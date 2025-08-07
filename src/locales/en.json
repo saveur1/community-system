@@ -1,0 +1,50 @@
+{
+    "navbar": {
+        "home": "Home",
+        "announcements": "Announcements",
+        "login": "Login",
+        "feedback": "Feedback"
+    },
+    "feedback": {
+        "feedback_title": "Send Us Feedback",
+        "feedback_name": "Name",
+        "feedback_phone": "Phone Number",
+        "feedback_field": "Message/Feedback",
+        "feedback_button": "Submit",
+        "select_programme": "Select Programme",
+        "programme": "Programme",
+        "placeholder": "Enter your message here"
+    },
+    "footer": {
+        "terms_of_use": "Terms of Use",
+        "support": "Support center",
+        "follow_us": "Follow us on",
+        "copyright": "All rights reserved",
+        "feedback": "Give Feedback",
+        "programmes": "Our Programmes"
+    },
+    "about": {
+        "about_title": "About the System",
+        "about_description": "Since its founding, RICH has expanded its reach across Rwanda, empowering religious leaders to champion health in their communities. Through the Community Listening System (CLS) and Management Information System (MIS), The following are key Programmes of RICH:",
+        "about_hiv": "HIV/AIDS",
+        "about_immunization": "Immunization (SUGIRA MWANA)",
+        "about_mental": "Mental Health (Baho Neza)",
+        "about_malaria": "Malaria SBC",
+        "about_nutrition": "Nutrition"
+    },
+    "assistant": {
+        "title": "RICH Assistant",
+        "description": "How can I assist you today?",
+        "placeholder": "Type your message here..."
+    },
+    "hero": {
+        "together": "Together,",
+        "every": "Every",
+        "voice_counts": "Voice Counts",
+        "description": "This  project enhance monitoring, evaluation, and community engagement, RICH seeks to establish a robust Community Listening System (CLS) and Management Information System (MIS) through religious channels, utilizing technology assets, to gather and manage qualitative and quantitative data.",
+        "transparent": "Transparent",
+        "inclusive": "Inclusive",
+        "actionable": "Actionable",
+        "feedback": "🔊 Submit Your Feedback!"
+    }
+}

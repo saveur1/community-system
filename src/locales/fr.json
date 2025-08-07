@@ -1,0 +1,15 @@
+{
+  "navbar": {
+    "home": "Maison",
+    "announcements": "Annonces",
+    "login": "Se connecter",
+    "feedback": "Retour"
+  },
+  "hero": {
+    "feedback_title": "Envoyez-nous des commentaires",
+    "feedback_name": "Nom",
+    "feedback_phone": "Numéro de téléphone",
+    "feedback_field": "Message / commentaires",
+    "feedback_button": "Soumettre"
+  }
+}

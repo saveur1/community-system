@@ -1,0 +1,15 @@
+{
+  "navbar": {
+    "home": "Nyumbani",
+    "announcements": "Matangazo",
+    "login": "Ingia",
+    "feedback": "Maoni"
+  },
+  "hero": {
+    "feedback_title": "Tutumie maoni",
+    "feedback_name": "Jina",
+    "feedback_phone": "Nambari ya simu",
+    "feedback_field": "Ujumbe/maoni",
+    "feedback_button": "Wasilisha"
+  }
+}
