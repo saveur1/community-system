@@ -28,7 +28,7 @@ const HomeSection = () => {
                   {" "} {t('hero.voice_counts')}
                 </span>
               </h1>
-              <p className="text-white/80 mt-4 text-lg md:text-lg max-w-2xl">
+              <p className="text-white/80 mt-4 text-lg md:text-lg max-w-2xl text-justify">
                 {t('hero.description')}
               </p>
               <div className="flex justify-center md:justify-start items-center flex-wrap gap-6 mt-6 text-sm text-white/80">

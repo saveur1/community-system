@@ -2,7 +2,7 @@ import { type Variants } from "framer-motion";import HomeSection from "./HomeSec
 import AboutSection from "./programmes";
 import FeedbackForm from "./feedback-form";
 import ChatBotButton from "./chatbot-icon";
-import ServiceUpdateCard from "./notification-card";
+import ServiceUpdateCard from "./announcements-card";
 
 export const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -21,7 +21,7 @@ const LandingPage = () => {
       {/* Hero Section */}
       <HomeSection />
 
-      <div className="flex justify-between py-16 items-center w-full max-w-8xl mx-auto">
+      <div className="grid grid-cols-3 py-16 w-full max-w-8xl mx-auto">
         {/* About the Project */}
         <AboutSection />
 

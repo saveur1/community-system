@@ -1,6 +1,6 @@
 const TopFooterBg = ()=> {
     return (
-        <div className="relative mt-24 h-12 w-full overflow-hidden">
+        <div className="relative mt-12 h-12 w-full overflow-hidden">
         <svg
           viewBox="0 0 1200 120"
           preserveAspectRatio="none"

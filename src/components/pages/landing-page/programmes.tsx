@@ -38,7 +38,7 @@ const AboutSection = () => {
 ];
 
   return (
-    <div className="flex justify-center w-full">
+    <div className="col-span-2 flex justify-center">
       <motion.section
         id="about"
         className="max-w-7xl w-full mx-2 px-4 md:px-8"
@@ -49,7 +49,7 @@ const AboutSection = () => {
         aria-label="About the Project"
       >
         <motion.h2 className="text-3xl md:text-4xl font-bold text-title mb-6">{t('about.about_title')}</motion.h2>
-        <motion.p className="text-lg text-gray-700 mb-8 max-w-3xl">
+        <motion.p className="text-lg text-justify text-gray-700 mb-8 max-w-3xl">
           { t('about.about_description') }
         </motion.p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
