@@ -26,6 +26,7 @@ const LandingPage = () => {
         <AboutSection />
 
         <FeedbackForm />
+        
       </div>
 
       <ServiceUpdateCard />

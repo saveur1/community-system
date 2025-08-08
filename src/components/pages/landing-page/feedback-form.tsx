@@ -8,13 +8,14 @@ import { sectionVariants } from ".";
 function FeedbackForm() {
   const [form, setForm] = useState({
     name: "",
-    programme: "", // Single selection
+    programmes: [] as string[], // Changed to array for multiple selection
+    otherProgramme: "", // New field for "Others" input
     message: ""
   });
 
   const [touched, setTouched] = useState({
     name: false,
-    programme: false,
+    programmes: false,
     message: false
   });
 
@@ -22,24 +23,30 @@ function FeedbackForm() {
   const { t } = useTranslation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
 
   const handleProgrammeChange = (value: string) => {
-    setForm({ ...form, programme: value });
-    setTouched({ ...touched, programme: true });
+    setTouched({ ...touched, programmes: true });
+    setForm(prev => {
+      const newProgrammes = prev.programmes.includes(value)
+        ? prev.programmes.filter(p => p !== value)
+        : [...prev.programmes, value];
+      return { ...prev, programmes: newProgrammes };
+    });
   };
 
   const validate = () => {
     return {
       name: !form.name.trim(),
-      programme: !form.programme.trim(),
+      programmes: form.programmes.length === 0 && !form.otherProgramme.trim(),
       message: !form.message.trim()
     };
   };
 
   const errors = validate();
-  const isValid = !errors.name && !errors.programme && !errors.message;
+  const isValid = !errors.name && !errors.programmes && !errors.message;
 
   const showErrorToast = (message: string) => {
     toast.error(message, {
@@ -55,18 +62,18 @@ function FeedbackForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ name: true, programme: true, message: true });
+    setTouched({ name: true, programmes: true, message: true });
 
     if (!isValid) {
       if (errors.name) showErrorToast(t('validation.name_required'));
-      if (errors.programme) showErrorToast(t('validation.programme_required'));
+      if (errors.programmes) showErrorToast(t('validation.programme_required'));
       if (errors.message) showErrorToast(t('validation.message_required'));
       return;
     }
 
     // Form is valid - proceed with submission
     setSubmitted(true);
-    setForm({ name: "", programme: "", message: "" });
+    setForm({ name: "", programmes: [], otherProgramme: "", message: "" });
     toast.success(t('feedback.success_message'), {
       position: "top-center",
       autoClose: 3000,
@@ -74,7 +81,7 @@ function FeedbackForm() {
     setTimeout(() => setSubmitted(false), 3000);
   };
 
-  // Programme options for radio buttons
+  // Programme options for checkboxes
   const programmeOptions = [
     { value: "HIV/AIDS", label: "HIV/AIDS" },
     { value: "Immunization", label: "Immunization (SUGIRA MWANA)" },
@@ -85,7 +92,7 @@ function FeedbackForm() {
 
   return (
     <motion.form
-      className="bg-white rounded-lg border self-start border-gray-300 shadow p-6 md:p-8 w-full max-w-md flex flex-col gap-4"
+      className="bg-white rounded-lg border border-primary shadow p-6 md:p-8 w-full max-w-md flex flex-col gap-4"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}
@@ -100,8 +107,7 @@ function FeedbackForm() {
         {t('feedback.feedback_name')} <span className="text-red-500">*</span>
       </label>
       <input
-        className={`border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary ${touched.name && errors.name ? "border-red-500" : "border-gray-300"
-          }`}
+        className="border border-primary rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
         type="text"
         id="name"
         name="name"
@@ -109,9 +115,7 @@ function FeedbackForm() {
         value={form.name}
         onChange={handleChange}
         onBlur={() => setTouched({ ...touched, name: true })}
-        required
-        aria-required="true"
-        aria-invalid={!!(touched.name && errors.name)}
+        aria-required="false"
       />
 
       <div>
@@ -119,17 +123,17 @@ function FeedbackForm() {
           {t('feedback.programme')} <span className="text-red-500">*</span>
         </label>
         
-        <div className="mt-2 space-y-2">
+        <div className="mt-2 space-y-3">
           {programmeOptions.map((option) => (
-            <div key={option.value} className="flex items-center gap-x-2">
+            <div key={option.value} className="flex items-center">
               <input
-                type="radio"
+                type="checkbox"
                 id={`programme-${option.value}`}
-                name="programme"
+                name="programmes"
                 value={option.value}
-                checked={form.programme === option.value}
+                checked={form.programmes.includes(option.value)}
                 onChange={() => handleProgrammeChange(option.value)}
-                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded-full cursor-pointer"
+                className="h-4 w-4 text-primary focus:ring-primary border-primary rounded cursor-pointer"
               />
               <label
                 htmlFor={`programme-${option.value}`}
@@ -139,6 +143,42 @@ function FeedbackForm() {
               </label>
             </div>
           ))}
+          
+          {/* Others option with text input */}
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="programme-other"
+              name="programmes"
+              checked={form.otherProgramme.trim() !== ""}
+              onChange={() => {
+                setTouched({ ...touched, programmes: true });
+                if (form.otherProgramme.trim() === "") {
+                  setForm(prev => ({ ...prev, otherProgramme: "Other" }));
+                } else {
+                  setForm(prev => ({ ...prev, otherProgramme: "" }));
+                }
+              }}
+              className="h-4 w-4 text-primary focus:ring-primary border-primary rounded cursor-pointer"
+            />
+            <label
+              htmlFor="programme-other"
+              className="ml-3 block text-sm text-gray-700 cursor-pointer hover:text-gray-900"
+            >
+              Others
+            </label>
+          </div>
+          
+          {form.otherProgramme.trim() !== "" && (
+            <input
+              type="text"
+              name="otherProgramme"
+              value={form.otherProgramme}
+              onChange={handleChange}
+              className="mt-2 border border-primary rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              placeholder="Please specify"
+            />
+          )}
         </div>
       </div>
 
@@ -146,8 +186,7 @@ function FeedbackForm() {
         {t('feedback.feedback_field')} <span className="text-red-500">*</span>
       </label>
       <textarea
-        className={`border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[90px] ${touched.message && errors.message ? "border-red-500" : "border-gray-300"
-          }`}
+        className="border border-primary rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[90px]"
         id="message"
         name="message"
         placeholder={t('feedback.placeholder')}
@@ -156,7 +195,6 @@ function FeedbackForm() {
         onBlur={() => setTouched({ ...touched, message: true })}
         required
         aria-required="true"
-        aria-invalid={!!(touched.message && errors.message)}
       />
 
       <motion.button

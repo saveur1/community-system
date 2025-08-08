@@ -1,6 +1,5 @@
 import path from 'node:path'
-import express from 'express'
-import getPort, { portNumbers } from 'get-port'
+import express from 'express';
 import * as zlib from 'node:zlib'
 
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITE_TEST_BUILD
@@ -93,10 +92,14 @@ export async function createServer(
   return { app, vite }
 }
 
+const PORT = process.env.PORT
+  ? Number(process.env.PORT)
+  : 3000;
+
 if (!isTest) {
   createServer().then(async ({ app }) =>
-    app.listen(await getPort({ port: portNumbers(3000, 3100) }), () => {
-      console.info('Client Server: http://localhost:3000')
-    }),
+    app.listen(PORT, () => {
+      console.info(`Server running on port ${PORT}`);
+    })
   )
 }
