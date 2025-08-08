@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowRight } from 'react-icons/fa';
-import { GrLinkNext, GrLinkPrevious } from "react-icons/gr";
+import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
 import { HiOutlineSpeakerphone } from 'react-icons/hi';
 
 type Direction = 'left' | 'right';
@@ -106,18 +106,18 @@ const AnnouncementsCards = () => {
   };
 
   return (
-    <div className="max-w-8xl mx-auto p-8 border-t-2 my-12 border-gray-300 flex flex-col items-center justify-center gap-y-4 w-full">
-      <div className="flex items-center justify-center gap-x-10 w-full">
+    <div className="max-w-8xl mx-auto px-2 sm:px-4 py-6 sm:py-8 border-t-2 my-8 sm:my-12 border-gray-300 flex flex-col items-center justify-center gap-y-4 w-full" id="anncouncements">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-x-8 w-full">
         {/* Previous announcement button */}
         <button 
           onClick={prevAnnouncement}
-          className="p-4 hover:bg-gray-100 rounded-full transition"
+          className="p-2 sm:p-3 hover:bg-gray-100 rounded-full transition"
           aria-label="Previous announcement"
         >
-          <GrLinkPrevious size={25} className="text-title" />
+          <MdKeyboardArrowLeft size={32} className="text-title" />
         </button>
 
-        <div className="relative min-h-52 w-full max-w-4xl overflow-hidden">
+        <div className="relative min-h-56 w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl overflow-hidden">
           <AnimatePresence custom={direction} initial={false}>
             <motion.div
               key={currentIndex}
@@ -136,7 +136,7 @@ const AnnouncementsCards = () => {
                 </div>
 
                 {/* Content */}
-                <div className="p-6 h-64 overflow-y-auto">
+                <div className="p-4 sm:p-6 h-56 sm:h-64 overflow-y-auto">
                   <p className="text-gray-700 mb-4">
                     {announcements[currentIndex].content}
                   </p>
@@ -166,15 +166,15 @@ const AnnouncementsCards = () => {
         {/* Next announcement button */}
         <button 
           onClick={nextAnnouncement}
-          className="p-4 hover:bg-gray-100 rounded-full transition"
+          className="p-2 sm:p-3 hover:bg-gray-100 rounded-full transition"
           aria-label="Next announcement"
         >
-          <GrLinkNext size={25} className="text-title"/>
+          <MdKeyboardArrowRight size={32} className="text-title"/>
         </button>
       </div>
 
       {/* Indicator dots - positioned below the card */}
-      <div className="flex justify-center space-x-3 mt-4">
+      <div className="flex justify-center space-x-2 sm:space-x-3 mt-4">
         {announcements.map((_, index) => (
           <button
             key={index}

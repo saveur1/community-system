@@ -7,7 +7,7 @@ const HomeSection = () => {
   const { t } = useTranslation();
   return (
     <section
-      className="relative max-lg:bg-primary lg:bg-[#C1B9AE]  lg:h-[calc(100lvh-70px)] py-8 sm:py-12 lg:py-20 px-4 sm:px-6 lg:px-8"
+      className="relative max-lg:bg-primary lg:bg-[#C1B9AE] lg:h-[calc(100lvh-70px)] lg:py-12 lg:px-8 max-lg:p-0 flex flex-col items-center justify-center "
       style={{ 
         backgroundImage: `url(${bgImage})`, 
         backgroundSize: "cover", 
@@ -15,11 +15,11 @@ const HomeSection = () => {
       }}
       aria-label="Home Section"
     >
-      <div className="container mx-auto max-w-8xl h-full">
+      <div className="container mx-auto max-w-8xl ">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 h-full min-h-[calc(100lvh-150px)]">
-          {/* Form Section */}
-          <div className="w-full lg:w-1/2 flex justify-center lg:justify-start order-2 lg:order-1">
-            <div className="flex-1 md:pr-12 max-w-xl text-center md:text-left">
+          {/* Welcome Section */}
+          <div className="w-full lg:w-1/2 max-lg:p-4 flex justify-center lg:justify-start order-2 lg:order-1">
+            <div className="flex-1 lg:pr-12 lg:max-w-xl text-center md:text-left">
               <h1 className="md:text-6xl text-4xl font-extrabold mb-6 md:!leading-[75px]">
                 <span className="text-white">
                   <span className="text-dark-blue">{t('hero.together')}</span> {t('hero.every')}

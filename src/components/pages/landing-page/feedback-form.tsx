@@ -92,7 +92,7 @@ function FeedbackForm() {
 
   return (
     <motion.form
-      className="bg-white rounded-lg border border-primary shadow p-6 md:p-8 w-full max-w-md flex flex-col gap-4"
+      className="bg-white rounded-lg border border-primary shadow p-6 max-lg:p-4 md:p-8 w-full max-w-md max-lg:max-w-lg flex flex-col gap-4"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}

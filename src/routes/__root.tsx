@@ -10,7 +10,7 @@ import { ToastContainer } from 'react-toastify'
 
 import ImigongoStarter from '@/components/layouts/imigongo-starter'
 import MainHeader from '@/components/layouts/main-header'
-import Footer from '@/components/layouts/new-footer'
+import Footer from '@/components/layouts/main-footer'
 import TopFooterBg from '@/components/layouts/top-footer-bg';
 
 export const Route = createRootRouteWithContext<RouterContext>()({

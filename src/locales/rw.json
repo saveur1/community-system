@@ -1,6 +1,7 @@
 {
     "navbar": {
         "home": "Ahabanza",
+        "about": "Ibiyerekeye",
         "announcements": "Amatangazo",
         "login": "Kwinjira",
         "feedback": "Tanga Igitekerezo"
@@ -24,7 +25,7 @@
         "feedback": "Tanga Igitekerezo"
     },
     "about": {
-        "about_title": "Ibyerekeye Twebwe",
+        "about_title": "Ibyerekeye Sisitemu",
         "about_description": "Kuva ku ishingwa ryayo, RICH yaguye ibikorwa byayo mu gihugu cyose, ifasha abayobozi b'amadini guteza imbere ubuzima mu miryango. Binyuze mu buryo bwo kumva abaturage (CLS) no mu buryo bwo gucunga amakuru (MIS), Izi nizimwe muri porogaramu za RICH:",
         "about_hiv": "HIV/AIDS",
         "about_immunization": "Immunization (SUGIRA MWANA)",
@@ -41,7 +42,7 @@
         "together": "Twese ",
         "every": "Hamwe,",
         "voice_counts": "Ijwi ryose rifite agaciro",
-        "description": "Sangiza ibitekerezo byawe, tangaza ibitangenda neza, kandi ubaze ibibazo - byose ahantu hamwe. Fasha gushyiraho serivisi z'ubuyobozi bwiza, umutekano w'abaturage, n'ejo hazaza heza.",
+        "description": "Uyu mushinga utezimbere uburyo bwo gukurikirana, gusuzuma, no gufatanya n'abaturage, aho RICH nabafatanyabikorwa bacu tugamije gushinga uburyo bwo Kumva Ijwi ry'Abaturage (CLS) no gushyiraho Sisitemu yo Gucunga Amakuru (MIS) binyuze mu nzira z'iyobokamana, hifashishijwe ikoranabuhanga, mu gukusanya no gucunga amakuru.",
         "transparent": "Kutabogama",
         "inclusive": "Ubudaheza",
         "actionable": "Gukorana Umurava",
