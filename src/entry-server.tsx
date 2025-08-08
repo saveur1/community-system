@@ -15,7 +15,7 @@ interface RenderProps {
   res: express.Response
 }
 
-export async function render({req, res, head }: RenderProps) {
+export async function render({ req, res, head }: RenderProps) {
   // Convert the express request to a fetch request
   const url = new URL(req.originalUrl || req.url, 'https://localhost:3000').href
   const lang = i18n.language || "rw";
@@ -49,15 +49,23 @@ export async function render({req, res, head }: RenderProps) {
     },
   })
 
+  let response: Response;
+
   // Let's use the default stream handler to create the response
-  const response = await handler(({ request, responseHeaders, router }) =>
-    renderRouterToStream({
-      request,
-      responseHeaders,
-      router,
-      children: <RouterServer router={router} />,
-    }),
-  )
+  try {
+    response = await handler(({ request, responseHeaders, router }) =>
+      renderRouterToStream({
+        request,
+        responseHeaders,
+        router,
+        children: <RouterServer router={router} />,
+      })
+    );
+  } catch (err) {
+    console.error("Error rendering stream:", err);
+    res.status(500).end("Internal Server Error while rendering")
+    return;
+  }
 
   // Convert the fetch response back to an express response
   res.statusMessage = response.statusText
@@ -66,6 +74,11 @@ export async function render({req, res, head }: RenderProps) {
   response.headers.forEach((value, name) => {
     res.setHeader(name, value)
   })
+
+  if (!response.body) {
+    res.status(500).end("Internal Server Error: No response body")
+    return
+  }
 
   // Stream the response body
   return pipeline(response.body as any, res)
