@@ -56,7 +56,8 @@ const AboutSection = () => {
           {programmes.map((prog, idx) => (
             <div
               key={prog.label}
-              className="flex items-center justify-between gap-4 p-3 sm:p-4 bg-white/80 rounded-lg shadow-lg border border-gray-200 cursor-pointer transition-all group"
+              className="flex items-center justify-between gap-4 p-3 sm:p-4 bg-white/80 rounded-lg hover:shadow-lg border border-gray-200 cursor-pointer transition-all group"
+              onClick={() => router.navigate({ to: prog.feedbackLink })}
             >
               <div className="flex items-center gap-4">
                 <span className="bg-primary/10 rounded-full p-2 sm:p-3 flex items-center justify-center">
@@ -67,7 +68,6 @@ const AboutSection = () => {
               <button
                 aria-label={`Give feedback for ${prog.label}`}
                 className="ml-2 text-primary hover:text-white hover:bg-primary rounded-full p-2 transition-colors border border-primary group-hover:bg-primary group-hover:text-white"
-                onClick={() => router.navigate({ to: prog.feedbackLink })}
               >
                 <FaCommentDots className="w-3 h-3" />
               </button>

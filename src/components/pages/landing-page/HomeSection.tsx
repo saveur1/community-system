@@ -1,3 +1,4 @@
+import { animate } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 // Main HomeSection Component
@@ -5,20 +6,34 @@ const bgImage = "/images/home_bg.svg";
 
 const HomeSection = () => {
   const { t } = useTranslation();
+
+  // Smooth scroll to section by id
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: string) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 70; // offset for sticky header
+      animate(window.scrollY, y, {
+        duration: 0.7,
+        onUpdate: (v) => window.scrollTo(0, v),
+      });
+    }
+  };
+
   return (
     <section
-      className="relative max-lg:bg-primary lg:bg-[#C1B9AE] lg:h-[calc(100lvh-70px)] lg:py-12 lg:px-8 max-lg:p-0 flex flex-col items-center justify-center "
-      style={{ 
-        backgroundImage: `url(${bgImage})`, 
-        backgroundSize: "cover", 
+      className="relative max-lg:bg-primary lg:bg-[#C1B9AE] lg:min-h-[calc(100lvh-70px)] lg:py-12 lg:px-8 max-lg:p-0 flex flex-col items-center justify-center w-full"
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: "cover",
         backgroundPosition: "center"
       }}
       aria-label="Home Section"
     >
-      <div className="container mx-auto max-w-8xl ">
+      <div className="w-full">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 h-full min-h-[calc(100lvh-150px)]">
           {/* Welcome Section */}
-          <div className="w-full lg:w-1/2 max-lg:p-4 flex justify-center lg:justify-start order-2 lg:order-1">
+          <div className="w-full lg:w-1/2 max-lg:p-4 flex justify-center max-2xl:pr-10 lg:justify-start order-2 lg:order-1">
             <div className="flex-1 lg:pr-12 lg:max-w-xl text-center md:text-left">
               <h1 className="md:text-6xl text-4xl font-extrabold mb-6 md:!leading-[75px]">
                 <span className="text-white">
@@ -46,7 +61,9 @@ const HomeSection = () => {
                 </div>
               </div>
               <div className="mt-8">
-                <button className="bg-gradient-to-r bg-dark-blue text-white px-8 py-3 rounded-full font-semibold shadow-md hover:bg-white hover:text-title cursor-pointer transition">
+                <button
+                  className="bg-gradient-to-r bg-dark-blue text-white px-8 py-3 rounded-full font-semibold shadow-md hover:bg-white hover:text-title cursor-pointer transition"
+                  onClick={e => handleSmoothScroll(e, "about")}>
                   {t('hero.feedback')}
                 </button>
               </div>

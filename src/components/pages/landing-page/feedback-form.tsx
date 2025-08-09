@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { sectionVariants } from ".";
+import ViewMorePrograms from "./view-more-programes";
 
 function FeedbackForm() {
   const [form, setForm] = useState({
@@ -146,39 +146,8 @@ function FeedbackForm() {
           
           {/* Others option with text input */}
           <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="programme-other"
-              name="programmes"
-              checked={form.otherProgramme.trim() !== ""}
-              onChange={() => {
-                setTouched({ ...touched, programmes: true });
-                if (form.otherProgramme.trim() === "") {
-                  setForm(prev => ({ ...prev, otherProgramme: "Other" }));
-                } else {
-                  setForm(prev => ({ ...prev, otherProgramme: "" }));
-                }
-              }}
-              className="h-4 w-4 text-primary focus:ring-primary border-primary rounded cursor-pointer"
-            />
-            <label
-              htmlFor="programme-other"
-              className="ml-3 block text-sm text-gray-700 cursor-pointer hover:text-gray-900"
-            >
-              Others
-            </label>
+            <ViewMorePrograms />
           </div>
-          
-          {form.otherProgramme.trim() !== "" && (
-            <input
-              type="text"
-              name="otherProgramme"
-              value={form.otherProgramme}
-              onChange={handleChange}
-              className="mt-2 border border-primary rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              placeholder="Please specify"
-            />
-          )}
         </div>
       </div>
 

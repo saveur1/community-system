@@ -112,7 +112,6 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
         onClick={toggleDropdown}
         onKeyDown={handleKeyDown}
         tabIndex={disabled ? -1 : 0}
-        role="button"
         aria-expanded={isOpen}
         className={disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
       >
