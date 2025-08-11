@@ -8,12 +8,14 @@
     "build:client": "vite build",
     "build:server": "vite build --ssr",
     "serve": "cross-env NODE_ENV=production node server",
+    "translate": "node src/utility/translate-languages-script.cjs",
     "debug": "node --inspect-brk server"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-router": "^1.130.12",
     "@tanstack/router-plugin": "^1.130.15",
+    "@vitalets/google-translate-api": "^9.2.1",
     "compression": "^1.7.5",
     "express": "^4.21.2",
     "framer-motion": "^12.23.12",
@@ -35,6 +37,7 @@
     "@types/react-dom": "^19.0.1",
     "@vitejs/plugin-react": "^4.3.4",
     "cross-env": "^10.0.0",
+    "https-proxy-agent": "^7.0.6",
     "typescript": "^5.7.2",
     "vite": "^6.3.5"
   }

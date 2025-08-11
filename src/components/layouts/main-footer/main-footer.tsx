@@ -2,8 +2,10 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTimes } from 'react-icons/fa'
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { useTranslation } from 'react-i18next';
+import TopFooterBg from './top-footer-bg';
+import ImigongoStarter from '../imigongo-starter';
 
-const Footer = () => {
+const FooterMain = () => {
   const { t } = useTranslation();
 
   return (
@@ -114,4 +116,12 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default function Footer(){
+  return (
+    <>
+      <TopFooterBg />
+      <FooterMain />
+      <ImigongoStarter />
+    </>
+  )
+} ;

@@ -16,7 +16,7 @@ const MobileHeader = ({ open, onClose, navLinks }: MobileHeaderProps) => (
                 animate={{ y: 0 }}
                 exit={{ y: "-100%" }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg md:hidden rounded-b-xl"
+                className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg lg:hidden rounded-b-xl"
                 style={{ maxHeight: "70vh" }}
             >
                 <div className="flex items-center justify-between h-16 px-4 border-b border-gray-300">

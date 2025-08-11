@@ -10,8 +10,8 @@ import { ToastContainer } from 'react-toastify'
 
 import ImigongoStarter from '@/components/layouts/imigongo-starter'
 import MainHeader from '@/components/layouts/main-header'
-import Footer from '@/components/layouts/main-footer'
-import TopFooterBg from '@/components/layouts/top-footer-bg';
+import Footer from '@/components/layouts/main-footer/main-footer'
+import TopFooterBg from '@/components/layouts/main-footer/top-footer-bg';
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
@@ -67,12 +67,7 @@ function RootComponent() {
       </head>
       <body>
           <ToastContainer />
-          <ImigongoStarter />
-          <MainHeader />
           <Outlet />
-          <TopFooterBg />
-          <Footer />
-          <ImigongoStarter />
           <TanStackRouterDevtools position='bottom-right'/>
       </body>
     </html>

@@ -1,15 +1,127 @@
 {
   "navbar": {
-    "home": "Maison",
-    "announcements": "Annonces",
-    "login": "Se connecter",
-    "feedback": "Retour"
+    "home": "Home",
+    "about": "About",
+    "announcements": "Announcements",
+    "login": "Login",
+    "feedback": "Feedback"
+  },
+  "feedback": {
+    "feedback_title": "Send Us Feedback",
+    "feedback_name": "Name",
+    "feedback_phone": "Phone Number",
+    "feedback_field": "Message/Feedback",
+    "feedback_button": "Submit",
+    "select_programme": "Select Programme",
+    "programme": "Programme",
+    "placeholder": "Enter your message here"
+  },
+  "footer": {
+    "terms_of_use": "Terms of Use",
+    "support": "Support center",
+    "follow_us": "Follow us on",
+    "copyright": "All rights reserved",
+    "feedback": "Give Feedback",
+    "programmes": "Our Programmes"
+  },
+  "about": {
+    "about_title": "About the System",
+    "about_description": "Since its founding, RICH has expanded its reach across Rwanda, empowering religious leaders to champion health in their communities. Through the Community Listening System (CLS) and Management Information System (MIS), The following are key Programmes of RICH:",
+    "about_hiv": "HIV/AIDS",
+    "about_immunization": "Immunization (SUGIRA MWANA)",
+    "about_mental": "Mental Health (Baho Neza)",
+    "about_malaria": "Malaria SBC",
+    "about_nutrition": "Nutrition"
+  },
+  "assistant": {
+    "title": "RICH Assistant",
+    "description": "How can I assist you today?",
+    "placeholder": "Type your message here..."
   },
   "hero": {
-    "feedback_title": "Envoyez-nous des commentaires",
-    "feedback_name": "Nom",
-    "feedback_phone": "Numéro de téléphone",
-    "feedback_field": "Message / commentaires",
-    "feedback_button": "Soumettre"
+    "together": "Together,",
+    "every": "Every",
+    "voice_counts": "Voice Counts",
+    "description": "This  project enhance monitoring, evaluation, and community engagement, RICH seeks to establish a robust Community Listening System (CLS) and Management Information System (MIS) through religious channels, utilizing technology assets, to gather and manage qualitative and quantitative data.",
+    "transparent": "Transparent",
+    "inclusive": "Inclusive",
+    "actionable": "Actionable",
+    "feedback": "🔊 Submit Your Feedback!"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your account",
+      "email": "Email Address",
+      "password": "Password",
+      "remember_me": "Remember me",
+      "forgot_password": "Forgot password?",
+      "sign_in": "Sign In",
+      "signing_in": "Signing in...",
+      "no_account": "Don't have an account?",
+      "sign_up": "Sign up",
+      "email_required": "Please enter a valid email address",
+      "password_required": "Password must be at least 6 characters",
+      "login_success": "Login successful!"
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Join our community today",
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "password": "Password",
+      "confirm_password": "Confirm Password",
+      "terms_agreement": "I agree to the",
+      "terms_of_service": "Terms of Service",
+      "and": "and",
+      "privacy_policy": "Privacy Policy",
+      "create_account": "Create Account",
+      "creating_account": "Creating account...",
+      "have_account": "Already have an account?",
+      "sign_in": "Sign in",
+      "first_name_required": "First name is required",
+      "last_name_required": "Last name is required",
+      "email_required": "Please enter a valid email address",
+      "phone_required": "Please enter a valid phone number",
+      "password_required": "Password must be at least 6 characters",
+      "passwords_match": "Passwords do not match",
+      "account_created": "Account created successfully!"
+    },
+    "forgot_password": {
+      "title": "Forgot Password?",
+      "subtitle": "Enter your email to reset your password",
+      "email": "Email Address",
+      "send_reset_link": "Send Reset Link",
+      "sending": "Sending...",
+      "back_to_login": "Back to Login",
+      "email_required": "Please enter a valid email address",
+      "reset_link_sent": "Reset link sent to your email!",
+      "check_email_title": "Check Your Email",
+      "check_email_subtitle": "We've sent a password reset link to",
+      "spam_notice": "If you don't see the email, check your spam folder. The link will expire in 1 hour.",
+      "resend_email": "Resend Email"
+    },
+    "reset_password": {
+      "title": "Reset Your Password",
+      "subtitle": "Enter your new password below",
+      "new_password": "New Password",
+      "confirm_new_password": "Confirm New Password",
+      "password_requirements": "Password Requirements:",
+      "requirement_1": "At least 6 characters long",
+      "requirement_2": "Include uppercase and lowercase letters",
+      "requirement_3": "Include at least one number",
+      "requirement_4": "Include at least one special character",
+      "reset_password": "Reset Password",
+      "resetting": "Resetting...",
+      "back_to_login": "Back to Login",
+      "password_required": "Password must be at least 6 characters",
+      "passwords_match": "Passwords do not match",
+      "password_reset_success": "Password reset successfully!",
+      "success_title": "Password Reset Successfully",
+      "success_subtitle": "Your password has been updated. You can now sign in with your new password.",
+      "sign_in": "Sign In"
+    }
   }
 }

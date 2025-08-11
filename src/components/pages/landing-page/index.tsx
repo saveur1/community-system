@@ -1,8 +1,12 @@
-import { type Variants } from "framer-motion";import HomeSection from "./HomeSection";
+import { type Variants } from "framer-motion"; import HomeSection from "./HomeSection";
 import AboutSection from "./programmes";
 import FeedbackForm from "./feedback-form";
 import ChatBotButton from "./chatbot-icon";
 import ServiceUpdateCard from "./announcements-card";
+import ImigongoStarter from "@/components/layouts/imigongo-starter";
+import MainHeader from "@/components/layouts/main-header";
+import TopFooterBg from "@/components/layouts/main-footer/top-footer-bg";
+import Footer from "@/components/layouts/main-footer/main-footer";
 
 export const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -17,7 +21,10 @@ export const sectionVariants: Variants = {
 const LandingPage = () => {
   return (
     <div className="bg-white min-h-screen flex flex-col">
-      <ChatBotButton />     
+
+      <MainHeader />
+
+      <ChatBotButton />
       {/* Hero Section */}
       <HomeSection />
 
@@ -28,6 +35,8 @@ const LandingPage = () => {
       </div>
 
       <ServiceUpdateCard />
+
+      <Footer />
 
     </div>
   );

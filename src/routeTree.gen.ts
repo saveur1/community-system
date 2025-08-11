@@ -11,13 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ErrorRouteImport } from './routes/error'
 import { Route as PostsRouteRouteImport } from './routes/posts/route'
+import { Route as CommunityRouteRouteImport } from './routes/community/route'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as CommunityIndexRouteImport } from './routes/community/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as CommunitySurveysIndexRouteImport } from './routes/community/surveys/index'
 
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
@@ -27,6 +31,16 @@ const ErrorRoute = ErrorRouteImport.update({
 const PostsRouteRoute = PostsRouteRouteImport.update({
   id: '/posts',
   path: '/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRouteRoute = CommunityRouteRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -39,34 +53,46 @@ const PostsIndexRoute = PostsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PostsRouteRoute,
 } as any)
+const CommunityIndexRoute = CommunityIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CommunityRouteRoute,
+} as any)
 const PostsPostIdRoute = PostsPostIdRouteImport.update({
   id: '/$postId',
   path: '/$postId',
   getParentRoute: () => PostsRouteRoute,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
-  id: '/auth/signup',
-  path: '/auth/signup',
-  getParentRoute: () => rootRouteImport,
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
-  id: '/auth/reset-password',
-  path: '/auth/reset-password',
-  getParentRoute: () => rootRouteImport,
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
-  id: '/auth/forgot-password',
-  path: '/auth/forgot-password',
-  getParentRoute: () => rootRouteImport,
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const CommunitySurveysIndexRoute = CommunitySurveysIndexRouteImport.update({
+  id: '/surveys/',
+  path: '/surveys/',
+  getParentRoute: () => CommunityRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/community': typeof CommunityRouteRouteWithChildren
   '/posts': typeof PostsRouteRouteWithChildren
   '/error': typeof ErrorRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -74,21 +100,28 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/community/': typeof CommunityIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/community/surveys': typeof CommunitySurveysIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/error': typeof ErrorRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/community': typeof CommunityIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/community/surveys': typeof CommunitySurveysIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/community': typeof CommunityRouteRouteWithChildren
   '/posts': typeof PostsRouteRouteWithChildren
   '/error': typeof ErrorRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -96,12 +129,16 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/community/': typeof CommunityIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/community/surveys/': typeof CommunitySurveysIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
+    | '/community'
     | '/posts'
     | '/error'
     | '/auth/forgot-password'
@@ -109,20 +146,27 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/signup'
     | '/posts/$postId'
+    | '/community/'
     | '/posts/'
+    | '/community/surveys'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/error'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
     | '/posts/$postId'
+    | '/community'
     | '/posts'
+    | '/community/surveys'
   id:
     | '__root__'
     | '/'
+    | '/auth'
+    | '/community'
     | '/posts'
     | '/error'
     | '/auth/forgot-password'
@@ -130,17 +174,17 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/signup'
     | '/posts/$postId'
+    | '/community/'
     | '/posts/'
+    | '/community/surveys/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  CommunityRouteRoute: typeof CommunityRouteRouteWithChildren
   PostsRouteRoute: typeof PostsRouteRouteWithChildren
   ErrorRoute: typeof ErrorRoute
-  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
-  AuthSignupRoute: typeof AuthSignupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -159,6 +203,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -173,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIndexRouteImport
       parentRoute: typeof PostsRouteRoute
     }
+    '/community/': {
+      id: '/community/'
+      path: '/'
+      fullPath: '/community/'
+      preLoaderRoute: typeof CommunityIndexRouteImport
+      parentRoute: typeof CommunityRouteRoute
+    }
     '/posts/$postId': {
       id: '/posts/$postId'
       path: '/$postId'
@@ -182,34 +247,73 @@ declare module '@tanstack/react-router' {
     }
     '/auth/signup': {
       id: '/auth/signup'
-      path: '/auth/signup'
+      path: '/signup'
       fullPath: '/auth/signup'
       preLoaderRoute: typeof AuthSignupRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/auth/reset-password': {
       id: '/auth/reset-password'
-      path: '/auth/reset-password'
+      path: '/reset-password'
       fullPath: '/auth/reset-password'
       preLoaderRoute: typeof AuthResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/auth/login': {
       id: '/auth/login'
-      path: '/auth/login'
+      path: '/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/auth/forgot-password': {
       id: '/auth/forgot-password'
-      path: '/auth/forgot-password'
+      path: '/forgot-password'
       fullPath: '/auth/forgot-password'
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/community/surveys/': {
+      id: '/community/surveys/'
+      path: '/surveys'
+      fullPath: '/community/surveys'
+      preLoaderRoute: typeof CommunitySurveysIndexRouteImport
+      parentRoute: typeof CommunityRouteRoute
     }
   }
 }
+
+interface AuthRouteRouteChildren {
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+  AuthSignupRoute: typeof AuthSignupRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
+  AuthSignupRoute: AuthSignupRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
+interface CommunityRouteRouteChildren {
+  CommunityIndexRoute: typeof CommunityIndexRoute
+  CommunitySurveysIndexRoute: typeof CommunitySurveysIndexRoute
+}
+
+const CommunityRouteRouteChildren: CommunityRouteRouteChildren = {
+  CommunityIndexRoute: CommunityIndexRoute,
+  CommunitySurveysIndexRoute: CommunitySurveysIndexRoute,
+}
+
+const CommunityRouteRouteWithChildren = CommunityRouteRoute._addFileChildren(
+  CommunityRouteRouteChildren,
+)
 
 interface PostsRouteRouteChildren {
   PostsPostIdRoute: typeof PostsPostIdRoute
@@ -227,12 +331,10 @@ const PostsRouteRouteWithChildren = PostsRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
+  CommunityRouteRoute: CommunityRouteRouteWithChildren,
   PostsRouteRoute: PostsRouteRouteWithChildren,
   ErrorRoute: ErrorRoute,
-  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthResetPasswordRoute: AuthResetPasswordRoute,
-  AuthSignupRoute: AuthSignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

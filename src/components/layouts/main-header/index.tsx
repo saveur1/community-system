@@ -7,6 +7,7 @@ import { FiMenu } from "react-icons/fi"
 import { AiOutlineHome, AiOutlineInfoCircle, AiOutlineSound, AiOutlineMessage, AiOutlineLogin } from "react-icons/ai"
 import { animate } from "framer-motion"
 import MobileHeader from "./mobile-header"
+import ImigongoStarter from "../imigongo-starter"
 
 const MainHeader = () => {
     const { t, i18n } = useTranslation();
@@ -40,95 +41,98 @@ const MainHeader = () => {
     // Pass onClose to navLinks for mobile
     const navLinks = (
         <>
-            <Link 
-                to="/" 
+            <Link
+                to="/"
                 className="text-primary hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
                 activeProps={{ className: "text-blue-600 font-semibold" }}
                 onClick={handleNavClick}
             >
                 <AiOutlineHome size={18} />
-                { t('navbar.home') }
+                {t('navbar.home')}
             </Link>
             <button
                 className="text-gray-500 hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer"
                 onClick={e => handleSmoothScroll(e, "about")}
             >
                 <AiOutlineInfoCircle size={18} />
-                { t('navbar.about') }
+                {t('navbar.about')}
             </button>
-            <button  
+            <button
                 className="text-gray-500 hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
                 onClick={e => handleSmoothScroll(e, "anncouncements")}
             >
                 <AiOutlineSound size={18} />
-                { t('navbar.announcements') }
+                {t('navbar.announcements')}
             </button>
-            <Link 
-                to="/auth/login" 
+            <Link
+                to="/auth/login"
                 className="text-gray-500 hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
                 activeProps={{ className: "text-blue-600 font-semibold" }}
                 onClick={handleNavClick}
             >
                 <AiOutlineMessage size={18} />
-                { t('navbar.feedback') }
+                {t('navbar.feedback')}
             </Link>
-            <SelectDropdown 
+            <SelectDropdown
                 options={[
-                    {label: "Kinyarwanda", value: "rw"},
-                    {label: "English", value: "en"},
-                    {label: "Swahili", value: "sw"},
-                    {label: "Francais", value: "fr"}
+                    { label: "Kinyarwanda", value: "rw" },
+                    { label: "English", value: "en" },
+                    { label: "Swahili", value: "sw" },
+                    { label: "Francais", value: "fr" }
                 ]}
                 dropdownClassName="min-w-36"
                 triggerClassName="py-1.5"
-                value={ language }
-                onChange={ handleLanguageChange }
+                value={language}
+                onChange={handleLanguageChange}
             />
-            <Link 
-                to="/auth/login" 
+            <Link
+                to="/auth/login"
                 className="bg-primary text-white px-3 pt-1 pb-1.5 rounded-md text-sm font-medium flex items-center gap-2 hover:bg-primary-dark transition-colors"
                 onClick={handleNavClick}
             >
                 <AiOutlineLogin size={18} />
-                { t('navbar.login') }
+                {t('navbar.login')}
             </Link>
         </>
     );
 
     return (
-        <header className="w-full bg-white border-b border-gray-200 z-50 sticky top-0">
-            <div className="max-w-8xl mx-auto">
-                <div className="flex items-center justify-between h-16 px-4">
-                    {/* Logo/TC on the left */}
-                    <div>
-                        <OptimizedImage
-                            src="/images/web_logo.png"
-                            alt="Logo"
-                            width={200}
-                            height={56}
-                            className="h-16 w-[200px] max-sm:w-[130px] object-contain"
-                        />
+        <>
+            <ImigongoStarter />
+            <header className="w-full bg-white border-b border-gray-200 z-50 sticky top-0">
+                <div className="max-w-8xl mx-auto">
+                    <div className="flex items-center justify-between h-16 px-4">
+                        {/* Logo/TC on the left */}
+                        <div>
+                            <OptimizedImage
+                                src="/images/web_logo.png"
+                                alt="Logo"
+                                width={200}
+                                height={56}
+                                className="h-16 w-[200px] max-sm:w-[130px] object-contain"
+                            />
+                        </div>
+
+                        {/* Desktop nav */}
+                        <nav className="hidden lg:flex items-center space-x-4 sm:space-x-6">
+                            {navLinks}
+                        </nav>
+
+                        {/* Mobile hamburger */}
+                        <button
+                            className="lg:hidden rounded focus:outline-none"
+                            onClick={() => setMobileOpen(true)}
+                            aria-label="Open menu"
+                        >
+                            <FiMenu size={28} />
+                        </button>
                     </div>
-                    
-                    {/* Desktop nav */}
-                    <nav className="hidden md:flex items-center space-x-4 sm:space-x-6">
-                        {navLinks}
-                    </nav>
-
-                    {/* Mobile hamburger */}
-                    <button
-                        className="md:hidden rounded focus:outline-none"
-                        onClick={() => setMobileOpen(true)}
-                        aria-label="Open menu"
-                    >
-                        <FiMenu size={28} />
-                    </button>
                 </div>
-            </div>
 
-            {/* Mobile menu */}
-            <MobileHeader open={mobileOpen} onClose={() => setMobileOpen(false)} navLinks={navLinks} />
-        </header>
+                {/* Mobile menu */}
+                <MobileHeader open={mobileOpen} onClose={() => setMobileOpen(false)} navLinks={navLinks} />
+            </header>
+        </>
     )
 }
 
