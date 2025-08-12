@@ -117,12 +117,12 @@ function DashboardHome() {
   };
 
   const quickLinks = [
-    { id: "users", label: "Users", icon: <HiOutlineUsers size={22} />, to: "/users", color: "bg-blue-100", dot: "bg-blue-500" },
-    { id: "surveys", label: "Surveys", icon: <FaClipboardList size={22} />, to: "/surveys", color: "bg-teal-100", dot: "bg-teal-400" },
-    { id: "reports", label: "Reports", icon: <HiOutlineChartBar size={22} />, to: "/reports", color: "bg-sky-100", dot: "bg-sky-500" },
-    { id: "pending", label: "Pending Approvals", icon: <HiOutlineClock size={22} />, to: "/pending", color: "bg-amber-100", dot: "bg-amber-400" },
-    { id: "complaints", label: "Complaints", icon: <HiOutlineXCircle size={22} />, to: "/complaints", color: "bg-rose-100", dot: "bg-rose-500" },
-    { id: "docs", label: "Guides", icon: <HiOutlineDocumentText size={22} />, to: "/guides", color: "bg-violet-100", dot: "bg-violet-500" },
+    { id: "users", label: "Users", icon: <HiOutlineUsers size={22} />, to: "/dashboard/users", color: "bg-blue-100", dot: "bg-blue-500" },
+    { id: "surveys", label: "Surveys", icon: <FaClipboardList size={22} />, to: "/dashboard/surveys", color: "bg-teal-100", dot: "bg-teal-400" },
+    { id: "reports", label: "Reports", icon: <HiOutlineChartBar size={22} />, to: "/dashboard/reports", color: "bg-sky-100", dot: "bg-sky-500" },
+    { id: "pending", label: "Pending Approvals", icon: <HiOutlineClock size={22} />, to: "/dashboard/pending", color: "bg-amber-100", dot: "bg-amber-400" },
+    { id: "complaints", label: "Complaints", icon: <HiOutlineXCircle size={22} />, to: "/dashboard/complaints", color: "bg-rose-100", dot: "bg-rose-500" },
+    { id: "docs", label: "Guides", icon: <HiOutlineDocumentText size={22} />, to: "/dashboard/docs", color: "bg-violet-100", dot: "bg-violet-500" },
   ];
 
   return (
