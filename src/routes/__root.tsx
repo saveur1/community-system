@@ -6,12 +6,9 @@ import {
 } from '@tanstack/react-router'
 import type { RouterContext } from '../routerContext'
 import tailwindcss from "../styles.css?inline";
-import { ToastContainer } from 'react-toastify'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import ImigongoStarter from '@/components/layouts/imigongo-starter'
-import MainHeader from '@/components/layouts/main-header'
-import Footer from '@/components/layouts/main-footer/main-footer'
-import TopFooterBg from '@/components/layouts/main-footer/top-footer-bg';
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
@@ -20,7 +17,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     ],
     meta: [
       {
-        title: 'TanStack Router SSR Basic File Based Streaming',
+        title: 'RICH CLS',
       },
       {
         charSet: 'UTF-8',

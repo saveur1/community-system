@@ -11,17 +11,22 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ErrorRouteImport } from './routes/error'
 import { Route as PostsRouteRouteImport } from './routes/posts/route'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as CommunityRouteRouteImport } from './routes/community/route'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as CommunityIndexRouteImport } from './routes/community/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as DashboardSurveysIndexRouteImport } from './routes/dashboard/surveys/index'
+import { Route as DashboardFeedbackIndexRouteImport } from './routes/dashboard/feedback/index'
 import { Route as CommunitySurveysIndexRouteImport } from './routes/community/surveys/index'
+import { Route as DashboardSurveysAddNewRouteImport } from './routes/dashboard/surveys/add-new'
 
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
@@ -31,6 +36,11 @@ const ErrorRoute = ErrorRouteImport.update({
 const PostsRouteRoute = PostsRouteRouteImport.update({
   id: '/posts',
   path: '/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRouteRoute = CommunityRouteRouteImport.update({
@@ -52,6 +62,11 @@ const PostsIndexRoute = PostsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PostsRouteRoute,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const CommunityIndexRoute = CommunityIndexRouteImport.update({
   id: '/',
@@ -83,16 +98,32 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const DashboardSurveysIndexRoute = DashboardSurveysIndexRouteImport.update({
+  id: '/surveys/',
+  path: '/surveys/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardFeedbackIndexRoute = DashboardFeedbackIndexRouteImport.update({
+  id: '/feedback/',
+  path: '/feedback/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const CommunitySurveysIndexRoute = CommunitySurveysIndexRouteImport.update({
   id: '/surveys/',
   path: '/surveys/',
   getParentRoute: () => CommunityRouteRoute,
+} as any)
+const DashboardSurveysAddNewRoute = DashboardSurveysAddNewRouteImport.update({
+  id: '/surveys/add-new',
+  path: '/surveys/add-new',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/community': typeof CommunityRouteRouteWithChildren
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/posts': typeof PostsRouteRouteWithChildren
   '/error': typeof ErrorRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -101,8 +132,12 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/community/': typeof CommunityIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/community/surveys': typeof CommunitySurveysIndexRoute
+  '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
+  '/dashboard/surveys': typeof DashboardSurveysIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -114,14 +149,19 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/community': typeof CommunityIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/community/surveys': typeof CommunitySurveysIndexRoute
+  '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
+  '/dashboard/surveys': typeof DashboardSurveysIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/community': typeof CommunityRouteRouteWithChildren
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/posts': typeof PostsRouteRouteWithChildren
   '/error': typeof ErrorRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -130,8 +170,12 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/community/': typeof CommunityIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/community/surveys/': typeof CommunitySurveysIndexRoute
+  '/dashboard/feedback/': typeof DashboardFeedbackIndexRoute
+  '/dashboard/surveys/': typeof DashboardSurveysIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -139,6 +183,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/community'
+    | '/dashboard'
     | '/posts'
     | '/error'
     | '/auth/forgot-password'
@@ -147,8 +192,12 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/posts/$postId'
     | '/community/'
+    | '/dashboard/'
     | '/posts/'
+    | '/dashboard/surveys/add-new'
     | '/community/surveys'
+    | '/dashboard/feedback'
+    | '/dashboard/surveys'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -160,13 +209,18 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/posts/$postId'
     | '/community'
+    | '/dashboard'
     | '/posts'
+    | '/dashboard/surveys/add-new'
     | '/community/surveys'
+    | '/dashboard/feedback'
+    | '/dashboard/surveys'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/community'
+    | '/dashboard'
     | '/posts'
     | '/error'
     | '/auth/forgot-password'
@@ -175,14 +229,19 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/posts/$postId'
     | '/community/'
+    | '/dashboard/'
     | '/posts/'
+    | '/dashboard/surveys/add-new'
     | '/community/surveys/'
+    | '/dashboard/feedback/'
+    | '/dashboard/surveys/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   CommunityRouteRoute: typeof CommunityRouteRouteWithChildren
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   PostsRouteRoute: typeof PostsRouteRouteWithChildren
   ErrorRoute: typeof ErrorRoute
 }
@@ -201,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/posts'
       fullPath: '/posts'
       preLoaderRoute: typeof PostsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community': {
@@ -230,6 +296,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/posts/'
       preLoaderRoute: typeof PostsIndexRouteImport
       parentRoute: typeof PostsRouteRoute
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/community/': {
       id: '/community/'
@@ -273,12 +346,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/dashboard/surveys/': {
+      id: '/dashboard/surveys/'
+      path: '/surveys'
+      fullPath: '/dashboard/surveys'
+      preLoaderRoute: typeof DashboardSurveysIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/feedback/': {
+      id: '/dashboard/feedback/'
+      path: '/feedback'
+      fullPath: '/dashboard/feedback'
+      preLoaderRoute: typeof DashboardFeedbackIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/community/surveys/': {
       id: '/community/surveys/'
       path: '/surveys'
       fullPath: '/community/surveys'
       preLoaderRoute: typeof CommunitySurveysIndexRouteImport
       parentRoute: typeof CommunityRouteRoute
+    }
+    '/dashboard/surveys/add-new': {
+      id: '/dashboard/surveys/add-new'
+      path: '/surveys/add-new'
+      fullPath: '/dashboard/surveys/add-new'
+      preLoaderRoute: typeof DashboardSurveysAddNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
   }
 }
@@ -315,6 +409,24 @@ const CommunityRouteRouteWithChildren = CommunityRouteRoute._addFileChildren(
   CommunityRouteRouteChildren,
 )
 
+interface DashboardRouteRouteChildren {
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardSurveysAddNewRoute: typeof DashboardSurveysAddNewRoute
+  DashboardFeedbackIndexRoute: typeof DashboardFeedbackIndexRoute
+  DashboardSurveysIndexRoute: typeof DashboardSurveysIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardSurveysAddNewRoute: DashboardSurveysAddNewRoute,
+  DashboardFeedbackIndexRoute: DashboardFeedbackIndexRoute,
+  DashboardSurveysIndexRoute: DashboardSurveysIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
 interface PostsRouteRouteChildren {
   PostsPostIdRoute: typeof PostsPostIdRoute
   PostsIndexRoute: typeof PostsIndexRoute
@@ -333,6 +445,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   CommunityRouteRoute: CommunityRouteRouteWithChildren,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
   PostsRouteRoute: PostsRouteRouteWithChildren,
   ErrorRoute: ErrorRoute,
 }

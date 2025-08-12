@@ -1,7 +1,6 @@
 import { NavItemType } from "@/utility/types";
 import { Link, useLocation } from "@tanstack/react-router";
-import { HiArrowNarrowLeft, HiMenuAlt3, HiX } from "react-icons/hi";
-import { useState } from "react";
+import { HiArrowNarrowLeft, HiMenuAlt3, HiX, HiCog, HiBell } from "react-icons/hi";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -20,16 +19,6 @@ interface NavItemProps {
   collapsed: boolean;
 }
 
-interface ProfileProps {
-  collapsed: boolean;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    avatarUrl: string;
-  };
-}
-
 // Logo Component
 const Logo: React.FC<LogoProps> = ({ collapsed }) => (
   <div className={`flex items-center gap-2 ${collapsed ? "hidden" : "block"}`}>
@@ -40,35 +29,6 @@ const Logo: React.FC<LogoProps> = ({ collapsed }) => (
     />
   </div>
 );
-
-// Profile Component
-const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
-  const displayName = `${user.firstName.charAt(0)}.${user.lastName}`;
-  return (
-    <div
-      className={`flex items-center gap-3 px-5 py-4 border-t border-gray-200 absolute bottom-0 left-0 w-full ${
-        collapsed ? "justify-center" : ""
-      }`}
-    >
-      <img
-        src={user.avatarUrl}
-        alt={`${user.firstName} ${user.lastName}`}
-        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-      />
-      {!collapsed && (
-        <div className="flex flex-col overflow-hidden">
-          <span className="font-semibold text-gray-900 truncate">{displayName}</span>
-          <span
-            className="text-xs text-gray-500 lowercase truncate"
-            title={user.email}
-          >
-            {user.email}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-};
 
 // Navigation Item Component
 const NavItem: React.FC<NavItemProps> = ({ item, collapsed }) => {
@@ -108,12 +68,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   setMobileMenuOpen,
   navItems,
 }) => {
-  const user = {
-    firstName: "John",
-    lastName: "Doe",
-    email: "John.Doe@example.com",
-    avatarUrl: "/images/avatar.svg",
-  };
 
   return (
     <>
@@ -175,8 +129,42 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Bottom Profile */}
-        <Profile collapsed={!sidebarOpen} user={user} />
+        {/* Bottom section with Settings and Notifications */}
+        <div className="mt-auto border-t border-gray-200">
+          <div className="py-2">
+            {/* Settings Link */}
+            <Link
+              to="/dashboard/settings"
+              className={`
+                flex items-center gap-3 px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-700 transition-colors duration-200 cursor-pointer
+                ${!sidebarOpen ? 'justify-center' : ''}
+              `}
+            >
+              <HiCog className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && (
+                <span className="font-medium">Settings</span>
+              )}
+            </Link>
+
+            {/* Notifications Link */}
+            <Link
+              to="/dashboard/notifications"
+              className={`
+                flex items-center gap-3 px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-700 transition-colors duration-200 cursor-pointer relative
+                ${!sidebarOpen ? 'justify-center' : ''}
+              `}
+            >
+              <div className="relative">
+                <HiBell className="w-5 h-5 flex-shrink-0" />
+                {/* Notification badge */}
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-3 h-3 text-xs font-bold text-white bg-red-500 rounded-full"></span>
+              </div>
+              {sidebarOpen && (
+                <span className="font-medium">Notifications</span>
+              )}
+            </Link>
+          </div>
+        </div>
       </nav>
     </>
   );

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { Link } from "@tanstack/react-router";
 import { FiUser, FiPhone, FiKey, FiChevronLeft, FiMapPin, FiMail, FiLinkedin, FiFacebook, FiInstagram, FiTwitter } from "react-icons/fi";
+import { FaGoogle } from "react-icons/fa";
 
 const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -34,11 +35,11 @@ const swipeVariants: Variants = {
 function LoginPage() {
   const [form, setForm] = useState({
     phone: "",
-    otp: ""
+    email: "",
+    password: ""
   });
-  const [showOtp, setShowOtp] = useState(false);
+  const [loginMode, setLoginMode] = useState<'phone' | 'email'>('phone');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [direction, setDirection] = useState(1);
   const { t } = useTranslation();
 
@@ -47,50 +48,46 @@ function LoginPage() {
     setForm({ ...form, [name]: value });
   };
 
-  const validatePhone = () => {
-    return form.phone.trim().length >= 10;
-  };
-
-  const validateOtp = () => {
-    return form.otp.trim().length === 6;
-  };
-
-  const handleSendOtp = async () => {
-    if (!validatePhone()) {
-      toast.error("Please enter a valid phone number", { position: "top-center" });
-      return;
+  const validateForm = () => {
+    if (loginMode === 'phone') {
+      return form.phone.trim().length >= 10 && form.password.trim().length >= 6;
+    } else {
+      return form.email.trim().includes('@') && form.password.trim().length >= 6;
     }
-
-    setIsSendingOtp(true);
-
-    // Simulate OTP sending
-    setTimeout(() => {
-      setIsSendingOtp(false);
-      setDirection(1);
-      setShowOtp(true);
-      toast.success(`OTP sent to ${form.phone}`, { position: "top-center" });
-    }, 1500);
   };
 
-  const handleBackToPhone = () => {
+  const handleSwitchToEmail = () => {
+    setDirection(1);
+    setLoginMode('email');
+  };
+
+  const handleSwitchToPhone = () => {
     setDirection(-1);
-    setShowOtp(false);
+    setLoginMode('phone');
+  };
+
+  const handleGoogleLogin = () => {
+    toast.info("Google login integration coming soon!", { position: "top-center" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateOtp()) {
-      toast.error("Please enter the 6-digit OTP", { position: "top-center" });
+    if (!validateForm()) {
+      const errorMsg = loginMode === 'phone'
+        ? "Please enter a valid phone number and password (min 6 characters)"
+        : "Please enter a valid email and password (min 6 characters)";
+      toast.error(errorMsg, { position: "top-center" });
       return;
     }
 
     setIsLoading(true);
 
-    // Simulate verification
+    // Simulate login
     setTimeout(() => {
       setIsLoading(false);
-      toast.success("Login successful", { position: "top-center" });
+      const loginMethod = loginMode === 'phone' ? form.phone : form.email;
+      toast.success(`Login successful with ${loginMethod}`, { position: "top-center" });
       // Redirect would happen here
     }, 1500);
   };
@@ -147,109 +144,161 @@ function LoginPage() {
         {/* Right Side - Login Form */}
         <div className="col-span-3 lg:col-span-3 bg-white rounded-xl lg:rounded-r-xl lg:rounded-l-none">
           <div className="w-full max-w-md mx-auto p-6 sm:p-8">
-            <div className="text-center mb-8">
+            <div className="text-center mb-6">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FiUser className="w-8 h-8 text-primary" />
               </div>
               <h1 className="text-2xl font-bold text-title mb-2">
-                {showOtp ? "Enter Verification Code" : "Welcome back!"}
+                Welcome back!
               </h1>
-              <p className="text-gray-600">
-                {showOtp ? `We sent a code to ${form.phone}` : "Enter your phone number to receive a verification code"}
-              </p>
             </div>
 
-            <div className="relative h-56">
-              <AnimatePresence custom={direction} initial={false}>
-                {!showOtp ? (
-                  <motion.div
-                    key="phone"
-                    custom={direction}
-                    variants={swipeVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    className="absolute top-0 left-0 w-full"
-                  >
-                    <div className="space-y-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Phone Number <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                          <FiPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={form.phone}
-                            onChange={handleChange}
-                            className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
-                            placeholder="+250 XXXXXXX"
-                          />
+            <form onSubmit={handleSubmit}>
+              <div className="relative overflow-hidden h-44">
+                <AnimatePresence mode="wait" custom={direction}>
+                  {loginMode === 'phone' ? (
+                    <motion.div
+                      key="phone"
+                      custom={direction}
+                      variants={swipeVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      className="absolute top-0 left-0 w-full"
+                    >
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 block mb-2">
+                            Phone Number <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <FiPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="tel"
+                              name="phone"
+                              value={form.phone}
+                              onChange={handleChange}
+                              className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
+                              placeholder="+1 (555) 123-4567"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between">
+                            <label className="text-sm font-medium text-gray-700 block mb-2">
+                              Password <span className="text-red-500">*</span>
+                            </label>
+                            <Link
+                              to="/auth/forgot-password"
+                              className="text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+                            >
+                              Forgot Password?
+                            </Link>
+                          </div>
+                          <div className="relative">
+                            <FiKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="password"
+                              name="password"
+                              value={form.password}
+                              onChange={handleChange}
+                              className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
+                              placeholder="Enter your password"
+                            />
+                          </div>
                         </div>
                       </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="email"
+                      custom={direction}
+                      variants={swipeVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      className="absolute top-0 left-0 w-full"
+                    >
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 block mb-2">
+                            Email Address <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="email"
+                              name="email"
+                              value={form.email}
+                              onChange={handleChange}
+                              className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
+                              placeholder="your.email@example.com"
+                            />
+                          </div>
+                        </div>
 
-                      <button
-                        type="button"
-                        onClick={handleSendOtp}
-                        disabled={isSendingOtp}
-                        className="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isSendingOtp ? "Sending..." : "Send Verification Code"}
-                      </button>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="otp"
-                    custom={direction}
-                    variants={swipeVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    className="absolute top-0 left-0 w-full"
-                  >
-                    <div className="space-y-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Verification Code <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                          <FiKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                          <input
-                            type="text"
-                            name="otp"
-                            value={form.otp}
-                            onChange={handleChange}
-                            className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
-                            placeholder="Enter 6-digit code"
-                            maxLength={6}
-                          />
+                        <div>
+                          <div className="flex justify-between">
+                            <label className="text-sm font-medium text-gray-700 block mb-2">
+                              Password <span className="text-red-500">*</span>
+                            </label>
+                            <Link
+                              to="/auth/forgot-password"
+                              className="text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+                            >
+                              Forgot Password?
+                            </Link>
+                          </div>
+                          <div className="relative">
+                            <FiKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="password"
+                              name="password"
+                              value={form.password}
+                              onChange={handleChange}
+                              className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
+                              placeholder="Enter your password"
+                            />
+                          </div>
                         </div>
                       </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-                      <button
-                        type="submit"
-                        onClick={handleSubmit}
-                        disabled={isLoading}
-                        className="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isLoading ? "Verifying..." : "Verify and Login"}
-                      </button>
+              <div className="mt-6 space-y-4">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </button>
 
-                      <button
-                        type="button"
-                        onClick={handleBackToPhone}
-                        className="w-full flex items-center justify-center text-primary py-2 px-4 rounded-lg font-medium hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-colors"
-                      >
-                        <FiChevronLeft className="mr-2" />
-                        Change Phone Number
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                {/* Alternative Login Options */}
+                <div className="flex space-x-3">
+                  <button
+                    type="button"
+                    onClick={loginMode === 'phone' ? handleSwitchToEmail : handleSwitchToPhone}
+                    className="flex-1 flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-colors"
+                  >
+                    <FiMail className="w-5 h-5 mr-2" />
+                    {loginMode === 'phone' ? 'Email' : 'Phone'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    className="flex-1 flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-colors"
+                  >
+                    <FaGoogle className="w-5 h-5 mr-2" />
+                    Google
+                  </button>
+                </div>
+              </div>
+            </form>
 
             <div className="mt-4 text-center">
               <p className="text-gray-600">
