@@ -15,7 +15,7 @@ const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
   const displayName = `${user.firstName.charAt(0)}.${user.lastName}`;
   return (
     <div
-      className={`flex items-center gap-2 px-2 py-1 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors ${
+      className={`flex items-center gap-2 px-2 py-1 bg-gray-100 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors ${
         collapsed ? "justify-center" : ""
       }`}
     >

@@ -22,3 +22,23 @@ export interface DocumentItemType {
     name: string;
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
+
+export type FeedbackItem = {
+    id: number;
+    programme: string;
+    feedbackType: 'Positive' | 'Negative' | 'Suggestion' | 'Concern';
+    response: string;
+    followUpNeeded: boolean;
+    email: string;
+    responses: number;
+    questions: number;
+    time: string;
+    status: 'Active' | 'Draft' | 'Completed' | 'Pending';
+  };
+  
+  export type FeedbackAction = {
+    key: string;
+    label: string;
+    icon: React.ReactNode;
+    destructive: boolean;
+  };

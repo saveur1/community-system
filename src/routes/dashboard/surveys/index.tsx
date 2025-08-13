@@ -141,7 +141,6 @@ const SurveyComponent = () => {
 
     const getSurveyActions = (survey: any) => {
         const baseActions = [
-            { key: 'view', label: 'View Details', icon: <FaEye className="w-4 h-4" />, destructive: false },
             { key: 'share', label: 'Share Survey', icon: <FaShare className="w-4 h-4" />, destructive: false },
         ];
 
@@ -169,11 +168,15 @@ const SurveyComponent = () => {
             );
         }
 
+        baseActions.push(
+            { key: 'delete', label: 'Delete Survey', icon: <FaTrash className="w-4 h-4" />, destructive: true }
+        );
+
         return baseActions;
     };
 
     const renderTableView = () => (
-        <div className="bg-white w-full rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white w-full rounded-lg shadow-sm border border-gray-200 overflow-visible">
             <table className="min-w-full">
                 <thead className="border-b border-gray-200">
                     <tr>
@@ -202,7 +205,7 @@ const SurveyComponent = () => {
                             <td className="px-6 py-4 text-sm text-gray-700">{survey.email}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 font-medium">{survey.projects}</td>
                             <td className="px-6 py-4">
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-4">
                                     <button 
                                         onClick={() => handleSurveyAction('edit', survey.id, survey.name)}
                                         className="text-primary cursor-pointer hover:text-blue-700"
@@ -211,11 +214,11 @@ const SurveyComponent = () => {
                                         <FaEdit className="w-4 h-4" />
                                     </button>
                                     <button 
-                                        onClick={() => handleSurveyAction('delete', survey.id, survey.name)}
-                                        className="text-red-500 cursor-pointer hover:text-red-700"
-                                        title="Delete Survey"
+                                        onClick={() => handleSurveyAction('view', survey.id, survey.name)}
+                                        className="text-title cursor-pointer hover:text-shadow-title"
+                                        title="View Survey"
                                     >
-                                        <FaTrash className="w-4 h-4" />
+                                        <FaEye className="w-4 h-4" />
                                     </button>
 
                                     {/* ACTION Menu */}
@@ -327,7 +330,7 @@ const SurveyComponent = () => {
             <Breadcrumb
                 items={["Community", "Surveys"]}
                 title="Surveys"
-                className='absolute top-0 left-0 w-full'
+                className='absolute top-0 left-0 w-full px-6'
             />
 
             {/* Header with view controls */}

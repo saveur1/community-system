@@ -1,3 +1,4 @@
+import { cn } from '@/utility/utility';
 import React from 'react';
 
 interface BreadcrumbProps {
@@ -8,7 +9,7 @@ interface BreadcrumbProps {
 
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, title, className }) => {
   return (
-    <nav className={`bg-white border-b border-gray-300 flex justify-between py-2.5 px-4 ${className ? className : ""}`}>
+    <nav className={cn("bg-white border-b border-gray-300 flex justify-between py-2.5 px-4", className)}>
         <h4 className="text-base uppercase text-title font-semibold">{title}</h4>
       <ol className="flex items-center space-x-2 text-sm text-gray-600">
         {items.map((item, index) => (
