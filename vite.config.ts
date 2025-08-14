@@ -15,19 +15,13 @@ const ssrBuildConfig: BuildEnvironmentOptions = {
   outDir: 'dist/server',
   ssrEmitAssets: true,
   copyPublicDir: false,
-  cssCodeSplit: false,
   emptyOutDir: true,
   rollupOptions: {
     input: path.resolve(__dirname, 'src/entry-server.tsx'),
     output: {
       entryFileNames: '[name].js',
       chunkFileNames: 'assets/[name]-[hash].js',
-      assetFileNames: (assetInfo) => {
-        if (assetInfo.name?.endsWith('.css')) {
-          return 'styles.css' // Fixed CSS filename
-        }
-        return 'assets/[name]-[hash][extname]'
-      }
+      assetFileNames: 'assets/[name]-[hash][extname]'
     },
   },
 }
@@ -43,7 +37,7 @@ const clientBuildConfig: BuildEnvironmentOptions = {
     output: {
       entryFileNames: 'static/[name].js',
       chunkFileNames: 'static/assets/[name]-[hash].js',
-      assetFileNames: 'static/assets/[name]-[hash][extname]',
+      assetFileNames: 'assets/[name]-[hash][extname]',
     },
   },
 }

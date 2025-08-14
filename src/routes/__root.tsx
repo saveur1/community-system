@@ -5,15 +5,17 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import type { RouterContext } from '../routerContext'
-import tailwindcss from "../styles.css?inline";
+import tailwindcss from "../styles.css?url";
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import toastCss from 'react-toastify/dist/ReactToastify.css?url';
 
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     links: [
-      { rel: 'icon', href: '/images/favicon.ico' }
+      { rel: 'icon', href: '/images/favicon.ico' },
+      { rel: 'stylesheet', href: toastCss },
+      { rel: 'stylesheet', href: tailwindcss },
     ],
     meta: [
       {
@@ -51,7 +53,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
           : '/src/entry-client.tsx',
       },
     ],
-    styles: [{ children: tailwindcss }],
+    // styles: [{ children: tailwindcss }],
   }),
   component: RootComponent,
 })

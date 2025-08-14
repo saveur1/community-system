@@ -213,13 +213,13 @@ const SurveyComponent = () => {
                                     >
                                         <FaEdit className="w-4 h-4" />
                                     </button>
-                                    <button 
-                                        onClick={() => handleSurveyAction('view', survey.id, survey.name)}
+                                    <Link 
+                                        to={`/dashboard/surveys/${survey.id}`}
                                         className="text-title cursor-pointer hover:text-shadow-title"
                                         title="View Survey"
                                     >
                                         <FaEye className="w-4 h-4" />
-                                    </button>
+                                    </Link>
 
                                     {/* ACTION Menu */}
                                     <CustomDropdown

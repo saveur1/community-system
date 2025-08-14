@@ -31,10 +31,11 @@ const LandingPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-lg:place-items-center md:gap-10 py-8 md:py-12 w-full max-w-8xl mx-auto px-2 sm:px-4">
         {/* About the Project */}
         <AboutSection />
-        <FeedbackForm />
+        <ServiceUpdateCard />
+        
       </div>
 
-      <ServiceUpdateCard />
+      <FeedbackForm />
 
       <Footer />
 

@@ -30,10 +30,17 @@ import { Route as DashboardProgrammesIndexRouteImport } from './routes/dashboard
 import { Route as DashboardNotificationsIndexRouteImport } from './routes/dashboard/notifications/index'
 import { Route as DashboardFeedbackIndexRouteImport } from './routes/dashboard/feedback/index'
 import { Route as DashboardDocumentsIndexRouteImport } from './routes/dashboard/documents/index'
+import { Route as DashboardAccountsIndexRouteImport } from './routes/dashboard/accounts/index'
 import { Route as CommunitySurveysIndexRouteImport } from './routes/community/surveys/index'
 import { Route as DashboardSurveysAddNewRouteImport } from './routes/dashboard/surveys/add-new'
+import { Route as DashboardSurveysViewIdRouteImport } from './routes/dashboard/surveys/$view-id'
 import { Route as DashboardProgrammesAddNewRouteImport } from './routes/dashboard/programmes/add-new'
+import { Route as DashboardProgrammesViewIdRouteImport } from './routes/dashboard/programmes/$view-id'
 import { Route as DashboardFeedbackAddNewRouteImport } from './routes/dashboard/feedback/add-new'
+import { Route as DashboardAccountsStakeholdersRouteImport } from './routes/dashboard/accounts/stakeholders'
+import { Route as DashboardAccountsReligiousRouteImport } from './routes/dashboard/accounts/religious'
+import { Route as DashboardAccountsCommunityRouteImport } from './routes/dashboard/accounts/community'
+import { Route as DashboardSurveysEditEditIdRouteImport } from './routes/dashboard/surveys/edit.$edit-id'
 
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
@@ -142,6 +149,11 @@ const DashboardDocumentsIndexRoute = DashboardDocumentsIndexRouteImport.update({
   path: '/documents/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardAccountsIndexRoute = DashboardAccountsIndexRouteImport.update({
+  id: '/accounts/',
+  path: '/accounts/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const CommunitySurveysIndexRoute = CommunitySurveysIndexRouteImport.update({
   id: '/surveys/',
   path: '/surveys/',
@@ -152,10 +164,21 @@ const DashboardSurveysAddNewRoute = DashboardSurveysAddNewRouteImport.update({
   path: '/surveys/add-new',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardSurveysViewIdRoute = DashboardSurveysViewIdRouteImport.update({
+  id: '/surveys/$view-id',
+  path: '/surveys/$view-id',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardProgrammesAddNewRoute =
   DashboardProgrammesAddNewRouteImport.update({
     id: '/programmes/add-new',
     path: '/programmes/add-new',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardProgrammesViewIdRoute =
+  DashboardProgrammesViewIdRouteImport.update({
+    id: '/programmes/$view-id',
+    path: '/programmes/$view-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardFeedbackAddNewRoute = DashboardFeedbackAddNewRouteImport.update({
@@ -163,6 +186,30 @@ const DashboardFeedbackAddNewRoute = DashboardFeedbackAddNewRouteImport.update({
   path: '/feedback/add-new',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardAccountsStakeholdersRoute =
+  DashboardAccountsStakeholdersRouteImport.update({
+    id: '/accounts/stakeholders',
+    path: '/accounts/stakeholders',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardAccountsReligiousRoute =
+  DashboardAccountsReligiousRouteImport.update({
+    id: '/accounts/religious',
+    path: '/accounts/religious',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardAccountsCommunityRoute =
+  DashboardAccountsCommunityRouteImport.update({
+    id: '/accounts/community',
+    path: '/accounts/community',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardSurveysEditEditIdRoute =
+  DashboardSurveysEditEditIdRouteImport.update({
+    id: '/surveys/edit/$edit-id',
+    path: '/surveys/edit/$edit-id',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -180,16 +227,23 @@ export interface FileRoutesByFullPath {
   '/community/': typeof CommunityIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
+  '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
+  '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
+  '/dashboard/programmes/$view-id': typeof DashboardProgrammesViewIdRoute
   '/dashboard/programmes/add-new': typeof DashboardProgrammesAddNewRoute
+  '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/community/surveys': typeof CommunitySurveysIndexRoute
+  '/dashboard/accounts': typeof DashboardAccountsIndexRoute
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
   '/dashboard/programmes': typeof DashboardProgrammesIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
+  '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -204,16 +258,23 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
+  '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
+  '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
+  '/dashboard/programmes/$view-id': typeof DashboardProgrammesViewIdRoute
   '/dashboard/programmes/add-new': typeof DashboardProgrammesAddNewRoute
+  '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/community/surveys': typeof CommunitySurveysIndexRoute
+  '/dashboard/accounts': typeof DashboardAccountsIndexRoute
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
   '/dashboard/programmes': typeof DashboardProgrammesIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
+  '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -232,16 +293,23 @@ export interface FileRoutesById {
   '/community/': typeof CommunityIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
+  '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
+  '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
+  '/dashboard/programmes/$view-id': typeof DashboardProgrammesViewIdRoute
   '/dashboard/programmes/add-new': typeof DashboardProgrammesAddNewRoute
+  '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/community/surveys/': typeof CommunitySurveysIndexRoute
+  '/dashboard/accounts/': typeof DashboardAccountsIndexRoute
   '/dashboard/documents/': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback/': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications/': typeof DashboardNotificationsIndexRoute
   '/dashboard/programmes/': typeof DashboardProgrammesIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/dashboard/surveys/': typeof DashboardSurveysIndexRoute
+  '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -261,16 +329,23 @@ export interface FileRouteTypes {
     | '/community/'
     | '/dashboard/'
     | '/posts/'
+    | '/dashboard/accounts/community'
+    | '/dashboard/accounts/religious'
+    | '/dashboard/accounts/stakeholders'
     | '/dashboard/feedback/add-new'
+    | '/dashboard/programmes/$view-id'
     | '/dashboard/programmes/add-new'
+    | '/dashboard/surveys/$view-id'
     | '/dashboard/surveys/add-new'
     | '/community/surveys'
+    | '/dashboard/accounts'
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
     | '/dashboard/programmes'
     | '/dashboard/settings'
     | '/dashboard/surveys'
+    | '/dashboard/surveys/edit/$edit-id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -285,16 +360,23 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/posts'
+    | '/dashboard/accounts/community'
+    | '/dashboard/accounts/religious'
+    | '/dashboard/accounts/stakeholders'
     | '/dashboard/feedback/add-new'
+    | '/dashboard/programmes/$view-id'
     | '/dashboard/programmes/add-new'
+    | '/dashboard/surveys/$view-id'
     | '/dashboard/surveys/add-new'
     | '/community/surveys'
+    | '/dashboard/accounts'
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
     | '/dashboard/programmes'
     | '/dashboard/settings'
     | '/dashboard/surveys'
+    | '/dashboard/surveys/edit/$edit-id'
   id:
     | '__root__'
     | '/'
@@ -312,16 +394,23 @@ export interface FileRouteTypes {
     | '/community/'
     | '/dashboard/'
     | '/posts/'
+    | '/dashboard/accounts/community'
+    | '/dashboard/accounts/religious'
+    | '/dashboard/accounts/stakeholders'
     | '/dashboard/feedback/add-new'
+    | '/dashboard/programmes/$view-id'
     | '/dashboard/programmes/add-new'
+    | '/dashboard/surveys/$view-id'
     | '/dashboard/surveys/add-new'
     | '/community/surveys/'
+    | '/dashboard/accounts/'
     | '/dashboard/documents/'
     | '/dashboard/feedback/'
     | '/dashboard/notifications/'
     | '/dashboard/programmes/'
     | '/dashboard/settings/'
     | '/dashboard/surveys/'
+    | '/dashboard/surveys/edit/$edit-id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -483,6 +572,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDocumentsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/accounts/': {
+      id: '/dashboard/accounts/'
+      path: '/accounts'
+      fullPath: '/dashboard/accounts'
+      preLoaderRoute: typeof DashboardAccountsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/community/surveys/': {
       id: '/community/surveys/'
       path: '/surveys'
@@ -497,6 +593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSurveysAddNewRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/surveys/$view-id': {
+      id: '/dashboard/surveys/$view-id'
+      path: '/surveys/$view-id'
+      fullPath: '/dashboard/surveys/$view-id'
+      preLoaderRoute: typeof DashboardSurveysViewIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/programmes/add-new': {
       id: '/dashboard/programmes/add-new'
       path: '/programmes/add-new'
@@ -504,11 +607,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProgrammesAddNewRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/programmes/$view-id': {
+      id: '/dashboard/programmes/$view-id'
+      path: '/programmes/$view-id'
+      fullPath: '/dashboard/programmes/$view-id'
+      preLoaderRoute: typeof DashboardProgrammesViewIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/feedback/add-new': {
       id: '/dashboard/feedback/add-new'
       path: '/feedback/add-new'
       fullPath: '/dashboard/feedback/add-new'
       preLoaderRoute: typeof DashboardFeedbackAddNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/accounts/stakeholders': {
+      id: '/dashboard/accounts/stakeholders'
+      path: '/accounts/stakeholders'
+      fullPath: '/dashboard/accounts/stakeholders'
+      preLoaderRoute: typeof DashboardAccountsStakeholdersRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/accounts/religious': {
+      id: '/dashboard/accounts/religious'
+      path: '/accounts/religious'
+      fullPath: '/dashboard/accounts/religious'
+      preLoaderRoute: typeof DashboardAccountsReligiousRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/accounts/community': {
+      id: '/dashboard/accounts/community'
+      path: '/accounts/community'
+      fullPath: '/dashboard/accounts/community'
+      preLoaderRoute: typeof DashboardAccountsCommunityRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/surveys/edit/$edit-id': {
+      id: '/dashboard/surveys/edit/$edit-id'
+      path: '/surveys/edit/$edit-id'
+      fullPath: '/dashboard/surveys/edit/$edit-id'
+      preLoaderRoute: typeof DashboardSurveysEditEditIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
   }
@@ -548,28 +686,42 @@ const CommunityRouteRouteWithChildren = CommunityRouteRoute._addFileChildren(
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardAccountsCommunityRoute: typeof DashboardAccountsCommunityRoute
+  DashboardAccountsReligiousRoute: typeof DashboardAccountsReligiousRoute
+  DashboardAccountsStakeholdersRoute: typeof DashboardAccountsStakeholdersRoute
   DashboardFeedbackAddNewRoute: typeof DashboardFeedbackAddNewRoute
+  DashboardProgrammesViewIdRoute: typeof DashboardProgrammesViewIdRoute
   DashboardProgrammesAddNewRoute: typeof DashboardProgrammesAddNewRoute
+  DashboardSurveysViewIdRoute: typeof DashboardSurveysViewIdRoute
   DashboardSurveysAddNewRoute: typeof DashboardSurveysAddNewRoute
+  DashboardAccountsIndexRoute: typeof DashboardAccountsIndexRoute
   DashboardDocumentsIndexRoute: typeof DashboardDocumentsIndexRoute
   DashboardFeedbackIndexRoute: typeof DashboardFeedbackIndexRoute
   DashboardNotificationsIndexRoute: typeof DashboardNotificationsIndexRoute
   DashboardProgrammesIndexRoute: typeof DashboardProgrammesIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
   DashboardSurveysIndexRoute: typeof DashboardSurveysIndexRoute
+  DashboardSurveysEditEditIdRoute: typeof DashboardSurveysEditEditIdRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardAccountsCommunityRoute: DashboardAccountsCommunityRoute,
+  DashboardAccountsReligiousRoute: DashboardAccountsReligiousRoute,
+  DashboardAccountsStakeholdersRoute: DashboardAccountsStakeholdersRoute,
   DashboardFeedbackAddNewRoute: DashboardFeedbackAddNewRoute,
+  DashboardProgrammesViewIdRoute: DashboardProgrammesViewIdRoute,
   DashboardProgrammesAddNewRoute: DashboardProgrammesAddNewRoute,
+  DashboardSurveysViewIdRoute: DashboardSurveysViewIdRoute,
   DashboardSurveysAddNewRoute: DashboardSurveysAddNewRoute,
+  DashboardAccountsIndexRoute: DashboardAccountsIndexRoute,
   DashboardDocumentsIndexRoute: DashboardDocumentsIndexRoute,
   DashboardFeedbackIndexRoute: DashboardFeedbackIndexRoute,
   DashboardNotificationsIndexRoute: DashboardNotificationsIndexRoute,
   DashboardProgrammesIndexRoute: DashboardProgrammesIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
   DashboardSurveysIndexRoute: DashboardSurveysIndexRoute,
+  DashboardSurveysEditEditIdRoute: DashboardSurveysEditEditIdRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

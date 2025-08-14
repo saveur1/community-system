@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaArrowRight } from 'react-icons/fa';
+import { FaArrowRight, FaBell } from 'react-icons/fa';
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
 import { HiOutlineSpeakerphone } from 'react-icons/hi';
 
@@ -50,7 +50,7 @@ const AnnouncementsCards = () => {
   // Auto-slide effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (isAutoPlaying) {
       interval = setInterval(() => {
         nextAnnouncement();
@@ -62,14 +62,14 @@ const AnnouncementsCards = () => {
 
   const nextAnnouncement = () => {
     setDirection('left');
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === announcements.length - 1 ? 0 : prevIndex + 1
     );
   };
 
   const prevAnnouncement = () => {
     setDirection('right');
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? announcements.length - 1 : prevIndex - 1
     );
   };
@@ -106,83 +106,106 @@ const AnnouncementsCards = () => {
   };
 
   return (
-    <div className="max-w-8xl mx-auto px-2 sm:px-4 py-6 sm:py-8 border-t-2 my-8 sm:my-12 border-gray-300 flex flex-col items-center justify-center gap-y-4 w-full" id="anncouncements">
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-x-8 w-full">
-        {/* Previous announcement button */}
-        <button 
-          onClick={prevAnnouncement}
-          className="p-2 sm:p-3 hover:bg-gray-100 rounded-full transition"
-          aria-label="Previous announcement"
-        >
-          <MdKeyboardArrowLeft size={32} className="text-title" />
-        </button>
+    <div
+      className="relative max-w-8xl mx-auto bg-blend-color border shadow rounded-lg px-1 py-6 sm:py-8 border-t-2 my-8 sm:my-2 border-gray-300 flex flex-col items-center justify-center gap-y-4 w-full"
+      id="anncouncements"
+      style={{
+        backgroundImage: `url('/images/notification_bg.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundBlendMode: 'multiply'
+      }}
+    >
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-primary opacity-80 rounded-lg"></div>
 
-        <div className="relative min-h-56 w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl overflow-hidden">
-          <AnimatePresence custom={direction} initial={false}>
-            <motion.div
-              key={currentIndex}
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="absolute top-0 left-0 w-full h-full"
-            >
-              <div className="bg-white rounded-lg overflow-hidden w-full h-full border border-gray-300 shadow-sm">
-                {/* Header with icon */}
-                <div className={`${announcements[currentIndex].bgColor} px-6 py-4 flex items-center`}>
-                  <HiOutlineSpeakerphone className="text-white text-2xl mr-3" />
-                  <h2 className="text-xl font-bold text-white">{announcements[currentIndex].title}</h2>
-                </div>
-
-                {/* Content */}
-                <div className="p-4 sm:p-6 h-56 sm:h-64 overflow-y-auto">
-                  <p className="text-gray-700 mb-4">
-                    {announcements[currentIndex].content}
-                  </p>
-
-                  <div className="flex items-center text-success font-medium">
-                    <a
-                      href={announcements[currentIndex].link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center hover:underline"
-                    >
-                      Learn more
-                      <FaArrowRight className="ml-2" />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Footer with subtle background */}
-                <div className="bg-gray-50 px-6 py-3 text-sm text-gray-500">
-                  Last updated: {new Date(announcements[currentIndex].date).toLocaleDateString()}
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Next announcement button */}
-        <button 
-          onClick={nextAnnouncement}
-          className="p-2 sm:p-3 hover:bg-gray-100 rounded-full transition"
-          aria-label="Next announcement"
-        >
-          <MdKeyboardArrowRight size={32} className="text-title"/>
-        </button>
+      {/* Bell Icon positioned at top center */}
+      <div className="absolute -top-9 left-1/2 transform -translate-x-1/2 bg-title rounded-full p-3 shadow-lg border border-gray-200">
+        <FaBell size={60} className="text-white" />
       </div>
 
-      {/* Indicator dots - positioned below the card */}
-      <div className="flex justify-center space-x-2 sm:space-x-3 mt-4">
-        {announcements.map((_, index) => (
+      {/* Content wrapper with relative positioning to appear above overlay */}
+      <div className="relative z-10 flex flex-col items-center justify-center gap-y-4 w-full">
+
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 w-full mt-8">
+          {/* Previous announcement button */}
           <button
-            key={index}
-            onClick={() => goToAnnouncement(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${index === currentIndex ? announcements[currentIndex].bgColor : 'bg-gray-300'}`}
-            aria-label={`Go to announcement ${index + 1}`}
-          />
-        ))}
+            onClick={prevAnnouncement}
+            className="p-2 hover:bg-white/20 rounded-full transition"
+            aria-label="Previous announcement"
+          >
+            <MdKeyboardArrowLeft size={27} className="text-white" />
+          </button>
+
+          <div className="relative h-72 w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl overflow-hidden">
+            <AnimatePresence custom={direction} initial={false}>
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="absolute top-0 left-0 w-full h-full"
+              >
+                <div className="bg-white rounded-lg overflow-hidden w-full h-full border border-gray-300 shadow-sm">
+                  {/* Header with icon */}
+                  <div className="bg-title px-6 py-4 flex items-center">
+                    {/* <HiOutlineSpeakerphone className="text-white text-2xl mr-3" /> */}
+                    <h2 className="text-xl font-bold text-white">{announcements[currentIndex].title}</h2>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 sm:p-6 h-56 sm:h-64 overflow-y-auto">
+                    <p className="text-gray-700 mb-4">
+                      {announcements[currentIndex].content}
+                    </p>
+
+                    <div className="flex items-center text-success font-medium">
+                      <a
+                        href={announcements[currentIndex].link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center hover:underline"
+                      >
+                        Learn more
+                        <FaArrowRight className="ml-2" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Footer with subtle background */}
+                  <div className="bg-gray-50 px-6 py-3 text-sm text-gray-500">
+                    Last updated: {new Date(announcements[currentIndex].date).toLocaleDateString()}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Next announcement button */}
+          <button
+            onClick={nextAnnouncement}
+            className="p-2 sm:p-3 hover:bg-white/20 rounded-full transition"
+            aria-label="Next announcement"
+          >
+            <MdKeyboardArrowRight size={27} className="text-white" />
+          </button>
+        </div>
+
+        {/* Indicator dots - positioned below the card */}
+        <div className="flex justify-center space-x-2 sm:space-x-3 mt-4">
+          {announcements.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToAnnouncement(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${index === currentIndex ? 'bg-white' : 'bg-white/40'}`}
+              aria-label={`Go to announcement ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

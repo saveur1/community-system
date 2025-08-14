@@ -15,7 +15,9 @@ export interface NavItemType {
     name: string;
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
     active: boolean;
-    link: string
+    link: string;
+    // Optional nested submenu items
+    children?: NavItemType[];
 }
 
 export interface DocumentItemType {

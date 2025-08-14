@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
@@ -17,6 +17,7 @@ interface ProgrammeItem {
 }
 
 const ProgrammesComponent = () => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [toDelete, setToDelete] = useState<{ id: number; name: string } | null>(null);
@@ -69,7 +70,7 @@ const ProgrammesComponent = () => {
     console.log(`${action} action for programme:`, programmeId, programmeName);
     switch (action) {
       case 'view':
-        alert(`Viewing programme: ${programmeName}`);
+        navigate({ to: '/dashboard/programmes/$view-id', params: { 'view-id': String(programmeId) } });
         break;
       case 'edit':
         alert(`Editing programme: ${programmeName}`);

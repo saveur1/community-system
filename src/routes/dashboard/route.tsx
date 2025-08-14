@@ -5,7 +5,7 @@ import Header from '@/components/pages/dashboard/dashboard-header';
 import { NavItemType } from '@/utility/types';
 import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
 import React, { useState } from 'react';
-import { FaList } from 'react-icons/fa';
+import { FaList, FaUserFriends } from 'react-icons/fa';
 import {
   HiChartBar,
   HiDocumentText,
@@ -27,6 +27,18 @@ const DashboardLayout: React.FC = () => {
     { name: "Feedback", icon: HiChatBubbleBottomCenter, active: false, link: `/${path}/feedback` },
     { name: "Programmes", icon: FaList, active: false, link: `/${path}/programmes` },
     { name: "Documents", icon: HiDocumentText, active: false, link: `/${path}/documents` },
+    {
+      name: "Accounts",
+      icon: FaUserFriends,
+      active: false,
+      link: `/${path}/accounts`,
+      children: [
+        { name: "Stakeholders", active: false, link: `/${path}/accounts/stakeholders`, icon: FaUserFriends },
+        { name: "Employees", active: false, link: `/${path}/accounts/employees`, icon: FaUserFriends },
+        { name: "Community", active: false, link: `/${path}/accounts/community`, icon: FaUserFriends },
+        { name: "Religious", active: false, link: `/${path}/accounts/religious`, icon: FaUserFriends },
+      ],
+    },
   ];
 
   return (
