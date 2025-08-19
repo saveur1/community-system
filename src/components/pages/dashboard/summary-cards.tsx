@@ -1,14 +1,15 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
+import { IconType } from "react-icons/lib";
 
 type SummaryCardProps = {
   id: string;
   title: string;
   value: string | number;
-  delta: number; // percentage change
-  period?: string; // e.g. "This Year"
-  icon?: React.ReactNode;
-  iconBgColor?: string; // e.g. "bg-purple-500"
+  delta: number;
+  period?: string;
+  icon?: IconType;
+  iconBgColor?: string;
 };
 
 export function SummaryCard({
@@ -17,7 +18,7 @@ export function SummaryCard({
   value,
   delta,
   period = "This Year",
-  icon,
+  icon: Icon,
   iconBgColor = "bg-gray-200",
 }: SummaryCardProps) {
   const isPositive = delta > 0;
@@ -53,10 +54,10 @@ export function SummaryCard({
       {/* Icon */}
       <div className="flex gap-3 sm:gap-4">
         <div className={`${iconBgColor} w-10 h-10 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center text-white text-lg`}>
-          {icon}
+         { Icon && <Icon size={20}/>}
         </div>
 
-        <div className="flex flex-col gap-y-1">
+        <div className="flex flex-col">
           {/* Title */}
           <h3 className="text-sm sm:text-base text-gray-500 font-medium">{title}</h3>
 
@@ -80,7 +81,7 @@ export function SummaryCard({
           {isPositive ? "↑" : isNegative ? "↓" : "→"}{" "}
           {Math.abs(delta).toFixed(2)}%
         </p>
-        <p className="text-gray-500 text-center">{period}</p>
+        <p className="text-gray-500 text-center min-w-20 mt-1">{period}</p>
       </div>
     </motion.div>
   );

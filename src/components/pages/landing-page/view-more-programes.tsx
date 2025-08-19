@@ -11,7 +11,10 @@ const dummyProgrammes = [
   { value: "data", label: "Data-Driven Health" },
 ];
 
-const ViewMorePrograms = () => {
+interface ViewMoreProgramsProps {
+  dropDownPosition?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+}
+const ViewMorePrograms = ({dropDownPosition = "bottom-right" }: ViewMoreProgramsProps) => {
   const [selected, setSelected] = useState<string[]>([]);
   const [isOtherOpen, setIsOtherOpen] = useState(false);
   const [other, setOther] = useState("");
@@ -41,7 +44,7 @@ const ViewMorePrograms = () => {
       }
       dropdownClassName="min-w-96 rounded-md bg-success shadow-lg ring-1 ring-black/10 p-4"
       closeOnClick={false}
-      position="bottom-right"
+      position={dropDownPosition}
     >
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-white mb-2">Select more programmes</h4>

@@ -1,13 +1,9 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import React, { useState, DragEvent, JSX, FC } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState, DragEvent, JSX, FC } from 'react';
 import { FaPlus, FaTrash, FaCopy, FaGripVertical, FaSave, FaArrowLeft, FaTimes } from 'react-icons/fa';
 import Breadcrumb from '@/components/ui/breadcrum';
-
-// Type definitions
-interface QuestionOption {
-    id: string;
-    value: string;
-}
+import ViewMorePrograms from '@/components/pages/landing-page/view-more-programes';
+import { useTranslation } from 'react-i18next';
 
 interface BaseQuestion {
     id: number;
@@ -34,6 +30,7 @@ type Question = ChoiceQuestion | TextQuestion;
 interface Survey {
     title: string;
     description: string;
+    program: string;
     estimatedTime: string;
     questions: Question[];
 }
@@ -46,14 +43,25 @@ interface QuestionType {
 
 const CreateSurveyComponent: FC = () => {
     const navigate = useNavigate();
+
+    const programOptions = [
+        { value: "HIV/AIDS", label: "HIV/AIDS" },
+        { value: "Immunization", label: "Immunization (SUGIRA MWANA)" },
+        { value: "Mental Health", label: "Mental Health (Baho Neza)" },
+        { value: "Malaria", label: "Malaria SBC" },
+        { value: "Data-Driven Health", label: "Data-Driven Health" }
+    ];
+
     const [survey, setSurvey] = useState<Survey>({
         title: '',
         description: '',
+        program: '',
         estimatedTime: '',
         questions: []
     });
 
     const [draggedItem, setDraggedItem] = useState<number | null>(null);
+    const { t } = useTranslation();
 
     const questionTypes: QuestionType[] = [
         { id: 'single_choice', label: 'Single Choice', icon: '◉' },
@@ -69,7 +77,7 @@ const CreateSurveyComponent: FC = () => {
             title: '',
             description: '',
             required: false,
-            ...(type === 'single_choice' || type === 'multiple_choice' 
+            ...(type === 'single_choice' || type === 'multiple_choice'
                 ? { options: ['', ''] }
                 : { placeholder: '' }
             )
@@ -82,13 +90,13 @@ const CreateSurveyComponent: FC = () => {
     };
 
     const updateQuestion = <K extends keyof Question>(
-        questionId: number, 
-        field: K, 
+        questionId: number,
+        field: K,
         value: Question[K]
     ): void => {
         setSurvey(prev => ({
             ...prev,
-            questions: prev.questions.map(q => 
+            questions: prev.questions.map(q =>
                 q.id === questionId ? { ...q, [field]: value } : q
             )
         }));
@@ -104,13 +112,13 @@ const CreateSurveyComponent: FC = () => {
     const duplicateQuestion = (questionId: number): void => {
         const questionToDuplicate = survey.questions.find(q => q.id === questionId);
         if (!questionToDuplicate) return;
-        
+
         const duplicatedQuestion: Question = {
             ...questionToDuplicate,
             id: Date.now(),
             title: questionToDuplicate.title + ' (Copy)'
         };
-        
+
         setSurvey(prev => ({
             ...prev,
             questions: [...prev.questions, duplicatedQuestion]
@@ -134,8 +142,8 @@ const CreateSurveyComponent: FC = () => {
             ...prev,
             questions: prev.questions.map(q => {
                 if (q.id === questionId && (q.type === 'single_choice' || q.type === 'multiple_choice')) {
-                    return { 
-                        ...q, 
+                    return {
+                        ...q,
                         options: q.options.map((opt, idx) => idx === optionIndex ? value : opt)
                     };
                 }
@@ -188,14 +196,14 @@ const CreateSurveyComponent: FC = () => {
             alert('Please add at least one question');
             return;
         }
-        
+
         // Validate questions
         for (let question of survey.questions) {
             if (!question.title.trim()) {
                 alert('Please fill in all question titles');
                 return;
             }
-            if ((question.type === 'single_choice' || question.type === 'multiple_choice') && 
+            if ((question.type === 'single_choice' || question.type === 'multiple_choice') &&
                 question.options.some(opt => !opt.trim())) {
                 alert('Please fill in all option values');
                 return;
@@ -214,7 +222,7 @@ const CreateSurveyComponent: FC = () => {
 
     const renderQuestionEditor = (question: Question, index: number): JSX.Element => {
         return (
-            <div 
+            <div
                 key={question.id}
                 className="bg-white border border-gray-200 rounded-lg p-6 mb-4 shadow-sm"
                 draggable
@@ -395,6 +403,39 @@ const CreateSurveyComponent: FC = () => {
                                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                             />
                         </div>
+                        {/* Programme Selection (checkboxes preserved) */}
+                        <div className="space-y-3">
+                            <label className="text-sm font-medium text-gray-700">
+                                {t('feedback.programme')} <span className="text-red-500">*</span>
+                            </label>
+
+                            <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                                {programOptions.map((option) => (
+                                    <div key={option.value} className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            id={`programme-${option.value}`}
+                                            name="programmes"
+                                            value={option.value}
+                                            checked={survey.program.includes(option.value)}
+                                            onChange={() => setSurvey(prev => ({ ...prev, program: option.value }))}
+                                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
+                                        />
+                                        <label
+                                            htmlFor={`programme-${option.value}`}
+                                            className="ml-3 block text-sm text-gray-700 cursor-pointer hover:text-gray-900"
+                                        >
+                                            {option.label}
+                                        </label>
+                                    </div>
+                                ))}
+
+                                {/* Others option with text input */}
+                                <div className="flex items-center">
+                                    <ViewMorePrograms dropDownPosition="bottom-left" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Questions Section */}
@@ -420,7 +461,7 @@ const CreateSurveyComponent: FC = () => {
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-500">
-                                {survey.questions.length} question{survey.questions.length !== 1 ? 's' : ''} • 
+                                {survey.questions.length} question{survey.questions.length !== 1 ? 's' : ''} •
                                 Estimated time: {survey.estimatedTime || '0'} minutes
                             </div>
                             <div className="flex space-x-3">
@@ -448,7 +489,7 @@ const CreateSurveyComponent: FC = () => {
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <h3 className="text-lg font-medium text-gray-900 mb-4">Add Question</h3>
                             <p className="text-sm text-gray-600 mb-4">Choose a question type to add to your survey:</p>
-                            
+
                             {/* Add Question Buttons */}
                             <div className="space-y-3">
                                 {questionTypes.map(type => (
@@ -471,7 +512,7 @@ const CreateSurveyComponent: FC = () => {
                                 ))}
                             </div>
                         </div>
-                        
+
                         {/* Survey Summary */}
                         {survey.questions.length > 0 && (
                             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
@@ -500,5 +541,5 @@ const CreateSurveyComponent: FC = () => {
 };
 
 export const Route = createFileRoute('/dashboard/surveys/add-new')({
-  component: CreateSurveyComponent,
+    component: CreateSurveyComponent,
 })

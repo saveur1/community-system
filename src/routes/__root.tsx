@@ -8,6 +8,7 @@ import type { RouterContext } from '../routerContext'
 import tailwindcss from "../styles.css?url";
 import { ToastContainer } from 'react-toastify';
 import toastCss from 'react-toastify/dist/ReactToastify.css?url';
+import QueryProvider from '../providers/query-provider';
 
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -35,10 +36,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
           {
             type: 'module',
             children: `import RefreshRuntime from "/@react-refresh"
-  RefreshRuntime.injectIntoGlobalHook(window)
-  window.$RefreshReg$ = () => {}
-  window.$RefreshSig$ = () => (type) => type
-  window.__vite_plugin_react_preamble_installed__ = true`,
+                        RefreshRuntime.injectIntoGlobalHook(window)
+                        window.$RefreshReg$ = () => {}
+                        window.$RefreshSig$ = () => (type) => type
+                        window.__vite_plugin_react_preamble_installed__ = true`,
           },
           {
             type: 'module',
@@ -53,7 +54,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
           : '/src/entry-client.tsx',
       },
     ],
-    // styles: [{ children: tailwindcss }],
   }),
   component: RootComponent,
 })
@@ -65,9 +65,11 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body>
+        <QueryProvider>
           <ToastContainer />
           <Outlet />
-          <TanStackRouterDevtools position='bottom-right'/>
+          {/* <TanStackRouterDevtools position='bottom-right'/> */}
+        </QueryProvider>
       </body>
     </html>
   )

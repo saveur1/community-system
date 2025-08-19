@@ -1,6 +1,6 @@
 import path from 'node:path'
 import url from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv  } from 'vite'
 import react from '@vitejs/plugin-react'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import type { BuildEnvironmentOptions } from 'vite'
@@ -44,7 +44,19 @@ const clientBuildConfig: BuildEnvironmentOptions = {
 
 // https://vitejs.dev/config/
 export default defineConfig((configEnv) => {
+  const { command, mode, isSsrBuild } = configEnv;
+  
+  // Load environment variables based on the current mode
+  const env = loadEnv(mode, process.cwd(), '')
+
   return {
+    define: {
+      // Only expose VITE_ prefixed variables to the client
+      __APP_ENV__: JSON.stringify(env.APP_ENV),
+    },
+    // Configure environment variable handling
+    envPrefix: ['VITE_', 'PUBLIC_'], // Variables with these prefixes will be exposed to client
+
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src')
@@ -55,7 +67,7 @@ export default defineConfig((configEnv) => {
       react(),
       tailwindcss()
     ],
-    build: configEnv.isSsrBuild ? ssrBuildConfig : clientBuildConfig,
+    build: isSsrBuild ? ssrBuildConfig : clientBuildConfig,
     
   }
 })

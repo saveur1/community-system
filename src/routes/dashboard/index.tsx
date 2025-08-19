@@ -1,19 +1,19 @@
 import { useMemo, useState } from "react";
 import {
   HiOutlineUsers,
-  HiOutlineCollection,
   HiOutlineChartBar,
   HiOutlineClock,
   HiOutlineXCircle,
   HiOutlineDocumentText,
 } from "react-icons/hi";
-import { FaClipboardList, FaRegComments } from "react-icons/fa";
+import { FaClipboardList } from "react-icons/fa";
 import { createFileRoute } from "@tanstack/react-router";
 import { SummaryCard } from "@/components/pages/dashboard/summary-cards";
 import { SurveyParticipants } from "@/components/pages/dashboard/survey-participants-chart";
 import { QuickActions } from "@/components/pages/dashboard/quick-actions";
+import useAuth from "@/hooks/useAuth";
+import summaryCards from "@/components/pages/dashboard/summary-cards-items";
 
-// Helper
 const genMonthly = (base: number) =>
   Array.from({ length: 12 }).map((_, i) =>
     Math.max(0, Math.round(base + Math.sin(i / 2) * base * 0.25 + i * 2))
@@ -35,44 +35,9 @@ const mockData: Record<string, number[]> = {
 
 function DashboardHome() {
   const [selectedSurvey, setSelectedSurvey] = useState<string>("immunization");
+  const { user } = useAuth();
 
-  const summaryCards = useMemo(
-    () => [
-      {
-        id: "feedbacks",
-        title: "Feedbacks — Immunization",
-        value: 345,
-        delta: 20.3,
-        note: "12 new this week",
-        icon: <FaRegComments size={20} />,
-        iconBgColor: "bg-primary",
-        period: "This Week",
-      },
-      {
-        id: "users",
-        title: "Registered Users",
-        value: 1280,
-        delta: -8.73,
-        note: "5 new today",
-        icon: <HiOutlineUsers size={20} />,
-        iconBgColor: "bg-title",
-        period: "This year",
-      },
-      {
-        id: "active",
-        title: "Active Surveys",
-        value: 7,
-        delta: 10.73,
-        note: "2 launched this month",
-        icon: <HiOutlineCollection size={20} />,
-        iconBgColor: "bg-success",
-        period: "This week",
-      },
-    ],
-    []
-  );
-
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   const chartSeries = [
     { name: "Participants", type: "line", data: mockData[selectedSurvey] },
@@ -99,9 +64,8 @@ function DashboardHome() {
 
   return (
     <div className="mt-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        {summaryCards.map((card) => (
+        {summaryCards(user)?.map((card) => (
           <SummaryCard key={card.id} {...card} />
         ))}
       </div>

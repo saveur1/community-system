@@ -1,26 +1,29 @@
 import path from 'node:path'
 import express from 'express';
 import * as zlib from 'node:zlib'
+import app from './backend/app.js';
+import { authMiddleware } from './middleware.js';
 
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITE_TEST_BUILD
 
 export async function createServer(
   root = process.cwd(),
   isProd = process.env.NODE_ENV === 'production',
-  hmrPort,
+  hmrPort = 24678, // Default HMR port used by Vite
 ) {
-  const app = express()
 
   /**
    * @type {import('vite').ViteDevServer}
    */
-  let vite
+  let vite: import('vite').ViteDevServer | undefined = undefined;
+
   if (!isProd) {
     vite = await (await import('vite')).createServer({
       root,
       logLevel: isTest ? 'error' : 'info',
       server: {
         middlewareMode: true,
+        
         watch: {
           // During tests we edit the files too fast and sometimes chokidar
           // misses change events, so enforce polling for consistency
@@ -47,6 +50,7 @@ export async function createServer(
   }
 
   if (isProd) app.use(express.static('./dist/client'))
+    app.use(authMiddleware);
 
   app.use('*', async (req, res) => {
     try {
@@ -61,31 +65,34 @@ export async function createServer(
 
       // Best effort extraction of the head from vite's index transformation hook
       let viteHead = !isProd
-        ? await vite.transformIndexHtml(
+        ? await vite?.transformIndexHtml(
           url,
           `<html><head></head><body></body></html>`,
         )
         : ''
 
-      viteHead = viteHead.substring(
+      viteHead = viteHead?.substring(
         viteHead.indexOf('<head>') + 6,
         viteHead.indexOf('</head>'),
       )
 
       const entry = await (async () => {
-        if (!isProd) {
+        if (!isProd && vite) {
           return vite.ssrLoadModule('/src/entry-server.tsx')
         } else {
-          return import('./dist/server/entry-server.js')
+          // @ts-ignore
+          return import('./dist/server/entry-server.js') as Promise<{ render: Function }>;
         }
       })()
 
       console.info('Rendering: ', url, '...')
       await entry.render({ req, res, head: viteHead })
     } catch (e) {
-      !isProd && vite.ssrFixStacktrace(e)
-      console.info(e.stack)
-      res.status(500).end(e.stack)
+      if (!isProd && vite) {
+        vite.ssrFixStacktrace(e as Error);
+      }
+      console.info((e as Error).stack);
+      res.status(500).end((e as Error).stack);
     }
   })
 

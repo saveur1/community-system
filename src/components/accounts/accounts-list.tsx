@@ -51,12 +51,15 @@ export function AccountsList({
   const sortedAccounts = useMemo(() => {
     const sortableItems = [...accounts];
     if (!sortConfig) return sortableItems;
-    
+
     sortableItems.sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
+      const aValue = a[sortConfig.key] ?? '';
+      const bValue = b[sortConfig.key] ?? '';
+
+      if (aValue < bValue) {
         return sortConfig.direction === 'asc' ? -1 : 1;
       }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
+      if (aValue > bValue) {
         return sortConfig.direction === 'asc' ? 1 : -1;
       }
       return 0;
@@ -66,8 +69,8 @@ export function AccountsList({
 
   const renderSortIcon = (key: keyof Account) => {
     if (sortConfig.key !== key) return <FaSort className="inline ml-1 opacity-30" />;
-    return sortConfig.direction === 'asc' 
-      ? <FaSortUp className="inline ml-1" /> 
+    return sortConfig.direction === 'asc'
+      ? <FaSortUp className="inline ml-1" />
       : <FaSortDown className="inline ml-1" />;
   };
 
@@ -171,36 +174,36 @@ export function AccountsList({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('name')}
                   >
                     Name {renderSortIcon('name')}
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     onClick={() => handleSort('email')}
                   >
                     Email {renderSortIcon('email')}
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     onClick={() => handleSort('phone')}
                   >
                     Phone {renderSortIcon('phone')}
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     onClick={() => handleSort('role')}
                   >
                     Role {renderSortIcon('role')}
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     onClick={() => handleSort('type')}
                   >
@@ -307,11 +310,10 @@ export function AccountsList({
                       <button
                         key={pageNum}
                         onClick={() => onPageChange(pageNum)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          currentPage === pageNum
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === pageNum
                             ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
                             : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         {pageNum}
                       </button>
@@ -359,13 +361,12 @@ export function AccountsList({
                   <div>
                     <h3 className="text-lg font-medium text-gray-900">{account.name}</h3>
                     <p className="text-sm text-gray-500">{account.role}</p>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      account.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${account.status === 'active'
+                        ? 'bg-green-100 text-green-800'
                         : account.status === 'inactive'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {account.status.charAt(0).toUpperCase() + account.status.slice(1)}
                     </span>
                   </div>
@@ -399,8 +400,8 @@ export function AccountsList({
                     {account.type}
                   </span>
                   <div className="relative">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="text-gray-400 hover:text-gray-500"
                       onClick={(e) => {
                         e.stopPropagation();

@@ -1,0 +1,1070 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"UserStatus": {
+				"type": "string",
+				"enum": [
+					"active",
+					"inactive"
+				]
+			},
+			"IPermissionAttributes": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IRoleAttributes": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"permissions": {
+						"items": {
+							"$ref": "#/components/schemas/IPermissionAttributes"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_IUserAttributes.Exclude_keyofIUserAttributes.password-or-resetPasswordCode-or-resetPasswordExpires-or-googleId__": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"status": {
+						"$ref": "#/components/schemas/UserStatus"
+					},
+					"salary": {
+						"type": "number",
+						"format": "double"
+					},
+					"profile": {
+						"type": "string"
+					},
+					"emailVerified": {
+						"type": "boolean"
+					},
+					"verified": {
+						"type": "boolean"
+					},
+					"roles": {
+						"items": {
+							"$ref": "#/components/schemas/IRoleAttributes"
+						},
+						"type": "array"
+					},
+					"userRoles": {
+						"items": {},
+						"type": "array"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"email",
+					"status"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"IUserResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"status": {
+						"$ref": "#/components/schemas/UserStatus"
+					},
+					"salary": {
+						"type": "number",
+						"format": "double"
+					},
+					"profile": {
+						"type": "string"
+					},
+					"emailVerified": {
+						"type": "boolean"
+					},
+					"verified": {
+						"type": "boolean"
+					},
+					"roles": {
+						"items": {
+							"$ref": "#/components/schemas/IRoleAttributes"
+						},
+						"type": "array"
+					},
+					"userRoles": {
+						"items": {},
+						"type": "array"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"profileImage": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"email",
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse_IUserResponse-Array_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"items": {
+							"$ref": "#/components/schemas/IUserResponse"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse_IUserResponse-or-null_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/IUserResponse"
+							}
+						],
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse_null_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"anyOf": [],
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUserCreateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"role": {
+						"items": {
+							"$ref": "#/components/schemas/IRoleAttributes"
+						},
+						"type": "array"
+					},
+					"status": {
+						"$ref": "#/components/schemas/UserStatus"
+					},
+					"profileImage": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUserUpdateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"role": {
+						"items": {
+							"$ref": "#/components/schemas/IRoleAttributes"
+						},
+						"type": "array"
+					},
+					"status": {
+						"$ref": "#/components/schemas/UserStatus"
+					},
+					"profileImage": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LoginRequest": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse__user-IUserResponse-or-null__": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"properties": {
+							"user": {
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/IUserResponse"
+									}
+								],
+								"nullable": true
+							}
+						},
+						"required": [
+							"user"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SignupRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"roleType": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ForgotPasswordRequest": {
+				"properties": {
+					"email": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResetPasswordRequest": {
+				"properties": {
+					"token": {
+						"type": "string"
+					},
+					"newPassword": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"token",
+					"newPassword"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse__success-boolean__": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"properties": {
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"success"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "tanstack-router-react-example-basic-ssr-streaming-file-based",
+		"contact": {}
+	},
+	"paths": {
+		"/api/users": {
+			"get": {
+				"operationId": "GetUsers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_IUserResponse-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwt": [
+							"manage_users"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_IUserResponse-or-null_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Email already in use",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwt": [
+							"manage_users"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUserCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/users/{userId}": {
+			"get": {
+				"operationId": "GetUserById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_IUserResponse-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwt": [
+							"view_users"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_IUserResponse-or-null_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Email already in use",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwt": [
+							"manage_users"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUserUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteUser",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwt": [
+							"manage_users"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/auth/login": {
+			"post": {
+				"operationId": "Login",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__user-IUserResponse-or-null__"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__user-IUserResponse-or-null__"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__user-IUserResponse-or-null__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/signup": {
+			"post": {
+				"operationId": "Signup",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__user-IUserResponse-or-null__"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__user-IUserResponse-or-null__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SignupRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/forgot-password": {
+			"post": {
+				"operationId": "ForgotPassword",
+				"responses": {
+					"200": {
+						"description": "Password reset email sent",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ForgotPasswordRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/reset-password": {
+			"post": {
+				"operationId": "ResetPassword",
+				"responses": {
+					"200": {
+						"description": "Password has been reset",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid or expired reset code"
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ResetPasswordRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/google": {
+			"get": {
+				"operationId": "GoogleAuth",
+				"responses": {
+					"302": {
+						"description": "",
+						"headers": {
+							"Location": {
+								"schema": {
+									"type": "string"
+								},
+								"required": true
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/auth/google/callback": {
+			"get": {
+				"operationId": "GoogleAuthCallback",
+				"responses": {
+					"302": {
+						"description": "",
+						"headers": {
+							"Set-Cookie": {
+								"schema": {
+									"type": "string"
+								},
+								"required": false
+							},
+							"Location": {
+								"schema": {
+									"type": "string"
+								},
+								"required": true
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "code",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "error",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/auth/me": {
+			"get": {
+				"operationId": "GetCurrentUser",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__user-IUserResponse-or-null__"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__user-IUserResponse-or-null__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/auth/logout": {
+			"post": {
+				"operationId": "Logout",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__success-boolean__"
+								}
+							}
+						},
+						"headers": {
+							"Set-Cookie": {
+								"schema": {
+									"type": "string"
+								},
+								"required": true
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": []
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

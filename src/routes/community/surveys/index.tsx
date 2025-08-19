@@ -1,20 +1,81 @@
 import Breadcrumb from '@/components/ui/breadcrum';
 import { createFileRoute } from '@tanstack/react-router'
 import { FaPoll, FaCheckCircle } from 'react-icons/fa';
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import SurveyAnswerForm from "@/components/survey/SurveyAnswerForm";
 
 const SurveyComponent = () => {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null);
+
+    const handleStartSurvey = (surveyId: string) => {
+        setSelectedSurveyId(surveyId);
+        // Optional: Scroll to the form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleSurveyComplete = () => {
+        // Reset selected survey and navigate to thank you page
+        setSelectedSurveyId(null);
+        navigate({ to: '/community/surveys/thank-you' });
+    };
+
+    const handleBackToList = () => {
+        setSelectedSurveyId(null);
+    };
+
     // Sample data for surveys
     const availableSurveys = [
-        { id: 1, title: 'Customer Satisfaction Survey', description: 'Share your experience with our services', questions: 10, time: '5 min' },
-        { id: 2, title: 'Product Feedback', description: 'Help us improve our products', questions: 8, time: '4 min' },
-        { id: 3, title: 'User Experience Survey', description: 'Tell us about your app usage', questions: 12, time: '6 min' },
+        { 
+            id: 'customer-satisfaction-2023', 
+            title: 'Customer Satisfaction Survey', 
+            description: 'Share your experience with our services', 
+            questions: 10, 
+            time: '5 min' 
+        },
+        { 
+            id: 'maternal-health-2023',
+            title: 'Maternal Health Survey',
+            description: 'Share your experience with maternal healthcare services in your community.',
+            questions: 10,
+            time: '10 min',
+        },
+        {
+            id: 'child-immunization-2023',
+            title: 'Child Immunization Feedback',
+            description: 'Help us improve our child immunization program by sharing your feedback.',
+            questions: 12,
+            time: '8 min',
+        },
     ];
 
+    // Sample data for completed surveys
     const completedSurveys = [
-        { id: 1, title: 'Website Usability', date: '2025-08-01', score: 85 },
-        { id: 2, title: 'Service Quality Feedback', date: '2025-07-25', score: 90 },
+        { id: 'product-feedback-2023', title: 'Product Feedback', date: '2025-08-10', score: 85 },
+        { id: 'service-quality-2023', title: 'Service Quality Feedback', date: '2025-07-25', score: 90 },
     ];
 
+    // If a survey is selected, show the form
+    if (selectedSurveyId) {
+        const survey = availableSurveys.find(s => s.id === selectedSurveyId);
+        return (
+            <div>
+            <Breadcrumb 
+                items={["Community", "Surveys"]}
+                title="Survey"
+                className='absolute top-0 left-0 w-full'
+            />
+            <div className="container mx-auto pt-20 px-4 py-8">
+                <SurveyAnswerForm onComplete={handleSurveyComplete} />
+            </div>
+            </div>
+        );
+    }
+
+    // Otherwise, show the list of available surveys
     return (
         <div className="">
             <Breadcrumb 
@@ -37,8 +98,11 @@ const SurveyComponent = () => {
                             <span>{survey.questions} Questions</span>
                             <span>Est. {survey.time}</span>
                         </div>
-                        <button className="bg-primary cursor-pointer px-4 text-white py-1.5 rounded-md hover:bg-primary-dark transition-colors duration-300">
-                            Start Survey
+                        <button 
+                          onClick={() => handleStartSurvey(survey.id)}
+                          className="bg-primary cursor-pointer px-4 text-white py-1.5 rounded-md hover:bg-primary-dark transition-colors duration-300"
+                        >
+                          Start Survey
                         </button>
                     </div>
                 ))}

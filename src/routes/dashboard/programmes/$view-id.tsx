@@ -160,7 +160,7 @@ const ProgramDetail = () => {
 
   return (
     <div className="pb-10">
-      <Breadcrumb items={["Community", "Programmes", programme.title]} title="Programme Details" className="absolute top-0 left-0 w-full px-6" />
+      <Breadcrumb items={["Community", "Programmes", programme?.title || '']} title="Programme Details" className="absolute top-0 left-0 w-full px-6" />
 
       <div className="pt-14 space-y-6">
         {/* Overview Card */}
@@ -168,13 +168,13 @@ const ProgramDetail = () => {
           <div className="p-6 bg-title/5 w-full overflow-hidden pb-0">
             <div className="flex items-start gap-4">
               <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-gray-800">{programme.title}</h1>
+                <h1 className="text-2xl font-semibold text-gray-800">{programme?.title}</h1>
                 <div className="mt-2 flex items-center gap-6 text-sm text-gray-600">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(programme.status)}`}>{programme.status}</span>
-                  <span className="inline-flex items-center gap-2"><FaTag /> Slug: {programme.slug}</span>
-                  <span className="inline-flex items-center gap-2"><FaUsers /> Target: {programme.targetGroup}</span>
-                  <span className="inline-flex items-center gap-2"><FaFolderOpen /> Docs: {programme.documents}</span>
-                  <span className="inline-flex items-center gap-2"><FaListOl /> Surveys: {programme.surveys}</span>
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(programme?.status || '')}`}>{programme?.status}</span>
+                  <span className="inline-flex items-center gap-2"><FaTag /> Slug: {programme?.slug}</span>
+                  <span className="inline-flex items-center gap-2"><FaUsers /> Target: {programme?.targetGroup}</span>
+                  <span className="inline-flex items-center gap-2"><FaFolderOpen /> Docs: {programme?.documents}</span>
+                  <span className="inline-flex items-center gap-2"><FaListOl /> Surveys: {programme?.surveys}</span>
                 </div>
               </div>
             </div>
@@ -183,9 +183,9 @@ const ProgramDetail = () => {
             <div className="mt-10 border-b border-gray-200">
               <nav className="-mb-px flex gap-6" aria-label="Tabs">
                 <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'details' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('details')}>Details</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'resources' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('resources')}>Resources ({programme.documents})</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'surveys' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('surveys')}>Surveys ({programme.surveys})</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'feedbacks' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('feedbacks')}>Feedbacks ({programme.feedbacks})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'resources' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('resources')}>Resources ({programme?.documents || 0})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'surveys' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('surveys')}>Surveys ({programme?.surveys || 0})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'feedbacks' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('feedbacks')}>Feedbacks ({programme?.feedbacks || 0})</button>
               </nav>
             </div>
           </div>
