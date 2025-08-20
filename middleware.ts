@@ -23,6 +23,8 @@ const publicPaths = [
     '/',
     '/auth/login',
     '/auth/signup',
+    '/auth/google',
+    '/auth/google/callback',
     '/auth/forgot-password',
     '/auth/reset-password',
     /^\/feedback\/.*$/ // Matches /feedback/any-characters-here
@@ -40,50 +42,43 @@ const isPublicPath = (path: string): boolean => {
     });
 };
 
-const verifyTokenAndAvailability = async (req: Request, res: Response, next: NextFunction, token: string) => {
-    try {
-        const decoded = await verifyToken(token);
-        if (!decoded || !decoded.userId) {
-            return res.redirect('/auth/login');
-        }
-        const user = await db.User.findByPk(decoded.userId);
-        if (!user) {
-            return res.redirect('/auth/login');
-        }
-        
-        
-    } catch (error) {
-        return res.redirect('/auth/login');
-    }
-};
+
 
 // Middleware to check authentication status
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const { path } = req;
 
-    // Skip auth check for public paths
     if (isPublicPath(path)) {
         return next();
     }
 
-    // Check if user is authenticated
-    // This is a simplified example - replace with your actual auth check
     const token = req.cookies?.token;
 
     if (!token) {
-        // If not authenticated and trying to access protected route, redirect to login
-        if (path.startsWith('/dashboard')) {
-            return res.redirect('/auth/login');
-        }
         return res.redirect('/auth/login');
     }
 
-    verifyTokenAndAvailability(req, res, next, token);
+    try {
+        const decoded = await verifyToken(token) as { userId: string };
+        const user = await db.User.findByPk(decoded.userId);
 
-    // If user is authenticated but tries to access auth pages, redirect to dashboard
-    if (path.startsWith('/auth')) {
-        return res.redirect('/dashboard');
+        if (!user) {
+            return res.redirect('/auth/login?error=user-not-found');
+        }
+
+        req.user = {
+            id: user.id,
+            email: user.email,
+            roles: user.roles?.map((r: any) => r.name) ?? []
+        };
+
+        if (path.startsWith('/auth')) {
+            return res.redirect('/dashboard');
+        }
+
+        next();
+    } catch (error) {
+        console.error('Authentication error:', error);
+        return res.redirect('/auth/login?error=invalid-token');
     }
-
-    next();
 };

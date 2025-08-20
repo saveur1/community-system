@@ -17,7 +17,7 @@ const app = express();
 initializeDatabase();
 
 // CORS configuration
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = ["http://localhost:3000", "https://community-tool.onrender.com"];
 
 app.use(cors({
   origin: function (origin, callback) {

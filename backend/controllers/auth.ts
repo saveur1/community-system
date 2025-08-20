@@ -324,12 +324,14 @@ export class AuthController extends Controller {
     console.log('User authenticated successfully:', user.id);
     const token = await this.generateToken(user);
 
+    const isProduction = process.env.NODE_ENV === 'production';
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       path: '/',
+      domain: isProduction ? config.cookieDomain : 'localhost',
     };
 
     const cookieString = `token=${token}; ${Object.entries(cookieOptions)
