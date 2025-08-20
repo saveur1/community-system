@@ -1,4 +1,6 @@
 import { Config } from "@/types/config-types";
+import dotenv from "dotenv";
+dotenv.config();
 
 const config: Config = {
   jwt: {
@@ -14,7 +16,7 @@ const config: Config = {
     host: process.env.DB_HOST || "localhost",
     port: Number(process.env.DB_PORT || "3306"),
     user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "saveur@123",
+    password: process.env.DB_PASSWORD || "",
     databaseName: process.env.DB_NAME || "community_tool",
     dialect: "mysql",
     logging: false,
@@ -23,7 +25,8 @@ const config: Config = {
   bcryptSaltRounds: 10, // Number of salt rounds for bcrypt hashing
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '3000', 10),
-  appUrl: process.env.APP_URL || 'http://localhost:3000',
+  appUrl: process.env.VITE_APP_URL || 'http://localhost:3000',
+  isDev: process.env.NODE_ENV === 'development',
 };
 
 export default config;

@@ -218,7 +218,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               value={form.phone}
               onChange={handleChange}
               className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
-              placeholder="+1 (555) 123-4567"
+              placeholder="(+250) 783 250 033"
             />
           </div>
         </div>

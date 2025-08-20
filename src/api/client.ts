@@ -3,7 +3,7 @@ import axios, { AxiosError } from 'axios';
 
 // Create axios instance with default config
 export const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
   withCredentials: true, // This is important for sending cookies
   headers: {
     'Content-Type': 'application/json',
@@ -14,11 +14,6 @@ export const client = axios.create({
 // Request interceptor to add auth token if it exists
 client.interceptors.request.use(
   (config) => {
-    // You can add auth token here if needed
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
     return config;
   },
   (error) => {

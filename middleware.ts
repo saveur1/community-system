@@ -1,3 +1,5 @@
+import db from '@/models';
+import { verifyToken } from '@/utils/jwt';
 import { Request, Response, NextFunction } from 'express';
 
 // Define user type
@@ -38,6 +40,23 @@ const isPublicPath = (path: string): boolean => {
     });
 };
 
+const verifyTokenAndAvailability = async (req: Request, res: Response, next: NextFunction, token: string) => {
+    try {
+        const decoded = await verifyToken(token);
+        if (!decoded || !decoded.userId) {
+            return res.redirect('/auth/login');
+        }
+        const user = await db.User.findByPk(decoded.userId);
+        if (!user) {
+            return res.redirect('/auth/login');
+        }
+        
+        
+    } catch (error) {
+        return res.redirect('/auth/login');
+    }
+};
+
 // Middleware to check authentication status
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const { path } = req;
@@ -58,6 +77,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         }
         return res.redirect('/auth/login');
     }
+
+    verifyTokenAndAvailability(req, res, next, token);
 
     // If user is authenticated but tries to access auth pages, redirect to dashboard
     if (path.startsWith('/auth')) {

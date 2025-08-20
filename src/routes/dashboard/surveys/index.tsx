@@ -3,9 +3,9 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { FaEye, FaShare, FaEdit, FaTrash, FaPause, FaPlay, FaStop, FaChartBar, FaDownload, FaList, FaTh, FaEllipsisV } from 'react-icons/fa';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
-import DeleteSurveyModal from '@/components/pages/surveys/delete-survey-modal';
-import { SurveyToolbar } from '@/components/pages/surveys/survey-toolbar';
-import { SurveyPagination } from '@/components/pages/surveys/survey-pagination';
+import DeleteSurveyModal from '@/components/features/surveys/delete-survey-modal';
+import { SurveyToolbar } from '@/components/features/surveys/survey-toolbar';
+import { SurveyPagination } from '@/components/features/surveys/survey-pagination';
 import useAuth from '@/hooks/useAuth';
 import { User } from '@/api/auth';
 

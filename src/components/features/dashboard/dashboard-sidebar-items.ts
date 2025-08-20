@@ -7,6 +7,10 @@ import {
 } from 'react-icons/hi';
 import { HiChatBubbleBottomCenter } from "react-icons/hi2";
 import { User } from '@/api/auth';
+import { checkPermissions } from '@/utility/logicFunctions';
+import { IoIosNotifications, IoIosVideocam } from 'react-icons/io';
+import { PiSpeakerSimpleHighBold } from 'react-icons/pi';
+import { MdHealthAndSafety } from 'react-icons/md';
 
 const navItems = (user: User | null, path: string): NavItemType[] => {
     const navigationItems: NavItemType[] = [
@@ -14,7 +18,7 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
       { name: "Feedback", icon: HiChatBubbleBottomCenter, active: false, link: `/${path}/feedback` },
     ]
   
-    if(user?.roles[0].permissions?.some(p => p.name === 'survey:create' || p.name === 'survey:update' || p.name === 'survey:delete')) {
+    if(checkPermissions(user, 'survey:create')) {
       navigationItems.push({ 
         name: "Surveys", 
         icon: HiClipboardList, 
@@ -27,18 +31,18 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
       })
     }
     else {
-      navigationItems.push({ name: "Surveys", icon: HiClipboardList, active: false, link: `/${path}/surveys/take` })
+      navigationItems.push({ name: "Surveys", icon: HiClipboardList, active: false, link: `/${path}/surveys/take-survey` })
     }
   
-    if(user?.roles[0].permissions?.some(p => p.name === 'programme:read')) {
+    if(checkPermissions(user, 'programme:read')) {
       navigationItems.push({ name: "Programmes", icon: FaList, active: false, link: `/${path}/programmes` })
     }
   
-    if(user?.roles[0].permissions?.some(p => p.name === 'document:read')) {
+    if(checkPermissions(user, 'document:read')) {
       navigationItems.push({ name: "Documents", icon: HiDocumentText, active: false, link: `/${path}/documents` })
     }
   
-    if(user?.roles[0].permissions?.some(p => p.name === 'user:read')) {
+    if(checkPermissions(user, 'user:read')) {
       navigationItems.push({
         name: "Accounts",
         icon: FaUserFriends,
@@ -53,16 +57,32 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
       })
     }
 
-    if(user?.roles[0].permissions?.some(p => p.name === 'role:read')) {
+    if(checkPermissions(user, 'role:read')) {
       navigationItems.push({ name: "Roles", icon: FaUserFriends, active: false, link: `/${path}/roles` })
     }
 
-    if(user?.roles[0].permissions?.some(p => p.name === 'permission:read')) {
+    if(checkPermissions(user, 'permission:read')) {
       navigationItems.push({ name: "Permissions", icon: FaUserFriends, active: false, link: `/${path}/permissions` })
     }
 
-    if(user?.roles[0].permissions?.some(p => p.name === 'reporting:read')) {
+    if( checkPermissions(user, 'reporting:read')) {
       navigationItems.push({ name: "Reporting", icon: FaUserFriends, active: false, link: `/${path}/reporting` })
+    }
+
+    if(checkPermissions(user, "community_session:read")) {
+      navigationItems.push({ name: "Community Sessions", icon: IoIosVideocam, active: false, link: `/${path}/community-sessions` })
+    }
+
+    if(checkPermissions(user, "notification:read")) {
+      navigationItems.push({ name: "Notifications", icon: IoIosNotifications, active: false, link: `/${path}/notifications` })
+    }
+
+    if(checkPermissions(user, "announcement:create")) {
+      navigationItems.push({ name: "Announcements", icon: PiSpeakerSimpleHighBold, active: false, link: `/${path}/announcements` })
+    }
+
+    if(checkPermissions(user, "immunization:read")) {
+      navigationItems.push({ name: "Immunization", icon: MdHealthAndSafety, active: false, link: `/${path}/immunization` })
     }
     return navigationItems;
   };

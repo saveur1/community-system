@@ -1,0 +1,108 @@
+{
+    "success": true,
+    "message": "User retrieved successfully",
+    "result": {
+        "user": {
+            "id": "374696ab-33b4-4feb-85b0-2ff2b05a86c1",
+            "name": "Bikorimana Saveur",
+            "email": "bikorimanaxavier@gmail.com",
+            "address": null,
+            "phone": "0780481590",
+            "emailVerified": false,
+            "verified": true,
+            "status": "active",
+            "googleId": null,
+            "salary": null,
+            "profile": null,
+            "createdAt": "2025-08-19T09:46:20.000Z",
+            "updatedAt": "2025-08-19T09:46:20.000Z",
+            "roles": [
+                {
+                    "id": "e092b5a6-e61d-4c9c-835d-8f7146ca6fe5",
+                    "name": "local_citizen",
+                    "description": "Local Citizen - Community role",
+                    "permissions": [
+                        {
+                            "id": "07e33e8c-50aa-45ff-8b6b-67c0c9267d5a",
+                            "name": "service:rating",
+                            "description": "View services rating"
+                        },
+                        {
+                            "id": "1b0184ee-162b-45b2-8eb8-8d83df44a480",
+                            "name": "notification:delete",
+                            "description": "Delete notifications"
+                        },
+                        {
+                            "id": "275d6386-897b-4d2f-b5fa-c3a0ec1ff43e",
+                            "name": "survey:respond",
+                            "description": "Respond to surveys"
+                        },
+                        {
+                            "id": "3d13890e-4913-4df2-bda0-892912459aff",
+                            "name": "community_session:download",
+                            "description": "Download community sessions"
+                        },
+                        {
+                            "id": "3d319ae0-439f-485a-a13b-61ec4a4aeace",
+                            "name": "survey:read",
+                            "description": "View surveys"
+                        },
+                        {
+                            "id": "5768ed6b-a4f3-4827-a6f3-e4b6eb71d46d",
+                            "name": "community_session:read",
+                            "description": "View community sessions"
+                        },
+                        {
+                            "id": "62a41e01-5134-423a-b40d-fd1ed1211984",
+                            "name": "notification:read",
+                            "description": "View notifications"
+                        },
+                        {
+                            "id": "6e34bf35-52ac-4b22-95bf-066912ed4432",
+                            "name": "document:read",
+                            "description": "View documents"
+                        },
+                        {
+                            "id": "78642824-3463-4889-8960-7de7c8ab2bf1",
+                            "name": "dashboard:community",
+                            "description": "View community dashboard"
+                        },
+                        {
+                            "id": "809170cb-9d72-49dd-8b27-e5fdcd269a30",
+                            "name": "feedback:update",
+                            "description": "Update feedback"
+                        },
+                        {
+                            "id": "9727ce13-7a68-47c3-9726-85c205e15a1d",
+                            "name": "announcement:read",
+                            "description": "View announcements"
+                        },
+                        {
+                            "id": "9a5824d0-a2a5-4dc1-8b9a-d0f7d8efa5d2",
+                            "name": "feedback:delete",
+                            "description": "Delete feedback"
+                        },
+                        {
+                            "id": "9a9c9776-fd77-4d28-910d-8f98cbbca8ac",
+                            "name": "feedback:create",
+                            "description": "Create feedback"
+                        },
+                        {
+                            "id": "c9d9a7b6-5464-434b-ba8b-f79e67bf3255",
+                            "name": "feedback:read",
+                            "description": "View feedback"
+                        }
+                    ],
+                    "UserRole": {
+                        "id": 1,
+                        "userId": "374696ab-33b4-4feb-85b0-2ff2b05a86c1",
+                        "roleId": "e092b5a6-e61d-4c9c-835d-8f7146ca6fe5",
+                        "createdAt": "2025-08-19T09:46:20.000Z",
+                        "updatedAt": "2025-08-19T09:46:20.000Z"
+                    }
+                }
+            ]
+        }
+    },
+    "statusCode": 200
+}

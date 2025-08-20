@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { FaEye, FaShare, FaEdit, FaTrash, FaPause, FaPlay, FaStop, FaChartBar, FaDownload, FaEnvelope, FaClock, FaListOl, FaCheckCircle, FaTimesCircle, FaTag } from 'react-icons/fa';
-import DeleteFeedbackModal from '@/components/pages/feedbacks/delete-feedback-modal';
+import DeleteFeedbackModal from '@/components/features/feedbacks/delete-feedback-modal';
 import { FeedbackItem, FeedbackAction } from '@/utility/types';
-import { FeedbackTable } from '@/components/pages/feedbacks/feedbacks-table';
-import { FeedbackGrid } from '@/components/pages/feedbacks/feedbacks-grid-view';
-import { FeedbackToolbar } from '@/components/pages/feedbacks/feedback-toolbar';
-import { FeedbackPagination } from '@/components/pages/feedbacks/feedback-pagination';
+import { FeedbackTable } from '@/components/features/feedbacks/feedbacks-table';
+import { FeedbackGrid } from '@/components/features/feedbacks/feedbacks-grid-view';
+import { FeedbackToolbar } from '@/components/features/feedbacks/feedback-toolbar';
+import { FeedbackPagination } from '@/components/features/feedbacks/feedback-pagination';
 import Drawer from '@/components/ui/drawer';
 
 const FeedbacksPage = () => {

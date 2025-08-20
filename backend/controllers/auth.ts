@@ -79,12 +79,12 @@ export class AuthController extends Controller {
       return;
     }
 
-    // Check if user needs verification (all roles except local_influencer)
+    // Check if user needs verification (all roles except local_citizen)
     const userRoles = await data?.getRoles();
-    const isLocalInfluencer = userRoles?.some(role => role.name === 'local_influencer');
+    const isLocalCitizen = userRoles?.some(role => role.name === 'local_citizen');
 
-    if (!user.verified && !isLocalInfluencer) {
-      res(403, ServiceResponse.failure('Your account needs to be verified by an administrator before you can log in.', { user: null }));
+    if (!user.verified && !isLocalCitizen) {
+      res(403, ServiceResponse.failure('Account Needs Verification.', { user: null }));
       return;
     }
 
@@ -261,15 +261,20 @@ export class AuthController extends Controller {
       // First try to find by googleId
       let user = await db.User.findOne({
         where: { googleId: googleUser.id },
-        include: [db.Role],
+        include: [{
+          model: db.Role,
+          as: 'roles' // Specify the alias for the Role association
+        }],
         transaction: t
       });
-
-      // If not found by googleId, try by email
+      
       if (!user) {
         user = await db.User.findOne({
           where: { email: googleUser.email },
-          include: [db.Role],
+          include: [{
+            model: db.Role,
+            as: 'roles' // Specify the alias for the Role association
+          }],
           transaction: t
         });
       }
@@ -288,7 +293,7 @@ export class AuthController extends Controller {
 
         // Assign default 'user' role
         const userRole = await db.Role.findOne({
-          where: { name: 'user' },
+          where: { name: 'local_citizen' },
           transaction: t
         });
 
@@ -308,7 +313,10 @@ export class AuthController extends Controller {
 
       // Make sure to reload with roles
       return user.reload({
-        include: [db.Role],
+        include: [{
+          model: db.Role,
+          as: 'roles' // Specify the alias for the Role association
+        }],
         transaction: t
       });
     });

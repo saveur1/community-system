@@ -10,14 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ErrorRouteImport } from './routes/error'
+import { Route as ApprovalRequiredRouteImport } from './routes/approval-required'
 import { Route as PostsRouteRouteImport } from './routes/posts/route'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
-import { Route as CommunityRouteRouteImport } from './routes/community/route'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as CommunityIndexRouteImport } from './routes/community/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as FeedbackProgrammeRouteImport } from './routes/feedback.$programme'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
@@ -30,10 +29,8 @@ import { Route as DashboardProgrammesIndexRouteImport } from './routes/dashboard
 import { Route as DashboardNotificationsIndexRouteImport } from './routes/dashboard/notifications/index'
 import { Route as DashboardFeedbackIndexRouteImport } from './routes/dashboard/feedback/index'
 import { Route as DashboardDocumentsIndexRouteImport } from './routes/dashboard/documents/index'
+import { Route as DashboardCommunitySessionsIndexRouteImport } from './routes/dashboard/community-sessions/index'
 import { Route as DashboardAccountsIndexRouteImport } from './routes/dashboard/accounts/index'
-import { Route as CommunitySurveysIndexRouteImport } from './routes/community/surveys/index'
-import { Route as CommunityFeedbackIndexRouteImport } from './routes/community/feedback/index'
-import { Route as CommunityDocumentsIndexRouteImport } from './routes/community/documents/index'
 import { Route as DashboardSurveysThankYouRouteImport } from './routes/dashboard/surveys/thank-you'
 import { Route as DashboardSurveysTakeSurveyRouteImport } from './routes/dashboard/surveys/take-survey'
 import { Route as DashboardSurveysAddNewRouteImport } from './routes/dashboard/surveys/add-new'
@@ -44,13 +41,16 @@ import { Route as DashboardFeedbackAddNewRouteImport } from './routes/dashboard/
 import { Route as DashboardAccountsStakeholdersRouteImport } from './routes/dashboard/accounts/stakeholders'
 import { Route as DashboardAccountsReligiousRouteImport } from './routes/dashboard/accounts/religious'
 import { Route as DashboardAccountsCommunityRouteImport } from './routes/dashboard/accounts/community'
-import { Route as CommunitySurveysThankYouRouteImport } from './routes/community/surveys/thank-you'
-import { Route as CommunityFeedbackAddNewRouteImport } from './routes/community/feedback/add-new'
 import { Route as DashboardSurveysEditEditIdRouteImport } from './routes/dashboard/surveys/edit.$edit-id'
 
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
   path: '/error',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApprovalRequiredRoute = ApprovalRequiredRouteImport.update({
+  id: '/approval-required',
+  path: '/approval-required',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostsRouteRoute = PostsRouteRouteImport.update({
@@ -61,11 +61,6 @@ const PostsRouteRoute = PostsRouteRouteImport.update({
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRouteRoute = CommunityRouteRouteImport.update({
-  id: '/community',
-  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
@@ -87,11 +82,6 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
-} as any)
-const CommunityIndexRoute = CommunityIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => CommunityRouteRoute,
 } as any)
 const PostsPostIdRoute = PostsPostIdRouteImport.update({
   id: '/$postId',
@@ -155,25 +145,16 @@ const DashboardDocumentsIndexRoute = DashboardDocumentsIndexRouteImport.update({
   path: '/documents/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardCommunitySessionsIndexRoute =
+  DashboardCommunitySessionsIndexRouteImport.update({
+    id: '/community-sessions/',
+    path: '/community-sessions/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardAccountsIndexRoute = DashboardAccountsIndexRouteImport.update({
   id: '/accounts/',
   path: '/accounts/',
   getParentRoute: () => DashboardRouteRoute,
-} as any)
-const CommunitySurveysIndexRoute = CommunitySurveysIndexRouteImport.update({
-  id: '/surveys/',
-  path: '/surveys/',
-  getParentRoute: () => CommunityRouteRoute,
-} as any)
-const CommunityFeedbackIndexRoute = CommunityFeedbackIndexRouteImport.update({
-  id: '/feedback/',
-  path: '/feedback/',
-  getParentRoute: () => CommunityRouteRoute,
-} as any)
-const CommunityDocumentsIndexRoute = CommunityDocumentsIndexRouteImport.update({
-  id: '/documents/',
-  path: '/documents/',
-  getParentRoute: () => CommunityRouteRoute,
 } as any)
 const DashboardSurveysThankYouRoute =
   DashboardSurveysThankYouRouteImport.update({
@@ -232,17 +213,6 @@ const DashboardAccountsCommunityRoute =
     path: '/accounts/community',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
-const CommunitySurveysThankYouRoute =
-  CommunitySurveysThankYouRouteImport.update({
-    id: '/surveys/thank-you',
-    path: '/surveys/thank-you',
-    getParentRoute: () => CommunityRouteRoute,
-  } as any)
-const CommunityFeedbackAddNewRoute = CommunityFeedbackAddNewRouteImport.update({
-  id: '/feedback/add-new',
-  path: '/feedback/add-new',
-  getParentRoute: () => CommunityRouteRoute,
-} as any)
 const DashboardSurveysEditEditIdRoute =
   DashboardSurveysEditEditIdRouteImport.update({
     id: '/surveys/edit/$edit-id',
@@ -253,9 +223,9 @@ const DashboardSurveysEditEditIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/community': typeof CommunityRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/posts': typeof PostsRouteRouteWithChildren
+  '/approval-required': typeof ApprovalRequiredRoute
   '/error': typeof ErrorRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -263,11 +233,8 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/feedback/$programme': typeof FeedbackProgrammeRoute
   '/posts/$postId': typeof PostsPostIdRoute
-  '/community/': typeof CommunityIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
-  '/community/feedback/add-new': typeof CommunityFeedbackAddNewRoute
-  '/community/surveys/thank-you': typeof CommunitySurveysThankYouRoute
   '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
   '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
@@ -278,10 +245,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
-  '/community/documents': typeof CommunityDocumentsIndexRoute
-  '/community/feedback': typeof CommunityFeedbackIndexRoute
-  '/community/surveys': typeof CommunitySurveysIndexRoute
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
+  '/dashboard/community-sessions': typeof DashboardCommunitySessionsIndexRoute
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
@@ -293,6 +258,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
+  '/approval-required': typeof ApprovalRequiredRoute
   '/error': typeof ErrorRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -300,11 +266,8 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/feedback/$programme': typeof FeedbackProgrammeRoute
   '/posts/$postId': typeof PostsPostIdRoute
-  '/community': typeof CommunityIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/posts': typeof PostsIndexRoute
-  '/community/feedback/add-new': typeof CommunityFeedbackAddNewRoute
-  '/community/surveys/thank-you': typeof CommunitySurveysThankYouRoute
   '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
   '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
@@ -315,10 +278,8 @@ export interface FileRoutesByTo {
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
-  '/community/documents': typeof CommunityDocumentsIndexRoute
-  '/community/feedback': typeof CommunityFeedbackIndexRoute
-  '/community/surveys': typeof CommunitySurveysIndexRoute
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
+  '/dashboard/community-sessions': typeof DashboardCommunitySessionsIndexRoute
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
@@ -331,9 +292,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/community': typeof CommunityRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/posts': typeof PostsRouteRouteWithChildren
+  '/approval-required': typeof ApprovalRequiredRoute
   '/error': typeof ErrorRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -341,11 +302,8 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/feedback/$programme': typeof FeedbackProgrammeRoute
   '/posts/$postId': typeof PostsPostIdRoute
-  '/community/': typeof CommunityIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
-  '/community/feedback/add-new': typeof CommunityFeedbackAddNewRoute
-  '/community/surveys/thank-you': typeof CommunitySurveysThankYouRoute
   '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
   '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
@@ -356,10 +314,8 @@ export interface FileRoutesById {
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
-  '/community/documents/': typeof CommunityDocumentsIndexRoute
-  '/community/feedback/': typeof CommunityFeedbackIndexRoute
-  '/community/surveys/': typeof CommunitySurveysIndexRoute
   '/dashboard/accounts/': typeof DashboardAccountsIndexRoute
+  '/dashboard/community-sessions/': typeof DashboardCommunitySessionsIndexRoute
   '/dashboard/documents/': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback/': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications/': typeof DashboardNotificationsIndexRoute
@@ -373,9 +329,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/community'
     | '/dashboard'
     | '/posts'
+    | '/approval-required'
     | '/error'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -383,11 +339,8 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/feedback/$programme'
     | '/posts/$postId'
-    | '/community/'
     | '/dashboard/'
     | '/posts/'
-    | '/community/feedback/add-new'
-    | '/community/surveys/thank-you'
     | '/dashboard/accounts/community'
     | '/dashboard/accounts/religious'
     | '/dashboard/accounts/stakeholders'
@@ -398,10 +351,8 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/add-new'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
-    | '/community/documents'
-    | '/community/feedback'
-    | '/community/surveys'
     | '/dashboard/accounts'
+    | '/dashboard/community-sessions'
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
@@ -413,6 +364,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/approval-required'
     | '/error'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -420,11 +372,8 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/feedback/$programme'
     | '/posts/$postId'
-    | '/community'
     | '/dashboard'
     | '/posts'
-    | '/community/feedback/add-new'
-    | '/community/surveys/thank-you'
     | '/dashboard/accounts/community'
     | '/dashboard/accounts/religious'
     | '/dashboard/accounts/stakeholders'
@@ -435,10 +384,8 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/add-new'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
-    | '/community/documents'
-    | '/community/feedback'
-    | '/community/surveys'
     | '/dashboard/accounts'
+    | '/dashboard/community-sessions'
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
@@ -450,9 +397,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
-    | '/community'
     | '/dashboard'
     | '/posts'
+    | '/approval-required'
     | '/error'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -460,11 +407,8 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/feedback/$programme'
     | '/posts/$postId'
-    | '/community/'
     | '/dashboard/'
     | '/posts/'
-    | '/community/feedback/add-new'
-    | '/community/surveys/thank-you'
     | '/dashboard/accounts/community'
     | '/dashboard/accounts/religious'
     | '/dashboard/accounts/stakeholders'
@@ -475,10 +419,8 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/add-new'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
-    | '/community/documents/'
-    | '/community/feedback/'
-    | '/community/surveys/'
     | '/dashboard/accounts/'
+    | '/dashboard/community-sessions/'
     | '/dashboard/documents/'
     | '/dashboard/feedback/'
     | '/dashboard/notifications/'
@@ -491,9 +433,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
-  CommunityRouteRoute: typeof CommunityRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   PostsRouteRoute: typeof PostsRouteRouteWithChildren
+  ApprovalRequiredRoute: typeof ApprovalRequiredRoute
   ErrorRoute: typeof ErrorRoute
   FeedbackProgrammeRoute: typeof FeedbackProgrammeRoute
 }
@@ -505,6 +447,13 @@ declare module '@tanstack/react-router' {
       path: '/error'
       fullPath: '/error'
       preLoaderRoute: typeof ErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/approval-required': {
+      id: '/approval-required'
+      path: '/approval-required'
+      fullPath: '/approval-required'
+      preLoaderRoute: typeof ApprovalRequiredRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts': {
@@ -519,13 +468,6 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -555,13 +497,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
-    }
-    '/community/': {
-      id: '/community/'
-      path: '/'
-      fullPath: '/community/'
-      preLoaderRoute: typeof CommunityIndexRouteImport
-      parentRoute: typeof CommunityRouteRoute
     }
     '/posts/$postId': {
       id: '/posts/$postId'
@@ -647,33 +582,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDocumentsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/community-sessions/': {
+      id: '/dashboard/community-sessions/'
+      path: '/community-sessions'
+      fullPath: '/dashboard/community-sessions'
+      preLoaderRoute: typeof DashboardCommunitySessionsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/accounts/': {
       id: '/dashboard/accounts/'
       path: '/accounts'
       fullPath: '/dashboard/accounts'
       preLoaderRoute: typeof DashboardAccountsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
-    }
-    '/community/surveys/': {
-      id: '/community/surveys/'
-      path: '/surveys'
-      fullPath: '/community/surveys'
-      preLoaderRoute: typeof CommunitySurveysIndexRouteImport
-      parentRoute: typeof CommunityRouteRoute
-    }
-    '/community/feedback/': {
-      id: '/community/feedback/'
-      path: '/feedback'
-      fullPath: '/community/feedback'
-      preLoaderRoute: typeof CommunityFeedbackIndexRouteImport
-      parentRoute: typeof CommunityRouteRoute
-    }
-    '/community/documents/': {
-      id: '/community/documents/'
-      path: '/documents'
-      fullPath: '/community/documents'
-      preLoaderRoute: typeof CommunityDocumentsIndexRouteImport
-      parentRoute: typeof CommunityRouteRoute
     }
     '/dashboard/surveys/thank-you': {
       id: '/dashboard/surveys/thank-you'
@@ -745,20 +666,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountsCommunityRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/community/surveys/thank-you': {
-      id: '/community/surveys/thank-you'
-      path: '/surveys/thank-you'
-      fullPath: '/community/surveys/thank-you'
-      preLoaderRoute: typeof CommunitySurveysThankYouRouteImport
-      parentRoute: typeof CommunityRouteRoute
-    }
-    '/community/feedback/add-new': {
-      id: '/community/feedback/add-new'
-      path: '/feedback/add-new'
-      fullPath: '/community/feedback/add-new'
-      preLoaderRoute: typeof CommunityFeedbackAddNewRouteImport
-      parentRoute: typeof CommunityRouteRoute
-    }
     '/dashboard/surveys/edit/$edit-id': {
       id: '/dashboard/surveys/edit/$edit-id'
       path: '/surveys/edit/$edit-id'
@@ -787,28 +694,6 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
-interface CommunityRouteRouteChildren {
-  CommunityIndexRoute: typeof CommunityIndexRoute
-  CommunityFeedbackAddNewRoute: typeof CommunityFeedbackAddNewRoute
-  CommunitySurveysThankYouRoute: typeof CommunitySurveysThankYouRoute
-  CommunityDocumentsIndexRoute: typeof CommunityDocumentsIndexRoute
-  CommunityFeedbackIndexRoute: typeof CommunityFeedbackIndexRoute
-  CommunitySurveysIndexRoute: typeof CommunitySurveysIndexRoute
-}
-
-const CommunityRouteRouteChildren: CommunityRouteRouteChildren = {
-  CommunityIndexRoute: CommunityIndexRoute,
-  CommunityFeedbackAddNewRoute: CommunityFeedbackAddNewRoute,
-  CommunitySurveysThankYouRoute: CommunitySurveysThankYouRoute,
-  CommunityDocumentsIndexRoute: CommunityDocumentsIndexRoute,
-  CommunityFeedbackIndexRoute: CommunityFeedbackIndexRoute,
-  CommunitySurveysIndexRoute: CommunitySurveysIndexRoute,
-}
-
-const CommunityRouteRouteWithChildren = CommunityRouteRoute._addFileChildren(
-  CommunityRouteRouteChildren,
-)
-
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardAccountsCommunityRoute: typeof DashboardAccountsCommunityRoute
@@ -822,6 +707,7 @@ interface DashboardRouteRouteChildren {
   DashboardSurveysTakeSurveyRoute: typeof DashboardSurveysTakeSurveyRoute
   DashboardSurveysThankYouRoute: typeof DashboardSurveysThankYouRoute
   DashboardAccountsIndexRoute: typeof DashboardAccountsIndexRoute
+  DashboardCommunitySessionsIndexRoute: typeof DashboardCommunitySessionsIndexRoute
   DashboardDocumentsIndexRoute: typeof DashboardDocumentsIndexRoute
   DashboardFeedbackIndexRoute: typeof DashboardFeedbackIndexRoute
   DashboardNotificationsIndexRoute: typeof DashboardNotificationsIndexRoute
@@ -844,6 +730,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardSurveysTakeSurveyRoute: DashboardSurveysTakeSurveyRoute,
   DashboardSurveysThankYouRoute: DashboardSurveysThankYouRoute,
   DashboardAccountsIndexRoute: DashboardAccountsIndexRoute,
+  DashboardCommunitySessionsIndexRoute: DashboardCommunitySessionsIndexRoute,
   DashboardDocumentsIndexRoute: DashboardDocumentsIndexRoute,
   DashboardFeedbackIndexRoute: DashboardFeedbackIndexRoute,
   DashboardNotificationsIndexRoute: DashboardNotificationsIndexRoute,
@@ -874,9 +761,9 @@ const PostsRouteRouteWithChildren = PostsRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
-  CommunityRouteRoute: CommunityRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   PostsRouteRoute: PostsRouteRouteWithChildren,
+  ApprovalRequiredRoute: ApprovalRequiredRoute,
   ErrorRoute: ErrorRoute,
   FeedbackProgrammeRoute: FeedbackProgrammeRoute,
 }

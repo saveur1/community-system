@@ -2,8 +2,8 @@ import AuthLoader from '@/components/common/auth-loader';
 import MainContent from '@/components/layouts/dashboard-main-content';
 import Sidebar from '@/components/layouts/dashboard-sidebar';
 import ImigongoStarter from '@/components/layouts/imigongo-starter';
-import Header from '@/components/pages/dashboard/dashboard-header';
-import navItems from '@/components/pages/dashboard/dashboard-sidebar-items';
+import Header from '@/components/features/dashboard/dashboard-header';
+import navItems from '@/components/features/dashboard/dashboard-sidebar-items';
 import useAuth from '@/hooks/useAuth';
 import { createFileRoute, useLocation } from '@tanstack/react-router'
 import { useState } from 'react';

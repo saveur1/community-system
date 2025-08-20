@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import LeftSignupCard from "./signup/signup-left-card";
 import SignupForm from "./signup/signup-form";

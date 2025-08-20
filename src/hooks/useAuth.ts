@@ -15,21 +15,29 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: () => {
-      toast.success('Login successful');
       navigate({to: "/dashboard"});
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || 'Login failed';
-      toast.error(errorMessage);
+      if(errorMessage?.toLocaleLowerCase() === 'account needs verification.'){
+        navigate({to: "/approval-required"});
+      }
+      else {
+        toast.error(errorMessage);
+      }
     },
   });
 
   // Signup mutation
   const signupMutation = useMutation({
     mutationFn: authApi.signup,
-    onSuccess: () => {
-      toast.success('Account created successfully');
-      navigate({to: "/dashboard"});
+    onSuccess: (data: AuthResponse) => {
+      if(data?.result?.user?.roles[0]?.name === "local_citizen"){
+        navigate({to: "/dashboard"});
+      }
+      else {
+        navigate({to: "/approval-required"});
+      }
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || 'Signup failed';

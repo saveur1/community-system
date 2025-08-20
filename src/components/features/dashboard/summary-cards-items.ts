@@ -6,11 +6,13 @@ import {
 import { FaRegComments } from "react-icons/fa";
 import { RiMedicineBottleFill } from 'react-icons/ri';
 import { MdBrokenImage } from 'react-icons/md';
+import { TiMessages  } from 'react-icons/ti';
+import { checkPermissions } from '@/utility/logicFunctions';
 
 const summaryCards = (user: User | null) => {
 
     // Analytics cards
-    if (user?.roles[0]?.permissions?.some((perm: any) => perm.name === "dashboard:analytics")) {
+    if (checkPermissions(user, 'dashboard:analytics')) {
       return [
         {
           id: "feedbacks",
@@ -35,6 +37,40 @@ const summaryCards = (user: User | null) => {
           title: "Active Surveys",
           value: 7,
           delta: 10.73,
+          icon: HiOutlineCollection,
+          iconBgColor: "bg-success",
+          period: "This week",
+        },
+      ];
+    }
+
+    // Community Dashboard summary cards
+    if(checkPermissions(user, "dashboard:community")){
+      return [
+        {
+          id: "vaccinations",
+          title: "Next Vaccinations",
+          value: "27/9/2025",
+          delta: NaN,
+          icon: RiMedicineBottleFill,
+          iconBgColor: "bg-primary",
+          period: "",
+        },
+        {
+          id: "feedback",
+          title: "Your Feedbacks",
+          value: 128,
+          delta: -8.73,
+          icon: TiMessages,
+          iconBgColor: "bg-title",
+          period: "This year",
+        },
+        {
+          id: "active",
+          title: "New Surveys",
+          value: 7,
+          delta: 10.73,
+          note: "2 launched this month",
           icon: HiOutlineCollection,
           iconBgColor: "bg-success",
           period: "This week",

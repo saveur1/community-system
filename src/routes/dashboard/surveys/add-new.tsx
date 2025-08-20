@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, DragEvent, JSX, FC } from 'react';
 import { FaPlus, FaTrash, FaCopy, FaGripVertical, FaSave, FaArrowLeft, FaTimes } from 'react-icons/fa';
 import Breadcrumb from '@/components/ui/breadcrum';
-import ViewMorePrograms from '@/components/pages/landing-page/view-more-programes';
+import ViewMorePrograms from '@/components/features/landing-page/view-more-programes';
 import { useTranslation } from 'react-i18next';
 
 interface BaseQuestion {

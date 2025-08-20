@@ -20,5 +20,6 @@ export interface Config {
     bcryptSaltRounds: number;
     nodeEnv: string;
     port: number;
+    isDev: boolean;
     appUrl: string;
 }

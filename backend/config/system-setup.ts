@@ -60,7 +60,7 @@ const permissions = [
 
   // dashboards Permissions
   { name: 'dashboard:analytics', description: 'View analytics dashboard' },
-  { name:  'dashboard:stakeholder', description: 'View Stakeholders dashboard' },
+  { name: 'dashboard:stakeholder', description: 'View Stakeholders dashboard' },
   { name: 'dashboard:health', description: 'View health dashboard' },
   { name: 'dashboard:education', description: 'View education dashboard' },
   { name: 'dashboard:community', description: 'View community dashboard' },
@@ -86,6 +86,13 @@ const permissions = [
 
   // Services Rating Permissions
   { name: 'service:rating', description: 'View services rating' },
+
+  // Immunization permissions
+  { name: 'immunization:read', description: 'View immunizations' },
+  { name: 'immunization:create', description: 'Create immunizations' },
+  { name: 'immunization:update', description: 'Update immunizations' },
+  { name: 'immunization:delete', description: 'Delete immunizations' },
+  { name: 'immunization:report', description: 'View immunizations report' },
 ];
 
 // Base role templates with common permissions
@@ -107,7 +114,7 @@ const roleTemplates = {
   health_worker: {
     description: 'Health Worker - Community role',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update','survey:delete','survey:analytics',
       'feedback:create', 'feedback:read',
       'document:read',
       'community_session:read', 'community_session:create',
@@ -116,6 +123,8 @@ const roleTemplates = {
       'notification:delete',
       'announcement:read',
       'service:rating',
+      'immunization:read',
+      'immunization:report',
     ]
   },
   local_influencer: {

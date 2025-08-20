@@ -69,7 +69,7 @@ export function SummaryCard({
       </div>
 
       {/* Delta + Period */}
-      <div className="text-sm">
+      {period && <div className="text-sm">
         <p
           className={`font-medium text-center ${isPositive
             ? "text-emerald-500"
@@ -82,7 +82,7 @@ export function SummaryCard({
           {Math.abs(delta).toFixed(2)}%
         </p>
         <p className="text-gray-500 text-center min-w-20 mt-1">{period}</p>
-      </div>
+      </div>}
     </motion.div>
   );
 }
