@@ -4,7 +4,7 @@ interface MainContentProps {
 
 // Main Layout Component
 const MainContent: React.FC<MainContentProps> = ({ children }) => (
-    <main className="px-4 lg:px-8 relative">
+    <main className="px-4 lg:px-8 relative min-h-[calc(100vh-109px)] pb-20">
       {children}
     </main>
   );

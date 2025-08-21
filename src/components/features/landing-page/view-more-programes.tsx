@@ -1,6 +1,7 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { CustomDropdown } from "@/components/ui/dropdown";
+import { useTranslation } from "react-i18next";
 
 const dummyProgrammes = [
   { value: "hiv", label: "HIV/AIDS" },
@@ -14,10 +15,11 @@ const dummyProgrammes = [
 interface ViewMoreProgramsProps {
   dropDownPosition?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
 }
-const ViewMorePrograms = ({dropDownPosition = "bottom-right" }: ViewMoreProgramsProps) => {
+const ViewMorePrograms = ({ dropDownPosition = "bottom-right" }: ViewMoreProgramsProps) => {
   const [selected, setSelected] = useState<string[]>([]);
   const [isOtherOpen, setIsOtherOpen] = useState(false);
   const [other, setOther] = useState("");
+  const { t } = useTranslation();
 
   const handleCheck = (value: string) => {
     setSelected(prev =>
@@ -26,20 +28,20 @@ const ViewMorePrograms = ({dropDownPosition = "bottom-right" }: ViewMorePrograms
   };
 
   const handleOtherCheck = () => {
-    setIsOtherOpen((value)=> {
-      if(value == false)
+    setIsOtherOpen((value) => {
+      if (value == false)
         setOther("");
 
-    return !value;
+      return !value;
     })
-    
+
   };
 
   return (
     <CustomDropdown
       trigger={
         <button type="button" className="text-primary underline bg-transparent px-0 py-0 font-medium text-sm cursor-pointer hover:text-primary-dark">
-          View more
+          {t("button.view_more")}
         </button>
       }
       dropdownClassName="min-w-96 rounded-md bg-success shadow-lg ring-1 ring-black/10 p-4"
@@ -47,7 +49,7 @@ const ViewMorePrograms = ({dropDownPosition = "bottom-right" }: ViewMorePrograms
       position={dropDownPosition}
     >
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-white mb-2">Select more programmes</h4>
+        <h4 className="text-sm font-medium text-white mb-2">{t("feedback.programme_more")}</h4>
         <div className="grid grid-cols-2 gap-2">
           {dummyProgrammes.map(option => (
             <label key={option.value} className="flex items-center text-gray-200 gap-2 text-sm cursor-pointer hover:text-white">

@@ -22,8 +22,9 @@ export class UserController extends Controller {
     };
   }
 
-  @Security("jwt", ["manage_users"])
+  @Security("jwt", ["user:create", "user:update", "user:delete"])
   @Get("/")
+  @asyncCatch
   public async getUsers(
     @Query() page: number = 1,
     @Query() limit: number = 10
@@ -42,8 +43,9 @@ export class UserController extends Controller {
     return ServiceResponse.success('Users retrieved successfully', userResponses, 200, { total: count, page, totalPages: Math.ceil(count / limit) });
   }
 
-  @Security("jwt", ["view_users"])
+  @Security("jwt", ["user:view"])
   @Get("/{userId}")
+  @asyncCatch
   @Response<ServiceResponse<null>>(404, "User not found")
   public async getUserById(
     @Path() userId: string
@@ -58,7 +60,7 @@ export class UserController extends Controller {
     return ServiceResponse.success('User retrieved successfully', userResponse);
   }
 
-  @Security("jwt", ["manage_users"])
+  @Security("jwt", ["user:create"])
   @Post("/")
   @Response<ServiceResponse<null>>(400, "Email already in use")
   public async createUser(
@@ -84,10 +86,11 @@ export class UserController extends Controller {
     return ServiceResponse.success('User created successfully', userResponse, 201);
   }
 
-  @Security("jwt", ["manage_users"])
+  @Security("jwt", ["user:update"])
   @Put("/{userId}")
   @Response<ServiceResponse<null>>(404, "User not found")
   @Response<ServiceResponse<null>>(400, "Email already in use")
+  @asyncCatch
   public async updateUser(
     @Path() userId: string,
     @Body() userData: IUserUpdateRequest
@@ -108,10 +111,11 @@ export class UserController extends Controller {
     return ServiceResponse.success('User updated successfully', userResponse);
   }
 
-  @Security("jwt", ["manage_users"])
+  @Security("jwt", ["user:delete"])
   @Delete("/{userId}")
   @SuccessResponse(204, "No Content")
   @Response<ServiceResponse<null>>(404, "User not found")
+  @asyncCatch
   public async deleteUser(
     @Path() userId: string
   ): Promise<ServiceResponse<null>> {

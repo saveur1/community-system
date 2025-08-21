@@ -18,6 +18,25 @@ export interface IUserAttributes {
   profile?: string | null;
   emailVerified?: boolean;
   verified?: boolean;
+  userType?: string | null;
+  // Community Health Worker optional fields
+  nationalId?: string | null;
+  district?: string | null;
+  sector?: string | null;
+  cell?: string | null;
+  village?: string | null;
+  preferredLanguage?: string | null;
+  nearByHealthCenter?: string | null;
+  // Role-specific optional fields
+  schoolName?: string | null;
+  schoolAddress?: string | null;
+  churchName?: string | null;
+  churchAddress?: string | null;
+  hospitalName?: string | null;
+  hospitalAddress?: string | null;
+  healthCenterName?: string | null;
+  healthCenterAddress?: string | null;
+  epiDistrict?: string | null;
   roles?: IRoleAttributes[];
   userRoles?: any[]; // For the association
   createdAt?: Date;

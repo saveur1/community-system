@@ -1,6 +1,10 @@
 import { useState, useMemo } from 'react';
-import { FaSearch, FaListUl, FaTh, FaSort, FaSortUp, FaSortDown, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaEllipsisV, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaSearch, FaListUl, FaTh, FaSort, FaSortUp, FaSortDown, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaChevronLeft, FaChevronRight, FaEye, FaTrash, FaPlus, FaEllipsisV } from 'react-icons/fa';
 import { Account, AccountFilters } from '@/types/account';
+import { SelectDropdown } from '@/components/ui/select';
+import Drawer from '@/components/ui/drawer';
+import Modal, { ModalBody, ModalFooter, ModalButton } from '@/components/ui/modal';
+import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 
 type ViewMode = 'list' | 'grid';
 
@@ -15,6 +19,9 @@ interface AccountsListProps {
   totalItems: number;
   pageSize: number;
   loading: boolean;
+  onDeleteAccount?: (account: Account) => void; // optional callback
+  onVerifyAccount?: (account: Account) => void; // optional callback
+  onDeactivateAccount?: (account: Account) => void; // optional callback
 }
 
 export function AccountsList({
@@ -27,7 +34,10 @@ export function AccountsList({
   totalPages,
   totalItems,
   pageSize,
-  loading
+  loading,
+  onDeleteAccount,
+  onVerifyAccount,
+  onDeactivateAccount
 }: AccountsListProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,6 +45,14 @@ export function AccountsList({
   const [sortConfig, setSortConfig] = useState<{ key: keyof Account; direction: 'asc' | 'desc' }>(
     { key: 'name', direction: 'asc' }
   );
+
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+
+  // Delete Modal state
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteInput, setDeleteInput] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +64,25 @@ export function AccountsList({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
+  };
+
+  const openView = (account: Account) => {
+    setSelectedAccount(account);
+    setIsDrawerOpen(true);
+  };
+
+  const openDelete = (account: Account) => {
+    setSelectedAccount(account);
+    setDeleteInput('');
+    setIsDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!selectedAccount) return;
+    if (deleteInput !== selectedAccount.name) return; // simple guard; button disabled too
+    onDeleteAccount?.(selectedAccount);
+    setIsDeleteOpen(false);
+    setSelectedAccount(null);
   };
 
   const sortedAccounts = useMemo(() => {
@@ -79,7 +116,7 @@ export function AccountsList({
   }
 
   return (
-    <div className="p-6">
+    <div className="pt-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -88,14 +125,14 @@ export function AccountsList({
               <input
                 type="text"
                 placeholder="Search accounts..."
-                className="pl-10 pr-4 py-2 border rounded-lg w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <FaSearch className="absolute left-3 top-3 text-gray-400" />
             </div>
           </form>
-          <div className="flex items-center bg-white rounded-lg border overflow-hidden">
+          <div className="flex items-center bg-white rounded-lg border border-gray-300 overflow-hidden">
             <button
               onClick={() => setViewMode('list')}
               className={`p-2 ${viewMode === 'list' ? 'bg-gray-100 text-primary' : 'text-gray-500'}`}
@@ -111,51 +148,63 @@ export function AccountsList({
               <FaTh />
             </button>
           </div>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 bg-primary text-white px-3 py-2 rounded-md hover:bg-primary-dark"
+            title="Add User"
+            onClick={() => {/* TODO: hook up to creation flow */}}
+          >
+            <FaPlus />
+            <span className="hidden sm:inline">Add User</span>
+          </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+      <div className="bg-white rounded-lg shadow-sm  border border-gray-300 p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              className="w-full border rounded-md p-2 text-sm"
-              value={filters.role || ''}
-              onChange={(e) => setFilters({ ...filters, role: e.target.value || undefined })}
-            >
-              <option value="">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-              <option value="moderator">Moderator</option>
-            </select>
+            <SelectDropdown
+              options={[
+                { label: 'Admin', value: 'admin' },
+                { label: 'User', value: 'user' },
+                { label: 'Moderator', value: 'moderator' },
+                { label: 'Member', value: 'member' },
+                { label: 'Leader', value: 'leader' },
+                { label: 'Volunteer', value: 'volunteer' },
+              ]}
+              value={filters.role}
+              onChange={(value) => setFilters({ ...filters, role: value || undefined })}
+              placeholder="All Roles"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              className="w-full border rounded-md p-2 text-sm"
-              value={filters.status || ''}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value as any || undefined })}
-            >
-              <option value="">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="pending">Pending</option>
-            </select>
+            <SelectDropdown
+              options={[
+                { label: 'Active', value: 'active' },
+                { label: 'Inactive', value: 'inactive' },
+                { label: 'Pending', value: 'pending' },
+              ]}
+              value={filters.status}
+              onChange={(value) => setFilters({ ...filters, status: (value as any) || undefined })}
+              placeholder="All Statuses"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
-            <select
-              className="w-full border rounded-md p-2 text-sm"
-              value={filters.type || ''}
-              onChange={(e) => setFilters({ ...filters, type: e.target.value as any || undefined })}
-            >
-              <option value="">All Types</option>
-              <option value="community">Community</option>
-              <option value="religious">Religious</option>
-              <option value="stakeholder">Stakeholder</option>
-              <option value="employee">Employee</option>
-            </select>
+            <SelectDropdown
+              options={[
+                { label: 'Community', value: 'community' },
+                { label: 'Religious', value: 'religious' },
+                { label: 'Stakeholder', value: 'stakeholder' },
+                { label: 'Employee', value: 'employee' },
+              ]}
+              value={filters.type}
+              onChange={(value) => setFilters({ ...filters, type: (value as any) || undefined })}
+              placeholder="All Types"
+            />
           </div>
           <div className="flex items-end">
             <button
@@ -169,10 +218,14 @@ export function AccountsList({
       </div>
 
       {viewMode === 'list' ? (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-300 overflow-hidden">
+          {sortedAccounts.length === 0 ? (
+            <div className="p-10 text-center text-gray-600">No data available</div>
+          ) : (
+            <>
+            <div className="overflow-x-visible">
+              <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-white">
                 <tr>
                   <th
                     scope="col"
@@ -247,10 +300,48 @@ export function AccountsList({
                       {account.type}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900">View</button>
-                        <button className="text-indigo-600 hover:text-indigo-900">Edit</button>
-                        <button className="text-red-600 hover:text-red-900">Delete</button>
+                      <div className="flex justify-end items-center gap-2">
+                        <button
+                          type="button"
+                          className="text-primary hover:text-primary/80"
+                          title="View"
+                          onClick={(e) => { e.stopPropagation(); openView(account); }}
+                        >
+                          <FaEye className="h-5 w-5" />
+                        </button>
+                        <CustomDropdown
+                          trigger={
+                            <button
+                              type="button"
+                              className="text-gray-500 hover:text-gray-700 p-1"
+                              title="More actions"
+                            >
+                              <FaEllipsisV className="h-5 w-5" />
+                            </button>
+                          }
+                          position="bottom-right"
+                          dropdownClassName="min-w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1"
+                        >
+                          <DropdownItem
+                            onClick={() => { onVerifyAccount?.(account); }}
+                            icon={<span className="inline-block w-2 h-2 rounded-full bg-green-500" />}
+                          >
+                            Verify user
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => { onDeactivateAccount?.(account); }}
+                            icon={<span className="inline-block w-2 h-2 rounded-full bg-yellow-500" />}
+                          >
+                            Deactivate user
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => { openDelete(account); }}
+                            icon={<FaTrash className="text-red-600" />}
+                            destructive
+                          >
+                            Delete user
+                          </DropdownItem>
+                        </CustomDropdown>
                       </div>
                     </td>
                   </tr>
@@ -331,24 +422,31 @@ export function AccountsList({
               </div>
               <div className="flex items-center">
                 <span className="mr-2 text-sm text-gray-700">Rows per page:</span>
-                <select
-                  className="border rounded p-1 text-sm"
-                  value={pageSize}
-                  onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                </select>
+                <div className="min-w-24">
+                  <SelectDropdown
+                    options={[
+                      { label: '5', value: '5' },
+                      { label: '10', value: '10' },
+                      { label: '25', value: '25' },
+                      { label: '50', value: '50' },
+                    ]}
+                    value={String(pageSize)}
+                    onChange={(value) => onPageSizeChange(Number(value))}
+                  />
+                </div>
               </div>
             </div>
           </div>
+          </>
+          )}
         </div>
       ) : (
+        sortedAccounts.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-300 p-10 text-center text-gray-600">No data available</div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedAccounts.map((account) => (
-            <div key={account.id} className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+            <div key={account.id} className="bg-white rounded-lg shadow-sm overflow-visible border border-gray-200 hover:shadow-md transition-shadow">
               <div className="p-6">
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="flex-shrink-0 h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
@@ -399,24 +497,128 @@ export function AccountsList({
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {account.type}
                   </span>
-                  <div className="relative">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="text-gray-400 hover:text-gray-500"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Handle menu toggle
-                      }}
+                      className="text-primary hover:text-primary/80"
+                      title="View"
+                      onClick={(e) => { e.stopPropagation(); openView(account); }}
                     >
-                      <FaEllipsisV className="h-5 w-5" />
+                      <FaEye className="h-5 w-5" />
                     </button>
+                    <CustomDropdown
+                      trigger={
+                        <button
+                          type="button"
+                          className="text-gray-500 hover:text-gray-700 p-1"
+                          title="More actions"
+                        >
+                          <FaEllipsisV className="h-5 w-5" />
+                        </button>
+                      }
+                      position="bottom-right"
+                      dropdownClassName="min-w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1"
+                    >
+                      <DropdownItem
+                        onClick={() => { onVerifyAccount?.(account); }}
+                        icon={<span className="inline-block w-2 h-2 rounded-full bg-green-500" />}
+                      >
+                        Verify user
+                      </DropdownItem>
+                      <DropdownItem
+                        onClick={() => { onDeactivateAccount?.(account); }}
+                        icon={<span className="inline-block w-2 h-2 rounded-full bg-yellow-500" />}
+                      >
+                        Deactivate user
+                      </DropdownItem>
+                      <DropdownItem
+                        onClick={() => { openDelete(account); }}
+                        icon={<FaTrash className="text-red-600" />}
+                        destructive
+                      >
+                        Delete user
+                      </DropdownItem>
+                    </CustomDropdown>
                   </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
+        )
       )}
+
+      {/* View Drawer */}
+      <Drawer
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        title={selectedAccount ? `Account: ${selectedAccount.name}` : 'Account'}
+        placement="right"
+        width={440}
+      >
+        {selectedAccount && (
+          <div className="p-4 space-y-4 text-sm text-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 rounded-full bg-gray-200 flex items-center justify-center">
+                {selectedAccount.profile ? (
+                  <img src={selectedAccount.profile} alt={selectedAccount.name} className="h-14 w-14 rounded-full" />
+                ) : (
+                  <FaUser className="h-7 w-7 text-gray-400" />
+                )}
+              </div>
+              <div>
+                <div className="text-base font-semibold text-gray-900">{selectedAccount.name}</div>
+                <div className="text-xs text-gray-500 capitalize">{selectedAccount.type}</div>
+              </div>
+            </div>
+            <div>
+              <div className="font-medium text-gray-900 mb-1">Details</div>
+              <ul className="space-y-1">
+                <li><span className="text-gray-500">Email:</span> {selectedAccount.email || 'N/A'}</li>
+                <li><span className="text-gray-500">Phone:</span> {selectedAccount.phone}</li>
+                <li><span className="text-gray-500">Role:</span> {selectedAccount.role}</li>
+                <li><span className="text-gray-500">Status:</span> {selectedAccount.status}</li>
+                <li><span className="text-gray-500">Address:</span> {selectedAccount.address || '—'}</li>
+                <li><span className="text-gray-500">Created:</span> {new Date(selectedAccount.createdAt).toLocaleString()}</li>
+                <li><span className="text-gray-500">Updated:</span> {new Date(selectedAccount.updatedAt).toLocaleString()}</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </Drawer>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete user" size="md">
+        <ModalBody>
+          <div className="space-y-3 text-gray-700">
+            <p>
+              You are about to delete this user. This action is irreversible and <strong>all related user information will be deleted</strong>.
+            </p>
+            {selectedAccount && (
+              <p>
+                To confirm, type the user's name: <span className="font-semibold">{selectedAccount.name}</span>
+              </p>
+            )}
+            <input
+              type="text"
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Type the user's name to confirm"
+              value={deleteInput}
+              onChange={(e) => setDeleteInput(e.target.value)}
+            />
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <ModalButton variant="secondary" onClick={() => setIsDeleteOpen(false)}>Cancel</ModalButton>
+          <ModalButton
+            variant="danger"
+            onClick={confirmDelete}
+            disabled={!selectedAccount || deleteInput !== selectedAccount.name}
+          >
+            Delete User
+          </ModalButton>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }

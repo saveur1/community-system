@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { HiArrowNarrowLeft, HiMenuAlt3, HiX, HiCog, HiBell } from "react-icons/hi";
 import NavItem from "./nav-items";
 import Avatar from "@/components/common/avatar";
+import { IoIosNotifications } from "react-icons/io";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -75,6 +76,19 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Bottom section with Settings and Notifications */}
         <div className="mt-auto border-t border-white/30">
           <div className="py-2">
+            {/* Settings Link */}
+            <Link
+              to="/dashboard/notifications"
+              className={`
+        flex items-center gap-3 px-5 py-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 cursor-pointer
+        ${!sidebarOpen ? 'justify-center' : ''}
+      `}
+            >
+              <IoIosNotifications className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && (
+                <span className="font-medium">Notifications</span>
+              )}
+            </Link>
             {/* Settings Link */}
             <Link
               to="/dashboard/settings"

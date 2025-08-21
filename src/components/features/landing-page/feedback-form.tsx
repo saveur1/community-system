@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { sectionVariants } from ".";
 import ViewMorePrograms from "./view-more-programes";
 import { FaSave, FaChevronLeft, FaChevronRight, FaMicrophone, FaVideo, FaStop, FaPlay, FaTrash, FaCircle } from 'react-icons/fa';
+import AnimatedInput from "@/components/ui/animated-input";
 
 function FeedbackForm() {
   const [form, setForm] = useState({
@@ -217,24 +218,13 @@ function FeedbackForm() {
   };
 
   const canProceedToNextStep = () => {
-    if (currentStep === 1) {
-      return !!form.name.trim();
-    }
     return true;
   };
 
-  // Feedback type still available but not shown in step 1 as per request
-  const feedbackTypes = [
-    { value: 'positive', label: 'Positive Experience', color: 'text-green-600', icon: '😊' },
-    { value: 'negative', label: 'Negative Experience', color: 'text-red-600', icon: '😞' },
-    { value: 'suggestion', label: 'Suggestion for Improvement', color: 'text-blue-600', icon: '💡' },
-    { value: 'concern', label: 'Health Concern', color: 'text-orange-600', icon: '⚠️' }
-  ];
-
   const feedbackMethods = [
-    { value: 'text', label: 'Text Feedback', icon: '📝', description: 'Write your feedback' },
-    { value: 'voice', label: 'Voice Feedback', icon: '🎤', description: 'Record audio message' },
-    { value: 'video', label: 'Video Feedback', icon: '📹', description: 'Record video message' }
+    { value: 'text', label: t('feedback.feedback_method_text'), icon: '📝', description: t('feedback.feedback_method_text_desc') },
+    { value: 'voice', label: t('feedback.feedback_method_voice'), icon: '🎤', description: t('feedback.feedback_method_voice_desc') },
+    { value: 'video', label: t('feedback.feedback_method_video'), icon: '📹', description: t('feedback.feedback_method_video_desc') }
   ];
 
   const renderStep1 = () => (
@@ -247,24 +237,15 @@ function FeedbackForm() {
     >
       {/* Name Field */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700" htmlFor="name">
-          {t('feedback.feedback_name')} <span className="text-red-500">*</span>
-        </label>
-        <input
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-gray-50"
-          type="text"
-          id="name"
-          name="name"
-          placeholder="John Doe"
-          value={form.name}
-          onChange={handleChange}
-          onBlur={() => setTouched({ ...touched, name: true })}
-          aria-required="true"
-        />
-      </div>
+      <AnimatedInput
+        label={t('feedback.feedback_name')}
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
+      />
+    </div>
 
       {/* Feedback Method */}
-      <h3 className="text-lg font-medium text-gray-900 mt-6 mb-3">Feedback Method</h3>
+      <h3 className="text-lg font-medium text-gray-900 mt-6 mb-3">{t('feedback.feedback_method')}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {feedbackMethods.map((method) => (
           <button
@@ -339,7 +320,7 @@ function FeedbackForm() {
             className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none min-h-[120px] bg-gray-50"
             id="message"
             name="message"
-            placeholder="Type away..."
+            placeholder={t("feedback.programme_placeholder")}
             value={form.message}
             onChange={handleChange}
             onBlur={() => setTouched({ ...touched, message: true })}
@@ -476,11 +457,11 @@ function FeedbackForm() {
   ];
 
   return (
-    <div className="max-w-8xl mx-auto w-full rounded-xl bg-gray-100 py-16 px-4">
+    <div className="max-w-8xl mx-auto w-full rounded-xl bg-gray-100 py-16 px-4" id="feedback">
       {/* Header Section */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-light text-title mb-2">{t('feedback.feedback_title')}</h1>
-        <p className="text-lg text-gray-600">Share your feedback, Shape the future of community services</p>
+        <p className="text-lg text-gray-600">{t('feedback.feedback_subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
@@ -495,7 +476,7 @@ function FeedbackForm() {
         >
           {/* Our Contact Details */}
           <div>
-            <h2 className="text-2xl font-light text-gray-700 mb-4">Our Contact Details</h2>
+            <h2 className="text-2xl font-light text-gray-700 mb-4">{t('contact.title')}</h2>
             <div className="space-y-2 text-gray-500">
               <p>Kimihurura Kigali-Gasabo</p>
               <p>KN14 Avenue, KG 621 ST#3 </p>
@@ -510,9 +491,9 @@ function FeedbackForm() {
 
           {/* Can't Wait to Meet You */}
           <div>
-            <h2 className="text-2xl font-light text-gray-700 mb-3">Your Voice Matters</h2>
+            <h2 className="text-2xl font-light text-gray-700 mb-3">{t('contact.title2')}</h2>
             <div className="text-gray-500 leading-relaxed">
-              <p>Every opinion matters in shaping the future of community services. Your feedback helps us understand what's working, what needs change, and how we can create solutions that benefit all members of our community.</p>
+              <p>{t('contact.description')}</p>
             </div>
           </div>
         </motion.div>
@@ -540,7 +521,7 @@ function FeedbackForm() {
               className="flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
             >
               <FaChevronLeft className="mr-2" />
-              {currentStep === 1 ? 'Back' : 'Back'}
+              {currentStep === 1 ? t('button.prev') : t('button.prev')}
             </button>
 
             <div className="text-sm text-gray-500">Step {currentStep} of {totalSteps}</div>
@@ -552,7 +533,7 @@ function FeedbackForm() {
                 disabled={!canProceedToNextStep()}
                 className="flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {t('button.next')}
                 <FaChevronRight className="ml-2" />
               </button>
             ) : (
@@ -563,7 +544,7 @@ function FeedbackForm() {
                 disabled={submitted}
               >
                 <FaSave className="mr-2" />
-                {submitted ? t('feedback.thank_you') : 'Submit Feedback'}
+                {submitted ? t('feedback.thank_you') : t('button.submit')}
               </button>
             )}
           </div>

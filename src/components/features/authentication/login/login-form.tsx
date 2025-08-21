@@ -42,19 +42,33 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      const errorMessage = loginType === 'email' 
-        ? "Please enter a valid email and password (min 6 characters)"
-        : "Please enter a valid phone number and password (min 6 characters)";
-      toast.error(errorMessage, { 
-        position: "top-center" 
-      });
-      return;
+    // Localized validation
+    if (loginType === 'email') {
+      const isEmail = form.email.includes('@');
+      if (!isEmail) {
+        toast.error(t('login.email_required'), { position: 'top-center' });
+        return;
+      }
+      if (form.password.trim().length < 6) {
+        toast.error(t('login.password_required'), { position: 'top-center' });
+        return;
+      }
+    } else {
+      const isPhone = form.phone.trim().length >= 10;
+      if (!isPhone) {
+        toast.error(t('login.phone_required'), { position: 'top-center' });
+        return;
+      }
+      if (form.password.trim().length < 6) {
+        toast.error(t('login.password_required'), { position: 'top-center' });
+        return;
+      }
     }
     
     await login({
-      email: loginType === 'email' ? form.email : form.phone,
+      type: loginType,
+      phone: form.phone,
+      email: form.email,
       password: form.password
     });
   };
@@ -101,7 +115,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
             <FiUser className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-2xl font-bold text-title mb-2">
-            Welcome back!
+            {t('login.title')}
           </h1>
         </div>
 
@@ -120,7 +134,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
               whileTap={{ scale: 0.98 }}
             >
               <FiPhone className="w-4 h-4 mr-2" />
-              Phone
+              {t('login.phone')}
             </motion.button>
             <motion.button
               type="button"
@@ -134,7 +148,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
               whileTap={{ scale: 0.98 }}
             >
               <FiMail className="w-4 h-4 mr-2" />
-              Email
+              {t('login.email')}
             </motion.button>
           </div>
         </div>
@@ -151,7 +165,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
             >
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">
-                  {loginType === 'email' ? 'Email' : 'Phone Number'} <span className="text-red-500">*</span>
+                  {loginType === 'email' ? t('login.email') : t('login.phone_number')} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   {loginType === 'email' ? (
@@ -165,7 +179,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
                     value={loginType === 'email' ? form.email : form.phone}
                     onChange={handleChange}
                     className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-200"
-                    placeholder={loginType === 'email' ? 'Enter your email' : 'Enter your phone number'}
+                    placeholder={loginType === 'email' ? t('login.email_placeholder') : t('login.phone_placeholder')}
                     required
                   />
                 </div>
@@ -174,13 +188,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
               <div>
                 <div className="flex justify-between">
                   <label className="text-sm font-medium text-gray-700 block mb-2">
-                    Password <span className="text-red-500">*</span>
+                    {t('login.password')} <span className="text-red-500">*</span>
                   </label>
                   <Link
                     to="/auth/forgot-password"
                     className="text-sm font-medium text-primary hover:text-primary-dark transition-colors"
                   >
-                    Forgot Password?
+                    {t('login.forgot_password')}
                   </Link>
                 </div>
                 <div className="relative">
@@ -191,7 +205,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
                     value={form.password}
                     onChange={handleChange}
                     className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-200"
-                    placeholder="Enter your password"
+                    placeholder={t('login.password_placeholder')}
                     required
                   />
                 </div>
@@ -208,7 +222,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
               whileHover="hover"
               whileTap="tap"
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? t('login.signing_in') : t('login.sign_in')}
             </motion.button>
 
             {/* Google Login Option */}
@@ -217,7 +231,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500">{t('login.or_continue_with')}</span>
               </div>
             </div>
 
@@ -230,7 +244,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
               whileTap="tap"
             >
               <FcGoogle className="w-5 h-5 mr-2" />
-              Continue with Google
+              {t('login.continue_with_google')}
             </motion.button>
           </div>
         </form>
@@ -242,12 +256,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
           transition={{ delay: 0.3 }}
         >
           <p className="text-gray-600">
-            Don't have an account?{" "}
+            {t('login.no_account')}{" "}
             <Link
               to="/auth/signup"
               className="text-primary hover:text-primary-dark font-medium transition-colors"
             >
-              Sign up
+              {t('login.sign_up')}
             </Link>
           </p>
         </motion.div>

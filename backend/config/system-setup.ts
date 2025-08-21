@@ -8,6 +8,8 @@ dotenv.config();
 const permissions = [
   // User Permissions
   { name: 'user:create', description: 'Create users' },
+  { name: 'user:view', description: 'View users' },
+  { name: 'users:view', description: 'View All users'},
   { name: 'user:read', description: 'View users' },
   { name: 'user:update', description: 'Update users' },
   { name: 'user:delete', description: 'Delete users' },
@@ -93,6 +95,12 @@ const permissions = [
   { name: 'immunization:update', description: 'Update immunizations' },
   { name: 'immunization:delete', description: 'Delete immunizations' },
   { name: 'immunization:report', description: 'View immunizations report' },
+
+  // school permissions
+  { name: 'school:read', description: 'View schools' },
+  { name: 'school:create', description: 'Create schools' },
+  { name: 'school:update', description: 'Update schools' },
+  { name: 'school:delete', description: 'Delete schools' },
 ];
 
 // Base role templates with common permissions
@@ -153,6 +161,10 @@ const roleTemplates = {
       'notification:delete',
       'announcement:read',
       'service:rating',
+      'school:read',
+      'school:create',
+      'school:update',
+      'school:delete',
     ]
   },
   
@@ -282,7 +294,7 @@ const roleTemplates = {
   admin: {
     description: 'System administrator with most permissions',
     permissions: [
-      'user:create', 'user:read', 'user:update', 'user:delete',
+      'user:create', 'user:read', 'user:update', 'user:delete','user:view','users:view',
       'role:create', 'role:read', 'role:update', 'role:delete',
       'feedback:create', 'feedback:read', 'feedback:update', 'feedback:delete',
       'programme:create', 'programme:read', 'programme:update', 'programme:delete',

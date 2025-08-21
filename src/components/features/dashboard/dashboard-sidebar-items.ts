@@ -8,7 +8,7 @@ import {
 import { HiChatBubbleBottomCenter } from "react-icons/hi2";
 import { User } from '@/api/auth';
 import { checkPermissions } from '@/utility/logicFunctions';
-import { IoIosNotifications, IoIosVideocam } from 'react-icons/io';
+import { IoIosNotifications, IoIosVideocam, IoMdSchool } from 'react-icons/io';
 import { PiSpeakerSimpleHighBold } from 'react-icons/pi';
 import { MdHealthAndSafety } from 'react-icons/md';
 
@@ -73,16 +73,35 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
       navigationItems.push({ name: "Community Sessions", icon: IoIosVideocam, active: false, link: `/${path}/community-sessions` })
     }
 
-    if(checkPermissions(user, "notification:read")) {
-      navigationItems.push({ name: "Notifications", icon: IoIosNotifications, active: false, link: `/${path}/notifications` })
-    }
-
     if(checkPermissions(user, "announcement:create")) {
       navigationItems.push({ name: "Announcements", icon: PiSpeakerSimpleHighBold, active: false, link: `/${path}/announcements` })
     }
 
     if(checkPermissions(user, "immunization:read")) {
-      navigationItems.push({ name: "Immunization", icon: MdHealthAndSafety, active: false, link: `/${path}/immunization` })
+      navigationItems.push({ 
+        name: "Immunization", 
+        icon: MdHealthAndSafety, 
+        active: false, 
+        link: `/${path}/immunization`, 
+        children: [
+          { name: "Assigned", active: false, link: `/${path}/immunization/assigned`, icon: MdHealthAndSafety },
+          { name: "Report", active: false, link: `/${path}/immunization/report`, icon: MdHealthAndSafety },
+          { name: "Family", active: false, link: `/${path}/immunization/family`, icon: MdHealthAndSafety },
+        ]
+      })
+    }
+
+    if(checkPermissions(user, "school:read")) {
+      navigationItems.push({ 
+        name: "School", 
+        icon: IoMdSchool, 
+        active: false, 
+        link: `/${path}/school`, 
+        children: [
+          { name: "Profile", active: false, link: `/${path}/school/profile`, icon: IoMdSchool },
+          { name: "Report", active: false, link: `/${path}/school/report`, icon: IoMdSchool }
+        ]
+      })
     }
     return navigationItems;
   };

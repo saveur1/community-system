@@ -1,76 +1,72 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { AccountsList } from '@/components/accounts/accounts-list';
 import { Account, AccountFilters } from '@/types/account';
+import { useUsersList, useVerifyUser } from '@/hooks/useUsers';
+import type { User } from '@/api/auth';
 
-// Mock data for community accounts
-const mockCommunityAccounts: Account[] = Array.from({ length: 32 }, (_, i) => ({
-  id: `comm-${i + 1}`,
-  name: `Community Member ${i + 1}`,
-  email: i % 3 === 0 ? undefined : `community${i + 1}@example.com`,
-  phone: `+1 (555) ${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`,
-  role: ['member', 'leader', 'volunteer'][Math.floor(Math.random() * 3)],
-  profile: i % 3 === 0 ? `https://i.pravatar.cc/150?img=${i % 70}` : undefined,
-  address: `${i + 100} Community St, Neighborhood ${String.fromCharCode(65 + (i % 26))}`,
-  type: 'community',
-  status: ['active', 'inactive', 'pending'][Math.floor(Math.random() * 3)] as any,
-  createdAt: new Date(Date.now() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 365)).toISOString(),
-  updatedAt: new Date().toISOString(),
-}));
+function mapUserTypeToAccountType(userType?: string): Account['type'] {
+  if (!userType) return 'employee';
+  if (userType === 'Religious Leaders') return 'religious';
+  if (userType === 'Health Services Providers') return 'community';
+  if (userType === 'community') return 'community';
+  if (userType === 'stakeholders') return 'stakeholder';
+  return 'employee';
+}
 
 export const Route = createFileRoute('/dashboard/accounts/community')({
   component: CommunityAccountsPage,
 });
 
 function CommunityAccountsPage() {
+  const { mutate: verifyUser } = useVerifyUser();
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Omit<AccountFilters, 'type'>>({});
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
     total: 0,
   });
+  const { data, isLoading } = useUsersList({ page: pagination.page, limit: pagination.pageSize });
 
-  // Simulate API call
+  const mapped = useMemo(() => {
+    const list: User[] = data?.result ?? [];
+    let items: Account[] = list
+      .filter(u => mapUserTypeToAccountType(u.userType) === 'community')
+      .map((u) => ({
+        id: String(u.id),
+        name: u.name,
+        email: u.email,
+        phone: u.phone || '',
+        role: u.roles?.[0]?.name || 'user',
+        profile: u.profile,
+        address: u.address,
+        type: 'community',
+        status: (u.status as any) || 'active',
+        createdAt: (u as any).createdAt ? String((u as any).createdAt) : new Date().toISOString(),
+        updatedAt: (u as any).updatedAt ? String((u as any).updatedAt) : new Date().toISOString(),
+      }));
+
+    if (filters.search) {
+      const term = filters.search.toLowerCase();
+      items = items.filter(a =>
+        a.name.toLowerCase().includes(term) ||
+        (a.email && a.email.toLowerCase().includes(term)) ||
+        (a.phone && a.phone.includes(term)) ||
+        (a.address && a.address.toLowerCase().includes(term)) ||
+        (a.role && a.role.toLowerCase().includes(term))
+      );
+    }
+    if (filters.role) items = items.filter(a => a.role === filters.role);
+    if (filters.status) items = items.filter(a => a.status === filters.status as any);
+    return items;
+  }, [data, filters]);
+
   useEffect(() => {
-    setLoading(true);
-    
-    // Simulate network delay
-    const timer = setTimeout(() => {
-      // Apply filters
-      let filtered = [...mockCommunityAccounts];
-      
-      if (filters.search) {
-        const searchTerm = filters.search.toLowerCase();
-        filtered = filtered.filter(account => 
-          account.name.toLowerCase().includes(searchTerm) ||
-          (account.email && account.email.toLowerCase().includes(searchTerm)) ||
-          (account.phone && account.phone.includes(searchTerm)) ||
-          (account.address && account.address.toLowerCase().includes(searchTerm)) ||
-          (account.role && account.role.toLowerCase().includes(searchTerm))
-        );
-      }
-      
-      if (filters.role) {
-        filtered = filtered.filter(account => account.role === filters.role);
-      }
-      
-      if (filters.status) {
-        filtered = filtered.filter(account => account.status === filters.status);
-      }
-      
-      const total = filtered.length;
-      const start = (pagination.page - 1) * pagination.pageSize;
-      const paginated = filtered.slice(start, start + pagination.pageSize);
-      
-      setAccounts(paginated);
-      setPagination(prev => ({ ...prev, total }));
-      setLoading(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [filters, pagination.page, pagination.pageSize]);
+    setAccounts(mapped);
+    const total = data?.meta?.total ?? mapped.length;
+    setPagination(prev => ({ ...prev, total }));
+  }, [mapped, data]);
 
   const handleSearch = (newFilters: AccountFilters) => {
     // Remove type filter since we're only showing community accounts
@@ -102,7 +98,17 @@ function CommunityAccountsPage() {
       totalPages={Math.ceil(pagination.total / pagination.pageSize)}
       totalItems={pagination.total}
       pageSize={pagination.pageSize}
-      loading={loading}
+      loading={isLoading}
+      onVerifyAccount={(acc) => {
+        verifyUser(String(acc.id));
+      }}
+      onDeactivateAccount={(acc) => {
+        setAccounts(prev => prev.map(a => a.id === acc.id ? { ...a, status: 'inactive' } : a));
+      }}
+      onDeleteAccount={(acc) => {
+        setAccounts(prev => prev.filter(a => a.id !== acc.id));
+        setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+      }}
     />
   );
 }

@@ -100,7 +100,9 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
     }
   };
 
-  const handleDropdownClick = () => {
+  const handleDropdownClick = (e?: React.MouseEvent) => {
+    // prevent clicks inside dropdown from bubbling to parents (e.g., table rows/cards)
+    if (e) e.stopPropagation();
     if (closeOnClick) {
       setIsOpen(false);
     }
@@ -109,7 +111,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       <div
-        onClick={toggleDropdown}
+        onClick={(e) => { e.stopPropagation(); toggleDropdown(); }}
         onKeyDown={handleKeyDown}
         tabIndex={disabled ? -1 : 0}
         aria-expanded={isOpen}

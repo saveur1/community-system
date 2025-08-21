@@ -14,6 +14,25 @@ class User extends Model<IUserAttributes, IUserCreationAttributes> implements IU
   declare password: string;
   declare address: string | null;
   declare phone: string | null;
+  // Community Health Worker optional fields
+  declare nationalId: string | null;
+  declare district: string | null;
+  declare sector: string | null;
+  declare cell: string | null;
+  declare village: string | null;
+  declare preferredLanguage: string | null;
+  declare nearByHealthCenter: string | null;
+  // Role-specific optional fields
+  declare schoolName: string | null;
+  declare schoolAddress: string | null;
+  declare churchName: string | null;
+  declare churchAddress: string | null;
+  declare hospitalName: string | null;
+  declare hospitalAddress: string | null;
+  declare healthCenterName: string | null;
+  declare healthCenterAddress: string | null;
+  declare epiDistrict: string | null;
+  declare userType: string | null;
   declare status: 'active' | 'inactive';
   declare resetPasswordCode: string | null;
   declare resetPasswordExpires: Date | null;
@@ -117,8 +136,18 @@ User.init({
         allowNull: true,
         unique: true,
         validate: {
-            isEmail: true,
-        }
+            // Validate email format only when provided
+            isEmailOrNull(value: unknown) {
+                const v = value as string | null | undefined;
+                if (v === null || v === undefined || v === '') return;
+                // Basic email format check; avoids requiring external validator import
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!re.test(v)) {
+                    throw new Error('Invalid email format');
+                }
+            },
+        },
+        comment: "Email field is required."
     },
     address: {
         type: DataTypes.STRING,
@@ -126,14 +155,103 @@ User.init({
     },
     phone: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
+        unique: true,
         validate: {
             isNumeric: true,
         },
+        comment: "Phone field is required."
+    },
+    // Community Health Worker optional fields
+    nationalId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional national identification number"
+    },
+    district: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional district name"
+    },
+    sector: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional sector name"
+    },
+    cell: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional cell name"
+    },
+    village: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional village name"
+    },
+    preferredLanguage: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional preferred language"
+    },
+    nearByHealthCenter: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional nearby health center"
+    },
+    // Role-specific optional fields
+    schoolName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional school name (for School Director)"
+    },
+    schoolAddress: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional school address (for School Director)"
+    },
+    churchName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional church/mosque name (for religious leaders)"
+    },
+    churchAddress: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional church/mosque address (for religious leaders)"
+    },
+    hospitalName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional hospital name (for Nurse)"
+    },
+    hospitalAddress: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional hospital address (for Nurse)"
+    },
+    healthCenterName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional health center name (for Local Health Center)"
+    },
+    healthCenterAddress: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional health center address (for Local Health Center)"
+    },
+    epiDistrict: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional working district (for EPI Supervisor)"
+    },
+    userType: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Optional user type received at signup"
     },
     emailVerified: {
         type: DataTypes.BOOLEAN,
-        allowNull: false,
+        allowNull: true,
         defaultValue: false,
         field: 'email_verified',
         comment: 'Whether the user has verified their email address.'

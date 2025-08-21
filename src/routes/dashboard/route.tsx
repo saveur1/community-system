@@ -7,6 +7,7 @@ import navItems from '@/components/features/dashboard/dashboard-sidebar-items';
 import useAuth from '@/hooks/useAuth';
 import { createFileRoute, useLocation } from '@tanstack/react-router'
 import { useState } from 'react';
+import ContentFooter from '@/components/layouts/dashboard-main-content/content-footer';
 
 
 export const Route = createFileRoute('/dashboard')({
@@ -41,6 +42,7 @@ function DashboardLayout() {
           {/* Optional top decorative band inside scroll if desired */}
           <MainContent>
             <AuthLoader />
+            <ContentFooter />
           </MainContent>
         </div>
         <ImigongoStarter />

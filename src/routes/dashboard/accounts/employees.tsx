@@ -2,10 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { AccountsList } from '@/components/accounts/accounts-list';
 import { Account, AccountFilters } from '@/types/account';
-import { useUsersList } from '@/hooks/useUsers';
+import { useUsersList, useVerifyUser } from '@/hooks/useUsers';
 import type { User } from '@/api/auth';
 
-// Helper: map backend user.userType to account type
 function mapUserTypeToAccountType(userType?: string): Account['type'] {
   if (!userType) return 'employee';
   if (userType === 'Religious Leaders') return 'religious';
@@ -15,39 +14,39 @@ function mapUserTypeToAccountType(userType?: string): Account['type'] {
   return 'employee';
 }
 
-export const Route = createFileRoute('/dashboard/accounts/')({
-  component: AccountsPage,
+export const Route = createFileRoute('/dashboard/accounts/employees')({
+  component: EmployeesAccountsPage,
 });
 
-function AccountsPage() {
+function EmployeesAccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [filters, setFilters] = useState<AccountFilters>({});
+  const [filters, setFilters] = useState<Omit<AccountFilters, 'type'>>({});
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
     total: 0,
   });
-
   const { data, isLoading } = useUsersList({ page: pagination.page, limit: pagination.pageSize });
+  const { mutate: verifyUser } = useVerifyUser();
 
-  // Map API users to Account[] whenever data or filters change
   const mapped = useMemo(() => {
     const list: User[] = data?.result ?? [];
-    let items: Account[] = list.map((u) => ({
-      id: String(u.id),
-      name: u.name,
-      email: u.email,
-      phone: u.phone || '',
-      role: u.roles?.[0]?.name || 'user',
-      profile: u.profile,
-      address: u.address,
-      type: mapUserTypeToAccountType((u as any).userType),
-      status: (u.status as any) || 'active',
-      createdAt: (u as any).createdAt ? String((u as any).createdAt) : new Date().toISOString(),
-      updatedAt: (u as any).updatedAt ? String((u as any).updatedAt) : new Date().toISOString(),
-    }));
+    let items: Account[] = list
+      .filter(u => mapUserTypeToAccountType(u.userType) === 'employee')
+      .map((u) => ({
+        id: String(u.id),
+        name: u.name,
+        email: u.email,
+        phone: u.phone || '',
+        role: u.roles?.[0]?.name || 'user',
+        profile: u.profile,
+        address: u.address,
+        type: 'employee',
+        status: (u.status as any) || 'active',
+        createdAt: (u as any).createdAt ? String((u as any).createdAt) : new Date().toISOString(),
+        updatedAt: (u as any).updatedAt ? String((u as any).updatedAt) : new Date().toISOString(),
+      }));
 
-    // Apply client-side filters until backend filtering is added
     if (filters.search) {
       const term = filters.search.toLowerCase();
       items = items.filter(a =>
@@ -55,17 +54,14 @@ function AccountsPage() {
         (a.email && a.email.toLowerCase().includes(term)) ||
         (a.phone && a.phone.includes(term)) ||
         (a.address && a.address.toLowerCase().includes(term)) ||
-        a.role.toLowerCase().includes(term) ||
-        a.type.toLowerCase().includes(term)
+        (a.role && a.role.toLowerCase().includes(term))
       );
     }
     if (filters.role) items = items.filter(a => a.role === filters.role);
     if (filters.status) items = items.filter(a => a.status === filters.status as any);
-    if (filters.type) items = items.filter(a => a.type === filters.type as any);
     return items;
   }, [data, filters]);
 
-  // Update accounts and total when API data arrives
   useEffect(() => {
     setAccounts(mapped);
     const total = data?.meta?.total ?? mapped.length;
@@ -73,8 +69,9 @@ function AccountsPage() {
   }, [mapped, data]);
 
   const handleSearch = (newFilters: AccountFilters) => {
-    setFilters(newFilters);
-    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on new search
+    const { type, ...rest } = newFilters;
+    setFilters(rest);
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
@@ -92,7 +89,7 @@ function AccountsPage() {
   return (
     <AccountsList
       accounts={accounts}
-      title="All Accounts"
+      title="Employee Accounts"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}
@@ -101,6 +98,16 @@ function AccountsPage() {
       totalItems={pagination.total}
       pageSize={pagination.pageSize}
       loading={isLoading}
+      onVerifyAccount={(acc) => {
+        verifyUser(String(acc.id));
+      }}
+      onDeactivateAccount={(acc) => {
+        setAccounts(prev => prev.map(a => a.id === acc.id ? { ...a, status: 'inactive' } : a));
+      }}
+      onDeleteAccount={(acc) => {
+        setAccounts(prev => prev.filter(a => a.id !== acc.id));
+        setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+      }}
     />
   );
 }

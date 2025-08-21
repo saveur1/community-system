@@ -49,7 +49,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Pick_IUserAttributes.Exclude_keyofIUserAttributes.password-or-resetPasswordCode-or-resetPasswordExpires-or-googleId__": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"id":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"email":{"dataType":"string","required":true},"address":{"dataType":"string"},"phone":{"dataType":"string"},"status":{"ref":"UserStatus","required":true},"salary":{"dataType":"double"},"profile":{"dataType":"string"},"emailVerified":{"dataType":"boolean"},"verified":{"dataType":"boolean"},"roles":{"dataType":"array","array":{"dataType":"refObject","ref":"IRoleAttributes"}},"userRoles":{"dataType":"array","array":{"dataType":"any"}},"createdAt":{"dataType":"datetime"},"updatedAt":{"dataType":"datetime"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"id":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"email":{"dataType":"string","required":true},"address":{"dataType":"string"},"phone":{"dataType":"string"},"status":{"ref":"UserStatus","required":true},"salary":{"dataType":"double"},"profile":{"dataType":"string"},"emailVerified":{"dataType":"boolean"},"verified":{"dataType":"boolean"},"userType":{"dataType":"string"},"nationalId":{"dataType":"string"},"district":{"dataType":"string"},"sector":{"dataType":"string"},"cell":{"dataType":"string"},"village":{"dataType":"string"},"preferredLanguage":{"dataType":"string"},"nearByHealthCenter":{"dataType":"string"},"schoolName":{"dataType":"string"},"schoolAddress":{"dataType":"string"},"churchName":{"dataType":"string"},"churchAddress":{"dataType":"string"},"hospitalName":{"dataType":"string"},"hospitalAddress":{"dataType":"string"},"healthCenterName":{"dataType":"string"},"healthCenterAddress":{"dataType":"string"},"epiDistrict":{"dataType":"string"},"roles":{"dataType":"array","array":{"dataType":"refObject","ref":"IRoleAttributes"}},"userRoles":{"dataType":"array","array":{"dataType":"any"}},"createdAt":{"dataType":"datetime"},"updatedAt":{"dataType":"datetime"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IUserResponse": {
@@ -65,6 +65,23 @@ const models: TsoaRoute.Models = {
             "profile": {"dataType":"string"},
             "emailVerified": {"dataType":"boolean"},
             "verified": {"dataType":"boolean"},
+            "userType": {"dataType":"string"},
+            "nationalId": {"dataType":"string"},
+            "district": {"dataType":"string"},
+            "sector": {"dataType":"string"},
+            "cell": {"dataType":"string"},
+            "village": {"dataType":"string"},
+            "preferredLanguage": {"dataType":"string"},
+            "nearByHealthCenter": {"dataType":"string"},
+            "schoolName": {"dataType":"string"},
+            "schoolAddress": {"dataType":"string"},
+            "churchName": {"dataType":"string"},
+            "churchAddress": {"dataType":"string"},
+            "hospitalName": {"dataType":"string"},
+            "hospitalAddress": {"dataType":"string"},
+            "healthCenterName": {"dataType":"string"},
+            "healthCenterAddress": {"dataType":"string"},
+            "epiDistrict": {"dataType":"string"},
             "roles": {"dataType":"array","array":{"dataType":"refObject","ref":"IRoleAttributes"}},
             "userRoles": {"dataType":"array","array":{"dataType":"any"}},
             "createdAt": {"dataType":"datetime"},
@@ -117,6 +134,7 @@ const models: TsoaRoute.Models = {
             "phone": {"dataType":"string"},
             "role": {"dataType":"array","array":{"dataType":"refObject","ref":"IRoleAttributes"}},
             "status": {"ref":"UserStatus"},
+            "verified": {"dataType":"boolean"},
             "profileImage": {"dataType":"string"},
         },
         "additionalProperties": false,
@@ -132,6 +150,7 @@ const models: TsoaRoute.Models = {
             "phone": {"dataType":"string"},
             "role": {"dataType":"array","array":{"dataType":"refObject","ref":"IRoleAttributes"}},
             "status": {"ref":"UserStatus"},
+            "verified": {"dataType":"boolean"},
             "profileImage": {"dataType":"string"},
         },
         "additionalProperties": false,
@@ -140,7 +159,11 @@ const models: TsoaRoute.Models = {
     "LoginRequest": {
         "dataType": "refObject",
         "properties": {
-            "email": {"dataType":"string","required":true},
+            "email": {"dataType":"string"},
+            "phone": {"dataType":"string"},
+            "identifier": {"dataType":"string"},
+            "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["email"]},{"dataType":"enum","enums":["phone"]}]},
+            "loginValue": {"dataType":"string"},
             "password": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
@@ -161,11 +184,28 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "name": {"dataType":"string","required":true},
-            "email": {"dataType":"string","required":true},
+            "email": {"dataType":"string"},
             "password": {"dataType":"string","required":true},
             "address": {"dataType":"string"},
-            "phone": {"dataType":"string"},
+            "phone": {"dataType":"string","required":true},
             "roleType": {"dataType":"string"},
+            "userType": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "nationalId": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "district": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "sector": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "cell": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "village": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "preferredLanguage": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "nearByHealthCenter": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "schoolName": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "schoolAddress": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "churchName": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "churchAddress": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "hospitalName": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "hospitalAddress": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "healthCenterName": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "healthCenterAddress": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "epiDistrict": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
         },
         "additionalProperties": false,
     },
@@ -220,7 +260,7 @@ export function RegisterRoutes(app: Router) {
                 limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
         };
         app.get('/api/users',
-            authenticateMiddleware([{"jwt":["manage_users"]}]),
+            authenticateMiddleware([{"jwt":["user:create","user:update","user:delete"]}]),
             ...(fetchMiddlewares<RequestHandler>(UserController)),
             ...(fetchMiddlewares<RequestHandler>(UserController.prototype.getUsers)),
 
@@ -251,7 +291,7 @@ export function RegisterRoutes(app: Router) {
                 userId: {"in":"path","name":"userId","required":true,"dataType":"string"},
         };
         app.get('/api/users/:userId',
-            authenticateMiddleware([{"jwt":["view_users"]}]),
+            authenticateMiddleware([{"jwt":["user:view"]}]),
             ...(fetchMiddlewares<RequestHandler>(UserController)),
             ...(fetchMiddlewares<RequestHandler>(UserController.prototype.getUserById)),
 
@@ -282,7 +322,7 @@ export function RegisterRoutes(app: Router) {
                 userData: {"in":"body","name":"userData","required":true,"ref":"IUserCreateRequest"},
         };
         app.post('/api/users',
-            authenticateMiddleware([{"jwt":["manage_users"]}]),
+            authenticateMiddleware([{"jwt":["user:create"]}]),
             ...(fetchMiddlewares<RequestHandler>(UserController)),
             ...(fetchMiddlewares<RequestHandler>(UserController.prototype.createUser)),
 
@@ -314,7 +354,7 @@ export function RegisterRoutes(app: Router) {
                 userData: {"in":"body","name":"userData","required":true,"ref":"IUserUpdateRequest"},
         };
         app.put('/api/users/:userId',
-            authenticateMiddleware([{"jwt":["manage_users"]}]),
+            authenticateMiddleware([{"jwt":["user:update"]}]),
             ...(fetchMiddlewares<RequestHandler>(UserController)),
             ...(fetchMiddlewares<RequestHandler>(UserController.prototype.updateUser)),
 
@@ -345,7 +385,7 @@ export function RegisterRoutes(app: Router) {
                 userId: {"in":"path","name":"userId","required":true,"dataType":"string"},
         };
         app.delete('/api/users/:userId',
-            authenticateMiddleware([{"jwt":["manage_users"]}]),
+            authenticateMiddleware([{"jwt":["user:delete"]}]),
             ...(fetchMiddlewares<RequestHandler>(UserController)),
             ...(fetchMiddlewares<RequestHandler>(UserController.prototype.deleteUser)),
 

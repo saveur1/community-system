@@ -1,5 +1,5 @@
 {
-  "name": "tanstack-router-react-example-basic-ssr-streaming-file-based",
+  "name": "community-listening-tool",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,9 +14,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
-    "@tanstack/query-async-storage-persister": "^5.85.3",
     "@tanstack/react-query": "^5.85.3",
-    "@tanstack/react-query-persist-client": "^5.85.3",
     "@tanstack/react-router": "^1.130.12",
     "@tanstack/router-plugin": "^1.130.15",
     "@types/axios": "^0.9.36",

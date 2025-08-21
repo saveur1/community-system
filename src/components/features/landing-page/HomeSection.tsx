@@ -21,7 +21,7 @@ const HomeSection = () => {
   };
 
   return (
-    <section className="bg-gradient-to-r from-primary from-50% to-[#C1B9AE] to-50%">
+    <section className="bg-gradient-to-r from-primary from-50% to-[#C1B9AE] to-50%" id="home">
       <div
         className="relative max-lg:bg-primary lg:bg-[#C1B9AE] lg:min-h-[calc(100lvh-70px)] lg:py-12 lg:px-8 max-lg:p-0 flex flex-col items-center justify-center w-full max-w-8xl mx-auto"
         style={{

@@ -65,12 +65,26 @@ export class AuthController extends Controller {
     @Body() credentials: LoginRequest,
     @Res() res: TsoaResponse<200 | 401 | 403, ServiceResponse<{ user: IUserResponse | null }>>
   ): Promise<void> {
-    const { email, password } = credentials;
-    const data = await db.User.findOne({ where: { email } });
+    const { type, email, phone, password } = credentials as any;
+
+    if ((!email && !phone) || !password) {
+      
+      res(401, ServiceResponse.failure('Invalid credentials', { user: null }));
+      return;
+    }
+
+    let where: any;
+    if (type === 'email') {
+      where = { email: email };
+    } else if (type === 'phone') {
+      where = { phone: phone };
+    }
+
+    const data = await db.User.findOne({ where });
     const user = data?.toJSON();
 
     if (!user || !user.password || !(await compare(password, user.password))) {
-      res(401, ServiceResponse.failure('Invalid email or password', { user: null }));
+      res(401, ServiceResponse.failure('Invalid credentials', { user: null }));
       return;
     }
 
@@ -118,9 +132,46 @@ export class AuthController extends Controller {
     @Body() signupData: SignupRequest,
     @Res() res: TsoaResponse<201 | 400, ServiceResponse<{ user: IUserResponse | null }>>
   ): Promise<void> {
-    const { email, password, name, address, phone, roleType = 'local_influencer' } = signupData;
+    const {
+      email,
+      password,
+      name,
+      address,
+      phone,
+      roleType,
+      userType,
+      // extended optional profile fields
+      nationalId,
+      district,
+      sector,
+      cell,
+      village,
+      preferredLanguage,
+      nearByHealthCenter,
+      // role-specific
+      schoolName,
+      schoolAddress,
+      churchName,
+      churchAddress,
+      hospitalName,
+      hospitalAddress,
+      healthCenterName,
+      healthCenterAddress,
+      epiDistrict,
+    } = signupData as any;
 
-    if (await db.User.findOne({ where: { email } })) {
+    // Require phone; email is optional
+    if (!phone || !String(phone).trim()) {
+      res(400, ServiceResponse.failure('Phone is required', { user: null }));
+      return;
+    }
+
+    // Uniqueness checks
+    if (await db.User.findOne({ where: { phone } })) {
+      res(400, ServiceResponse.failure('User with this phone already exists', { user: null }));
+      return;
+    }
+    if (email && (await db.User.findOne({ where: { email } }))) {
       res(400, ServiceResponse.failure('User with this email already exists', { user: null }));
       return;
     }
@@ -138,6 +189,25 @@ export class AuthController extends Controller {
         phone,
         status: 'active',
         verified: isLocalCitizen, // Auto-verify local_citizen
+        userType,
+        // extended optional fields
+        nationalId,
+        district,
+        sector,
+        cell,
+        village,
+        preferredLanguage,
+        nearByHealthCenter,
+        // role-specific optional fields
+        schoolName,
+        schoolAddress,
+        churchName,
+        churchAddress,
+        hospitalName,
+        hospitalAddress,
+        healthCenterName,
+        healthCenterAddress,
+        epiDistrict,
       }, { transaction: t });
 
       // Find or create role
@@ -321,7 +391,6 @@ export class AuthController extends Controller {
       });
     });
 
-    console.log('User authenticated successfully:', user.id);
     const token = await this.generateToken(user);
 
     const isProduction = process.env.NODE_ENV === 'production';

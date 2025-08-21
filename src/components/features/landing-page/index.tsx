@@ -1,4 +1,6 @@
-import { type Variants } from "framer-motion"; import HomeSection from "./HomeSection";
+import { type Variants, animate } from "framer-motion";
+import { useEffect } from "react";
+import HomeSection from "./HomeSection";
 import AboutSection from "./programmes";
 import FeedbackForm from "./feedback-form";
 import ChatBotButton from "./chatbot-icon";
@@ -17,8 +19,33 @@ export const sectionVariants: Variants = {
   }),
 };
 
-
 const LandingPage = () => {
+  // Scroll to section if hash is present after mount or when hash changes
+  useEffect(() => {
+    const tryScroll = () => {
+      const id = window.location.hash?.replace('#', '');
+      if (!id) return;
+      // Defer a tick to ensure sections are rendered
+      requestAnimationFrame(() => {
+        const el = document.getElementById(id);
+        if (el) {
+          const y = el.getBoundingClientRect().top + window.scrollY - 70; // header offset
+          animate(window.scrollY, y, {
+            duration: 0.7,
+            onUpdate: (v) => window.scrollTo(0, v),
+          });
+        }
+      });
+    };
+
+    // Run on mount
+    tryScroll();
+
+    // Listen to hash changes
+    window.addEventListener('hashchange', tryScroll);
+    return () => window.removeEventListener('hashchange', tryScroll);
+  }, []);
+
   return (
     <div className="bg-white min-h-screen flex flex-col">
 

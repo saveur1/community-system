@@ -1,15 +1,41 @@
 export interface LoginRequest {
-  email: string;
+  // Backward compatible: clients may still send `email`
+  email?: string;
+  // New options to allow login via phone or a generic identifier
+  phone?: string;
+  identifier?: string; // email or phone
+  // Preferred shape
+  type?: 'email' | 'phone';
+  loginValue?: string;
   password: string;
 }
 
 export interface SignupRequest {
   name: string;
-  email: string;
+  email?: string; // optional: signup can proceed without email
   password: string;
   address?: string;
-  phone?: string;
+  phone: string; // required for signup
   roleType?: string;
+  userType?: string | null;
+  // Extended optional profile fields
+  nationalId?: string | null;
+  district?: string | null;
+  sector?: string | null;
+  cell?: string | null;
+  village?: string | null;
+  preferredLanguage?: string | null;
+  nearByHealthCenter?: string | null;
+  // Role-specific
+  schoolName?: string | null;
+  schoolAddress?: string | null;
+  churchName?: string | null;
+  churchAddress?: string | null;
+  hospitalName?: string | null;
+  hospitalAddress?: string | null;
+  healthCenterName?: string | null;
+  healthCenterAddress?: string | null;
+  epiDistrict?: string | null;
 }
 
 export interface ForgotPasswordRequest {

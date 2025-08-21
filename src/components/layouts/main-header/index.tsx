@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useRouter } from "@tanstack/react-router"
 import OptimizedImage from "../../ui/image"
 import { SelectDropdown } from "../../ui/select"
 import { useState } from "react"
@@ -13,6 +13,7 @@ const MainHeader = () => {
     const { t, i18n } = useTranslation();
     const [language, setLanguage] = useState(i18n.language);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const router = useRouter();
 
     // Helper to close menu on mobile
     const handleNavClick = () => setMobileOpen(false);
@@ -27,29 +28,26 @@ const MainHeader = () => {
     // Smooth scroll to section by id
     const handleSmoothScroll = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: string) => {
         e.preventDefault();
-        handleNavClick();
-        const el = document.getElementById(id);
-        if (el) {
-            const y = el.getBoundingClientRect().top + window.scrollY - 70; // offset for sticky header
-            animate(window.scrollY, y, {
-                duration: 0.7,
-                onUpdate: (v) => window.scrollTo(0, v),
-            });
+        // If we're not on home, navigate to home with a hash so the landing page can scroll after mount
+        if (router.state.location.pathname !== '/') {
+            router.navigate({ to: '/', hash: id });
+        } else {
+            // Already on home: set the hash to trigger the landing page hash listener
+            window.location.hash = id;
         }
+        handleNavClick();
     };
 
     // Pass onClose to navLinks for mobile
     const navLinks = (
         <>
-            <Link
-                to="/"
-                className="text-primary hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
-                activeProps={{ className: "text-blue-600 font-semibold" }}
-                onClick={handleNavClick}
+            <button
+                className="text-primary cursor-pointer hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
+                onClick={e => handleSmoothScroll(e, "home")}
             >
                 <AiOutlineHome size={18} />
                 {t('navbar.home')}
-            </Link>
+            </button>
             <button
                 className="text-gray-500 hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer"
                 onClick={e => handleSmoothScroll(e, "about")}
@@ -58,21 +56,19 @@ const MainHeader = () => {
                 {t('navbar.about')}
             </button>
             <button
-                className="text-gray-500 hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
+                className="text-gray-500 cursor-pointer hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
                 onClick={e => handleSmoothScroll(e, "anncouncements")}
             >
                 <AiOutlineSound size={18} />
                 {t('navbar.announcements')}
             </button>
-            <Link
-                to="/auth/login"
-                className="text-gray-500 hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
-                activeProps={{ className: "text-blue-600 font-semibold" }}
-                onClick={handleNavClick}
+            <button
+                className="text-gray-500 cursor-pointer hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
+                onClick={e => handleSmoothScroll(e, "feedback")}
             >
                 <AiOutlineMessage size={18} />
                 {t('navbar.feedback')}
-            </Link>
+            </button>
             <SelectDropdown
                 options={[
                     { label: "Kinyarwanda", value: "rw" },
@@ -103,7 +99,7 @@ const MainHeader = () => {
                 <div className="max-w-8xl mx-auto">
                     <div className="flex items-center justify-between h-16 px-4">
                         {/* Logo/TC on the left */}
-                        <div>
+                        <Link to="/">
                             <OptimizedImage
                                 src="/images/web_logo.png"
                                 alt="Logo"
@@ -111,7 +107,7 @@ const MainHeader = () => {
                                 height={56}
                                 className="h-16 w-[200px] max-sm:w-[130px] object-contain"
                             />
-                        </div>
+                        </Link>
 
                         {/* Desktop nav */}
                         <nav className="hidden lg:flex items-center space-x-4 sm:space-x-6">

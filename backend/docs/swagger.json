@@ -111,6 +111,57 @@
 					"verified": {
 						"type": "boolean"
 					},
+					"userType": {
+						"type": "string"
+					},
+					"nationalId": {
+						"type": "string"
+					},
+					"district": {
+						"type": "string"
+					},
+					"sector": {
+						"type": "string"
+					},
+					"cell": {
+						"type": "string"
+					},
+					"village": {
+						"type": "string"
+					},
+					"preferredLanguage": {
+						"type": "string"
+					},
+					"nearByHealthCenter": {
+						"type": "string"
+					},
+					"schoolName": {
+						"type": "string"
+					},
+					"schoolAddress": {
+						"type": "string"
+					},
+					"churchName": {
+						"type": "string"
+					},
+					"churchAddress": {
+						"type": "string"
+					},
+					"hospitalName": {
+						"type": "string"
+					},
+					"hospitalAddress": {
+						"type": "string"
+					},
+					"healthCenterName": {
+						"type": "string"
+					},
+					"healthCenterAddress": {
+						"type": "string"
+					},
+					"epiDistrict": {
+						"type": "string"
+					},
 					"roles": {
 						"items": {
 							"$ref": "#/components/schemas/IRoleAttributes"
@@ -171,6 +222,57 @@
 					},
 					"verified": {
 						"type": "boolean"
+					},
+					"userType": {
+						"type": "string"
+					},
+					"nationalId": {
+						"type": "string"
+					},
+					"district": {
+						"type": "string"
+					},
+					"sector": {
+						"type": "string"
+					},
+					"cell": {
+						"type": "string"
+					},
+					"village": {
+						"type": "string"
+					},
+					"preferredLanguage": {
+						"type": "string"
+					},
+					"nearByHealthCenter": {
+						"type": "string"
+					},
+					"schoolName": {
+						"type": "string"
+					},
+					"schoolAddress": {
+						"type": "string"
+					},
+					"churchName": {
+						"type": "string"
+					},
+					"churchAddress": {
+						"type": "string"
+					},
+					"hospitalName": {
+						"type": "string"
+					},
+					"hospitalAddress": {
+						"type": "string"
+					},
+					"healthCenterName": {
+						"type": "string"
+					},
+					"healthCenterAddress": {
+						"type": "string"
+					},
+					"epiDistrict": {
+						"type": "string"
 					},
 					"roles": {
 						"items": {
@@ -314,6 +416,9 @@
 					"status": {
 						"$ref": "#/components/schemas/UserStatus"
 					},
+					"verified": {
+						"type": "boolean"
+					},
 					"profileImage": {
 						"type": "string"
 					}
@@ -352,6 +457,9 @@
 					"status": {
 						"$ref": "#/components/schemas/UserStatus"
 					},
+					"verified": {
+						"type": "boolean"
+					},
 					"profileImage": {
 						"type": "string"
 					}
@@ -364,12 +472,27 @@
 					"email": {
 						"type": "string"
 					},
+					"phone": {
+						"type": "string"
+					},
+					"identifier": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"email",
+							"phone"
+						]
+					},
+					"loginValue": {
+						"type": "string"
+					},
 					"password": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"email",
 					"password"
 				],
 				"type": "object",
@@ -433,12 +556,80 @@
 					},
 					"roleType": {
 						"type": "string"
+					},
+					"userType": {
+						"type": "string",
+						"nullable": true
+					},
+					"nationalId": {
+						"type": "string",
+						"nullable": true
+					},
+					"district": {
+						"type": "string",
+						"nullable": true
+					},
+					"sector": {
+						"type": "string",
+						"nullable": true
+					},
+					"cell": {
+						"type": "string",
+						"nullable": true
+					},
+					"village": {
+						"type": "string",
+						"nullable": true
+					},
+					"preferredLanguage": {
+						"type": "string",
+						"nullable": true
+					},
+					"nearByHealthCenter": {
+						"type": "string",
+						"nullable": true
+					},
+					"schoolName": {
+						"type": "string",
+						"nullable": true
+					},
+					"schoolAddress": {
+						"type": "string",
+						"nullable": true
+					},
+					"churchName": {
+						"type": "string",
+						"nullable": true
+					},
+					"churchAddress": {
+						"type": "string",
+						"nullable": true
+					},
+					"hospitalName": {
+						"type": "string",
+						"nullable": true
+					},
+					"hospitalAddress": {
+						"type": "string",
+						"nullable": true
+					},
+					"healthCenterName": {
+						"type": "string",
+						"nullable": true
+					},
+					"healthCenterAddress": {
+						"type": "string",
+						"nullable": true
+					},
+					"epiDistrict": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
 					"name",
-					"email",
-					"password"
+					"password",
+					"phone"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -509,7 +700,7 @@
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "tanstack-router-react-example-basic-ssr-streaming-file-based",
+		"title": "community-listening-tool",
 		"contact": {}
 	},
 	"paths": {
@@ -534,7 +725,9 @@
 				"security": [
 					{
 						"jwt": [
-							"manage_users"
+							"user:create",
+							"user:update",
+							"user:delete"
 						]
 					}
 				],
@@ -591,7 +784,7 @@
 				"security": [
 					{
 						"jwt": [
-							"manage_users"
+							"user:create"
 						]
 					}
 				],
@@ -639,7 +832,7 @@
 				"security": [
 					{
 						"jwt": [
-							"view_users"
+							"user:view"
 						]
 					}
 				],
@@ -694,7 +887,7 @@
 				"security": [
 					{
 						"jwt": [
-							"manage_users"
+							"user:update"
 						]
 					}
 				],
@@ -749,7 +942,7 @@
 				"security": [
 					{
 						"jwt": [
-							"manage_users"
+							"user:delete"
 						]
 					}
 				],
