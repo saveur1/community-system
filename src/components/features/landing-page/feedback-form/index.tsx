@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -98,8 +98,8 @@ function FeedbackForm() {
   const { t } = useTranslation();
 
   // Recording state
-  type VoiceFeedback = { id: string; blob: Blob; duration: number; timestamp: Date };
-  type VideoFeedback = { id: string; blob: Blob; duration: number; timestamp: Date };
+  type VoiceFeedback = { id: string; blob: Blob; duration: number; timestamp: Date; url?: string };
+  type VideoFeedback = { id: string; blob: Blob; duration: number; timestamp: Date; url?: string };
   const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedback[]>([]);
   const [videoFeedback, setVideoFeedback] = useState<VideoFeedback[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -118,6 +118,59 @@ function FeedbackForm() {
   type PermissionState = 'checking' | 'prompt' | 'granted' | 'denied';
   const [micPermission, setMicPermission] = useState<PermissionState>('checking');
   const [camPermission, setCamPermission] = useState<PermissionState>('checking');
+
+  // Cleanup function to stop all media streams and clear resources
+  const cleanupMediaResources = useCallback(() => {
+    // Stop current stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
+        track.stop();
+      });
+      streamRef.current = null;
+    }
+    setStream(null);
+
+    // Clear video element
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current.src = '';
+    }
+
+    // Stop any playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current = null;
+    }
+    setPlayingAudioId(null);
+
+    // Clear recording state
+    setIsRecording(false);
+    setRecordingType(null);
+    setMediaRecorder(null);
+    setShowVideoPreview(false);
+
+    // Clear timer
+    if (timerRef.current) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setRecordingSeconds(0);
+  }, []);
+
+  // Cleanup blob URLs to prevent memory leaks
+  const cleanupBlobUrls = useCallback(() => {
+    voiceFeedback.forEach(feedback => {
+      if (feedback.url) {
+        URL.revokeObjectURL(feedback.url);
+      }
+    });
+    videoFeedback.forEach(feedback => {
+      if (feedback.url) {
+        URL.revokeObjectURL(feedback.url);
+      }
+    });
+  }, [voiceFeedback, videoFeedback]);
 
   // Check permissions on mount and subscribe to changes
   useEffect(() => {
@@ -171,17 +224,20 @@ function FeedbackForm() {
     };
   }, []);
 
-  // Cleanup on unmount: stop media, timers, audio (do NOT clear on stream change)
+  // Cleanup on unmount and when feedback method changes
   useEffect(() => {
     return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
-      if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
+      cleanupMediaResources();
+      cleanupBlobUrls();
     };
-  }, []);
+  }, [cleanupMediaResources, cleanupBlobUrls]);
+
+  // Cleanup resources when switching feedback methods
+  useEffect(() => {
+    if (form.feedbackMethod !== 'voice' && form.feedbackMethod !== 'video') {
+      cleanupMediaResources();
+    }
+  }, [form.feedbackMethod, cleanupMediaResources]);
 
   const requestMicrophonePermission = async () => {
     try {
@@ -249,11 +305,18 @@ function FeedbackForm() {
       }
     }
 
+    // Clean up resources before submitting
+    cleanupMediaResources();
+
     // Simulate submit success
     setSubmitted(true);
     setForm({ name: "", message: "", feedbackMethod: 'text' });
+    
+    // Clean up blob URLs before clearing feedback
+    cleanupBlobUrls();
     setVoiceFeedback([]);
     setVideoFeedback([]);
+    
     toast.success(t('feedback.success_message'), {
       position: "top-center",
       autoClose: 3000,
@@ -263,6 +326,9 @@ function FeedbackForm() {
 
   const startRecording = async (type: 'voice' | 'video') => {
     try {
+      // Clean up any existing resources first
+      cleanupMediaResources();
+
       if (type === 'voice' && micPermission === 'denied') {
         showErrorToast('Microphone permission is denied. Enable it to record.');
         return;
@@ -271,13 +337,21 @@ function FeedbackForm() {
         showErrorToast('Camera/Microphone permission is denied. Enable them to record video.');
         return;
       }
+      
       const constraints = type === 'voice' ? { audio: true } : { audio: true, video: true };
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(mediaStream);
       streamRef.current = mediaStream;
 
       if (type === 'video' && videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
+        const v = videoRef.current;
+        v.srcObject = mediaStream;
+        // Ensure inline playback and no autoplay restrictions
+        try { (v as any).playsInline = true; } catch {}
+        v.muted = true;
+        v.onloadedmetadata = () => {
+          v.play().catch(() => {/* ignore autoplay errors */});
+        };
         setShowVideoPreview(true);
       }
 
@@ -302,16 +376,27 @@ function FeedbackForm() {
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) chunks.push(event.data);
       };
+      
       const startTime = Date.now();
       recorder.onstop = () => {
         const outType = recorder.mimeType || chosenMime || (type === 'voice' ? 'audio/webm' : 'video/webm');
         const blob = new Blob(chunks, { type: outType });
         const duration = Math.round((Date.now() - startTime) / 1000);
-        const item = { id: Math.random().toString(36).slice(2), blob, duration, timestamp: new Date() };
-        if (type === 'voice') setVoiceFeedback((prev) => [...prev, item]);
-        else setVideoFeedback((prev) => [...prev, item]);
+        const url = URL.createObjectURL(blob);
+        const item = { id: Math.random().toString(36).slice(2), blob, duration, timestamp: new Date(), url };
+        
+        if (type === 'voice') {
+          setVoiceFeedback((prev) => [...prev, item]);
+        } else {
+          // For video, replace existing recording
+          setVideoFeedback((prev) => {
+            // Clean up previous video URLs
+            prev.forEach(v => v.url && URL.revokeObjectURL(v.url));
+            return [item];
+          });
+        }
 
-        // Clean up stream
+        // Clean up stream after recording
         mediaStream.getTracks().forEach((track) => track.stop());
         setStream(null);
         streamRef.current = null;
@@ -326,6 +411,7 @@ function FeedbackForm() {
       setIsRecording(true);
       setRecordingType(type);
       setMediaRecorder(recorder);
+      
       // start timer
       setRecordingSeconds(0);
       if (timerRef.current) window.clearInterval(timerRef.current);
@@ -334,6 +420,7 @@ function FeedbackForm() {
       }, 1000);
     } catch (err) {
       console.error(err);
+      cleanupMediaResources();
       showErrorToast('Unable to start recording. Please check permissions.');
       const e = err as { name?: string };
       // Only set to denied on explicit user denial
@@ -363,8 +450,23 @@ function FeedbackForm() {
   };
 
   const deleteRecording = (type: 'voice' | 'video', id: string) => {
-    if (type === 'voice') setVoiceFeedback((prev) => prev.filter((v) => v.id !== id));
-    else setVideoFeedback((prev) => prev.filter((v) => v.id !== id));
+    if (type === 'voice') {
+      setVoiceFeedback((prev) => {
+        const toDelete = prev.find(v => v.id === id);
+        if (toDelete?.url) {
+          URL.revokeObjectURL(toDelete.url);
+        }
+        return prev.filter((v) => v.id !== id);
+      });
+    } else {
+      setVideoFeedback((prev) => {
+        const toDelete = prev.find(v => v.id === id);
+        if (toDelete?.url) {
+          URL.revokeObjectURL(toDelete.url);
+        }
+        return prev.filter((v) => v.id !== id);
+      });
+    }
   };
 
   const feedbackMethods: { value: FeedbackMethod; label: string; icon: string; description: string }[] = [
@@ -564,11 +666,13 @@ function FeedbackForm() {
                                   audioRef.current.pause();
                                   audioRef.current.src = '';
                                 }
-                                const audio = new Audio(URL.createObjectURL(v.blob));
+                                // Create new audio element
+                                const audio = new Audio(v.url || URL.createObjectURL(v.blob));
                                 audioRef.current = audio;
                                 setPlayingAudioId(v.id);
                                 audio.onended = () => setPlayingAudioId(null);
-                                audio.play();
+                                audio.onerror = () => setPlayingAudioId(null);
+                                audio.play().catch(() => setPlayingAudioId(null));
                               }}
                               isPlaying={playingAudioId === v.id}
                             />
@@ -620,59 +724,76 @@ function FeedbackForm() {
                     <button type="button" onClick={requestCameraPermission} className="text-sm px-3 py-1 rounded bg-red-600 text-white">Allow</button>
                   </div>
                 )}
-                <div className="flex items-center gap-3 mb-4">
-                  {!isRecording ? (
-                    <button type="button" onClick={() => startRecording('video')} className="flex items-center px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50" disabled={camPermission === 'denied' || micPermission === 'denied'}>
-                      <FaVideo className="mr-2" /> Start Video Recording
-                    </button>
-                  ) : (
-                    <button type="button" onClick={stopRecording} className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg">
-                      <FaStop className="mr-2" /> Stop Recording
-                    </button>
-                  )}
-                  {isRecording && recordingType === 'video' && (
-                    <div className="ml-3 flex items-center text-red-600">
-                      <FaCircle className="animate-pulse mr-2" />
-                      <span className="font-medium">Recording... {recordingSeconds}s</span>
+
+                {/* Recording state: live preview with big Stop button */}
+                {isRecording && recordingType === 'video' && (
+                  <div className="w-full max-w-2xl">
+                    <div className="relative w-full rounded-lg overflow-hidden border border-gray-300 shadow-sm">
+                      <video ref={videoRef} autoPlay muted playsInline className="w-full aspect-video bg-black object-cover" />
                     </div>
-                  )}
-                </div>
-                {showVideoPreview && isRecording && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Live Camera Preview</h4>
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      muted
-                      className="w-full max-w-md rounded-lg border border-gray-300 shadow-sm"
-                    />
+                    <div className="mt-4 flex items-center justify-center gap-4">
+                      <button
+                        type="button"
+                        onClick={stopRecording}
+                        className="w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg"
+                        aria-label="Stop recording"
+                        title="Stop recording"
+                      >
+                        <FaStop className="text-2xl" />
+                      </button>
+                      <div className="flex items-center text-red-600">
+                        <FaCircle className="animate-pulse mr-2" />
+                        <span className="font-medium">Recording... {recordingSeconds}s</span>
+                      </div>
+                    </div>
                   </div>
                 )}
-                {videoFeedback.length > 0 && (
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-gray-700">Recorded Videos</h4>
-                    {videoFeedback.map((v) => (
-                      <div key={v.id} className="flex items-start justify-between p-3 border rounded-lg">
-                        <video
-                          controls
-                          className="w-80 max-w-full rounded border"
-                          style={{ minWidth: '320px' }}
-                        >
-                          <source src={URL.createObjectURL(v.blob)} type="video/webm" />
-                        </video>
-                        <div className="flex flex-col items-end gap-2 ml-4">
-                          <span className="text-sm text-gray-500">{v.duration}s</span>
-                          <span className="text-xs text-gray-400">{v.timestamp.toLocaleString()}</span>
+
+                {/* Not recording: show recorded preview if available */}
+                {!isRecording && videoFeedback.length > 0 && (
+                  <div className="w-full max-w-2xl">
+                    {videoFeedback.slice(0, 1).map((v) => (
+                      <div key={v.id} className="w-full">
+                        <div className="relative w-full rounded-lg overflow-hidden border border-gray-300 shadow-sm">
+                          <video controls className="w-full aspect-video bg-black">
+                            <source src={v.url || URL.createObjectURL(v.blob)} type="video/webm" />
+                          </video>
+                        </div>
+                        <div className="mt-4 flex items-center justify-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => startRecording('video')}
+                            className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
+                            disabled={camPermission === 'denied' || micPermission === 'denied'}
+                          >
+                            Re-record
+                          </button>
                           <button
                             type="button"
                             onClick={() => deleteRecording('video', v.id)}
-                            className="text-red-600 hover:underline flex items-center text-sm"
+                            className="px-4 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100"
                           >
-                            <FaTrash className="mr-1" /> Remove
+                            <span className="inline-flex items-center"><FaTrash className="mr-2" />Remove</span>
                           </button>
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* No recording yet and not recording now: show CTA */}
+                {!isRecording && videoFeedback.length === 0 && (
+                  <div className="w-full max-w-2xl">
+                    <div className="flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => startRecording('video')}
+                        className="flex items-center px-5 py-3 bg-primary text-white rounded-lg disabled:opacity-50"
+                        disabled={camPermission === 'denied' || micPermission === 'denied'}
+                      >
+                        <FaVideo className="mr-2" /> Start Video Recording
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
