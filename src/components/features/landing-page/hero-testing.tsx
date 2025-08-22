@@ -112,7 +112,7 @@ const WavoSlideshow = () => {
   }, [isAnimating]);
 
   return (
-    <div className="relative h-[calc(100vh-70px)] w-full overflow-hidden bg-black">
+    <div className="relative h-[calc(100vh-80px)] w-full overflow-hidden bg-black">
       {/* Background */}
       <div className="absolute inset-0 w-full h-full">
         {slides.map((slide, index) => {
@@ -131,7 +131,7 @@ const WavoSlideshow = () => {
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
                 style={{
-                  backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${slide.background})`
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${slide.background})`
                 }}
               />
             </motion.div>
@@ -193,7 +193,7 @@ const WavoSlideshow = () => {
 
       {/* Progress */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-40">
-        <motion.div className="h-full bg-white" initial={{ width: '0%' }} animate={{ width: '100%' }} transition={{ duration: 7, ease: 'linear' }} key={currentSlide} />
+        <motion.div className="h-full bg-primary" initial={{ width: '0%' }} animate={{ width: '100%' }} transition={{ duration: 7, ease: 'linear' }} key={currentSlide} />
       </div>
     </div>
   );
