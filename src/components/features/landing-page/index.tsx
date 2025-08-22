@@ -4,11 +4,10 @@ import HomeSection from "./HomeSection";
 import AboutSection from "./programmes";
 import FeedbackForm from "./feedback-form";
 import ChatBotButton from "./chatbot-icon";
-import ServiceUpdateCard from "./announcements-card";
-import ImigongoStarter from "@/components/layouts/imigongo-starter";
+import TweetsCards from "./twitting-card";
 import MainHeader from "@/components/layouts/main-header";
-import TopFooterBg from "@/components/layouts/main-footer/top-footer-bg";
 import Footer from "@/components/layouts/main-footer/main-footer";
+import WavoSlideshow from "./hero-testing";
 
 export const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -53,12 +52,13 @@ const LandingPage = () => {
 
       <ChatBotButton />
       {/* Hero Section */}
-      <HomeSection />
+      {/* <HomeSection /> */}
+      <WavoSlideshow />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-lg:place-items-center md:gap-10 py-8 md:py-12 w-full max-w-8xl mx-auto px-2 sm:px-4">
         {/* About the Project */}
         <AboutSection />
-        <ServiceUpdateCard />
+        <TweetsCards />
         
       </div>
 

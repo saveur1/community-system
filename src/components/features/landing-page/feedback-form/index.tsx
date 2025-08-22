@@ -1,93 +1,25 @@
+// components/FeedbackForm.tsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { sectionVariants } from "../";
-import { FaSave, FaMicrophone, FaVideo, FaStop, FaPlay, FaPause, FaTrash, FaCircle, FaLock } from 'react-icons/fa';
+import { FaSave } from 'react-icons/fa';
 
 import AnimatedInput from "@/components/ui/animated-input";
+import TextFeedback from "./text-feedback";
+import VoiceFeedback from "./voice-feedback";
+import VideoFeedback from "./video-feedback";
 
-// Waveform Component
-type VoiceWaveformProps = { isRecording: boolean; recordingSeconds: number };
-const VoiceWaveform: React.FC<VoiceWaveformProps> = ({ isRecording, recordingSeconds }) => {
-  // Generate different wave heights for visual variety
-  const waveHeights = [12, 24, 16, 32, 20, 28, 14, 36, 22, 18, 30, 26, 16, 34, 20, 24, 18, 28, 22, 32];
-
-  return (
-    <div className="flex items-center justify-center space-x-1 h-14">
-      {waveHeights.map((baseHeight, index) => (
-        <motion.div
-          key={index}
-          className="bg-primary rounded-full"
-          style={{
-            width: '3px',
-            height: isRecording ? `${baseHeight}px` : `${baseHeight * 0.3}px`,
-          }}
-          animate={isRecording ? {
-            height: [
-              `${baseHeight * 0.3}px`,
-              `${baseHeight}px`,
-              `${baseHeight * 0.6}px`,
-              `${baseHeight * 0.9}px`,
-              `${baseHeight * 0.4}px`,
-              `${baseHeight * 0.8}px`,
-              `${baseHeight * 0.3}px`
-            ],
-          } : {}}
-          transition={{
-            duration: 1.5,
-            repeat: isRecording ? Infinity : 0,
-            ease: "easeInOut",
-            delay: index * 0.1,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// Recording Timer Display
-type RecordingTimerProps = { seconds: number };
-const RecordingTimer: React.FC<RecordingTimerProps> = ({ seconds }) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  const formattedTime = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  
-  return (
-    <div className="text-center">
-      <motion.div
-        className="text-2xl font-mono font-medium text-gray-700"
-        animate={{ scale: [1, 1.05, 1] }}
-        transition={{ duration: 1, repeat: Infinity }}
-      >
-        {formattedTime}
-      </motion.div>
-    </div>
-  );
-};
-
-// Play Button Component for the waveform UI
-type PlayButtonProps = { onClick: () => void; isPlaying?: boolean };
-const PlayButton: React.FC<PlayButtonProps> = ({ onClick, isPlaying = false }) => (
-  <motion.button
-    onClick={onClick}
-    className="w-16 h-16 bg-primary hover:bg-primary/80 rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    aria-label={isPlaying ? 'Pause' : 'Play'}
-  >
-    {isPlaying ? <FaPause className="text-xl" /> : <FaPlay className="text-xl ml-1" />}
-  </motion.button>
-);
+import {
+  FeedbackMethod,
+  PermissionState,
+  FormState,
+  VoiceFeedback as VoiceFeedbackType,
+  VideoFeedback as VideoFeedbackType,
+} from "@/types/feedback-types";
 
 function FeedbackForm() {
-  type FeedbackMethod = 'text' | 'voice' | 'video';
-  interface FormState {
-    name: string;
-    message: string;
-    feedbackMethod: FeedbackMethod;
-  }
-
   const [form, setForm] = useState<FormState>({
     name: "",
     message: "",
@@ -98,24 +30,19 @@ function FeedbackForm() {
   const { t } = useTranslation();
 
   // Recording state
-  type VoiceFeedback = { id: string; blob: Blob; duration: number; timestamp: Date; url?: string };
-  type VideoFeedback = { id: string; blob: Blob; duration: number; timestamp: Date; url?: string };
-  const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedback[]>([]);
-  const [videoFeedback, setVideoFeedback] = useState<VideoFeedback[]>([]);
+  const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedbackType[]>([]);
+  const [videoFeedback, setVideoFeedback] = useState<VideoFeedbackType[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [recordingType, setRecordingType] = useState<'voice' | 'video' | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [showVideoPreview, setShowVideoPreview] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const timerRef = React.useRef<number | null>(null);
-  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const timerRef = useRef<number | null>(null);
 
   // Permissions state
-  type PermissionState = 'checking' | 'prompt' | 'granted' | 'denied';
   const [micPermission, setMicPermission] = useState<PermissionState>('checking');
   const [camPermission, setCamPermission] = useState<PermissionState>('checking');
 
@@ -135,14 +62,6 @@ function FeedbackForm() {
       videoRef.current.srcObject = null;
       videoRef.current.src = '';
     }
-
-    // Stop any playing audio
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = '';
-      audioRef.current = null;
-    }
-    setPlayingAudioId(null);
 
     // Clear recording state
     setIsRecording(false);
@@ -172,6 +91,65 @@ function FeedbackForm() {
     });
   }, [voiceFeedback, videoFeedback]);
 
+  // Start camera preview stream (not recording)
+  const startCameraPreview = useCallback(async () => {
+    try {
+      if (camPermission !== 'granted' || micPermission !== 'granted') {
+        return;
+      }
+
+      // Don't start preview if already recording or if stream already exists
+      if (isRecording || streamRef.current) {
+        return;
+      }
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 },
+        audio: true
+      });
+      
+      streamRef.current = mediaStream;
+      setStream(mediaStream);
+
+      if (videoRef.current) {
+        const v = videoRef.current;
+        v.srcObject = mediaStream;
+        v.muted = true;
+        v.playsInline = true;
+        v.onloadedmetadata = () => {
+          v.play().catch(() => {/* ignore autoplay errors */});
+        };
+        setShowVideoPreview(true);
+      }
+    } catch (err) {
+      console.error('Error starting camera preview:', err);
+    }
+  }, [camPermission, micPermission, isRecording]);
+
+  // Stop camera preview stream
+  const stopCameraPreview = useCallback(() => {
+    if (streamRef.current && !isRecording) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+      setStream(null);
+      setShowVideoPreview(false);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+        videoRef.current.src = '';
+      }
+    }
+  }, [isRecording]);
+
+  // Start camera preview when video feedback is selected and permissions are granted
+  useEffect(() => {
+    if (form.feedbackMethod === 'video' && camPermission === 'granted' && micPermission === 'granted') {
+      startCameraPreview();
+    } else if (form.feedbackMethod !== 'video') {
+      stopCameraPreview();
+    }
+  }, [form.feedbackMethod, camPermission, micPermission, startCameraPreview, stopCameraPreview]);
+
   // Check permissions on mount and subscribe to changes
   useEffect(() => {
     let micStatus: PermissionStatus | null = null;
@@ -195,7 +173,6 @@ function FeedbackForm() {
             updateState('microphone', toState(micStatus.state as PermissionState));
             micStatus.onchange = () => updateState('microphone', toState(micStatus?.state as PermissionState));
           } catch {
-            // Fallback: unknown -> prompt
             updateState('microphone', 'prompt');
           }
 
@@ -239,34 +216,8 @@ function FeedbackForm() {
     }
   }, [form.feedbackMethod, cleanupMediaResources]);
 
-  const requestMicrophonePermission = async () => {
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-      s.getTracks().forEach((t) => t.stop());
-      setMicPermission('granted');
-      toast.success('Microphone enabled.');
-    } catch {
-      setMicPermission('denied');
-      toast.error('Microphone permission denied.');
-    }
-  };
-
-  const requestCameraPermission = async () => {
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-      s.getTracks().forEach((t) => t.stop());
-      setCamPermission('granted');
-      toast.success('Camera enabled.');
-    } catch {
-      setCamPermission('denied');
-      toast.error('Camera permission denied.');
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    const key = name as keyof FormState;
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const handleFormChange = (updates: Partial<FormState>) => {
+    setForm(prev => ({ ...prev, ...updates }));
   };
 
   const showErrorToast = (message: string) => {
@@ -329,6 +280,15 @@ function FeedbackForm() {
       // Clean up any existing resources first
       cleanupMediaResources();
 
+      // Clear existing recordings when starting a new recording
+      if (type === 'voice') {
+        setVoiceFeedback([]);
+      } else if (type === 'video') {
+        // Clean up existing video URLs before clearing
+        videoFeedback.forEach(v => v.url && URL.revokeObjectURL(v.url));
+        setVideoFeedback([]);
+      }
+
       if (type === 'voice' && micPermission === 'denied') {
         showErrorToast('Microphone permission is denied. Enable it to record.');
         return;
@@ -346,7 +306,6 @@ function FeedbackForm() {
       if (type === 'video' && videoRef.current) {
         const v = videoRef.current;
         v.srcObject = mediaStream;
-        // Ensure inline playback and no autoplay restrictions
         try { (v as any).playsInline = true; } catch {}
         v.muted = true;
         v.onloadedmetadata = () => {
@@ -355,7 +314,7 @@ function FeedbackForm() {
         setShowVideoPreview(true);
       }
 
-      // Select a supported mimeType for consistent playback across browsers (Chrome/Edge)
+      // Select a supported mimeType for consistent playback across browsers
       const pickSupportedMime = (candidates: string[]): string | undefined => {
         return candidates.find((mt) => (window as any).MediaRecorder && (MediaRecorder as any).isTypeSupported?.(mt));
       };
@@ -449,24 +408,12 @@ function FeedbackForm() {
     }
   };
 
-  const deleteRecording = (type: 'voice' | 'video', id: string) => {
-    if (type === 'voice') {
-      setVoiceFeedback((prev) => {
-        const toDelete = prev.find(v => v.id === id);
-        if (toDelete?.url) {
-          URL.revokeObjectURL(toDelete.url);
-        }
-        return prev.filter((v) => v.id !== id);
-      });
-    } else {
-      setVideoFeedback((prev) => {
-        const toDelete = prev.find(v => v.id === id);
-        if (toDelete?.url) {
-          URL.revokeObjectURL(toDelete.url);
-        }
-        return prev.filter((v) => v.id !== id);
-      });
-    }
+  const handleStartVoiceRecording = () => {
+    startRecording('voice');
+  };
+
+  const handleStartVideoRecording = () => {
+    startRecording('video');
   };
 
   const feedbackMethods: { value: FeedbackMethod; label: string; icon: string; description: string }[] = [
@@ -476,7 +423,7 @@ function FeedbackForm() {
   ];
 
   return (
-    <div className="max-w-8xl mx-auto w-full rounded-xl bg-gray-100 border border-gray-300 py-8 px-4" id="feedback">
+    <div className="max-w-8xl mx-auto w-full rounded-2xl bg-gray-100 border border-gray-300 py-6 px-4" id="feedback">
       {/* Header Section */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-light text-title mb-2">{t('feedback.feedback_title')}</h1>
@@ -537,24 +484,23 @@ function FeedbackForm() {
               <AnimatedInput
                 label={t('feedback.feedback_name')}
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => handleFormChange({ name: e.target.value })}
               />
             </div>
 
             {/* Feedback Method */}
-            <h3 className="text-lg font-medium text-gray-900 mt-6 mb-3">{t('feedback.feedback_method')}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
               {feedbackMethods.map((method) => (
                 <button
                   key={method.value}
                   type="button"
-                  onClick={() => setForm({ ...form, feedbackMethod: method.value as any })}
-                  className={`p-2 border rounded-lg text-left transition-colors ${form.feedbackMethod === method.value ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary'}`}
+                  onClick={() => handleFormChange({ feedbackMethod: method.value })}
+                  className={`p-2 py-3 border rounded-lg text-left transition-colors ${form.feedbackMethod === method.value ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary'}`}
                 >
                   <div className="flex items-center">
-                    <span className="text-2xl mr-2">{method.icon}</span>
+                    <span className="text-2xl mr-2 p-1 bg-primary/10 rounded-full">{method.icon}</span>
                     <div>
-                      <div className="font-medium">{method.label}</div>
+                      <div className="font-medium text-sm">{method.label}</div>
                       <div className="text-sm text-gray-500">{method.description}</div>
                     </div>
                   </div>
@@ -564,244 +510,55 @@ function FeedbackForm() {
 
             {/* Dynamic Input Area */}
             {form.feedbackMethod === 'text' && (
-              <div className="space-y-2 mt-6">
-                <label className="text-sm font-medium text-gray-700" htmlFor="message">
-                  {t('feedback.feedback_field')} <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none min-h-[120px] bg-gray-50"
-                  id="message"
-                  name="message"
-                  placeholder={t('feedback.programme_placeholder')}
-                  value={form.message}
-                  onChange={handleChange}
-                  required
-                  aria-required="true"
-                />
-              </div>
+              <TextFeedback
+                form={form}
+                onFormChange={handleFormChange}
+                onSubmit={handleSubmit}
+                submitted={submitted}
+              />
             )}
 
             {form.feedbackMethod === 'voice' && (
-              <div className="mt-6">
-                {/* Enhanced Voice Recording UI */}
-                <motion.div
-                  className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-4 border border-purple-200"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {/* Permission state for microphone */}
-                  {micPermission === 'denied' && (
-                    <div className="mb-4 flex items-start gap-3 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700">
-                      <FaLock className="mt-1" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Microphone blocked</p>
-                        <p className="text-xs">Please enable microphone access in your browser settings.</p>
-                      </div>
-                      <button type="button" onClick={requestMicrophonePermission} className="text-sm px-3 py-1 rounded bg-red-600 text-white">Allow</button>
-                    </div>
-                  )}
-                  {/* Recording Controls */}
-                  <div className="text-center mb-2">
-                    {!isRecording ? (
-                      <motion.button
-                        type="button"
-                        onClick={() => startRecording('voice')}
-                        className="w-16 h-16 bg-primary hover:bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto disabled:opacity-50"
-                        disabled={micPermission === 'denied'}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <FaMicrophone className="text-xl" />
-                      </motion.button>
-                    ) : (
-                      <motion.button
-                        type="button"
-                        onClick={stopRecording}
-                        className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto"
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      >
-                        <FaStop className="text-xl" />
-                      </motion.button>
-                    )}
-                    <p className="mt-3 text-sm text-gray-600">
-                      {!isRecording ? "Tap to start recording" : "Recording in progress..."}
-                    </p>
-                  </div>
-
-                  {/* Waveform Visualization */}
-                  <VoiceWaveform isRecording={isRecording && recordingType === 'voice'} recordingSeconds={recordingSeconds} />
-
-                  {/* Recording Timer */}
-                  {isRecording && recordingType === 'voice' && (
-                    <RecordingTimer seconds={recordingSeconds} />
-                  )}
-                </motion.div>
-
-                {/* Recorded Voice Messages */}
-                {voiceFeedback.length > 0 && (
-                  <div className="mt-6 space-y-3">
-                    <h4 className="text-sm font-medium text-gray-700">Recorded Messages</h4>
-                    {voiceFeedback.map((v) => (
-                      <motion.div
-                        key={v.id}
-                        className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-3 border border-purple-200"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4 flex-1">
-                            <PlayButton
-                              onClick={() => {
-                                // If currently playing this one, pause
-                                if (playingAudioId === v.id && audioRef.current) {
-                                  audioRef.current.pause();
-                                  setPlayingAudioId(null);
-                                  return;
-                                }
-                                // Stop any existing audio
-                                if (audioRef.current) {
-                                  audioRef.current.pause();
-                                  audioRef.current.src = '';
-                                }
-                                // Create new audio element
-                                const audio = new Audio(v.url || URL.createObjectURL(v.blob));
-                                audioRef.current = audio;
-                                setPlayingAudioId(v.id);
-                                audio.onended = () => setPlayingAudioId(null);
-                                audio.onerror = () => setPlayingAudioId(null);
-                                audio.play().catch(() => setPlayingAudioId(null));
-                              }}
-                              isPlaying={playingAudioId === v.id}
-                            />
-
-                            {/* Mini Waveform for recorded message */}
-                            <div className="flex items-center space-x-1 flex-1">
-                              {Array.from({ length: 15 }, (_, i) => (
-                                <div
-                                  key={i}
-                                  className="bg-primary rounded-full"
-                                  style={{
-                                    width: '2px',
-                                    height: `${Math.random() * 20 + 8}px`,
-                                  }}
-                                />
-                              ))}
-                            </div>
-
-                            <div className="text-right">
-                              <div className="text-sm font-medium text-gray-700">{Math.floor(v.duration / 60)}:{(v.duration % 60).toString().padStart(2, '0')}</div>
-                              <div className="text-xs text-gray-500">{v.timestamp.toLocaleString()}</div>
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => deleteRecording('voice', v.id)}
-                            className="ml-4 text-red-500 hover:text-red-700 transition-colors"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <VoiceFeedback
+                form={form}
+                onFormChange={handleFormChange}
+                onSubmit={handleSubmit}
+                submitted={submitted}
+                voiceFeedback={voiceFeedback}
+                setVoiceFeedback={setVoiceFeedback}
+                micPermission={micPermission}
+                setMicPermission={setMicPermission}
+                isRecording={isRecording && recordingType === 'voice'}
+                recordingSeconds={recordingSeconds}
+                onStartRecording={handleStartVoiceRecording}
+                onStopRecording={stopRecording}
+              />
             )}
 
             {form.feedbackMethod === 'video' && (
-              <div className="mt-6">
-                {camPermission === 'denied' && (
-                  <div className="mb-4 flex items-start gap-3 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700">
-                    <FaLock className="mt-1" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Camera blocked</p>
-                      <p className="text-xs">Please enable camera access in your browser settings.</p>
-                    </div>
-                    <button type="button" onClick={requestCameraPermission} className="text-sm px-3 py-1 rounded bg-red-600 text-white">Allow</button>
-                  </div>
-                )}
-
-                {/* Recording state: live preview with big Stop button */}
-                {isRecording && recordingType === 'video' && (
-                  <div className="w-full max-w-2xl">
-                    <div className="relative w-full rounded-lg overflow-hidden border border-gray-300 shadow-sm">
-                      <video ref={videoRef} autoPlay muted playsInline className="w-full aspect-video bg-black object-cover" />
-                    </div>
-                    <div className="mt-4 flex items-center justify-center gap-4">
-                      <button
-                        type="button"
-                        onClick={stopRecording}
-                        className="w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg"
-                        aria-label="Stop recording"
-                        title="Stop recording"
-                      >
-                        <FaStop className="text-2xl" />
-                      </button>
-                      <div className="flex items-center text-red-600">
-                        <FaCircle className="animate-pulse mr-2" />
-                        <span className="font-medium">Recording... {recordingSeconds}s</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Not recording: show recorded preview if available */}
-                {!isRecording && videoFeedback.length > 0 && (
-                  <div className="w-full max-w-2xl">
-                    {videoFeedback.slice(0, 1).map((v) => (
-                      <div key={v.id} className="w-full">
-                        <div className="relative w-full rounded-lg overflow-hidden border border-gray-300 shadow-sm">
-                          <video controls className="w-full aspect-video bg-black">
-                            <source src={v.url || URL.createObjectURL(v.blob)} type="video/webm" />
-                          </video>
-                        </div>
-                        <div className="mt-4 flex items-center justify-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => startRecording('video')}
-                            className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
-                            disabled={camPermission === 'denied' || micPermission === 'denied'}
-                          >
-                            Re-record
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => deleteRecording('video', v.id)}
-                            className="px-4 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100"
-                          >
-                            <span className="inline-flex items-center"><FaTrash className="mr-2" />Remove</span>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* No recording yet and not recording now: show CTA */}
-                {!isRecording && videoFeedback.length === 0 && (
-                  <div className="w-full max-w-2xl">
-                    <div className="flex items-center justify-center">
-                      <button
-                        type="button"
-                        onClick={() => startRecording('video')}
-                        className="flex items-center px-5 py-3 bg-primary text-white rounded-lg disabled:opacity-50"
-                        disabled={camPermission === 'denied' || micPermission === 'denied'}
-                      >
-                        <FaVideo className="mr-2" /> Start Video Recording
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <VideoFeedback
+                form={form}
+                onFormChange={handleFormChange}
+                onSubmit={handleSubmit}
+                submitted={submitted}
+                videoFeedback={videoFeedback}
+                setVideoFeedback={setVideoFeedback}
+                camPermission={camPermission}
+                setCamPermission={setCamPermission}
+                micPermission={micPermission}
+                setMicPermission={setMicPermission}
+                isRecording={isRecording && recordingType === 'video'}
+                recordingSeconds={recordingSeconds}
+                videoRef={videoRef}
+                showVideoPreview={showVideoPreview}
+                onStartRecording={handleStartVideoRecording}
+                onStopRecording={stopRecording}
+              />
             )}
           </motion.div>
 
           {/* Submit */}
-          <div className="flex justify-end items-center mt-4 pt-4 border-t border-gray-200">
+          <div className="flex justify-end items-center mt-4">
             <button
               type="button"
               onClick={handleSubmit}

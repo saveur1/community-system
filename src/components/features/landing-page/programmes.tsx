@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { FaHandsHelping, FaUserGraduate, FaSync, FaChartBar, FaCommentDots } from "react-icons/fa";
-import { HiOutlineSupport } from "react-icons/hi";
+
+import { FaChild, FaUsers, FaShieldAlt, FaBrain, FaCommentDots } from 'react-icons/fa';
 import { sectionVariants } from ".";
 import { useRouter } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -10,32 +10,31 @@ const AboutSection = () => {
   const { t } = useTranslation();
 
   const programmes = [
-  {
-    icon: <FaHandsHelping className="text-success w-6 h-6" />,
-    label: t('about.about_hiv'),
-    feedbackLink: "/feedback/hiv-aids",
-  },
-  {
-    icon: <FaUserGraduate className="text-success w-6 h-6" />,
-    label: t('about.about_immunization'),
-    feedbackLink: "/feedback/immunization",
-  },
-  {
-    icon: <HiOutlineSupport className="text-success w-6 h-6" />,
-    label: t('about.about_mental'),
-    feedbackLink: "/feedback/mental-health",
-  },
-  {
-    icon: <FaSync className="text-success w-6 h-6" />,
-    label: t('about.about_malaria'),
-    feedbackLink: "/feedback/malaria",
-  },
-  {
-    icon: <FaChartBar className="text-success w-6 h-6" />,
-    label: t('about.about_nutrition'),
-    feedbackLink: "/feedback/nutrition",
-  },
-];
+    {
+      icon: <FaChild className="text-success w-6 h-6" />,
+      title: t('priorities.child_family_title'),
+      description: t('priorities.child_family_desc'),
+      feedbackLink: "/feedback/child-family",
+    },
+    {
+      icon: <FaUsers className="text-success w-6 h-6" />,
+      title: t('priorities.reproductive_health_title'),
+      description: t('priorities.reproductive_health_desc'),
+      feedbackLink: "/feedback/reproductive-health",
+    },
+    {
+      icon: <FaShieldAlt className="text-success w-6 h-6" />,
+      title: t('priorities.disease_prevention_title'),
+      description: t('priorities.disease_prevention_desc'),
+      feedbackLink: "/feedback/disease-prevention",
+    },
+    {
+      icon: <FaBrain className="text-success w-6 h-6" />,
+      title: t('priorities.mental_health_title'),
+      description: t('priorities.mental_health_desc'),
+      feedbackLink: "/feedback/mental-health",
+    },
+  ];
 
   return (
     <div className="w-full flex justify-start col-span-1 md:col-span-2 mb-8 md:mb-0">
@@ -48,29 +47,31 @@ const AboutSection = () => {
         variants={sectionVariants}
         aria-label="About the Project"
       >
-        <motion.h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-title mb-6">{t('about.about_title')}</motion.h2>
-        <motion.p className="text-base sm:text-lg text-justify text-gray-700 mb-8">
-          { t('about.about_description') }
-        </motion.p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          {programmes.map((prog, idx) => (
-            <div
-              key={prog.label}
-              className="flex items-center justify-between gap-4 p-3 sm:p-4 bg-white/80 rounded-lg hover:shadow-lg border border-gray-200 cursor-pointer transition-all group"
-              onClick={() => router.navigate({ to: prog.feedbackLink })}
-            >
-              <div className="flex items-center gap-4">
-                <span className="bg-primary/10 rounded-full p-2 sm:p-3 flex items-center justify-center">
-                  {prog.icon}
-                </span>
-                <span className="font-semibold text-base sm:text-lg text-dark-blue">{prog.label}</span>
+        <motion.h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-title mb-6">{t('priorities.title')}</motion.h2>
+        <motion.p className="text-base sm:text-lg text-justify text-gray-700 mb-8" dangerouslySetInnerHTML={{ __html: t('about.about_description') }} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {programmes.map((prog) => (
+            <div key={prog.title} className="bg-white rounded-lg border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
+              <div className="p-6 flex-grow">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 text-success bg-success/10 p-3 rounded-full">
+                    {prog.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-title mb-1">{prog.title}</h3>
+                    <p className="text-sm text-gray-600">{prog.description}</p>
+                  </div>
+                </div>
               </div>
-              <button
-                aria-label={`Give feedback for ${prog.label}`}
-                className="ml-2 text-primary hover:text-white hover:bg-primary rounded-full p-2 transition-colors border border-primary group-hover:bg-primary group-hover:text-white"
-              >
-                <FaCommentDots className="w-3 h-3" />
-              </button>
+              <div className="bg-gray-50 px-6 py-3 border rounded-b-lg border-gray-200">
+                <button 
+                  onClick={() => router.navigate({ to: prog.feedbackLink })}
+                  className="text-primary font-medium text-sm hover:text-primary-dark flex items-center gap-2"
+                >
+                  <span>{t('button.learn_more')}</span>
+                  <FaCommentDots className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

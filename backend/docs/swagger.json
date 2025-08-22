@@ -467,6 +467,151 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Record_string.unknown_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ITweetResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"text": {
+						"type": "string"
+					},
+					"authorId": {
+						"type": "string"
+					},
+					"authorUsername": {
+						"type": "string"
+					},
+					"createdAtTweet": {
+						"type": "string"
+					},
+					"data": {
+						"$ref": "#/components/schemas/Record_string.unknown_"
+					}
+				},
+				"required": [
+					"id",
+					"text",
+					"authorId",
+					"authorUsername",
+					"createdAtTweet",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse_ITweetResponse-Array-or-_error-string__": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"anyOf": [
+							{
+								"items": {
+									"$ref": "#/components/schemas/ITweetResponse"
+								},
+								"type": "array"
+							},
+							{
+								"properties": {
+									"error": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"error"
+								],
+								"type": "object"
+							}
+						],
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse_ITweetResponse-Array_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"items": {
+							"$ref": "#/components/schemas/ITweetResponse"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse__error-string__": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"properties": {
+							"error": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"error"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"LoginRequest": {
 				"properties": {
 					"email": {
@@ -956,6 +1101,39 @@
 						}
 					}
 				]
+			}
+		},
+		"/api/tweets/latest": {
+			"get": {
+				"operationId": "GetLatestTweets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_ITweetResponse-Array-or-_error-string__"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Failed to fetch tweets",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__error-string__"
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns up to 5 latest tweets. Tries X API v2 first; if it fails, falls back to the last 5 saved in DB.",
+				"tags": [
+					"Tweets"
+				],
+				"security": [],
+				"parameters": []
 			}
 		},
 		"/api/auth/login": {

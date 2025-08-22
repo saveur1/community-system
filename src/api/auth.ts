@@ -46,9 +46,10 @@ export const authApi = {
 
 // AUTH TYPES
  type LoginRequest = {
-    type: 'email' | 'phone';
+    type: 'email' | 'phone' | 'username';
     phone: string,
     email: string;
+    username?: string;
     password: string;
   };
   

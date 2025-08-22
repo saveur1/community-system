@@ -1,12 +1,18 @@
 {
     "navbar": {
         "home": "Ahatangira",
-        "about": "Ibiyerekeye",
-        "announcements": "Amatangazo",
+        "about": "Abo turibo",
         "login": "Kwinjira",
         "feedback": "Tanga Igitekerezo"
     },
     "button": {
+        "next": "Ibikurikira",
+        "prev": "Ahabanza",
+        "submit": "Ohereza",
+        "view_more": "Reba nizindi"
+    },
+    "common": {
+        "sending": "Kohereza...",
         "next": "Ibikurikira",
         "prev": "Ahabanza",
         "submit": "Ohereza",
@@ -46,7 +52,7 @@
         "feedback": "Tanga Igitekerezo"
     },
     "about": {
-        "about_title": "Ibyerekeye Sisitemu",
+        "about_title": "Abo Turibo",
         "about_description": "Kuva ku ishingwa ryayo, RICH yaguye ibikorwa byayo mu gihugu cyose, ifasha abayobozi b'amadini guteza imbere ubuzima mu miryango. Binyuze mu buryo bwo kumva abaturage (CLS) no mu buryo bwo gucunga amakuru (MIS), Izi nizimwe muri porogaramu za RICH:",
         "about_hiv": "HIV/AIDS",
         "about_immunization": "Immunization (SUGIRA MWANA)",
@@ -54,21 +60,48 @@
         "about_malaria": "Malaria SBC",
         "about_nutrition": "Nutrition"
     },
+    "priorities": {
+        "title": "Ibikorwa by'ibanze",
+        "child_family_title": "Uburere bw'abana bato n'umuryango",
+        "child_family_desc": "Gufasha abana gukura neza kandi bakomeye, no gushyigikira imiryango ngo itere imbere.",
+        "reproductive_health_title": "Ubuzima bw'imyororokere, ubw'umubyeyi n'ubw'ingimbi",
+        "reproductive_health_desc": "Guteza imbere ubuzima bw'umubyeyi, ubuzima bw'urubyiruko, no kurinda ihohoterwa rishingiye ku gitsina.",
+        "disease_prevention_title": "Kurwanya indwara",
+        "disease_prevention_desc": "Kurwanya SIDA, malariya, igituntu, n'indwara zitandura, no gushyigikira abafite ubumuga n'abakomeretse.",
+        "mental_health_title": "Ubuzima bwo mu mutwe",
+        "mental_health_desc": "Guteza imbere imibereho myiza, kugabanya ihezwa, no kongera uburyo bwo kubona ubuvuzi."
+    },
     "assistant": {
         "title": "RICH Assistant",
         "description": "Ni gute nagufasha uyu munsi?",
         "placeholder": "Andika ikibaho hano..."
     },
+    "forgot_password": {
+        "title": "Wibagiwe ijambo banga?",
+        "subtitle": "Injiza imeri yawe kugirango usubizeho ijambo banga",
+        "email_placeholder": "Injiza aderesi yawe ya imeri",
+        "reset_button": "Ohereza ihuza ryo gusubiramo",
+        "back_to_login": "Subira kwinjira",
+        "email_required": "Nyamuneka andika aderesi ya imeri yemewe",
+        "reset_success": "Ihuza ryo gusubiramo ryerekanwe kuri imeri yawe!",
+        "check_email_title": "Reba Imeri Yawe",
+        "check_email_subtitle": "Twohereje ihuza ryo gusubiramo ijambo banga kuri",
+        "spam_notice": "Ntushobora kubona iyo imeri, reba muri spam folder. Ihuza rizagira amasaha 1 gusa.",
+        "resend_email": "Ohereza iyindi imeri",
+        "connect_with_us": "Dukurikire",
+        "quote_text": "Ijwi ryawe rihindura umuryango wacu. Sangiza ubunararibonye bwawe, udufashe kunoza porogaramu za Leta kuri bose.",
+        "quote_attrib": "Gahunda yo Kumva Abaturage"
+    },
     "login": {
-        "title": "Murakaza neza.",
+        "title": "Murakaza neza",
         "phone": "Telefoni",
         "email": "Imeri",
-        "phone_number": "Nomero ya Telephone",
-        "email_address": "Aderesi imeri",
+        "username": "Izina ukoresha",
         "password": "Ijambo banga",
-        "phone_placeholder": "Andika Nomero ya Telephone",
-        "email_placeholder": "Andika Aderesi imeri",
-        "password_placeholder": "Andika Ijambo banga",
+        "email_placeholder": "Injiza imeri yawe",
+        "phone_placeholder": "Injiza numero yawe ya telefone",
+        "username_placeholder": "Injiza izina ukoresha",
+        "password_placeholder": "Injiza ijambo banga",
         "forgot_password": "Wibagiwe ijambo banga?",
         "sign_in": "Kwinjira",
         "signing_in": "Kwinjira...",

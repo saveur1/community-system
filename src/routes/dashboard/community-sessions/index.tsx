@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import { FaEye, FaTrash, FaDownload, FaShare, FaEllipsisV, FaVideo, FaImage, FaMusic } from 'react-icons/fa';
-import { communitySessions as mockSessions, type CommunitySession } from './mock-data';
+import { communitySessions as mockSessions, type CommunitySession } from '../../../components/features/community-sessions/mock-data';
 
 const SessionTypeIcon = ({ type }: { type: CommunitySession['type'] }) => {
   switch (type) {

@@ -1,11 +1,10 @@
 import { Link, useRouter } from "@tanstack/react-router"
 import OptimizedImage from "../../ui/image"
 import { SelectDropdown } from "../../ui/select"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiMenu } from "react-icons/fi"
-import { AiOutlineHome, AiOutlineInfoCircle, AiOutlineSound, AiOutlineMessage, AiOutlineLogin } from "react-icons/ai"
-import { animate } from "framer-motion"
+import { AiOutlineHome, AiOutlineInfoCircle, AiOutlineMessage, AiOutlineLogin } from "react-icons/ai"
 import MobileHeader from "./mobile-header"
 import ImigongoStarter from "../imigongo-starter"
 
@@ -14,6 +13,18 @@ const MainHeader = () => {
     const [language, setLanguage] = useState(i18n.language);
     const [mobileOpen, setMobileOpen] = useState(false);
     const router = useRouter();
+    const [activeSection, setActiveSection] = useState<string>('home');
+
+    // Keep active link in sync with current hash
+    useEffect(() => {
+        const updateFromHash = () => {
+            const hash = (window.location.hash || '#home').replace('#', '') || 'home';
+            setActiveSection(hash);
+        };
+        updateFromHash();
+        window.addEventListener('hashchange', updateFromHash);
+        return () => window.removeEventListener('hashchange', updateFromHash);
+    }, []);
 
     // Helper to close menu on mobile
     const handleNavClick = () => setMobileOpen(false);
@@ -31,9 +42,11 @@ const MainHeader = () => {
         // If we're not on home, navigate to home with a hash so the landing page can scroll after mount
         if (router.state.location.pathname !== '/') {
             router.navigate({ to: '/', hash: id });
+            setActiveSection(id);
         } else {
             // Already on home: set the hash to trigger the landing page hash listener
             window.location.hash = id;
+            setActiveSection(id);
         }
         handleNavClick();
     };
@@ -42,28 +55,21 @@ const MainHeader = () => {
     const navLinks = (
         <>
             <button
-                className="text-primary cursor-pointer hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
+                className={`${activeSection === 'home' ? 'text-primary' : 'text-gray-500'} cursor-pointer hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors`}
                 onClick={e => handleSmoothScroll(e, "home")}
             >
                 <AiOutlineHome size={18} />
                 {t('navbar.home')}
             </button>
             <button
-                className="text-gray-500 hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer"
+                className={`${activeSection === 'about' ? 'text-primary' : 'text-gray-500'} hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer`}
                 onClick={e => handleSmoothScroll(e, "about")}
             >
                 <AiOutlineInfoCircle size={18} />
                 {t('navbar.about')}
             </button>
             <button
-                className="text-gray-500 cursor-pointer hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
-                onClick={e => handleSmoothScroll(e, "anncouncements")}
-            >
-                <AiOutlineSound size={18} />
-                {t('navbar.announcements')}
-            </button>
-            <button
-                className="text-gray-500 cursor-pointer hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
+                className={`${activeSection === 'feedback' ? 'text-primary' : 'text-gray-500'} cursor-pointer hover:text-primary px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 transition-colors`}
                 onClick={e => handleSmoothScroll(e, "feedback")}
             >
                 <AiOutlineMessage size={18} />

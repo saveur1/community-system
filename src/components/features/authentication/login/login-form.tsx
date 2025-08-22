@@ -12,10 +12,11 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
-  const [loginType, setLoginType] = useState<'email' | 'phone'>('phone');
+  const [loginType, setLoginType] = useState<'email' | 'phone' | 'username'>('phone');
   const [form, setForm] = useState({
     email: "",
     phone: "",
+    username: "",
     password: ""
   });
   const { t } = useTranslation();
@@ -30,9 +31,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
     if (loginType === 'email') {
       const isEmail = form.email.includes('@');
       return isEmail && form.password.trim().length >= 6;
-    } else {
+    } else if (loginType === 'phone') {
       const isPhone = form.phone.trim().length >= 10;
       return isPhone && form.password.trim().length >= 6;
+    } else {
+      return form.username.trim().length >= 3 && form.password.trim().length >= 6;
     }
   };
 
@@ -69,16 +72,18 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
       type: loginType,
       phone: form.phone,
       email: form.email,
+      username: form.username,
       password: form.password
     });
   };
 
-  const switchLoginType = (type: 'email' | 'phone') => {
+  const switchLoginType = (type: 'email' | 'phone' | 'username') => {
     setLoginType(type);
     // Clear form when switching
     setForm({
       email: "",
       phone: "",
+      username: "",
       password: ""
     });
   };
@@ -109,7 +114,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
 
   return (
     <div className={`col-span-3 lg:col-span-3 bg-white rounded-xl lg:rounded-r-xl lg:rounded-l-none ${className}`}>
-      <div className="w-full max-w-md mx-auto p-6 sm:p-8 sm:pt-4">
+      <div className="w-full max-w-lg mx-auto p-6 bg-white rounded-2xl overflow-hidden">
         <div className="text-center mb-4">
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <FiUser className="w-8 h-8 text-primary" />
@@ -122,10 +127,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
         {/* Login Type Toggle */}
         <div className="mb-6">
           <div className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
-          <motion.button
+            <motion.button
               type="button"
               onClick={() => switchLoginType('phone')}
-              className={`flex-1 flex items-center justify-center py-2 px-3 rounded-md font-medium text-sm transition-colors ${
+              className={`flex-1 flex items-center justify-center py-2 px-2 rounded-md font-medium text-sm transition-colors ${
                 loginType === 'phone'
                   ? 'bg-white text-primary shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
@@ -133,13 +138,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <FiPhone className="w-4 h-4 mr-2" />
+              <FiPhone className="w-4 h-4 mr-1" />
               {t('login.phone')}
             </motion.button>
             <motion.button
               type="button"
               onClick={() => switchLoginType('email')}
-              className={`flex-1 flex items-center justify-center py-2 px-3 rounded-md font-medium text-sm transition-colors ${
+              className={`flex-1 flex items-center justify-center py-2 px-2 rounded-md font-medium text-sm transition-colors ${
                 loginType === 'email'
                   ? 'bg-white text-primary shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
@@ -147,8 +152,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <FiMail className="w-4 h-4 mr-2" />
+              <FiMail className="w-4 h-4 mr-1" />
               {t('login.email')}
+            </motion.button>
+            <motion.button
+              type="button"
+              onClick={() => switchLoginType('username')}
+              className={`flex-1 flex items-center justify-center py-2 px-2 rounded-md font-medium text-sm transition-colors ${
+                loginType === 'username'
+                  ? 'bg-white text-primary shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <FiUser className="w-4 h-4 mr-1" />
+              {t('login.username', 'Username')}
             </motion.button>
           </div>
         </div>
@@ -164,24 +183,74 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
               className="space-y-4"
             >
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-2">
-                  {loginType === 'email' ? t('login.email') : t('login.phone_number')} <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
+                <div className="space-y-4">
                   {loginType === 'email' ? (
-                    <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <div className="space-y-1">
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        {t('login.email')}
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FiMail className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          required
+                          value={form.email}
+                          onChange={handleChange}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          placeholder={t('login.email_placeholder')}
+                        />
+                      </div>
+                    </div>
+                  ) : loginType === 'phone' ? (
+                    <div className="space-y-1">
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                        {t('login.phone')}
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FiPhone className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          autoComplete="tel"
+                          required
+                          value={form.phone}
+                          onChange={handleChange}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          placeholder={t('login.phone_placeholder')}
+                        />
+                      </div>
+                    </div>
                   ) : (
-                    <FiPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <div className="space-y-1">
+                      <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                        {t('login.username', 'Username')}
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FiUser className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="username"
+                          name="username"
+                          type="text"
+                          autoComplete="username"
+                          required
+                          value={form.username}
+                          onChange={handleChange}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          placeholder={t('login.username_placeholder', 'Enter your username')}
+                        />
+                      </div>
+                    </div>
                   )}
-                  <input
-                    type={loginType === 'email' ? 'email' : 'tel'}
-                    name={loginType}
-                    value={loginType === 'email' ? form.email : form.phone}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-200"
-                    placeholder={loginType === 'email' ? t('login.email_placeholder') : t('login.phone_placeholder')}
-                    required
-                  />
                 </div>
               </div>
 
@@ -204,7 +273,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
                     name="password"
                     value={form.password}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-200"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                     placeholder={t('login.password_placeholder')}
                     required
                   />

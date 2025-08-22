@@ -332,6 +332,13 @@ const setupSystem = async () => {
     console.log('🔄 Dropping existing tables...');
     try {
       // Drop tables in reverse order of dependencies
+      await sequelize.getQueryInterface().dropAllTables();
+      console.log('✅ Dropped all tables');
+    } catch (error) {
+      console.log('ℹ️ All tables did not exist or could not be dropped');
+    }
+    try {
+      // Drop tables in reverse order of dependencies
       await sequelize.getQueryInterface().dropTable('user_roles');
       console.log('✅ Dropped user_roles table');
     } catch (error) {

@@ -36,7 +36,7 @@ const HomeSection = () => {
             {/* Welcome Section */}
             <div className="w-full lg:w-1/2 max-lg:p-4 flex justify-center max-2xl:pr-10 lg:justify-start order-2 lg:order-1">
               <div className="flex-1 lg:pr-12 lg:max-w-xl text-center md:text-left">
-                <h1 className="md:text-5xl text-3xl font-extrabold mb-6 md:!leading-[65px]">
+                <h1 className="md:text-5xl text-3xl font-extrabold mb-6 md:!leading-[55px]">
                   <span className="text-white">
                     <span className="text-dark-blue">{t('hero.together')}</span> {t('hero.every')}
                   </span>

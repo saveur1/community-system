@@ -30,7 +30,7 @@ function ForgotPasswordPage() {
   const error = validate();
 
   const showErrorToast = (message: string) => {
-    toast.error(message, {
+    toast.error(t(message), {
       position: "top-center",
       autoClose: 5000,
       closeOnClick: true,
@@ -45,7 +45,7 @@ function ForgotPasswordPage() {
     setTouched(true);
 
     if (error) {
-      showErrorToast("Please enter a valid email address");
+      showErrorToast("forgot_password.email_required");
       return;
     }
 
@@ -55,7 +55,7 @@ function ForgotPasswordPage() {
     setTimeout(() => {
       setIsLoading(false);
       setIsSubmitted(true);
-      toast.success("Reset link sent to your email!", {
+      toast.success(t("forgot_password.reset_success"), {
         position: "top-center",
         autoClose: 3000,
       });
@@ -83,7 +83,7 @@ function ForgotPasswordPage() {
             <div className="text-white relative z-10 flex flex-col justify-between h-full w-full">
               {/* Social Media Icons */}
               <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4">Connect With Us</h3>
+                <h3 className="text-xl font-bold mb-4">{t("forgot_password.connect_with_us")}</h3>
                 <div className="flex space-x-4">
                   <a href="#" className="hover:text-white/80 transition-colors">
                     <FiTwitter className="w-6 h-6" />
@@ -103,10 +103,10 @@ function ForgotPasswordPage() {
               {/* Inspirational Quote */}
               <div className="rounded-lg">
                 <blockquote className="italic mb-2 pr-8">
-                  "Your voice shapes our community. Share your experiences and help improve government programs for everyone."
+                  {t("forgot_password.quote_text")}
                 </blockquote>
                 <p className="text-sm text-white/80">
-                  - Community Listening Initiative
+                  - {t("forgot_password.quote_attrib")}
                 </p>
               </div>
             </div>
@@ -118,25 +118,25 @@ function ForgotPasswordPage() {
               <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FiLock className="w-8 h-8 text-success" />
               </div>
-              <h1 className="text-2xl font-bold text-title mb-4">Check Your Email</h1>
+              <h1 className="text-2xl font-bold text-title mb-4">{t("forgot_password.check_email_title")}</h1>
               <p className="text-gray-600 mb-6">
-                We've sent a password reset link to <strong>{email}</strong>
+                {t("forgot_password.check_email_subtitle")} <strong>{email}</strong>
               </p>
               <p className="text-sm text-gray-500 mb-6">
-                If you don't see the email, check your spam folder. The link will expire in 1 hour.
+                {t("forgot_password.spam_notice")}
               </p>
               <div className="space-y-4">
                 <button
                   onClick={() => setIsSubmitted(false)}
                   className="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
                 >
-                  Resend Email
+                  {t("forgot_password.resend_email")}
                 </button>
                 <Link
                   to="/auth/login"
                   className="block text-primary hover:text-primary-dark font-medium transition-colors"
                 >
-                  Back to Login
+                  {t("forgot_password.back_to_login")}
                 </Link>
               </div>
             </div>
@@ -166,7 +166,7 @@ function ForgotPasswordPage() {
           <div className="text-white relative z-10 flex flex-col justify-between h-full w-full">
             {/* Social Media Icons */}
             <div className="mb-8">
-              <h3 className="text-xl font-bold mb-4">Connect With Us</h3>
+              <h3 className="text-xl font-bold mb-4">{t("forgot_password.connect_with_us")}</h3>
               <div className="flex space-x-4">
                 <a href="#" className="hover:text-white/80 transition-colors">
                   <FiTwitter className="w-6 h-6" />
@@ -186,10 +186,10 @@ function ForgotPasswordPage() {
             {/* Inspirational Quote */}
             <div className="rounded-lg">
               <blockquote className="italic mb-2 pr-8">
-                "Your voice shapes our community. Share your experiences and help improve government programs for everyone."
+                {t("forgot_password.quote_text")}
               </blockquote>
               <p className="text-sm text-white/80">
-                - Community Listening Initiative
+                - {t("forgot_password.quote_attrib")}
               </p>
             </div>
           </div>
@@ -202,14 +202,14 @@ function ForgotPasswordPage() {
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FiLock className="w-8 h-8 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold text-title mb-2">Forgot Password?</h1>
-              <p className="text-gray-600">Enter your email to reset your password</p>
+              <h1 className="text-2xl font-bold text-title mb-2">{t("forgot_password.title")}</h1>
+              <p className="text-gray-600">{t("forgot_password.subtitle")}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">
-                  Email Address <span className="text-red-500">*</span>
+                  {t("forgot_password.email")} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <AiOutlineMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -219,11 +219,11 @@ function ForgotPasswordPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => setTouched(true)}
                     className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
-                    placeholder="Enter your email"
+                    placeholder={t("forgot_password.email_placeholder")}
                   />
                 </div>
                 {touched && error && (
-                  <p className="text-red-500 text-sm mt-1">Please enter a valid email address</p>
+                  <p className="text-red-500 text-sm mt-1">{t("forgot_password.email_required")}</p>
                 )}
               </div>
 
@@ -232,7 +232,7 @@ function ForgotPasswordPage() {
                 disabled={isLoading}
                 className="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Sending..." : "Send Reset Link"}
+                {isLoading ? t("common.sending") : t("forgot_password.reset_button")}
               </button>
             </form>
 

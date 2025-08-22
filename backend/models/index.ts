@@ -3,6 +3,7 @@ import { User } from './users';
 import { Role } from './role';
 import UserRole from './userRole';
 import Permission from './permission';
+import Tweet from './tweet';
 
 // Centralized associations to avoid circular imports
 User.belongsToMany(Role, {
@@ -32,6 +33,6 @@ Permission.belongsToMany(Role, {
   otherKey: 'roleId',
 });
 
-const db = { sequelize, User, Role, UserRole, Permission };
+const db = { sequelize, User, Role, UserRole, Permission, Tweet };
 
 export default db;

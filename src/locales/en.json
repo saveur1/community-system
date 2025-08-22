@@ -2,15 +2,22 @@
     "navbar": {
         "home": "Home",
         "about": "About",
-        "announcements": "Announcements",
         "login": "Login",
         "feedback": "Feedback"
+    },
+    "common": {
+        "sending": "Sending...",
+        "next": "Next",
+        "prev": "Previous",
+        "submit": "Submit",
+        "view_more": "View More"
     },
     "button": {
         "next": "Next",
         "prev": "Previous",
         "submit": "Submit",
-        "view_more": "View More"
+        "view_more": "View More",
+        "learn_more": "Learn More"
     },
     "feedback": {
         "feedback_title": "Send Us Feedback",
@@ -46,8 +53,8 @@
         "programmes": "Our Programmes"
     },
     "about": {
-        "about_title": "About the System",
-        "about_description": "Since its founding, RICH has expanded its reach across Rwanda, empowering religious leaders to champion health in their communities. Through the Community Listening System (CLS) and Management Information System (MIS), The following are key Programmes of RICH:",
+        "about_title": "About us",
+        "about_description": "The Rwanda Interfaith Council on Health (RICH) was founded in 2003 to unite faith-based organizations in the fight against HIV/AIDS. Today, RICH works across Rwanda to promote <b>health</b>, <b>wellbeing</b>, and <b>stronger families</b>, tackling issues from maternal and child health to mental health, nutrition, and disease prevention. Our primary priorities are:",
         "about_hiv": "HIV/AIDS",
         "about_immunization": "Immunization (SUGIRA MWANA)",
         "about_mental": "Mental Health (Baho Neza)",
@@ -67,29 +74,28 @@
         "transparent": "Transparent",
         "inclusive": "Inclusive",
         "actionable": "Actionable",
-        "feedback": "🔊 Submit Your Feedback!"
+        "feedback": "Submit Your Feedback!"
     },
     "login": {
         "title": "Welcome Back",
         "phone": "Phone",
         "email": "Email",
+        "username": "Username",
         "phone_number": "Phone Number",
         "email_address": "Email Address",
         "phone_placeholder": "Enter your phone number",
         "email_placeholder": "Enter your email address",
+        "username_placeholder": "Enter your username",
         "password_placeholder": "Enter your password",
         "password": "Password",
-        "forgot_password": "Forgot password?",
+        "remember_me": "Remember me",
+        "forgot_password": "Forgot Password?",
         "sign_in": "Sign In",
-        "signing_in": "Signing in...",
-        "or_continue_with": "Or continue with",
-        "continue_with_google": "Continue with Google",
+        "signing_in": "Signing In...",
         "no_account": "Don't have an account?",
-        "sign_up": "Sign up",
-        "email_required": "Please enter a valid email address",
-        "phone_required": "Please enter a valid phone number",
-        "password_required": "Password must be at least 6 characters",
-        "login_success": "Login successful!",
+        "sign_up": "Sign Up",
+        "or": "or",
+        "continue_with": "Continue with",
         "connect_with_us": "Connect With Us",
         "cloud_alt": "cloud shadow",
         "quote_text": "Your voice shapes our community. Share your experiences and help improve government programs for everyone.",
@@ -178,6 +184,17 @@
         "health_center_name_placeholder": "Enter health center name",
         "health_center_address_label": "Health Center Address",
         "health_center_address_placeholder": "Enter health center address"
+    },
+    "priorities": {
+        "title": "Our Priorities",
+        "child_family_title": "Early Childhood & Family",
+        "child_family_desc": "Helping children grow healthy and strong, while supporting families to thrive.",
+        "reproductive_health_title": "Reproductive, Maternal & Adolescent Health",
+        "reproductive_health_desc": "Promoting safe motherhood, youth health, and protection from gender-based violence.",
+        "disease_prevention_title": "Disease Prevention",
+        "disease_prevention_desc": "Fighting HIV/AIDS, malaria, TB, and non-communicable diseases, while supporting disability and injury care.",
+        "mental_health_title": "Mental Health",
+        "mental_health_desc": "Promoting wellbeing, reducing stigma, and expanding access to care."
     },
     "auth": {
         "forgot_password": {
