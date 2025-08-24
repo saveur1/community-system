@@ -423,7 +423,7 @@ function FeedbackForm() {
   ];
 
   return (
-    <div className="max-w-8xl mx-auto w-full rounded-2xl bg-gray-100 border border-gray-300 py-6 px-4" id="feedback">
+    <div className="max-w-8xl mx-auto w-full rounded-2xl bg-gray-100 border border-gray-300 py-6 mt-20 px-4" id="feedback">
       {/* Header Section */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-light text-title mb-2">{t('feedback.feedback_title')}</h1>

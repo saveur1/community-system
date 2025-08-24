@@ -1,202 +1,279 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FaHeart, FaUsers, FaAward } from 'react-icons/fa';
+import { FiTrendingUp } from 'react-icons/fi';
 
-interface Slide {
+interface StatCard {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+  color: string;
+}
+
+interface SlideImage {
   id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  background: string;
+  url: string;
+  alt: string;
 }
 
-interface FlyingTextProps {
-  text: string;
-  className?: string;
-  style?: React.CSSProperties;
-  delay?: number;
-  wordDelay?: number;
-}
-
-const FlyingText: React.FC<FlyingTextProps> = ({ text, className, style, delay = 0, wordDelay = 200 }) => {
-  const [visibleWords, setVisibleWords] = useState<number[]>([]);
-  const words = text.split(' ');
-
-  useEffect(() => {
-    setVisibleWords([]);
-    let timeouts: NodeJS.Timeout[] = [];
-
-    words.forEach((_, index) => {
-      const timeout = setTimeout(() => {
-        setVisibleWords(prev => [...prev, index]);
-      }, delay + index * wordDelay);
-      timeouts.push(timeout);
-    });
-
-    return () => {
-      timeouts.forEach(clearTimeout);
-    };
-  }, [text, delay, wordDelay]);
-
-  return (
-    <div className={className} style={style}>
-      {words.map((word, index) => (
-        <motion.span
-          key={`${text}-${index}`}
-          initial={{ y: 50, opacity: 0 }}
-          animate={visibleWords.includes(index) ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="inline-block mr-2"
-        >
-          {word}
-        </motion.span>
-      ))}
-    </div>
-  );
-};
-
-const WavoSlideshow = () => {
+const HealthHeroSection: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
 
-  const slides: Slide[] = [
+  // Community and interfaith collaboration images
+  const slideImages: SlideImage[] = [
     {
       id: 1,
-      title: "Early Childhood",
-      subtitle: "Growing Strong Families",
-      description: "19 model ECD centers | 5,800+ children enrolled | 3,400+ households supported",
-      background: "/images/child.jpg"
+      url: "/images/gathering.jpg",
+      alt: "Community health workers in Rwanda"
     },
     {
       id: 2,
-      title: "Maternal & Youth Health",
-      subtitle: "Empowering Women & Youth",
-      description: "2,000+ volunteers | 1M+ people reached | 1,480 GBV victims reintegrated",
-      background: "/images/gathering.jpg"
+      url: "/images/malaria.jpg",
+      alt: "Interfaith dialogue and collaboration"
     },
     {
       id: 3,
-      title: "Disease Prevention",
-      subtitle: "Fighting for Healthier Communities",
-      description: "1M+ reached with messages | 135 hospitals partnered | 280 volunteers in IVM",
-      background: "/images/malaria.jpg"
+      url: "/images/child.jpg",
+      alt: "Community listening and engagement"
     },
     {
       id: 4,
-      title: "Mental Health",
-      subtitle: "Healing Minds & Families",
-      description: "1,240 GBV victims counselled | 100 families supported | 100K+ reached by sermons",
-      background: "/images/schools.jpg"
+      url: "/images/counciljpg.jpg",
+      alt: "Religious leaders promoting health"
     }
   ];
 
-  const nextSlide = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setCurrentSlide(prev => (prev + 1) % slides.length);
-    setTimeout(() => setIsAnimating(false), 2500);
-  };
+  // Statistics data from RICH organization
+  const statsData: StatCard[] = [
+    {
+      icon: <FaUsers className="w-8 h-8" />,
+      value: "2M+",
+      label: "Community Members Reached",
+      color: "bg-blue-500"
+    },
+    {
+      icon: <FaHeart className="w-8 h-8" />,
+      value: "2,480",
+      label: "GBV Victims Supported",
+      color: "bg-red-500"
+    },
+    {
+      icon: <FaAward className="w-8 h-8" />,
+      value: "21+",
+      label: "Years of Impact",
+      color: "bg-green-500"
+    },
+    {
+      icon: <FiTrendingUp className="w-8 h-8" />,
+      value: "4,064",
+      label: "Religious Volunteers",
+      color: "bg-purple-500"
+    }
+  ];
 
-  const prevSlide = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
-    setTimeout(() => setIsAnimating(false), 2500);
-  };
-
+  // Auto-advance slideshow
   useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 9000);
-    return () => clearInterval(interval);
-  }, [isAnimating]);
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slideImages.length);
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [slideImages.length]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.8,
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.6, ease: "easeOut" as const }
+    }
+  };
+
+  const slideVariants = {
+    enter: { x: 300, opacity: 0 },
+    center: { x: 0, opacity: 1 },
+    exit: { x: -300, opacity: 0 }
+  };
+
+  const statsVariants = {
+    hidden: { y: 100, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.8,
+        delay: 0.5,
+        staggerChildren: 0.1
+      }
+    }
+  };
 
   return (
-    <div className="relative h-[calc(100vh-80px)] w-full overflow-hidden bg-black">
-      {/* Background */}
-      <div className="absolute inset-0 w-full h-full">
-        {slides.map((slide, index) => {
-          const isActive = index === currentSlide;
-          const isPrevious = index === (currentSlide - 1 + slides.length) % slides.length;
-          if (!isActive && !isPrevious) return null;
-          return (
-            <motion.div
-              key={`bg-${slide.id}`}
-              className="absolute inset-0 w-full h-full"
-              initial={isActive && !isPrevious ? { x: '100%' } : { x: 0 }}
-              animate={{ x: 0 }}
-              transition={{ duration: 1.0, ease: [0.25, 0.1, 0.25, 1.0] }}
-              style={{ zIndex: isActive ? 20 : 10 }}
-            >
-              <div
-                className="w-full h-full bg-cover bg-center bg-no-repeat"
-                style={{
-                  backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${slide.background})`
-                }}
-              />
-            </motion.div>
-          );
-        })}
+    <div className="relative min-h-[calc(100vh-72px)] bg-gradient-to-br from-blue-50 via-white to-green-50 overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]"></div>
       </div>
 
-      {/* Text */}
-      <div className="absolute inset-0 flex items-center justify-center z-40">
-        <div className="text-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`text-${currentSlide}`}
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-            >
-              <FlyingText text={slides[currentSlide].title} className="text-5xl lg:text-7xl font-light text-white leading-none" delay={100} />
-              <FlyingText text={slides[currentSlide].subtitle} className="text-3xl lg:text-5xl font-light text-white mt-4" style={{ WebkitTextStroke: '1px white', WebkitTextFillColor: 'transparent' }} delay={400} />
-              <FlyingText text={slides[currentSlide].description} className="text-sm tracking-widest text-white mt-6 font-light" delay={700} />
+      {/* Main Hero Content */}
+      <div className="relative z-10 max-w-8xl mx-auto px-10">
+        <motion.div
+          className="grid lg:grid-cols-2 gap-12 items-center min-h-[70vh]"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Left Side - Content */}
+          <div className="space-y-8">
+            <motion.div variants={itemVariants} className="space-y-6">
+              <motion.div
+                className="inline-block px-4 py-2 bg-blue-100 text-primary rounded-full text-sm font-medium"
+                whileHover={{ scale: 1.05 }}
+              >
+                🤝 Rwanda Interfaith Council on Health
+              </motion.div>
+              
+              <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                <span className="text-gray-800">Community</span>
+                <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-600">
+                  Listening
+                </span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
+                Amplifying community voices through faith-based collaboration. 
+                Join our interfaith network promoting health, unity, and sustainable 
+                development across Rwanda.
+              </p>
             </motion.div>
-          </AnimatePresence>
+
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
+              <motion.button
+                className="px-8 py-4 bg-gradient-to-r from-primary to-primary-dark text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-shadow"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Share Your Voice
+              </motion.button>
+              
+              <motion.button
+                className="px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:border-primary hover:text-primary transition-colors"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Learn About RICH
+              </motion.button>
+            </motion.div>
+          </div>
+
+          {/* Right Side - Image Slideshow */}
+          <motion.div
+            variants={itemVariants}
+            className="relative"
+          >
+            <div className="relative w-full h-[400px] rounded-2xl border border-gray-200 overflow-hidden shadow-2xl">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={currentSlide}
+                  src={slideImages[currentSlide].url}
+                  alt={slideImages[currentSlide].alt}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                />
+              </AnimatePresence>
+              
+              {/* Slide Indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {slideImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'bg-white scale-110'
+                        : 'bg-white/50 hover:bg-white/70'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Floating Elements */}
+            <motion.div
+              className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20"
+              animate={{
+                y: [0, -20, 0],
+                rotate: [0, 180, 360]
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            
+            <motion.div
+              className="absolute -bottom-8 -left-8 w-32 h-32 bg-gradient-to-br from-green-400 to-green-600 rounded-full opacity-10"
+              animate={{
+                y: [0, 20, 0],
+                rotate: [360, 180, 0]
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Statistics Cards - Bottom */}
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200"
+        variants={statsVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="max-w-8xl mx-auto px-4 py-2">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {statsData.map((stat, index) => (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                className="flex items-center space-x-4 p-4 rounded-xl hover:bg-white/50 transition-colors group cursor-pointer"
+                whileHover={{ scale: 1.05, y: -5 }}
+              >
+                <div className={`${stat.color} text-white p-3 rounded-full group-hover:scale-110 transition-transform`}>
+                  {stat.icon}
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-800">{stat.value}</div>
+                  <div className="text-sm text-gray-600">{stat.label}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Navigation */}
-      <button onClick={prevSlide} className="absolute left-6 top-1/2 transform -translate-y-1/2 z-40 text-white hover:text-gray-300" disabled={isAnimating}>
-        <FiChevronLeft size={40} />
-      </button>
-      <button onClick={nextSlide} className="absolute right-6 top-1/2 transform -translate-y-1/2 z-40 text-white hover:text-gray-300" disabled={isAnimating}>
-        <FiChevronRight size={40} />
-      </button>
-
-      {/* Counter */}
-      <div className="absolute bottom-6 left-6 z-40 text-white text-sm">
-        <span className="font-light">{String(currentSlide + 1).padStart(2, '0')}</span>
-        <span className="mx-2">/</span>
-        <span className="font-light">{String(slides.length).padStart(2, '0')}</span>
-      </div>
-
-      {/* Indicators */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40 flex space-x-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              if (!isAnimating) {
-                setIsAnimating(true);
-                setCurrentSlide(index);
-                setTimeout(() => setIsAnimating(false), 2500);
-              }
-            }}
-            className={`w-3 h-3 rounded-full ${index === currentSlide ? 'bg-white' : 'bg-white/30 hover:bg-white/50'}`}
-            disabled={isAnimating}
-          />
-        ))}
-      </div>
-
-      {/* Progress */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-40">
-        <motion.div className="h-full bg-primary" initial={{ width: '0%' }} animate={{ width: '100%' }} transition={{ duration: 7, ease: 'linear' }} key={currentSlide} />
-      </div>
+      </motion.div>
     </div>
   );
 };
 
-export default WavoSlideshow;
+export default HealthHeroSection;
