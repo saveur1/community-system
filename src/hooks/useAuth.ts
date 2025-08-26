@@ -87,9 +87,7 @@ export function useAuth() {
     queryKey: authKeys.currentUser,
     queryFn: authApi.getCurrentUser,
     enabled: true,
-    retry: true,
-    retryDelay: 1000,
-    refetchInterval: 60 * 60 * 1000, // 1 hour
+    retry: false
   });
 
   // Logout function

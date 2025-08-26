@@ -20,11 +20,7 @@ function DashboardLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const location = useLocation();
   const path = location.pathname.split('/')[1];
-  const { user, refreshUser } = useAuth();
-
-  useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+  const { user } = useAuth();
 
 
   return (
