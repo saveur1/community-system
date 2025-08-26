@@ -10,6 +10,7 @@
     "serve": "cross-env NODE_ENV=production tsx server.ts",
     "translate": "node src/utility/translate-languages-script.cjs",
     "debug": "tsx --inspect-brk server.ts",
+    "lint": "npx tsc --noEmit",
     "setup:system": "tsx backend/config/system-setup.ts"
   },
   "dependencies": {

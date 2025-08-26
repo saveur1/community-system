@@ -190,7 +190,7 @@ const SurveyAnswerForm: React.FC<{ onComplete?: () => void }> = ({ onComplete })
     console.log('Survey answers:', Object.values(answers));
     // Here you would typically send the answers to your API
     if (onComplete) onComplete();
-    navigate({ to: '/community/surveys/thank-you' });
+    navigate({ to: '/dashboard/surveys/thank-you' });
   };
 
   const renderQuestion = (question: any) => {

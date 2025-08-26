@@ -1,7 +1,7 @@
 import { Model, Optional } from 'sequelize';
 import { IRoleAttributes } from './role.types';
 
-export type UserStatus = 'active' | 'inactive';
+export type UserStatus = 'pending' | 'active' | 'inactive';
 
 export interface IUserAttributes {
   id: string;
@@ -17,10 +17,8 @@ export interface IUserAttributes {
   salary?: number | null;
   profile?: string | null;
   emailVerified?: boolean;
-  verified?: boolean;
   userType?: string | null;
   // Community Health Worker optional fields
-  nationalId?: string | null;
   district?: string | null;
   sector?: string | null;
   cell?: string | null;

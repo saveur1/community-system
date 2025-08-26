@@ -8,7 +8,6 @@ export interface IUserCreateRequest {
   phone?: string;
   role?: IUserAttributes['roles'];
   status?: IUserAttributes['status'];
-  verified?: IUserAttributes['verified'];
   profileImage?: string;
 }
 

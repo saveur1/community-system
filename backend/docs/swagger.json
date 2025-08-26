@@ -10,6 +10,7 @@
 			"UserStatus": {
 				"type": "string",
 				"enum": [
+					"pending",
 					"active",
 					"inactive"
 				]
@@ -108,13 +109,7 @@
 					"emailVerified": {
 						"type": "boolean"
 					},
-					"verified": {
-						"type": "boolean"
-					},
 					"userType": {
-						"type": "string"
-					},
-					"nationalId": {
 						"type": "string"
 					},
 					"district": {
@@ -220,13 +215,7 @@
 					"emailVerified": {
 						"type": "boolean"
 					},
-					"verified": {
-						"type": "boolean"
-					},
 					"userType": {
-						"type": "string"
-					},
-					"nationalId": {
 						"type": "string"
 					},
 					"district": {
@@ -416,9 +405,6 @@
 					"status": {
 						"$ref": "#/components/schemas/UserStatus"
 					},
-					"verified": {
-						"type": "boolean"
-					},
 					"profileImage": {
 						"type": "string"
 					}
@@ -456,9 +442,6 @@
 					},
 					"status": {
 						"$ref": "#/components/schemas/UserStatus"
-					},
-					"verified": {
-						"type": "boolean"
 					},
 					"profileImage": {
 						"type": "string"
@@ -612,6 +595,306 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ServiceResponse_any-Array_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"items": {},
+						"type": "array",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse_any-or-null_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"StakeholderCreateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"logo": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"StakeholderUpdateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"logo": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProjectCreateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"draft",
+							"in_progress",
+							"completed",
+							"on_hold",
+							"cancelled"
+						]
+					},
+					"targetGroup": {
+						"type": "string",
+						"nullable": true
+					},
+					"stakeholderIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"documents": {
+						"items": {
+							"properties": {
+								"deleteToken": {
+									"type": "string",
+									"nullable": true
+								},
+								"publicId": {
+									"type": "string",
+									"nullable": true
+								},
+								"userId": {
+									"type": "string"
+								},
+								"documentUrl": {
+									"type": "string",
+									"nullable": true
+								},
+								"addedAt": {
+									"type": "string",
+									"format": "date-time"
+								},
+								"type": {
+									"type": "string",
+									"nullable": true
+								},
+								"size": {
+									"type": "number",
+									"format": "double",
+									"nullable": true
+								},
+								"documentName": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"userId",
+								"documentName"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProjectUpdateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"draft",
+							"in_progress",
+							"completed",
+							"on_hold",
+							"cancelled"
+						]
+					},
+					"targetGroup": {
+						"type": "string"
+					},
+					"stakeholderIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"documents": {
+						"items": {
+							"properties": {
+								"deleteToken": {
+									"type": "string"
+								},
+								"publicId": {
+									"type": "string"
+								},
+								"userId": {
+									"type": "string"
+								},
+								"documentUrl": {
+									"type": "string"
+								},
+								"addedAt": {
+									"type": "string",
+									"format": "date-time"
+								},
+								"type": {
+									"type": "string"
+								},
+								"size": {
+									"type": "number",
+									"format": "double"
+								},
+								"documentName": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"userId",
+								"documentName"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DocumentCreateRequest": {
+				"properties": {
+					"projectId": {
+						"type": "string"
+					},
+					"documentName": {
+						"type": "string"
+					},
+					"size": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"type": {
+						"type": "string",
+						"nullable": true
+					},
+					"addedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"documentUrl": {
+						"type": "string",
+						"nullable": true
+					},
+					"userId": {
+						"type": "string"
+					},
+					"publicId": {
+						"type": "string",
+						"nullable": true
+					},
+					"deleteToken": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"documentName",
+					"userId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DocumentUpdateRequest": {
+				"properties": {
+					"projectId": {
+						"type": "string"
+					},
+					"documentName": {
+						"type": "string"
+					},
+					"size": {
+						"type": "number",
+						"format": "double"
+					},
+					"type": {
+						"type": "string"
+					},
+					"addedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"documentUrl": {
+						"type": "string"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"publicId": {
+						"type": "string"
+					},
+					"deleteToken": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"LoginRequest": {
 				"properties": {
 					"email": {
@@ -703,10 +986,6 @@
 						"type": "string"
 					},
 					"userType": {
-						"type": "string",
-						"nullable": true
-					},
-					"nationalId": {
 						"type": "string",
 						"nullable": true
 					},
@@ -1134,6 +1413,658 @@
 				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/api/stakeholders": {
+			"get": {
+				"operationId": "GetStakeholders",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stakeholders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateStakeholder",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stakeholders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:create"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/StakeholderCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/stakeholders/{stakeholderId}": {
+			"get": {
+				"operationId": "GetStakeholderById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Stakeholder not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stakeholders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stakeholderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateStakeholder",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stakeholders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stakeholderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/StakeholderUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteStakeholder",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stakeholders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stakeholderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/projects": {
+			"get": {
+				"operationId": "GetProjects",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Projects"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateProject",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Projects"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:create"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ProjectCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/projects/{projectId}": {
+			"get": {
+				"operationId": "GetProjectById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Project not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Projects"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "projectId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateProject",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Projects"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "projectId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ProjectUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteProject",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Projects"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "projectId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/documents": {
+			"get": {
+				"operationId": "GetDocuments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Documents"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "projectId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "userId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateDocument",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Documents"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:create"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DocumentCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/documents/{documentId}": {
+			"get": {
+				"operationId": "GetDocumentById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Document not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Documents"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "documentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateDocument",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Documents"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "documentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DocumentUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteDocument",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Documents"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "documentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/api/auth/login": {

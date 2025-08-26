@@ -3,25 +3,28 @@ import { useEffect, useMemo, useState, FC, JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight, FaSave, FaTrash, FaUpload } from 'react-icons/fa';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { SelectDropdown } from '@/components/ui/select';
+import { toast } from 'react-toastify';
+import { useCreateProject } from '@/hooks/useProjects';
+import { useAuth } from '@/hooks/useAuth';
+import { uploadToCloudinary } from '@/utility/logicFunctions';
 
 // Types
 interface ProgrammeForm {
   title: string;
   slug: string;
   description: string;
-  status: 'Active' | 'Draft' | 'Planned' | 'Archived';
   targetGroup: string;
   resourceFiles: File[];
 }
 
-const AddProgrammeComponent: FC = (): JSX.Element => {
+const AddProjectComponent: FC = (): JSX.Element => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const createProject = useCreateProject();
   const [programme, setProgramme] = useState<ProgrammeForm>({
     title: '',
     slug: '',
     description: '',
-    status: 'Draft',
     targetGroup: '',
     resourceFiles: [],
   });
@@ -43,7 +46,7 @@ const AddProgrammeComponent: FC = (): JSX.Element => {
   }, [programme.title]);
 
   const stepTitle = useMemo(() => {
-    return currentStep === 1 ? 'Programme Details' : 'Target Group & Resources';
+    return currentStep === 1 ? 'Project Details' : 'Target Group & Resources';
   }, [currentStep]);
 
   // File uploads
@@ -61,31 +64,67 @@ const AddProgrammeComponent: FC = (): JSX.Element => {
 
   const handleSave = () => {
     if (!programme.title.trim()) {
-      alert('Please enter a programme title');
+      alert('Please enter a project title');
       return;
     }
-    // Simulate persistence payload
-    const formData = new FormData();
-    formData.append('title', programme.title);
-    formData.append('slug', programme.slug);
-    formData.append('description', programme.description);
-    formData.append('status', programme.status);
-    formData.append('targetGroup', programme.targetGroup);
-    programme.resourceFiles.forEach((f, i) => formData.append(`resources[${i}]`, f));
+    void (async () => {
+      try {
+        // 1) Upload selected files to Cloudinary, gather document payloads
+        const uploads = [] as Array<{
+          documentName: string;
+          size?: number | null;
+          type?: string | null;
+          addedAt?: Date;
+          documentUrl?: string | null;
+          userId: string;
+          publicId?: string | null;
+          deleteToken?: string | null;
+        }>;
 
-    console.log('Saving programme (simulated):', {
-      ...programme,
-      resourceFiles: programme.resourceFiles.map(f => ({ name: f.name, size: f.size })),
-    });
-    alert('Programme saved successfully!');
-    navigate({ to: '/dashboard/programmes' });
+        for (const f of programme.resourceFiles) {
+          const toastId = toast.loading(`Uploading ${f.name}... 0%`);
+          try {
+            const res = await uploadToCloudinary(f, {
+              onProgress: (p) => toast.update(toastId, { render: `Uploading ${f.name}... ${p}%` }),
+            });
+            toast.update(toastId, { render: `Uploaded ${f.name}`, type: 'success', isLoading: false, autoClose: 1200 });
+            uploads.push({
+              documentName: f.name,
+              size: f.size,
+              type: (f.name.includes('.') ? (f.name.split('.').pop() || '') : '').toLowerCase() || 'unknown',
+              addedAt: new Date(),
+              documentUrl: res.secureUrl || res.url,
+              userId: user?.id as string,
+              publicId: res.publicId,
+              deleteToken: res.deleteToken,
+            });
+          } catch (e: any) {
+            toast.update(toastId, { render: e?.message || `Failed uploading ${f.name}`, type: 'error', isLoading: false, autoClose: 2000 });
+            throw e;
+          }
+        }
+
+        // 2) Submit project with documents array
+        await createProject.mutateAsync({
+          name: programme.title,
+          targetGroup: programme.targetGroup || null,
+          documents: uploads,
+        });
+
+        toast.success('Project created successfully');
+        navigate({ to: '/dashboard/projects' });
+      } catch (err) {
+        const msg = (err as any)?.response?.data?.message || 'Failed to create project';
+        toast.error(msg);
+      }
+    })();
   };
 
-  const handleCancel = () => navigate({ to: '/dashboard/programmes' });
+  const handleCancel = () => navigate({ to: '/dashboard/projects' });
 
   return (
     <div className="pb-10">
-      <Breadcrumb items={["Community", "Programmes", "Add Programme"]} title="Create New Programme" className="absolute top-0 left-0 w-full px-6" />
+      <Breadcrumb items={["Community", "Projects", "Add Project"]} title="Create New Project" className="absolute top-0 left-0 w-full px-6" />
 
       <div className="pt-20 max-w-5xl mx-auto">
 
@@ -104,7 +143,7 @@ const AddProgrammeComponent: FC = (): JSX.Element => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Programme Title *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Project Title *</label>
                   <input
                     type="text"
                     placeholder="e.g., Immunization"
@@ -113,26 +152,12 @@ const AddProgrammeComponent: FC = (): JSX.Element => {
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   {/* Hidden, auto-generated slug display */}
-                  <p className="text-xs text-gray-500 mt-1">Slug: {programme.slug || '—'}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <SelectDropdown
-                    options={[
-                      { label: 'Draft', value: 'Draft' },
-                      { label: 'Active', value: 'Active' },
-                      { label: 'Planned', value: 'Planned' },
-                      { label: 'Archived', value: 'Archived' },
-                    ]}
-                    value={programme.status}
-                    onChange={(val) => setProgramme(prev => ({ ...prev, status: val as ProgrammeForm['status'] }))}
-                    placeholder="Select status"
-                  />
+                  <p className="text-xs text-gray-500 mt-1">Slug: {programme.slug || "—"}</p>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea
-                    placeholder="Brief description of the programme"
+                    placeholder="Brief description of the project"
                     value={programme.description}
                     onChange={(e) => setProgramme(prev => ({ ...prev, description: e.target.value }))}
                     rows={4}
@@ -142,7 +167,7 @@ const AddProgrammeComponent: FC = (): JSX.Element => {
               </div>
 
               <div className="flex justify-between items-center mt-4">
-                <button onClick={() => navigate({ to: '/dashboard/programmes' })} className="px-4 py-2 rounded-md border flex items-center gap-2">
+                <button onClick={() => navigate({ to: '/dashboard/projects' })} className='px-4 py-2 rounded-md border flex items-center gap-2'>
                   <FaChevronLeft className="opacity-70" /> Cancel
                 </button>
 
@@ -246,7 +271,7 @@ const AddProgrammeComponent: FC = (): JSX.Element => {
                 </div>
 
                 <button onClick={handleSave} className="px-4 py-2 rounded-md bg-primary text-white flex items-center gap-2">
-                  <FaSave /> Submit Programme
+                  <FaSave /> Submit Project
                 </button>
               </div>
             </motion.div>
@@ -257,6 +282,6 @@ const AddProgrammeComponent: FC = (): JSX.Element => {
   );
 };
 
-export const Route = createFileRoute('/dashboard/programmes/add-new')({
-  component: AddProgrammeComponent,
+export const Route = createFileRoute('/dashboard/projects/add-new')({
+  component: AddProjectComponent,
 });

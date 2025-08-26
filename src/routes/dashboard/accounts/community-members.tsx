@@ -2,24 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { AccountsList } from '@/components/accounts/accounts-list';
 import { Account, AccountFilters } from '@/types/account';
-import { useUsersList, useVerifyUser } from '@/hooks/useUsers';
+import { useUsersList } from '@/hooks/useUsers';
 import type { User } from '@/api/auth';
 
-function mapUserTypeToAccountType(userType?: string): Account['type'] {
-  if (!userType) return 'employee';
-  if (userType === 'Religious Leaders') return 'religious';
-  if (userType === 'Health Services Providers') return 'community';
-  if (userType === 'community') return 'community';
-  if (userType === 'stakeholders') return 'stakeholder';
-  return 'employee';
+function isCommunityMember(userType?: string) {
+  if (!userType) return false;
+  return userType==='Community Members';
 }
 
-export const Route = createFileRoute('/dashboard/accounts/religious')({
-  component: ReligiousAccountsPage,
+export const Route = createFileRoute('/dashboard/accounts/community-members')({
+  component: CommunityAccountsPage,
 });
 
-function ReligiousAccountsPage() {
-  const { mutate: verifyUser } = useVerifyUser();
+function CommunityAccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [filters, setFilters] = useState<Omit<AccountFilters, 'type'>>({});
   const [pagination, setPagination] = useState({
@@ -32,7 +27,7 @@ function ReligiousAccountsPage() {
   const mapped = useMemo(() => {
     const list: User[] = data?.result ?? [];
     let items: Account[] = list
-      .filter(u => mapUserTypeToAccountType(u.userType) === 'religious')
+      .filter(u => isCommunityMember(u.userType))
       .map((u) => ({
         id: String(u.id),
         name: u.name,
@@ -41,7 +36,7 @@ function ReligiousAccountsPage() {
         role: u.roles?.[0]?.name || 'user',
         profile: u.profile,
         address: u.address,
-        type: 'religious',
+        type: 'Community Members',
         status: (u.status as any) || 'active',
         createdAt: (u as any).createdAt ? String((u as any).createdAt) : new Date().toISOString(),
         updatedAt: (u as any).updatedAt ? String((u as any).updatedAt) : new Date().toISOString(),
@@ -69,7 +64,7 @@ function ReligiousAccountsPage() {
   }, [mapped, data]);
 
   const handleSearch = (newFilters: AccountFilters) => {
-    // Remove type filter since we're only showing religious accounts
+    // Remove type filter since we're only showing community accounts
     const { type, ...rest } = newFilters;
     setFilters(rest);
     setPagination(prev => ({ ...prev, page: 1 }));
@@ -90,7 +85,7 @@ function ReligiousAccountsPage() {
   return (
     <AccountsList
       accounts={accounts}
-      title="Religious Accounts"
+      title="Community Accounts"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}
@@ -99,12 +94,6 @@ function ReligiousAccountsPage() {
       totalItems={pagination.total}
       pageSize={pagination.pageSize}
       loading={isLoading}
-      onVerifyAccount={(acc) => {
-        verifyUser(String(acc.id));
-      }}
-      onDeactivateAccount={(acc) => {
-        setAccounts(prev => prev.map(a => a.id === acc.id ? { ...a, status: 'inactive' } : a));
-      }}
       onDeleteAccount={(acc) => {
         setAccounts(prev => prev.filter(a => a.id !== acc.id));
         setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));

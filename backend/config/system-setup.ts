@@ -24,11 +24,11 @@ const permissions = [
   { name: 'feedback:update', description: 'Update feedback' },
   { name: 'feedback:delete', description: 'Delete feedback' },
 
-  // Programme Permissions
-  { name: 'programme:create', description: 'Create programmes' },
-  { name: 'programme:read', description: 'View programmes' },
-  { name: 'programme:update', description: 'Update programmes' },
-  { name: 'programme:delete', description: 'Delete programmes' },
+  // Project Permissions
+  { name: 'project:create', description: 'Create projects' },
+  { name: 'project:read', description: 'View projects' },
+  { name: 'project:update', description: 'Update projects' },
+  { name: 'project:delete', description: 'Delete projects' },
 
   // Document Permissions
   { name: 'document:create', description: 'Create documents' },
@@ -104,158 +104,7 @@ const permissions = [
 ];
 
 // Base role templates with common permissions
-const roleTemplates = {
-  // Community roles
-  local_citizen: {
-    description: 'Local Citizen - Community role',
-    permissions: [
-      'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read', 'feedback:update', 'feedback:delete',
-      'document:read',
-      'community_session:read','community_session:download',
-      'dashboard:community',
-      'notification:read', 'notification:delete',
-      'announcement:read',
-      'service:rating',
-    ]
-  },
-  health_worker: {
-    description: 'Health Worker - Community role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update','survey:delete','survey:analytics',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read', 'community_session:create',
-      'dashboard:health',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-      'immunization:read',
-      'immunization:report',
-    ]
-  },
-  local_influencer: {
-    description: 'Local Influencer - Community role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read',
-      'dashboard:community',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-    ]
-  },
-  school_director: {
-    description: 'School Director - Community role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create',
-      'dashboard:education',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-      'school:read',
-      'school:create',
-      'school:update',
-      'school:delete',
-    ]
-  },
-  
-  // Religious Leaders
-  religious_influencer: {
-    description: 'Religious Influencer - Religious Leaders role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'dashboard:religious',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-    ]
-  },
-  pastor: {
-    description: 'Pastor - Religious Leaders role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'dashboard:religious',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-    ]
-  },
-  church_mosque_rep: {
-    description: 'Church/Mosque Representative - Religious Leaders role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'dashboard:religious',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-    ]
-  },
-  
-  // Health Services Providers
-  nurse: {
-    description: 'Nurse - Health Services role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'reporting:dashboard', 'reporting:export', 'dashboard:health',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-    ]
-  },
-  local_health_center: {
-    description: 'Local Health Center - Health Services role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'reporting:dashboard', 'reporting:export', 'reporting:analytics', 'dashboard:health',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-    ]
-  },
-  epi_supervisor: {
-    description: 'EPI Supervisor - Health Services role',
-    permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update', 'survey:delete',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'reporting:dashboard', 'reporting:export', 'reporting:analytics', 'dashboard:health',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'service:rating',
-    ]
-  },
-  
+const roleTemplates = { 
   // Stakeholders
   unicef: {
     description: 'UNICEF - Stakeholder role',
@@ -286,6 +135,234 @@ const roleTemplates = {
     ]
   },
   
+  // Frontend-aligned roles from signup userTypes
+  // Community Members
+  volunteers: {
+    description: 'Volunteers - Community role',
+    permissions: [
+      'survey:read', 'survey:respond',
+      'feedback:create', 'feedback:read', 'feedback:update',
+      'document:read',
+      'community_session:read',
+      'dashboard:community',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  youth_leaders: {
+    description: 'Youth Leaders - Community role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read',
+      'dashboard:community',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  local_government_leaders: {
+    description: 'Local Government Leaders - Community role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read', 'community_session:create',
+      'dashboard:community',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  school_representatives: {
+    description: 'School Representatives - Community role',
+    permissions: [
+      'survey:read', 'survey:respond',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read',
+      'dashboard:education',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+      'school:read',
+    ]
+  },
+  beneficiaries: {
+    description: 'Beneficiaries - Community role',
+    permissions: [
+      'survey:read', 'survey:respond',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  religious_community_representatives: {
+    description: 'Religious Community Representatives - Community role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'feedback:create', 'feedback:read', 'feedback:update',
+      'document:read', 'document:create',
+      'community_session:read', 'community_session:create', 'community_session:download',
+      'dashboard:religious',
+      'notification:read',
+      'notification:delete',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  general_population: {
+    description: 'General Population - Community role',
+    permissions: [
+      'survey:read', 'survey:respond',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'dashboard:community',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  
+  // Health service providers
+  nurses: {
+    description: 'Nurses - Health Services role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'feedback:create', 'feedback:read', 'feedback:update',
+      'document:read', 'document:create',
+      'community_session:read', 'community_session:create', 'community_session:download',
+      'reporting:dashboard', 'reporting:export', 'dashboard:health',
+      'notification:read',
+      'notification:delete',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  chw: {
+    description: 'Community Health Workers - Health Services role',
+    permissions: [
+      'survey:read', 'survey:respond',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read',
+      'dashboard:health',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  epi_managers: {
+    description: 'EPI Managers - Health Services role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update', 'survey:delete',
+      'feedback:create', 'feedback:read', 'feedback:update',
+      'document:read', 'document:create',
+      'community_session:read', 'community_session:create', 'community_session:download',
+      'reporting:dashboard', 'reporting:export', 'reporting:analytics', 'dashboard:health',
+      'notification:read',
+      'notification:delete',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  doctors: {
+    description: 'Doctors - Health Services role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'feedback:create', 'feedback:read', 'feedback:update',
+      'document:read', 'document:create',
+      'community_session:read', 'community_session:create',
+      'dashboard:health',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  health_facility_managers: {
+    description: 'Health Facility Managers - Health Services role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'feedback:create', 'feedback:read', 'feedback:update',
+      'document:read', 'document:create',
+      'community_session:read', 'community_session:create', 'community_session:download',
+      'reporting:dashboard', 'reporting:export', 'reporting:analytics', 'dashboard:health',
+      'notification:read',
+      'notification:delete',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  anc: {
+    description: 'ANC - Health Services role',
+    permissions: [
+      'survey:read', 'survey:respond',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read',
+      'dashboard:health',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  cho: {
+    description: 'CHO - Health Services role',
+    permissions: [
+      'survey:read', 'survey:respond',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read',
+      'dashboard:health',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  frontline_health_workers: {
+    description: 'Frontline Health Workers - Health Services role',
+    permissions: [
+      'survey:read', 'survey:respond',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read',
+      'dashboard:health',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  
+  // RICH Members
+  religious_leaders: {
+    description: 'Religious Leaders - RICH Members role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read', 'community_session:create', 'community_session:download',
+      'dashboard:religious',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  rich_members_representatives: {
+    description: 'RICH Members Representatives - RICH Members role',
+    permissions: [
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
+      'feedback:create', 'feedback:read',
+      'document:read',
+      'community_session:read', 'community_session:create',
+      'dashboard:religious',
+      'notification:read',
+      'announcement:read',
+      'service:rating',
+    ]
+  },
+  
   // System roles
   super_admin: {
     description: 'Has all permissions',
@@ -297,7 +374,7 @@ const roleTemplates = {
       'user:create', 'user:read', 'user:update', 'user:delete','user:view','users:view',
       'role:create', 'role:read', 'role:update', 'role:delete',
       'feedback:create', 'feedback:read', 'feedback:update', 'feedback:delete',
-      'programme:create', 'programme:read', 'programme:update', 'programme:delete',
+      'project:create', 'project:read', 'project:update', 'project:delete',
       'document:create', 'document:read', 'document:update', 'document:delete',
       'stakeholder:create', 'stakeholder:read', 'stakeholder:update', 'stakeholder:delete',
       'employee:create', 'employee:read', 'employee:update', 'employee:delete',

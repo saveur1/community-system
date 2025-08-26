@@ -25,7 +25,7 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as DashboardSurveysIndexRouteImport } from './routes/dashboard/surveys/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
-import { Route as DashboardProgrammesIndexRouteImport } from './routes/dashboard/programmes/index'
+import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
 import { Route as DashboardNotificationsIndexRouteImport } from './routes/dashboard/notifications/index'
 import { Route as DashboardFeedbackIndexRouteImport } from './routes/dashboard/feedback/index'
 import { Route as DashboardDocumentsIndexRouteImport } from './routes/dashboard/documents/index'
@@ -37,16 +37,16 @@ import { Route as DashboardSurveysAddNewRouteImport } from './routes/dashboard/s
 import { Route as DashboardSurveysViewIdRouteImport } from './routes/dashboard/surveys/$view-id'
 import { Route as DashboardSchoolReportRouteImport } from './routes/dashboard/school/report'
 import { Route as DashboardSchoolProfileRouteImport } from './routes/dashboard/school/profile'
-import { Route as DashboardProgrammesAddNewRouteImport } from './routes/dashboard/programmes/add-new'
-import { Route as DashboardProgrammesViewIdRouteImport } from './routes/dashboard/programmes/$view-id'
+import { Route as DashboardProjectsAddNewRouteImport } from './routes/dashboard/projects/add-new'
+import { Route as DashboardProjectsViewIdRouteImport } from './routes/dashboard/projects/$view-id'
 import { Route as DashboardImmunizationReportRouteImport } from './routes/dashboard/immunization/report'
 import { Route as DashboardImmunizationFamilyRouteImport } from './routes/dashboard/immunization/family'
 import { Route as DashboardImmunizationAssignedRouteImport } from './routes/dashboard/immunization/assigned'
 import { Route as DashboardFeedbackAddNewRouteImport } from './routes/dashboard/feedback/add-new'
 import { Route as DashboardAccountsStakeholdersRouteImport } from './routes/dashboard/accounts/stakeholders'
-import { Route as DashboardAccountsReligiousRouteImport } from './routes/dashboard/accounts/religious'
-import { Route as DashboardAccountsEmployeesRouteImport } from './routes/dashboard/accounts/employees'
-import { Route as DashboardAccountsCommunityRouteImport } from './routes/dashboard/accounts/community'
+import { Route as DashboardAccountsRichMembersRouteImport } from './routes/dashboard/accounts/rich-members'
+import { Route as DashboardAccountsHealthServiceProvidersRouteImport } from './routes/dashboard/accounts/health-service-providers'
+import { Route as DashboardAccountsCommunityMembersRouteImport } from './routes/dashboard/accounts/community-members'
 import { Route as DashboardSurveysEditEditIdRouteImport } from './routes/dashboard/surveys/edit.$edit-id'
 
 const ErrorRoute = ErrorRouteImport.update({
@@ -129,12 +129,11 @@ const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   path: '/settings/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardProgrammesIndexRoute =
-  DashboardProgrammesIndexRouteImport.update({
-    id: '/programmes/',
-    path: '/programmes/',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
+const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardNotificationsIndexRoute =
   DashboardNotificationsIndexRouteImport.update({
     id: '/notifications/',
@@ -194,18 +193,16 @@ const DashboardSchoolProfileRoute = DashboardSchoolProfileRouteImport.update({
   path: '/school/profile',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardProgrammesAddNewRoute =
-  DashboardProgrammesAddNewRouteImport.update({
-    id: '/programmes/add-new',
-    path: '/programmes/add-new',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
-const DashboardProgrammesViewIdRoute =
-  DashboardProgrammesViewIdRouteImport.update({
-    id: '/programmes/$view-id',
-    path: '/programmes/$view-id',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
+const DashboardProjectsAddNewRoute = DashboardProjectsAddNewRouteImport.update({
+  id: '/projects/add-new',
+  path: '/projects/add-new',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardProjectsViewIdRoute = DashboardProjectsViewIdRouteImport.update({
+  id: '/projects/$view-id',
+  path: '/projects/$view-id',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardImmunizationReportRoute =
   DashboardImmunizationReportRouteImport.update({
     id: '/immunization/report',
@@ -235,22 +232,22 @@ const DashboardAccountsStakeholdersRoute =
     path: '/accounts/stakeholders',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
-const DashboardAccountsReligiousRoute =
-  DashboardAccountsReligiousRouteImport.update({
-    id: '/accounts/religious',
-    path: '/accounts/religious',
+const DashboardAccountsRichMembersRoute =
+  DashboardAccountsRichMembersRouteImport.update({
+    id: '/accounts/rich-members',
+    path: '/accounts/rich-members',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
-const DashboardAccountsEmployeesRoute =
-  DashboardAccountsEmployeesRouteImport.update({
-    id: '/accounts/employees',
-    path: '/accounts/employees',
+const DashboardAccountsHealthServiceProvidersRoute =
+  DashboardAccountsHealthServiceProvidersRouteImport.update({
+    id: '/accounts/health-service-providers',
+    path: '/accounts/health-service-providers',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
-const DashboardAccountsCommunityRoute =
-  DashboardAccountsCommunityRouteImport.update({
-    id: '/accounts/community',
-    path: '/accounts/community',
+const DashboardAccountsCommunityMembersRoute =
+  DashboardAccountsCommunityMembersRouteImport.update({
+    id: '/accounts/community-members',
+    path: '/accounts/community-members',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardSurveysEditEditIdRoute =
@@ -275,16 +272,16 @@ export interface FileRoutesByFullPath {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
-  '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
-  '/dashboard/accounts/employees': typeof DashboardAccountsEmployeesRoute
-  '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
+  '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
+  '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
+  '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
   '/dashboard/immunization/assigned': typeof DashboardImmunizationAssignedRoute
   '/dashboard/immunization/family': typeof DashboardImmunizationFamilyRoute
   '/dashboard/immunization/report': typeof DashboardImmunizationReportRoute
-  '/dashboard/programmes/$view-id': typeof DashboardProgrammesViewIdRoute
-  '/dashboard/programmes/add-new': typeof DashboardProgrammesAddNewRoute
+  '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
+  '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
   '/dashboard/school/profile': typeof DashboardSchoolProfileRoute
   '/dashboard/school/report': typeof DashboardSchoolReportRoute
   '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
@@ -296,7 +293,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
-  '/dashboard/programmes': typeof DashboardProgrammesIndexRoute
+  '/dashboard/projects': typeof DashboardProjectsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
@@ -314,16 +311,16 @@ export interface FileRoutesByTo {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard': typeof DashboardIndexRoute
   '/posts': typeof PostsIndexRoute
-  '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
-  '/dashboard/accounts/employees': typeof DashboardAccountsEmployeesRoute
-  '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
+  '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
+  '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
+  '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
   '/dashboard/immunization/assigned': typeof DashboardImmunizationAssignedRoute
   '/dashboard/immunization/family': typeof DashboardImmunizationFamilyRoute
   '/dashboard/immunization/report': typeof DashboardImmunizationReportRoute
-  '/dashboard/programmes/$view-id': typeof DashboardProgrammesViewIdRoute
-  '/dashboard/programmes/add-new': typeof DashboardProgrammesAddNewRoute
+  '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
+  '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
   '/dashboard/school/profile': typeof DashboardSchoolProfileRoute
   '/dashboard/school/report': typeof DashboardSchoolReportRoute
   '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
@@ -335,7 +332,7 @@ export interface FileRoutesByTo {
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
-  '/dashboard/programmes': typeof DashboardProgrammesIndexRoute
+  '/dashboard/projects': typeof DashboardProjectsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
@@ -356,16 +353,16 @@ export interface FileRoutesById {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
-  '/dashboard/accounts/community': typeof DashboardAccountsCommunityRoute
-  '/dashboard/accounts/employees': typeof DashboardAccountsEmployeesRoute
-  '/dashboard/accounts/religious': typeof DashboardAccountsReligiousRoute
+  '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
+  '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
+  '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
   '/dashboard/immunization/assigned': typeof DashboardImmunizationAssignedRoute
   '/dashboard/immunization/family': typeof DashboardImmunizationFamilyRoute
   '/dashboard/immunization/report': typeof DashboardImmunizationReportRoute
-  '/dashboard/programmes/$view-id': typeof DashboardProgrammesViewIdRoute
-  '/dashboard/programmes/add-new': typeof DashboardProgrammesAddNewRoute
+  '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
+  '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
   '/dashboard/school/profile': typeof DashboardSchoolProfileRoute
   '/dashboard/school/report': typeof DashboardSchoolReportRoute
   '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
@@ -377,7 +374,7 @@ export interface FileRoutesById {
   '/dashboard/documents/': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback/': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications/': typeof DashboardNotificationsIndexRoute
-  '/dashboard/programmes/': typeof DashboardProgrammesIndexRoute
+  '/dashboard/projects/': typeof DashboardProjectsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/dashboard/surveys/': typeof DashboardSurveysIndexRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
@@ -399,16 +396,16 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard/'
     | '/posts/'
-    | '/dashboard/accounts/community'
-    | '/dashboard/accounts/employees'
-    | '/dashboard/accounts/religious'
+    | '/dashboard/accounts/community-members'
+    | '/dashboard/accounts/health-service-providers'
+    | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
     | '/dashboard/feedback/add-new'
     | '/dashboard/immunization/assigned'
     | '/dashboard/immunization/family'
     | '/dashboard/immunization/report'
-    | '/dashboard/programmes/$view-id'
-    | '/dashboard/programmes/add-new'
+    | '/dashboard/projects/$view-id'
+    | '/dashboard/projects/add-new'
     | '/dashboard/school/profile'
     | '/dashboard/school/report'
     | '/dashboard/surveys/$view-id'
@@ -420,7 +417,7 @@ export interface FileRouteTypes {
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
-    | '/dashboard/programmes'
+    | '/dashboard/projects'
     | '/dashboard/settings'
     | '/dashboard/surveys'
     | '/dashboard/surveys/edit/$edit-id'
@@ -438,16 +435,16 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard'
     | '/posts'
-    | '/dashboard/accounts/community'
-    | '/dashboard/accounts/employees'
-    | '/dashboard/accounts/religious'
+    | '/dashboard/accounts/community-members'
+    | '/dashboard/accounts/health-service-providers'
+    | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
     | '/dashboard/feedback/add-new'
     | '/dashboard/immunization/assigned'
     | '/dashboard/immunization/family'
     | '/dashboard/immunization/report'
-    | '/dashboard/programmes/$view-id'
-    | '/dashboard/programmes/add-new'
+    | '/dashboard/projects/$view-id'
+    | '/dashboard/projects/add-new'
     | '/dashboard/school/profile'
     | '/dashboard/school/report'
     | '/dashboard/surveys/$view-id'
@@ -459,7 +456,7 @@ export interface FileRouteTypes {
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
-    | '/dashboard/programmes'
+    | '/dashboard/projects'
     | '/dashboard/settings'
     | '/dashboard/surveys'
     | '/dashboard/surveys/edit/$edit-id'
@@ -479,16 +476,16 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard/'
     | '/posts/'
-    | '/dashboard/accounts/community'
-    | '/dashboard/accounts/employees'
-    | '/dashboard/accounts/religious'
+    | '/dashboard/accounts/community-members'
+    | '/dashboard/accounts/health-service-providers'
+    | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
     | '/dashboard/feedback/add-new'
     | '/dashboard/immunization/assigned'
     | '/dashboard/immunization/family'
     | '/dashboard/immunization/report'
-    | '/dashboard/programmes/$view-id'
-    | '/dashboard/programmes/add-new'
+    | '/dashboard/projects/$view-id'
+    | '/dashboard/projects/add-new'
     | '/dashboard/school/profile'
     | '/dashboard/school/report'
     | '/dashboard/surveys/$view-id'
@@ -500,7 +497,7 @@ export interface FileRouteTypes {
     | '/dashboard/documents/'
     | '/dashboard/feedback/'
     | '/dashboard/notifications/'
-    | '/dashboard/programmes/'
+    | '/dashboard/projects/'
     | '/dashboard/settings/'
     | '/dashboard/surveys/'
     | '/dashboard/surveys/edit/$edit-id'
@@ -630,11 +627,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/programmes/': {
-      id: '/dashboard/programmes/'
-      path: '/programmes'
-      fullPath: '/dashboard/programmes'
-      preLoaderRoute: typeof DashboardProgrammesIndexRouteImport
+    '/dashboard/projects/': {
+      id: '/dashboard/projects/'
+      path: '/projects'
+      fullPath: '/dashboard/projects'
+      preLoaderRoute: typeof DashboardProjectsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/notifications/': {
@@ -714,18 +711,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSchoolProfileRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/programmes/add-new': {
-      id: '/dashboard/programmes/add-new'
-      path: '/programmes/add-new'
-      fullPath: '/dashboard/programmes/add-new'
-      preLoaderRoute: typeof DashboardProgrammesAddNewRouteImport
+    '/dashboard/projects/add-new': {
+      id: '/dashboard/projects/add-new'
+      path: '/projects/add-new'
+      fullPath: '/dashboard/projects/add-new'
+      preLoaderRoute: typeof DashboardProjectsAddNewRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/programmes/$view-id': {
-      id: '/dashboard/programmes/$view-id'
-      path: '/programmes/$view-id'
-      fullPath: '/dashboard/programmes/$view-id'
-      preLoaderRoute: typeof DashboardProgrammesViewIdRouteImport
+    '/dashboard/projects/$view-id': {
+      id: '/dashboard/projects/$view-id'
+      path: '/projects/$view-id'
+      fullPath: '/dashboard/projects/$view-id'
+      preLoaderRoute: typeof DashboardProjectsViewIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/immunization/report': {
@@ -763,25 +760,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountsStakeholdersRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/accounts/religious': {
-      id: '/dashboard/accounts/religious'
-      path: '/accounts/religious'
-      fullPath: '/dashboard/accounts/religious'
-      preLoaderRoute: typeof DashboardAccountsReligiousRouteImport
+    '/dashboard/accounts/rich-members': {
+      id: '/dashboard/accounts/rich-members'
+      path: '/accounts/rich-members'
+      fullPath: '/dashboard/accounts/rich-members'
+      preLoaderRoute: typeof DashboardAccountsRichMembersRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/accounts/employees': {
-      id: '/dashboard/accounts/employees'
-      path: '/accounts/employees'
-      fullPath: '/dashboard/accounts/employees'
-      preLoaderRoute: typeof DashboardAccountsEmployeesRouteImport
+    '/dashboard/accounts/health-service-providers': {
+      id: '/dashboard/accounts/health-service-providers'
+      path: '/accounts/health-service-providers'
+      fullPath: '/dashboard/accounts/health-service-providers'
+      preLoaderRoute: typeof DashboardAccountsHealthServiceProvidersRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/accounts/community': {
-      id: '/dashboard/accounts/community'
-      path: '/accounts/community'
-      fullPath: '/dashboard/accounts/community'
-      preLoaderRoute: typeof DashboardAccountsCommunityRouteImport
+    '/dashboard/accounts/community-members': {
+      id: '/dashboard/accounts/community-members'
+      path: '/accounts/community-members'
+      fullPath: '/dashboard/accounts/community-members'
+      preLoaderRoute: typeof DashboardAccountsCommunityMembersRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/surveys/edit/$edit-id': {
@@ -814,16 +811,16 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardAccountsCommunityRoute: typeof DashboardAccountsCommunityRoute
-  DashboardAccountsEmployeesRoute: typeof DashboardAccountsEmployeesRoute
-  DashboardAccountsReligiousRoute: typeof DashboardAccountsReligiousRoute
+  DashboardAccountsCommunityMembersRoute: typeof DashboardAccountsCommunityMembersRoute
+  DashboardAccountsHealthServiceProvidersRoute: typeof DashboardAccountsHealthServiceProvidersRoute
+  DashboardAccountsRichMembersRoute: typeof DashboardAccountsRichMembersRoute
   DashboardAccountsStakeholdersRoute: typeof DashboardAccountsStakeholdersRoute
   DashboardFeedbackAddNewRoute: typeof DashboardFeedbackAddNewRoute
   DashboardImmunizationAssignedRoute: typeof DashboardImmunizationAssignedRoute
   DashboardImmunizationFamilyRoute: typeof DashboardImmunizationFamilyRoute
   DashboardImmunizationReportRoute: typeof DashboardImmunizationReportRoute
-  DashboardProgrammesViewIdRoute: typeof DashboardProgrammesViewIdRoute
-  DashboardProgrammesAddNewRoute: typeof DashboardProgrammesAddNewRoute
+  DashboardProjectsViewIdRoute: typeof DashboardProjectsViewIdRoute
+  DashboardProjectsAddNewRoute: typeof DashboardProjectsAddNewRoute
   DashboardSchoolProfileRoute: typeof DashboardSchoolProfileRoute
   DashboardSchoolReportRoute: typeof DashboardSchoolReportRoute
   DashboardSurveysViewIdRoute: typeof DashboardSurveysViewIdRoute
@@ -835,7 +832,7 @@ interface DashboardRouteRouteChildren {
   DashboardDocumentsIndexRoute: typeof DashboardDocumentsIndexRoute
   DashboardFeedbackIndexRoute: typeof DashboardFeedbackIndexRoute
   DashboardNotificationsIndexRoute: typeof DashboardNotificationsIndexRoute
-  DashboardProgrammesIndexRoute: typeof DashboardProgrammesIndexRoute
+  DashboardProjectsIndexRoute: typeof DashboardProjectsIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
   DashboardSurveysIndexRoute: typeof DashboardSurveysIndexRoute
   DashboardSurveysEditEditIdRoute: typeof DashboardSurveysEditEditIdRoute
@@ -843,16 +840,18 @@ interface DashboardRouteRouteChildren {
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardAccountsCommunityRoute: DashboardAccountsCommunityRoute,
-  DashboardAccountsEmployeesRoute: DashboardAccountsEmployeesRoute,
-  DashboardAccountsReligiousRoute: DashboardAccountsReligiousRoute,
+  DashboardAccountsCommunityMembersRoute:
+    DashboardAccountsCommunityMembersRoute,
+  DashboardAccountsHealthServiceProvidersRoute:
+    DashboardAccountsHealthServiceProvidersRoute,
+  DashboardAccountsRichMembersRoute: DashboardAccountsRichMembersRoute,
   DashboardAccountsStakeholdersRoute: DashboardAccountsStakeholdersRoute,
   DashboardFeedbackAddNewRoute: DashboardFeedbackAddNewRoute,
   DashboardImmunizationAssignedRoute: DashboardImmunizationAssignedRoute,
   DashboardImmunizationFamilyRoute: DashboardImmunizationFamilyRoute,
   DashboardImmunizationReportRoute: DashboardImmunizationReportRoute,
-  DashboardProgrammesViewIdRoute: DashboardProgrammesViewIdRoute,
-  DashboardProgrammesAddNewRoute: DashboardProgrammesAddNewRoute,
+  DashboardProjectsViewIdRoute: DashboardProjectsViewIdRoute,
+  DashboardProjectsAddNewRoute: DashboardProjectsAddNewRoute,
   DashboardSchoolProfileRoute: DashboardSchoolProfileRoute,
   DashboardSchoolReportRoute: DashboardSchoolReportRoute,
   DashboardSurveysViewIdRoute: DashboardSurveysViewIdRoute,
@@ -864,7 +863,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardDocumentsIndexRoute: DashboardDocumentsIndexRoute,
   DashboardFeedbackIndexRoute: DashboardFeedbackIndexRoute,
   DashboardNotificationsIndexRoute: DashboardNotificationsIndexRoute,
-  DashboardProgrammesIndexRoute: DashboardProgrammesIndexRoute,
+  DashboardProjectsIndexRoute: DashboardProjectsIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
   DashboardSurveysIndexRoute: DashboardSurveysIndexRoute,
   DashboardSurveysEditEditIdRoute: DashboardSurveysEditEditIdRoute,

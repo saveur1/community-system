@@ -19,7 +19,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
     username: "",
     password: ""
   });
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { login, isLoggingIn: isLoading } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +72,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
       type: loginType,
       phone: form.phone,
       email: form.email,
-      username: form.username,
+      // username: form.username,
       password: form.password
     });
   };
@@ -114,7 +114,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
 
   return (
     <div className={`col-span-3 lg:col-span-3 bg-white rounded-xl lg:rounded-r-xl lg:rounded-l-none ${className}`}>
-      <div className="w-full max-w-lg mx-auto p-6 bg-white rounded-2xl overflow-hidden">
+      <div className={`w-full ${i18n.language === 'en' ? 'max-w-md' : 'max-w-lg'} mx-auto p-6 bg-white rounded-2xl overflow-hidden`}>
         <div className="text-center mb-4">
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <FiUser className="w-8 h-8 text-primary" />

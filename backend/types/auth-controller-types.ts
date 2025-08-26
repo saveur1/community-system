@@ -19,7 +19,6 @@ export interface SignupRequest {
   roleType?: string;
   userType?: string | null;
   // Extended optional profile fields
-  nationalId?: string | null;
   district?: string | null;
   sector?: string | null;
   cell?: string | null;

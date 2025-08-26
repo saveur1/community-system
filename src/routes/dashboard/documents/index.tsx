@@ -1,16 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Breadcrumb from '@/components/ui/breadcrum'
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown'
 import { FaList, FaTh, FaEye, FaEdit, FaTrash, FaDownload, FaShare, FaEllipsisV } from 'react-icons/fa'
+import { uploadToCloudinary } from '@/utility/logicFunctions'
+import { useCreateDocument, useDeleteDocument, useUserDocuments } from '@/hooks/useDocuments'
+import { toast } from 'react-toastify'
+import useAuth from '@/hooks/useAuth'
+import { deleteCloudinaryAsset } from '@/utility/logicFunctions'
 
 type DocumentItem = {
-  id: number
+  id: string
   name: string
   size: number // bytes
   type: string // mime or extension
   addedAt: string
   file?: File // only for uploaded in-session files
+  publicId?: string
+  deleteToken?: string | null
 }
 
 const formatSize = (bytes: number) => {
@@ -24,20 +31,37 @@ const formatSize = (bytes: number) => {
 }
 
 const DocumentsPage = () => {
+  const { user } = useAuth()
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
-  const [documents, setDocuments] = useState<DocumentItem[]>([
-    { id: 1, name: 'Immunization_Guide.pdf', size: 1_280_000, type: 'application/pdf', addedAt: '2025-08-10' },
-    { id: 2, name: 'Outreach_Checklist.docx', size: 240_512, type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', addedAt: '2025-08-11' },
-    { id: 3, name: 'Coverage_Chart.png', size: 512_340, type: 'image/png', addedAt: '2025-08-12' },
-  ])
+  const [documents, setDocuments] = useState<DocumentItem[]>([])
 
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(6)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [toDelete, setToDelete] = useState<{ id: number; name: string } | null>(null)
+  const [toDelete, setToDelete] = useState<{ id: string; name: string; publicId?: string } | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const createDoc = useCreateDocument()
+  const deleteDoc = useDeleteDocument()
+
+  // Fetch documents for the logged-in user from backend
+  const { data: docsData, isLoading: docsLoading } = useUserDocuments(user?.id, { page, limit: pageSize })
+
+  // Sync fetched data to local UI state (mapped shape)
+  useEffect(() => {
+    if (!docsData?.result) return
+    const mapped: DocumentItem[] = docsData.result.map((d) => ({
+      id: d.id,
+      name: d.documentName,
+      size: d.size ?? 0,
+      type: d.type ?? 'unknown',
+      addedAt: (d.addedAt || d.createdAt || new Date().toISOString()).toString().slice(0, 10),
+      publicId: d.publicId ?? undefined,
+      deleteToken: d.deleteToken ?? null,
+    }))
+    setDocuments(mapped)
+  }, [docsData])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -50,70 +74,104 @@ const DocumentsPage = () => {
   const start = (currentPage - 1) * pageSize
   const paginated = filtered.slice(start, start + pageSize)
 
-  const handleAddDocuments = (files: FileList | null) => {
+  const handleAddDocuments = async (files: FileList | null) => {
     if (!files || !files.length) return
-    setDocuments((prev) => {
-      const nextId = prev.reduce((m, x) => Math.max(m, x.id), 0) + 1
-      const added: DocumentItem[] = Array.from(files).map((f, i) => ({
-        id: nextId + i,
-        name: f.name,
-        size: f.size,
-        type: f.type || f.name.split('.').pop() || 'unknown',
-        addedAt: new Date().toISOString().slice(0, 10),
-        file: f,
-      }))
-      return [...added, ...prev]
-    })
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
+    if (!user?.id) {
+      toast.error('You must be logged in to upload documents')
+      return
+    }
+    try {
+      for (const f of Array.from(files)) {
+        // Upload toast
+        const uploadToastId = toast.loading(`Uploading your document...`)
+        try {
+          // 1) Upload to Cloudinary to get URL
+          const uploaded = await uploadToCloudinary(f, {
+            onProgress: (percent: number) => {
+              try {
+                toast.update(uploadToastId, {
+                  render: `Uploading your document... ${percent}%`,
+                  isLoading: true,
+                })
+              } catch {}
+            },
+          })
+          const documentUrl = uploaded.secureUrl || uploaded.url
+          const publicId = uploaded.publicId
+          const deleteToken = uploaded.deleteToken
+          toast.update(uploadToastId, { render: `Uploaded your document`, type: 'success', isLoading: false, autoClose: 1200 })
 
-  const handleAction = (action: string, doc: DocumentItem) => {
-    switch (action) {
-      case 'preview': {
-        if (doc.file) {
-          const url = URL.createObjectURL(doc.file)
-          window.open(url, '_blank')
-          setTimeout(() => URL.revokeObjectURL(url), 60_000)
-        } else {
-          alert('Preview unavailable for seeded item. Upload to preview.')
+          // 2) Build payload (no projectId sent)
+          const payload = {
+            documentName: f.name,
+            size: f.size,
+            // Save extension only (e.g., pdf, docx, mp4)
+            type: (f.name.includes('.') ? (f.name.split('.').pop() || '') : '').toLowerCase() || 'unknown',
+            addedAt: new Date(),
+            documentUrl,
+            publicId,
+            deleteToken,
+            userId: user.id,
+          }
+
+          // Saving toast
+          const saveToastId = toast.loading(`Saving your document to database...`)
+          try {
+            // 3) Create in backend and use returned doc to update local list
+            await createDoc.mutateAsync(payload as any)
+            toast.update(saveToastId, { render: `Saved your document`, type: 'success', isLoading: false, autoClose: 1200 })
+          
+          } catch (err: any) {
+            console.error(err)
+            const msg = err?.response?.data?.message || 'Failed to save document'
+            toast.update(saveToastId, { render: msg, type: 'error', isLoading: false, autoClose: 2000 })
+          }
+        } catch (err: any) {
+          console.error(err)
+          const msg = err?.response?.data?.message || 'Failed to upload document'
+          toast.update(uploadToastId, { render: msg, type: 'error', isLoading: false, autoClose: 2000 })
         }
-        break
       }
-      case 'download': {
-        if (doc.file) {
-          const url = URL.createObjectURL(doc.file)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = doc.name
-          a.click()
-          setTimeout(() => URL.revokeObjectURL(url), 60_000)
-        } else {
-          alert('Download unavailable for seeded item in this demo.')
-        }
-        break
-      }
-      case 'rename': {
-        const next = prompt('Rename document', doc.name)
-        if (next && next.trim() && next !== doc.name) {
-          setDocuments((prev) => prev.map((d) => (d.id === doc.id ? { ...d, name: next.trim() } : d)))
-        }
-        break
-      }
-      case 'delete': {
-        setToDelete({ id: doc.id, name: doc.name })
-        setDeleteModalOpen(true)
-        break
-      }
-      default: {
-        alert(`${action} → ${doc.name}`)
-      }
+    } catch (e) {
+      console.error(e)
+      toast.error('Unexpected error while adding documents')
     }
   }
 
-  const confirmDelete = (id: number) => {
-    setDocuments((prev) => prev.filter((d) => d.id !== id))
-    setDeleteModalOpen(false)
-    setToDelete(null)
+  const handleAction = (action: string, doc: DocumentItem) => {
+    if (action === 'view') {
+      // Placeholder
+    } else if (action === 'edit') {
+      // Placeholder
+    } else if (action === 'delete') {
+      setToDelete({ id: doc.id, name: doc.name, publicId: doc.publicId })
+      setDeleteModalOpen(true)
+    }
+  }
+
+  const confirmDelete = async (id: string) => {
+    const doc = documents.find((d) => d.id === id)
+    let cloudToast: any
+    try {
+      if (doc?.deleteToken) {
+        cloudToast = toast.loading('Deleting file from cloud...')
+        try {
+          await deleteCloudinaryAsset({ deleteToken: doc.deleteToken })
+          toast.update(cloudToast, { render: 'Deleted file from cloud', type: 'success', isLoading: false, autoClose: 1200 })
+        } catch (e: any) {
+          toast.update(cloudToast, { render: e?.message || 'Failed to delete cloud file', type: 'error', isLoading: false, autoClose: 2000 })
+        }
+      } else {
+        toast.info('No delete token found. Skipping cloud deletion.')
+      }
+
+      // Delete DB record
+      await deleteDoc.mutateAsync(id)
+      setDocuments((prev) => prev.filter((d) => d.id !== id))
+    } finally {
+      setDeleteModalOpen(false)
+      setToDelete(null)
+    }
   }
 
   const renderTable = () => (

@@ -5,14 +5,14 @@ import { Account, AccountFilters } from '@/types/account';
 import { useUsersList } from '@/hooks/useUsers';
 import type { User } from '@/api/auth';
 
-// Helper: map backend user.userType to account type
+// Helper: determine account type by membership in signup user type groups
 function mapUserTypeToAccountType(userType?: string): Account['type'] {
-  if (!userType) return 'employee';
-  if (userType === 'Religious Leaders') return 'religious';
-  if (userType === 'Health Services Providers') return 'community';
-  if (userType === 'community') return 'community';
-  if (userType === 'stakeholders') return 'stakeholder';
-  return 'employee';
+  if (!userType) return 'RICH Members';
+  if (userType === 'Community Members') return 'Community Members';
+  if (userType === 'Health service providers') return 'Health service providers';
+  if (userType === 'Stakeholders') return 'Stakeholders';
+  if (userType === 'RICH Members') return 'RICH Members';
+  return 'RICH Members';
 }
 
 export const Route = createFileRoute('/dashboard/accounts/')({

@@ -2,23 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { AccountsList } from '@/components/accounts/accounts-list';
 import { Account, AccountFilters } from '@/types/account';
-import { useUsersList, useVerifyUser } from '@/hooks/useUsers';
+import { useUsersList } from '@/hooks/useUsers';
 import type { User } from '@/api/auth';
 
-function mapUserTypeToAccountType(userType?: string): Account['type'] {
-  if (!userType) return 'employee';
-  if (userType === 'Religious Leaders') return 'religious';
-  if (userType === 'Health Services Providers') return 'community';
-  if (userType === 'community') return 'community';
-  if (userType === 'stakeholders') return 'stakeholder';
-  return 'employee';
+function isRichMember(userType?: string) {
+  if (!userType) return false;
+  return userType==='RICH Members';
 }
 
-export const Route = createFileRoute('/dashboard/accounts/employees')({
-  component: EmployeesAccountsPage,
+export const Route = createFileRoute('/dashboard/accounts/rich-members')({
+  component: RichMembersAccountsPage,
 });
 
-function EmployeesAccountsPage() {
+function RichMembersAccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [filters, setFilters] = useState<Omit<AccountFilters, 'type'>>({});
   const [pagination, setPagination] = useState({
@@ -27,12 +23,11 @@ function EmployeesAccountsPage() {
     total: 0,
   });
   const { data, isLoading } = useUsersList({ page: pagination.page, limit: pagination.pageSize });
-  const { mutate: verifyUser } = useVerifyUser();
 
   const mapped = useMemo(() => {
     const list: User[] = data?.result ?? [];
     let items: Account[] = list
-      .filter(u => mapUserTypeToAccountType(u.userType) === 'employee')
+      .filter(u => isRichMember(u.userType))
       .map((u) => ({
         id: String(u.id),
         name: u.name,
@@ -41,7 +36,7 @@ function EmployeesAccountsPage() {
         role: u.roles?.[0]?.name || 'user',
         profile: u.profile,
         address: u.address,
-        type: 'employee',
+        type: 'RICH Members',
         status: (u.status as any) || 'active',
         createdAt: (u as any).createdAt ? String((u as any).createdAt) : new Date().toISOString(),
         updatedAt: (u as any).updatedAt ? String((u as any).updatedAt) : new Date().toISOString(),
@@ -69,6 +64,7 @@ function EmployeesAccountsPage() {
   }, [mapped, data]);
 
   const handleSearch = (newFilters: AccountFilters) => {
+    // Remove type filter since we're only showing religious accounts
     const { type, ...rest } = newFilters;
     setFilters(rest);
     setPagination(prev => ({ ...prev, page: 1 }));
@@ -89,7 +85,7 @@ function EmployeesAccountsPage() {
   return (
     <AccountsList
       accounts={accounts}
-      title="Employee Accounts"
+      title="RICH Member Accounts"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}
@@ -98,12 +94,6 @@ function EmployeesAccountsPage() {
       totalItems={pagination.total}
       pageSize={pagination.pageSize}
       loading={isLoading}
-      onVerifyAccount={(acc) => {
-        verifyUser(String(acc.id));
-      }}
-      onDeactivateAccount={(acc) => {
-        setAccounts(prev => prev.map(a => a.id === acc.id ? { ...a, status: 'inactive' } : a));
-      }}
       onDeleteAccount={(acc) => {
         setAccounts(prev => prev.filter(a => a.id !== acc.id));
         setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));

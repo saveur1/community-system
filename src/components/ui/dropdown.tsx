@@ -133,7 +133,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
 };
 
 // Dropdown Menu Item Component
-interface DropdownItemProps {
+export interface DropdownItemProps {
   children: ReactNode;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   disabled?: boolean;

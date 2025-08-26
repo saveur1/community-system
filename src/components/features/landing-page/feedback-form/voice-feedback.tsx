@@ -87,7 +87,7 @@ interface PlayButtonProps {
 const PlayButton: React.FC<PlayButtonProps> = ({ onClick, isPlaying = false }) => (
   <motion.button
     onClick={onClick}
-    className="w-16 h-16 bg-primary hover:bg-primary/80 rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
+    className="w-14 h-14 sm:w-16 sm:h-16 bg-primary hover:bg-primary/80 rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
     aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -157,7 +157,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
   };
 
   return (
-    <div className="mt-6">
+    <div className="mt-4 sm:mt-6">
       {/* Enhanced Voice Recording UI */}
       <motion.div
         className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-4 border border-purple-200"
@@ -189,7 +189,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
             <motion.button
               type="button"
               onClick={onStartRecording}
-              className="w-16 h-16 bg-primary hover:bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto disabled:opacity-50"
+              className="w-14 h-14 sm:w-16 sm:h-16 bg-primary hover:bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto disabled:opacity-50"
               disabled={micPermission === 'denied'}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -200,7 +200,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
             <motion.button
               type="button"
               onClick={onStopRecording}
-              className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto"
+              className="w-14 h-14 sm:w-16 sm:h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto"
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             >

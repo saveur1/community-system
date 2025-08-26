@@ -18,6 +18,7 @@ import {
 import sequelize from '../config/database';
 import { asyncCatch } from '@/middlewares/errorHandler';
 import db from '@/models';
+import { IUserAttributes } from '../types/user-types';
 
 // Extend the Express Request type to include the user property
 declare global {
@@ -81,23 +82,18 @@ export class AuthController extends Controller {
     }
 
     const data = await db.User.findOne({ where });
-    const user = data?.toJSON();
+    const user = data?.toJSON() as IUserAttributes | undefined;
 
     if (!user || !user.password || !(await compare(password, user.password))) {
       res(401, ServiceResponse.failure('Invalid credentials', { user: null }));
       return;
     }
 
-    if (user.status !== 'active') {
+    if (user.status === 'inactive') {
       res(403, ServiceResponse.failure('Your account is inactive. Please contact support.', { user: null }));
       return;
     }
-
-    // Check if user needs verification (all roles except local_citizen)
-    const userRoles = await data?.getRoles();
-    const isLocalCitizen = userRoles?.some(role => role.name === 'local_citizen');
-
-    if (!user.verified && !isLocalCitizen) {
+    if (user.status === 'pending') {
       res(403, ServiceResponse.failure('Account Needs Verification.', { user: null }));
       return;
     }
@@ -141,7 +137,6 @@ export class AuthController extends Controller {
       roleType,
       userType,
       // extended optional profile fields
-      nationalId,
       district,
       sector,
       cell,
@@ -179,19 +174,17 @@ export class AuthController extends Controller {
     const hashedPassword = await hash(password, 10);
 
     const newUser = await sequelize.transaction(async (t) => {
-      // Create user with verified status based on role
-      const isLocalCitizen = roleType === 'local_citizen';
+      // Create user with status based on role
+      const isGeneralPopulation = roleType === 'general_population';
       const user = await db.User.create({
         name,
         email,
         password: hashedPassword,
         address,
         phone,
-        status: 'active',
-        verified: isLocalCitizen, // Auto-verify local_citizen
+        status: isGeneralPopulation ? 'active' : 'pending',
         userType,
         // extended optional fields
-        nationalId,
         district,
         sector,
         cell,
@@ -216,6 +209,7 @@ export class AuthController extends Controller {
       // If role doesn't exist, return error
       if (!role) {
         res(400, ServiceResponse.failure('Can\'t create user, with that role.', { user: null }));
+        await t.rollback();
         return;
       }
 
@@ -233,9 +227,9 @@ export class AuthController extends Controller {
       return;
     }
 
-    // if role is local_citizen, send token otherwise send message that they need to be verified
-    if (roleType !== 'local_citizen') {
-      res(201, ServiceResponse.success('Signup successful, Wait for our further verification.', { user: null }));
+    // if role is general_population, send token otherwise send message that they need to be verified
+    if (roleType !== 'general_population') {
+      res(201, ServiceResponse.success('Signup successful. Your account is pending verification.', { user: null }));
       return;
     }
     const token = await this.generateToken(newUser);

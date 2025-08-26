@@ -15,7 +15,6 @@ class User extends Model<IUserAttributes, IUserCreationAttributes> implements IU
   declare address: string | null;
   declare phone: string | null;
   // Community Health Worker optional fields
-  declare nationalId: string | null;
   declare district: string | null;
   declare sector: string | null;
   declare cell: string | null;
@@ -40,7 +39,6 @@ class User extends Model<IUserAttributes, IUserCreationAttributes> implements IU
   declare salary: number | null;
   declare profile: string | null;
   declare emailVerified: boolean;
-  declare verified: boolean;
   declare roles?: Role[];
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
@@ -163,11 +161,6 @@ User.init({
         comment: "Phone field is required."
     },
     // Community Health Worker optional fields
-    nationalId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        comment: "Optional national identification number"
-    },
     district: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -256,15 +249,9 @@ User.init({
         field: 'email_verified',
         comment: 'Whether the user has verified their email address.'
     },
-    verified: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-        comment: 'Whether the user has been verified by an admin (required for non-local_influencer roles)'
-    },
     status: {
-        type: DataTypes.ENUM("active", "inactive"),
-        defaultValue: "active",
+        type: DataTypes.ENUM("pending", "active", "inactive"),
+        defaultValue: "pending",
         allowNull: false,
     },
     password: {

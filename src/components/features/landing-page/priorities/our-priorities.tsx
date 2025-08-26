@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { FaChild, FaUsers, FaShieldAlt, FaBrain, FaCommentDots } from 'react-icons/fa';
-import { sectionVariants } from ".";
+import { sectionVariants } from "..";
 import { useRouter } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
@@ -38,7 +38,6 @@ const OurPriorities = () => {
   return (
     <div className="w-full flex justify-start col-span-1 md:col-span-2 mb-8 md:mb-0">
       <motion.section
-        id="about"
         className="w-full px-2 sm:px-4"
         initial="hidden"
         whileInView="visible"

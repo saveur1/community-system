@@ -99,7 +99,8 @@
         "connect_with_us": "Connect With Us",
         "cloud_alt": "cloud shadow",
         "quote_text": "Your voice shapes our community. Share your experiences and help improve government programs for everyone.",
-        "quote_attrib": "Community Listening Initiative"
+        "quote_attrib": "Community Listening Initiative",
+        "continue_with_google": "Continue with Google"
     },
     "signup": {
         "title": "Create Account",
@@ -124,7 +125,7 @@
         "creating": "Creating...",
         "already_have_account": "Already have an account?",
         "sign_in_link": "Sign in",
-        "verify_before_login": "Please verify your account before logging in.",
+        "verify_before_login": "Login is only possible after admin verification.",
         "provide_hospital": "Please provide hospital name and address",
         "provide_health_center": "Please provide health center name and address",
         "select_epi_district": "Please select your EPI district",
@@ -136,6 +137,7 @@
         "terms_agreement": "I agree to the",
         "terms_of_service": "Terms of Service",
         "and": "and",
+        "select_category": "Which best describe you?",
         "privacy_policy": "Privacy Policy",
         "password_required": "Password must be at least 6 characters",
         "passwords_match": "Passwords do not match",

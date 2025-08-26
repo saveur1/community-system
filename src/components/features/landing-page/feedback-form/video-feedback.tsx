@@ -63,7 +63,7 @@ const VideoFeedback: React.FC<VideoFeedbackProps> = ({
   };
 
   return (
-    <div className="space-y-4 mt-6">
+    <div className="space-y-4 mt-4 sm:mt-6">
       {/* Permission Messages */}
       {(camPermission === 'denied' || micPermission === 'denied') && (
         <motion.div 
@@ -183,7 +183,7 @@ const VideoFeedback: React.FC<VideoFeedbackProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="flex justify-center items-center gap-4"
+          className="flex flex-wrap justify-center items-center gap-3 sm:gap-4"
         >
           {/* Recording Control - only show circular button when no video exists */}
           {!isRecording && videoFeedback.length === 0 ? (
@@ -192,7 +192,7 @@ const VideoFeedback: React.FC<VideoFeedbackProps> = ({
               whileTap={{ scale: 0.95 }}
               type="button"
               onClick={onStartRecording}
-              className="flex items-center justify-center w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors"
+              className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors"
               aria-label="Start video recording"
             >
               <FaVideo className="text-xl" />
@@ -203,7 +203,7 @@ const VideoFeedback: React.FC<VideoFeedbackProps> = ({
               whileTap={{ scale: 0.95 }}
               type="button"
               onClick={onStopRecording}
-              className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-600 hover:bg-gray-700 text-white shadow-lg transition-colors"
+              className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-600 hover:bg-gray-700 text-white shadow-lg transition-colors"
               aria-label="Stop recording"
             >
               <FaStop className="text-xl" />
@@ -219,7 +219,7 @@ const VideoFeedback: React.FC<VideoFeedbackProps> = ({
               whileTap={{ scale: 0.95 }}
               type="button"
               onClick={onStartRecording}
-              className="flex items-center px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors shadow-md"
+              className="flex items-center px-3 sm:px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors shadow-md"
             >
               <FaVideo className="mr-2" />
               Re-record
@@ -235,7 +235,7 @@ const VideoFeedback: React.FC<VideoFeedbackProps> = ({
               whileTap={{ scale: 0.95 }}
               type="button"
               onClick={() => deleteRecording(videoFeedback[0].id)}
-              className="flex items-center px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors shadow-md"
+              className="flex items-center px-3 sm:px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors shadow-md"
             >
               <FaTrash className="mr-2" />
               Remove

@@ -1,5 +1,5 @@
 import { FaList, FaTh } from 'react-icons/fa';
-import { Link, useLocation } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 
 interface FeedbackToolbarProps {
   viewMode: 'list' | 'grid';
@@ -16,8 +16,6 @@ export const FeedbackToolbar = ({
   setSearch,
   filteredCount,
 }: FeedbackToolbarProps) => {
-  const { pathname } = useLocation();
-  const dashboard = pathname.split('/')[1];
 
   return (
     <div className="flex w-full bg-white px-4 py-2 my-6 border border-gray-300 rounded-md items-center mb-6">
@@ -47,7 +45,7 @@ export const FeedbackToolbar = ({
             <FaTh className="w-4 h-4" />
           </button>
         </div>
-        <Link to={`/${dashboard}/feedback/add-new`} className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm flex items-center gap-2">
+        <Link to="/dashboard/feedback/add-new" className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm flex items-center gap-2">
           <span className="text-lg">+</span>
           Make Feedback
         </Link>

@@ -1,5 +1,5 @@
 import { NavItemType } from '@/utility/types';
-import { FaList, FaUserFriends } from 'react-icons/fa';
+import { FaUserFriends } from 'react-icons/fa';
 import {
   HiChartBar,
   HiDocumentText,
@@ -8,9 +8,10 @@ import {
 import { HiChatBubbleBottomCenter } from "react-icons/hi2";
 import { User } from '@/api/auth';
 import { checkPermissions } from '@/utility/logicFunctions';
-import { IoIosNotifications, IoIosVideocam, IoMdSchool } from 'react-icons/io';
-import { PiSpeakerSimpleHighBold } from 'react-icons/pi';
+import {  IoIosVideocam, IoMdSchool } from 'react-icons/io';
+import { PiSpeakerSimpleHighBold, PiSubtitlesFill } from 'react-icons/pi';
 import { MdHealthAndSafety } from 'react-icons/md';
+import { GrProjects } from "react-icons/gr";
 
 const navItems = (user: User | null, path: string): NavItemType[] => {
     const navigationItems: NavItemType[] = [
@@ -34,8 +35,8 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
       navigationItems.push({ name: "Surveys", icon: HiClipboardList, active: false, link: `/${path}/surveys/take-survey` })
     }
   
-    if(checkPermissions(user, 'programme:read')) {
-      navigationItems.push({ name: "Programmes", icon: FaList, active: false, link: `/${path}/programmes` })
+    if(checkPermissions(user, 'project:read')) {
+      navigationItems.push({ name: "Projects", icon: GrProjects, active: false, link: `/${path}/projects` })
     }
   
     if(checkPermissions(user, 'document:read')) {
@@ -50,15 +51,15 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
         link: `/${path}/accounts`,
         children: [
           { name: "Stakeholders", active: false, link: `/${path}/accounts/stakeholders`, icon: FaUserFriends },
-          { name: "Employees", active: false, link: `/${path}/accounts/employees`, icon: FaUserFriends },
-          { name: "Community", active: false, link: `/${path}/accounts/community`, icon: FaUserFriends },
-          { name: "Religious", active: false, link: `/${path}/accounts/religious`, icon: FaUserFriends },
+          { name: "RICH Members", active: false, link: `/${path}/accounts/rich-members`, icon: FaUserFriends },
+          { name: "Community Members ", active: false, link: `/${path}/accounts/community-members`, icon: FaUserFriends },
+          { name: "Health service", active: false, link: `/${path}/accounts/health-service-providers`, icon: FaUserFriends },
         ],
       })
     }
 
     if(checkPermissions(user, 'role:read')) {
-      navigationItems.push({ name: "Roles", icon: FaUserFriends, active: false, link: `/${path}/roles` })
+      navigationItems.push({ name: "Roles", icon: PiSubtitlesFill, active: false, link: `/${path}/roles` })
     }
 
     if(checkPermissions(user, 'permission:read')) {

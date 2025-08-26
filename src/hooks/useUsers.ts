@@ -81,20 +81,47 @@ export function useDeleteUser() {
   });
 }
 
-// Verify user (set verified = true)
-export function useVerifyUser() {
+// Combined verify/unverify hook
+export function useVerifyAndUnverify() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (userId: string) => usersApi.update(userId, { verified: true } as UserUpdateRequest),
-    onSuccess: async (_data, userId) => {
-      toast.success('User verified successfully');
+    mutationFn: async (params: { userId: string; targetStatus: 'active' | 'pending' }) => {
+      const { userId, targetStatus } = params;
+      return usersApi.update(userId, { status: targetStatus } as UserUpdateRequest);
+    },
+    onSuccess: async (_data, variables) => {
+      const { userId, targetStatus } = variables as { userId: string; targetStatus: 'active' | 'pending' };
+      toast.success(targetStatus === 'active' ? 'User verified successfully' : 'User set to pending verification');
       await Promise.all([
         qc.invalidateQueries({ queryKey: usersKeys.detail(userId) }),
         qc.invalidateQueries({ queryKey: usersKeys.all }),
       ]);
     },
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || 'Failed to verify user';
+      const msg = error?.response?.data?.message || 'Failed to update verification status';
+      toast.error(msg);
+    },
+  });
+}
+
+// Combined activate/deactivate hook
+export function useActivateAndDeactivate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { userId: string; targetStatus: 'active' | 'inactive' }) => {
+      const { userId, targetStatus } = params;
+      return usersApi.update(userId, { status: targetStatus } as UserUpdateRequest);
+    },
+    onSuccess: async (_data, variables) => {
+      const { userId, targetStatus } = variables as { userId: string; targetStatus: 'active' | 'inactive' };
+      toast.success(targetStatus === 'active' ? 'User activated successfully' : 'User deactivated successfully');
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: usersKeys.detail(userId) }),
+        qc.invalidateQueries({ queryKey: usersKeys.all }),
+      ]);
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || 'Failed to update active status';
       toast.error(msg);
     },
   });

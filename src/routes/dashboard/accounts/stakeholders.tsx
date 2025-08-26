@@ -2,16 +2,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { AccountsList } from '@/components/accounts/accounts-list';
 import { Account, AccountFilters } from '@/types/account';
-import { useUsersList, useVerifyUser } from '@/hooks/useUsers';
+import { useUsersList } from '@/hooks/useUsers';
 import type { User } from '@/api/auth';
 
-function mapUserTypeToAccountType(userType?: string): Account['type'] {
-  if (!userType) return 'employee';
-  if (userType === 'Religious Leaders') return 'religious';
-  if (userType === 'Health Services Providers') return 'community';
-  if (userType === 'community') return 'community';
-  if (userType === 'stakeholders') return 'stakeholder';
-  return 'employee';
+function isStakeholder(userType?: string) {
+  if (!userType) return false;
+  return userType==='Stakeholders';
 }
 
 export const Route = createFileRoute('/dashboard/accounts/stakeholders')({
@@ -19,7 +15,6 @@ export const Route = createFileRoute('/dashboard/accounts/stakeholders')({
 });
 
 function StakeholdersAccountsPage() {
-  const { mutate: verifyUser } = useVerifyUser();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [filters, setFilters] = useState<Omit<AccountFilters, 'type'>>({});
   const [pagination, setPagination] = useState({
@@ -32,7 +27,7 @@ function StakeholdersAccountsPage() {
   const mapped = useMemo(() => {
     const list: User[] = data?.result ?? [];
     let items: Account[] = list
-      .filter(u => mapUserTypeToAccountType(u.userType) === 'stakeholder')
+      .filter(u => isStakeholder(u.userType))
       .map((u) => ({
         id: String(u.id),
         name: u.name,
@@ -41,7 +36,7 @@ function StakeholdersAccountsPage() {
         role: u.roles?.[0]?.name || 'user',
         profile: u.profile,
         address: u.address,
-        type: 'stakeholder',
+        type: 'Stakeholders',
         status: (u.status as any) || 'active',
         createdAt: (u as any).createdAt ? String((u as any).createdAt) : new Date().toISOString(),
         updatedAt: (u as any).updatedAt ? String((u as any).updatedAt) : new Date().toISOString(),
@@ -98,12 +93,6 @@ function StakeholdersAccountsPage() {
       totalItems={pagination.total}
       pageSize={pagination.pageSize}
       loading={isLoading}
-      onVerifyAccount={(acc) => {
-        verifyUser(String(acc.id));
-      }}
-      onDeactivateAccount={(acc) => {
-        setAccounts(prev => prev.map(a => a.id === acc.id ? { ...a, status: 'inactive' } : a));
-      }}
       onDeleteAccount={(acc) => {
         setAccounts(prev => prev.filter(a => a.id !== acc.id));
         setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));

@@ -54,7 +54,7 @@ async function fetchProgramme(id: number): Promise<Programme> {
 async function fetchDocs(programmeId: number): Promise<DocItem[]> {
   await new Promise(r => setTimeout(r, 120));
   return [
-    { id: 1, name: 'Programme Outline.pdf', type: 'PDF', size: '1.2 MB', added: '2025-08-01' },
+    { id: 1, name: 'Project Outline.pdf', type: 'PDF', size: '1.2 MB', added: '2025-08-01' },
     { id: 2, name: 'Budget.xlsx', type: 'XLSX', size: '380 KB', added: '2025-08-02' },
     { id: 3, name: 'Campaign Banner.png', type: 'PNG', size: '820 KB', added: '2025-08-05' },
     { id: 4, name: 'Field Report.docx', type: 'DOCX', size: '220 KB', added: '2025-08-06' },
@@ -130,7 +130,7 @@ const ProgramDetail = () => {
 
   const sortIcon = (key: string) => {
     if (sortKey !== key) return <FaSort className="inline ml-1" />;
-    return sortDir === 'asc' ? <FaSortUp className="inline ml-1" /> : <FaSortDown className="inline ml-1" />;
+    return sortDir === 'asc' ? <FaSortUp className='inline ml-1' /> : <FaSortDown className='inline ml-1' />;
   };
 
   const toggleSort = (key: string) => {
@@ -160,7 +160,7 @@ const ProgramDetail = () => {
 
   return (
     <div className="pb-10">
-      <Breadcrumb items={["Community", "Programmes", programme?.title || '']} title="Programme Details" className="absolute top-0 left-0 w-full px-6" />
+      <Breadcrumb items={["Community", "Projects", programme?.title || ""]} title="Project Details" className="absolute top-0 left-0 w-full px-6" />
 
       <div className="pt-14 space-y-6">
         {/* Overview Card */}
@@ -170,7 +170,7 @@ const ProgramDetail = () => {
               <div className="flex-1">
                 <h1 className="text-2xl font-semibold text-gray-800">{programme?.title}</h1>
                 <div className="mt-2 flex items-center gap-6 text-sm text-gray-600">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(programme?.status || '')}`}>{programme?.status}</span>
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(programme?.status || ``)}`}>{programme?.status}</span>
                   <span className="inline-flex items-center gap-2"><FaTag /> Slug: {programme?.slug}</span>
                   <span className="inline-flex items-center gap-2"><FaUsers /> Target: {programme?.targetGroup}</span>
                   <span className="inline-flex items-center gap-2"><FaFolderOpen /> Docs: {programme?.documents}</span>
@@ -182,10 +182,10 @@ const ProgramDetail = () => {
             {/* Tabs */}
             <div className="mt-10 border-b border-gray-200">
               <nav className="-mb-px flex gap-6" aria-label="Tabs">
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'details' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('details')}>Details</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'resources' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('resources')}>Resources ({programme?.documents || 0})</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'surveys' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('surveys')}>Surveys ({programme?.surveys || 0})</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'feedbacks' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`} onClick={() => setActiveTab('feedbacks')}>Feedbacks ({programme?.feedbacks || 0})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `details` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`details`)}>Details</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `resources` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`resources`)}>Resources ({programme?.documents || 0})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `surveys` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`surveys`)}>Surveys ({programme?.surveys || 0})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `feedbacks` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`feedbacks`)}>Feedbacks ({programme?.feedbacks || 0})</button>
               </nav>
             </div>
           </div>
@@ -229,7 +229,7 @@ const ProgramDetail = () => {
                     const files = Array.from(e.target.files || []);
                     if (!files.length) return;
                     const now = new Date().toISOString().slice(0,10);
-                    const newDocs: DocItem[] = files.map((f, i) => ({ id: Date.now()+i, name: f.name, type: f.name.split('.').pop()?.toUpperCase() || 'FILE', size: `${Math.ceil(f.size/1024)} KB`, added: now }));
+                    const newDocs: DocItem[] = files.map((f, i) => ({ id: Date.now()+i, name: f.name, type: f.name.split('.').pop()?.toUpperCase() || 'FILE', size: '${Math.ceil(f.size/1024)} KB', added: now }));
                     setDocs(prev => [...newDocs, ...prev]);
                     e.currentTarget.value = '';
                   }} />
@@ -305,10 +305,10 @@ const ProgramDetail = () => {
                 <table className="min-w-full">
                   <thead className="border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('name')}>Name {sortIcon('name')}</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('status')}>Status {sortIcon('status')}</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('email')}>Contact {sortIcon('email')}</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('responses')}>Responses {sortIcon('responses')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort("name")}>Name {sortIcon("name")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort("status")}>Status {sortIcon("status")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort("email")}>Contact {sortIcon("email")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort("responses")}>Responses {sortIcon("responses")}</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Action</th>
                     </tr>
                   </thead>
@@ -316,11 +316,11 @@ const ProgramDetail = () => {
                     {pageData.map(s => (
                       <tr key={s.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 text-sm text-gray-700">{s.name}</td>
-                        <td className="px-6 py-4"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(s.status)}`}>{s.status}</span></td>
+                        <td className="px-6 py-4"><span className={"inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(s.status)}"}>{s.status}</span></td>
                         <td className="px-6 py-4 text-sm text-gray-700">{s.email}</td>
                         <td className="px-6 py-4 text-sm text-gray-700">{s.responses}</td>
                         <td className="px-6 py-4">
-                          <Link to="/dashboard/surveys/$view-id" params={{ 'view-id': String(s.id) }} className="text-title inline-flex items-center gap-2">
+                          <Link to="/dashboard/surveys/$view-id" params={{ "view-id": String(s.id) }} className="text-title inline-flex items-center gap-2">
                             <FaEye className="w-4 h-4" /> View
                           </Link>
                         </td>
@@ -372,8 +372,8 @@ const ProgramDetail = () => {
                         <td className="px-6 py-4 text-sm text-gray-700">{f.respondent}</td>
                         <td className="px-6 py-4 text-sm text-gray-700">{f.type}</td>
                         <td className="px-6 py-4 text-sm text-gray-700 max-w-xl truncate" title={f.message}>{f.message}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{f.followUp ? 'Yes' : 'No'}</td>
-                        <td className="px-6 py-4"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(f.status)}`}>{f.status}</span></td>
+                        <td className="px-6 py-4 text-sm text-gray-700">{f.followUp ? "Yes" : "No"}</td>
+                        <td className="px-6 py-4"><span className={"inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(f.status)}"}>{f.status}</span></td>
                       </tr>
                     ))}
                   </tbody>
@@ -396,6 +396,6 @@ const ProgramDetail = () => {
   );
 };
 
-export const Route = createFileRoute('/dashboard/programmes/$view-id')({
+export const Route = createFileRoute('/dashboard/projects/$view-id')({
   component: ProgramDetail,
 });

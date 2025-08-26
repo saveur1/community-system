@@ -20,7 +20,7 @@ const TextFeedback: React.FC<TextFeedbackProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="space-y-2 mt-6"
+      className="space-y-2 mt-4 sm:mt-6"
     >
       <AnimatedTextarea
         label={t('feedback.feedback_field')}

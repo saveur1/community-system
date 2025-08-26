@@ -6,7 +6,7 @@ export interface Account {
   role: string;
   profile?: string;
   address?: string;
-  type: 'community' | 'religious' | 'stakeholder' | 'employee';
+  type: 'Community Members' | 'Health service providers' | 'Stakeholders' | 'RICH Members';
   status: 'active' | 'inactive' | 'pending';
   createdAt: string;
   updatedAt: string;

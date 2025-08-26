@@ -5,6 +5,8 @@ import { SelectDropdown } from '@/components/ui/select';
 import Drawer from '@/components/ui/drawer';
 import Modal, { ModalBody, ModalFooter, ModalButton } from '@/components/ui/modal';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
+import { spacer } from '@/utility/logicFunctions';
+import { useVerifyAndUnverify, useActivateAndDeactivate } from '@/hooks/useUsers';
 
 type ViewMode = 'list' | 'grid';
 
@@ -20,8 +22,6 @@ interface AccountsListProps {
   pageSize: number;
   loading: boolean;
   onDeleteAccount?: (account: Account) => void; // optional callback
-  onVerifyAccount?: (account: Account) => void; // optional callback
-  onDeactivateAccount?: (account: Account) => void; // optional callback
 }
 
 export function AccountsList({
@@ -36,8 +36,6 @@ export function AccountsList({
   pageSize,
   loading,
   onDeleteAccount,
-  onVerifyAccount,
-  onDeactivateAccount
 }: AccountsListProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,6 +51,20 @@ export function AccountsList({
   // Delete Modal state
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
+
+  // Mutations for status changes
+  const { mutate: verifyToggleMutate } = useVerifyAndUnverify();
+  const { mutate: activeToggleMutate } = useActivateAndDeactivate();
+
+  const handleVerifyToggle = (account: Account) => {
+    const targetStatus = account.status === 'active' ? 'pending' : 'active';
+    verifyToggleMutate({ userId: String(account.id), targetStatus });
+  };
+
+  const handleActiveToggle = (account: Account) => {
+    const targetStatus = account.status === 'inactive' ? 'active' : 'inactive';
+    activeToggleMutate({ userId: String(account.id), targetStatus });
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -258,9 +270,9 @@ export function AccountsList({
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    onClick={() => handleSort('type')}
+                    onClick={() => handleSort('status')}
                   >
-                    Type {renderSortIcon('type')}
+                    Status {renderSortIcon('status')}
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -292,12 +304,19 @@ export function AccountsList({
                       <div className="text-sm text-gray-900">{account.phone}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        {account.role}
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 capitalize">
+                        {spacer(account.role)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {account.type}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${account.status === 'active'
+                          ? 'bg-green-100 text-green-800'
+                          : account.status === 'inactive'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                        {account.status.charAt(0).toUpperCase() + account.status.slice(1)}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end items-center gap-2">
@@ -323,16 +342,16 @@ export function AccountsList({
                           dropdownClassName="min-w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1"
                         >
                           <DropdownItem
-                            onClick={() => { onVerifyAccount?.(account); }}
-                            icon={<span className="inline-block w-2 h-2 rounded-full bg-green-500" />}
+                            onClick={() => { handleVerifyToggle(account); }}
+                            icon={<span className={`inline-block w-2 h-2 rounded-full ${account.status === 'active' ? 'bg-yellow-500' : 'bg-green-500'}`} />}
                           >
-                            Verify user
+                            {account.status === 'active' ? 'Unverify user' : 'Verify user'}
                           </DropdownItem>
                           <DropdownItem
-                            onClick={() => { onDeactivateAccount?.(account); }}
-                            icon={<span className="inline-block w-2 h-2 rounded-full bg-yellow-500" />}
+                            onClick={() => { handleActiveToggle(account); }}
+                            icon={<span className={`inline-block w-2 h-2 rounded-full ${account.status === 'inactive' ? 'bg-green-500' : 'bg-red-500'}`} />}
                           >
-                            Deactivate user
+                            {account.status === 'inactive' ? 'Activate user' : 'Deactivate user'}
                           </DropdownItem>
                           <DropdownItem
                             onClick={() => { openDelete(account); }}
@@ -494,8 +513,13 @@ export function AccountsList({
                   )}
                 </div>
                 <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {account.type}
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${account.status === 'active'
+                      ? 'bg-green-100 text-green-800'
+                      : account.status === 'inactive'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                    {account.status.charAt(0).toUpperCase() + account.status.slice(1)}
                   </span>
                   <div className="flex items-center gap-2">
                     <button
@@ -520,16 +544,16 @@ export function AccountsList({
                       dropdownClassName="min-w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1"
                     >
                       <DropdownItem
-                        onClick={() => { onVerifyAccount?.(account); }}
-                        icon={<span className="inline-block w-2 h-2 rounded-full bg-green-500" />}
+                        onClick={() => { handleVerifyToggle(account); }}
+                        icon={<span className={`inline-block w-2 h-2 rounded-full ${account.status === 'active' ? 'bg-red-500' : 'bg-green-500'}`} />}
                       >
-                        Verify user
+                        {account.status === 'active' ? 'Unverify user' : 'Verify user'}
                       </DropdownItem>
                       <DropdownItem
-                        onClick={() => { onDeactivateAccount?.(account); }}
-                        icon={<span className="inline-block w-2 h-2 rounded-full bg-yellow-500" />}
+                        onClick={() => { handleActiveToggle(account); }}
+                        icon={<span className={`inline-block w-2 h-2 rounded-full ${account.status === 'inactive' ? 'bg-green-500' : 'bg-red-500'}`} />}
                       >
-                        Deactivate user
+                        {account.status === 'inactive' ? 'Activate user' : 'Deactivate user'}
                       </DropdownItem>
                       <DropdownItem
                         onClick={() => { openDelete(account); }}

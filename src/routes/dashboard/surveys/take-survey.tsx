@@ -20,7 +20,7 @@ const SurveyComponent = () => {
     const handleSurveyComplete = () => {
         // Reset selected survey and navigate to thank you page
         setSelectedSurveyId(null);
-        navigate({ to: '/community/surveys/thank-you' });
+        navigate({ to: '/dashboard/surveys/thank-you' });
     };
 
     const handleBackToList = () => {
@@ -64,7 +64,7 @@ const SurveyComponent = () => {
         return (
             <div>
             <Breadcrumb 
-                items={["Community", "Surveys"]}
+                items={["Dashboard", "Surveys"]}
                 title="Survey"
                 className='absolute top-0 left-0 w-full'
             />
@@ -79,7 +79,7 @@ const SurveyComponent = () => {
     return (
         <div className="">
             <Breadcrumb 
-                items={["Community", "Available Surveys"]}
+                items={["Dashboard", "Available Surveys"]}
                 title="Available Surveys"
                 className='absolute top-0 left-0 w-full'
             />
