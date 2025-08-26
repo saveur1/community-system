@@ -6,7 +6,7 @@ import Header from '@/components/features/dashboard/dashboard-header';
 import navItems from '@/components/features/dashboard/dashboard-sidebar-items';
 import useAuth from '@/hooks/useAuth';
 import { createFileRoute, useLocation } from '@tanstack/react-router'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ContentFooter from '@/components/layouts/dashboard-main-content/content-footer';
 
 
@@ -20,7 +20,12 @@ function DashboardLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const location = useLocation();
   const path = location.pathname.split('/')[1];
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+
+  useEffect(() => {
+    refreshUser();
+  }, []);
+
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
