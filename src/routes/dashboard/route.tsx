@@ -24,7 +24,7 @@ function DashboardLayout() {
 
   useEffect(() => {
     refreshUser();
-  }, []);
+  }, [refreshUser]);
 
 
   return (
