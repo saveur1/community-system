@@ -106,7 +106,7 @@ export class AuthController extends Controller {
       sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       path: '/',
-      domain: isProduction ? '.yourdomain.com' : 'localhost',
+      domain: isProduction ? 'community-tool.onrender.com' : 'localhost',
     };
 
     // Convert cookie options to string
@@ -394,7 +394,7 @@ export class AuthController extends Controller {
       sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       path: '/',
-      domain: isProduction ? config.cookieDomain : 'localhost',
+      domain: isProduction ? 'community-tool.onrender.com' : 'localhost',
     };
 
     const cookieString = `token=${token}; ${Object.entries(cookieOptions)
