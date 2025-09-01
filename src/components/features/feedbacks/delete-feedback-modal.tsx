@@ -5,9 +5,9 @@ import { FaExclamationTriangle } from 'react-icons/fa';
 interface DeleteFeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
-  feedbackId?: number;
+  feedbackId?: string;
   feedbackTitle?: string;
-  onConfirm?: (feedbackId: number) => void;
+  onConfirm?: (feedbackId: string) => void;
 }
 
 const DeleteFeedbackModal: React.FC<DeleteFeedbackModalProps> = ({

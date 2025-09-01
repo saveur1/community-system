@@ -24,30 +24,40 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-passw
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as DashboardSurveysIndexRouteImport } from './routes/dashboard/surveys/index'
+import { Route as DashboardStakeholdersIndexRouteImport } from './routes/dashboard/stakeholders/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
+import { Route as DashboardReportingIndexRouteImport } from './routes/dashboard/reporting/index'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
 import { Route as DashboardNotificationsIndexRouteImport } from './routes/dashboard/notifications/index'
 import { Route as DashboardFeedbackIndexRouteImport } from './routes/dashboard/feedback/index'
 import { Route as DashboardDocumentsIndexRouteImport } from './routes/dashboard/documents/index'
 import { Route as DashboardCommunitySessionsIndexRouteImport } from './routes/dashboard/community-sessions/index'
+import { Route as DashboardAnnouncementsIndexRouteImport } from './routes/dashboard/announcements/index'
 import { Route as DashboardAccountsIndexRouteImport } from './routes/dashboard/accounts/index'
 import { Route as DashboardSurveysThankYouRouteImport } from './routes/dashboard/surveys/thank-you'
 import { Route as DashboardSurveysTakeSurveyRouteImport } from './routes/dashboard/surveys/take-survey'
+import { Route as DashboardSurveysReviewSurveyRouteImport } from './routes/dashboard/surveys/review-survey'
+import { Route as DashboardSurveysReportFormsRouteImport } from './routes/dashboard/surveys/report-forms'
 import { Route as DashboardSurveysAddNewRouteImport } from './routes/dashboard/surveys/add-new'
 import { Route as DashboardSurveysViewIdRouteImport } from './routes/dashboard/surveys/$view-id'
-import { Route as DashboardSchoolReportRouteImport } from './routes/dashboard/school/report'
-import { Route as DashboardSchoolProfileRouteImport } from './routes/dashboard/school/profile'
+import { Route as DashboardStakeholdersAddNewRouteImport } from './routes/dashboard/stakeholders/add-new'
+import { Route as DashboardStakeholdersViewIdRouteImport } from './routes/dashboard/stakeholders/$view-id'
+import { Route as DashboardStakeholdersEditIdRouteImport } from './routes/dashboard/stakeholders/$edit-id'
+import { Route as DashboardSettingsAddRoleRouteImport } from './routes/dashboard/settings/add-role'
+import { Route as DashboardReportingMakeReportRouteImport } from './routes/dashboard/reporting/make-report'
 import { Route as DashboardProjectsAddNewRouteImport } from './routes/dashboard/projects/add-new'
 import { Route as DashboardProjectsViewIdRouteImport } from './routes/dashboard/projects/$view-id'
-import { Route as DashboardImmunizationReportRouteImport } from './routes/dashboard/immunization/report'
-import { Route as DashboardImmunizationFamilyRouteImport } from './routes/dashboard/immunization/family'
-import { Route as DashboardImmunizationAssignedRouteImport } from './routes/dashboard/immunization/assigned'
 import { Route as DashboardFeedbackAddNewRouteImport } from './routes/dashboard/feedback/add-new'
+import { Route as DashboardCommunitySessionsAddNewRouteImport } from './routes/dashboard/community-sessions/add-new'
+import { Route as DashboardCommunitySessionsSessionIdRouteImport } from './routes/dashboard/community-sessions/$sessionId'
 import { Route as DashboardAccountsStakeholdersRouteImport } from './routes/dashboard/accounts/stakeholders'
 import { Route as DashboardAccountsRichMembersRouteImport } from './routes/dashboard/accounts/rich-members'
 import { Route as DashboardAccountsHealthServiceProvidersRouteImport } from './routes/dashboard/accounts/health-service-providers'
 import { Route as DashboardAccountsCommunityMembersRouteImport } from './routes/dashboard/accounts/community-members'
+import { Route as DashboardAccountsAddNewRouteImport } from './routes/dashboard/accounts/add-new'
 import { Route as DashboardSurveysEditEditIdRouteImport } from './routes/dashboard/surveys/edit.$edit-id'
+import { Route as DashboardSettingsEditRoleRoleIdRouteImport } from './routes/dashboard/settings/edit-role.$roleId'
+import { Route as DashboardFeedbackEditEditIdRouteImport } from './routes/dashboard/feedback/edit.$edit-id'
 
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
@@ -124,9 +134,20 @@ const DashboardSurveysIndexRoute = DashboardSurveysIndexRouteImport.update({
   path: '/surveys/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardStakeholdersIndexRoute =
+  DashboardStakeholdersIndexRouteImport.update({
+    id: '/stakeholders/',
+    path: '/stakeholders/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardReportingIndexRoute = DashboardReportingIndexRouteImport.update({
+  id: '/reporting/',
+  path: '/reporting/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
@@ -156,6 +177,12 @@ const DashboardCommunitySessionsIndexRoute =
     path: '/community-sessions/',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardAnnouncementsIndexRoute =
+  DashboardAnnouncementsIndexRouteImport.update({
+    id: '/announcements/',
+    path: '/announcements/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardAccountsIndexRoute = DashboardAccountsIndexRouteImport.update({
   id: '/accounts/',
   path: '/accounts/',
@@ -173,6 +200,18 @@ const DashboardSurveysTakeSurveyRoute =
     path: '/surveys/take-survey',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardSurveysReviewSurveyRoute =
+  DashboardSurveysReviewSurveyRouteImport.update({
+    id: '/surveys/review-survey',
+    path: '/surveys/review-survey',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardSurveysReportFormsRoute =
+  DashboardSurveysReportFormsRouteImport.update({
+    id: '/surveys/report-forms',
+    path: '/surveys/report-forms',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardSurveysAddNewRoute = DashboardSurveysAddNewRouteImport.update({
   id: '/surveys/add-new',
   path: '/surveys/add-new',
@@ -183,16 +222,36 @@ const DashboardSurveysViewIdRoute = DashboardSurveysViewIdRouteImport.update({
   path: '/surveys/$view-id',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardSchoolReportRoute = DashboardSchoolReportRouteImport.update({
-  id: '/school/report',
-  path: '/school/report',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardSchoolProfileRoute = DashboardSchoolProfileRouteImport.update({
-  id: '/school/profile',
-  path: '/school/profile',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
+const DashboardStakeholdersAddNewRoute =
+  DashboardStakeholdersAddNewRouteImport.update({
+    id: '/stakeholders/add-new',
+    path: '/stakeholders/add-new',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardStakeholdersViewIdRoute =
+  DashboardStakeholdersViewIdRouteImport.update({
+    id: '/stakeholders/$view-id',
+    path: '/stakeholders/$view-id',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardStakeholdersEditIdRoute =
+  DashboardStakeholdersEditIdRouteImport.update({
+    id: '/stakeholders/$edit-id',
+    path: '/stakeholders/$edit-id',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardSettingsAddRoleRoute =
+  DashboardSettingsAddRoleRouteImport.update({
+    id: '/settings/add-role',
+    path: '/settings/add-role',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardReportingMakeReportRoute =
+  DashboardReportingMakeReportRouteImport.update({
+    id: '/reporting/make-report',
+    path: '/reporting/make-report',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardProjectsAddNewRoute = DashboardProjectsAddNewRouteImport.update({
   id: '/projects/add-new',
   path: '/projects/add-new',
@@ -203,29 +262,23 @@ const DashboardProjectsViewIdRoute = DashboardProjectsViewIdRouteImport.update({
   path: '/projects/$view-id',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardImmunizationReportRoute =
-  DashboardImmunizationReportRouteImport.update({
-    id: '/immunization/report',
-    path: '/immunization/report',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
-const DashboardImmunizationFamilyRoute =
-  DashboardImmunizationFamilyRouteImport.update({
-    id: '/immunization/family',
-    path: '/immunization/family',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
-const DashboardImmunizationAssignedRoute =
-  DashboardImmunizationAssignedRouteImport.update({
-    id: '/immunization/assigned',
-    path: '/immunization/assigned',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
 const DashboardFeedbackAddNewRoute = DashboardFeedbackAddNewRouteImport.update({
   id: '/feedback/add-new',
   path: '/feedback/add-new',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardCommunitySessionsAddNewRoute =
+  DashboardCommunitySessionsAddNewRouteImport.update({
+    id: '/community-sessions/add-new',
+    path: '/community-sessions/add-new',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardCommunitySessionsSessionIdRoute =
+  DashboardCommunitySessionsSessionIdRouteImport.update({
+    id: '/community-sessions/$sessionId',
+    path: '/community-sessions/$sessionId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardAccountsStakeholdersRoute =
   DashboardAccountsStakeholdersRouteImport.update({
     id: '/accounts/stakeholders',
@@ -250,10 +303,27 @@ const DashboardAccountsCommunityMembersRoute =
     path: '/accounts/community-members',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardAccountsAddNewRoute = DashboardAccountsAddNewRouteImport.update({
+  id: '/accounts/add-new',
+  path: '/accounts/add-new',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardSurveysEditEditIdRoute =
   DashboardSurveysEditEditIdRouteImport.update({
     id: '/surveys/edit/$edit-id',
     path: '/surveys/edit/$edit-id',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardSettingsEditRoleRoleIdRoute =
+  DashboardSettingsEditRoleRoleIdRouteImport.update({
+    id: '/settings/edit-role/$roleId',
+    path: '/settings/edit-role/$roleId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardFeedbackEditEditIdRoute =
+  DashboardFeedbackEditEditIdRouteImport.update({
+    id: '/feedback/edit/$edit-id',
+    path: '/feedback/edit/$edit-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 
@@ -272,30 +342,40 @@ export interface FileRoutesByFullPath {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
   '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
+  '/dashboard/community-sessions/$sessionId': typeof DashboardCommunitySessionsSessionIdRoute
+  '/dashboard/community-sessions/add-new': typeof DashboardCommunitySessionsAddNewRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
-  '/dashboard/immunization/assigned': typeof DashboardImmunizationAssignedRoute
-  '/dashboard/immunization/family': typeof DashboardImmunizationFamilyRoute
-  '/dashboard/immunization/report': typeof DashboardImmunizationReportRoute
   '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
-  '/dashboard/school/profile': typeof DashboardSchoolProfileRoute
-  '/dashboard/school/report': typeof DashboardSchoolReportRoute
+  '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
+  '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
+  '/dashboard/stakeholders/$edit-id': typeof DashboardStakeholdersEditIdRoute
+  '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
+  '/dashboard/stakeholders/add-new': typeof DashboardStakeholdersAddNewRoute
   '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
+  '/dashboard/surveys/report-forms': typeof DashboardSurveysReportFormsRoute
+  '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
+  '/dashboard/announcements': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions': typeof DashboardCommunitySessionsIndexRoute
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/dashboard/reporting': typeof DashboardReportingIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
+  '/dashboard/stakeholders': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
+  '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
+  '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
 }
 export interface FileRoutesByTo {
@@ -311,30 +391,40 @@ export interface FileRoutesByTo {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard': typeof DashboardIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
   '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
+  '/dashboard/community-sessions/$sessionId': typeof DashboardCommunitySessionsSessionIdRoute
+  '/dashboard/community-sessions/add-new': typeof DashboardCommunitySessionsAddNewRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
-  '/dashboard/immunization/assigned': typeof DashboardImmunizationAssignedRoute
-  '/dashboard/immunization/family': typeof DashboardImmunizationFamilyRoute
-  '/dashboard/immunization/report': typeof DashboardImmunizationReportRoute
   '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
-  '/dashboard/school/profile': typeof DashboardSchoolProfileRoute
-  '/dashboard/school/report': typeof DashboardSchoolReportRoute
+  '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
+  '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
+  '/dashboard/stakeholders/$edit-id': typeof DashboardStakeholdersEditIdRoute
+  '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
+  '/dashboard/stakeholders/add-new': typeof DashboardStakeholdersAddNewRoute
   '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
+  '/dashboard/surveys/report-forms': typeof DashboardSurveysReportFormsRoute
+  '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
+  '/dashboard/announcements': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions': typeof DashboardCommunitySessionsIndexRoute
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/dashboard/reporting': typeof DashboardReportingIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
+  '/dashboard/stakeholders': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
+  '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
+  '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
 }
 export interface FileRoutesById {
@@ -353,30 +443,40 @@ export interface FileRoutesById {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
   '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
+  '/dashboard/community-sessions/$sessionId': typeof DashboardCommunitySessionsSessionIdRoute
+  '/dashboard/community-sessions/add-new': typeof DashboardCommunitySessionsAddNewRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
-  '/dashboard/immunization/assigned': typeof DashboardImmunizationAssignedRoute
-  '/dashboard/immunization/family': typeof DashboardImmunizationFamilyRoute
-  '/dashboard/immunization/report': typeof DashboardImmunizationReportRoute
   '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
-  '/dashboard/school/profile': typeof DashboardSchoolProfileRoute
-  '/dashboard/school/report': typeof DashboardSchoolReportRoute
+  '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
+  '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
+  '/dashboard/stakeholders/$edit-id': typeof DashboardStakeholdersEditIdRoute
+  '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
+  '/dashboard/stakeholders/add-new': typeof DashboardStakeholdersAddNewRoute
   '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
+  '/dashboard/surveys/report-forms': typeof DashboardSurveysReportFormsRoute
+  '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
   '/dashboard/accounts/': typeof DashboardAccountsIndexRoute
+  '/dashboard/announcements/': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions/': typeof DashboardCommunitySessionsIndexRoute
   '/dashboard/documents/': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback/': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications/': typeof DashboardNotificationsIndexRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/dashboard/reporting/': typeof DashboardReportingIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
+  '/dashboard/stakeholders/': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys/': typeof DashboardSurveysIndexRoute
+  '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
+  '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
 }
 export interface FileRouteTypes {
@@ -396,30 +496,40 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard/'
     | '/posts/'
+    | '/dashboard/accounts/add-new'
     | '/dashboard/accounts/community-members'
     | '/dashboard/accounts/health-service-providers'
     | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
+    | '/dashboard/community-sessions/$sessionId'
+    | '/dashboard/community-sessions/add-new'
     | '/dashboard/feedback/add-new'
-    | '/dashboard/immunization/assigned'
-    | '/dashboard/immunization/family'
-    | '/dashboard/immunization/report'
     | '/dashboard/projects/$view-id'
     | '/dashboard/projects/add-new'
-    | '/dashboard/school/profile'
-    | '/dashboard/school/report'
+    | '/dashboard/reporting/make-report'
+    | '/dashboard/settings/add-role'
+    | '/dashboard/stakeholders/$edit-id'
+    | '/dashboard/stakeholders/$view-id'
+    | '/dashboard/stakeholders/add-new'
     | '/dashboard/surveys/$view-id'
     | '/dashboard/surveys/add-new'
+    | '/dashboard/surveys/report-forms'
+    | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
     | '/dashboard/accounts'
+    | '/dashboard/announcements'
     | '/dashboard/community-sessions'
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
     | '/dashboard/projects'
+    | '/dashboard/reporting'
     | '/dashboard/settings'
+    | '/dashboard/stakeholders'
     | '/dashboard/surveys'
+    | '/dashboard/feedback/edit/$edit-id'
+    | '/dashboard/settings/edit-role/$roleId'
     | '/dashboard/surveys/edit/$edit-id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -435,30 +545,40 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard'
     | '/posts'
+    | '/dashboard/accounts/add-new'
     | '/dashboard/accounts/community-members'
     | '/dashboard/accounts/health-service-providers'
     | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
+    | '/dashboard/community-sessions/$sessionId'
+    | '/dashboard/community-sessions/add-new'
     | '/dashboard/feedback/add-new'
-    | '/dashboard/immunization/assigned'
-    | '/dashboard/immunization/family'
-    | '/dashboard/immunization/report'
     | '/dashboard/projects/$view-id'
     | '/dashboard/projects/add-new'
-    | '/dashboard/school/profile'
-    | '/dashboard/school/report'
+    | '/dashboard/reporting/make-report'
+    | '/dashboard/settings/add-role'
+    | '/dashboard/stakeholders/$edit-id'
+    | '/dashboard/stakeholders/$view-id'
+    | '/dashboard/stakeholders/add-new'
     | '/dashboard/surveys/$view-id'
     | '/dashboard/surveys/add-new'
+    | '/dashboard/surveys/report-forms'
+    | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
     | '/dashboard/accounts'
+    | '/dashboard/announcements'
     | '/dashboard/community-sessions'
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
     | '/dashboard/projects'
+    | '/dashboard/reporting'
     | '/dashboard/settings'
+    | '/dashboard/stakeholders'
     | '/dashboard/surveys'
+    | '/dashboard/feedback/edit/$edit-id'
+    | '/dashboard/settings/edit-role/$roleId'
     | '/dashboard/surveys/edit/$edit-id'
   id:
     | '__root__'
@@ -476,30 +596,40 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard/'
     | '/posts/'
+    | '/dashboard/accounts/add-new'
     | '/dashboard/accounts/community-members'
     | '/dashboard/accounts/health-service-providers'
     | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
+    | '/dashboard/community-sessions/$sessionId'
+    | '/dashboard/community-sessions/add-new'
     | '/dashboard/feedback/add-new'
-    | '/dashboard/immunization/assigned'
-    | '/dashboard/immunization/family'
-    | '/dashboard/immunization/report'
     | '/dashboard/projects/$view-id'
     | '/dashboard/projects/add-new'
-    | '/dashboard/school/profile'
-    | '/dashboard/school/report'
+    | '/dashboard/reporting/make-report'
+    | '/dashboard/settings/add-role'
+    | '/dashboard/stakeholders/$edit-id'
+    | '/dashboard/stakeholders/$view-id'
+    | '/dashboard/stakeholders/add-new'
     | '/dashboard/surveys/$view-id'
     | '/dashboard/surveys/add-new'
+    | '/dashboard/surveys/report-forms'
+    | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
     | '/dashboard/accounts/'
+    | '/dashboard/announcements/'
     | '/dashboard/community-sessions/'
     | '/dashboard/documents/'
     | '/dashboard/feedback/'
     | '/dashboard/notifications/'
     | '/dashboard/projects/'
+    | '/dashboard/reporting/'
     | '/dashboard/settings/'
+    | '/dashboard/stakeholders/'
     | '/dashboard/surveys/'
+    | '/dashboard/feedback/edit/$edit-id'
+    | '/dashboard/settings/edit-role/$roleId'
     | '/dashboard/surveys/edit/$edit-id'
   fileRoutesById: FileRoutesById
 }
@@ -620,11 +750,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSurveysIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/stakeholders/': {
+      id: '/dashboard/stakeholders/'
+      path: '/stakeholders'
+      fullPath: '/dashboard/stakeholders'
+      preLoaderRoute: typeof DashboardStakeholdersIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/settings/': {
       id: '/dashboard/settings/'
       path: '/settings'
       fullPath: '/dashboard/settings'
       preLoaderRoute: typeof DashboardSettingsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/reporting/': {
+      id: '/dashboard/reporting/'
+      path: '/reporting'
+      fullPath: '/dashboard/reporting'
+      preLoaderRoute: typeof DashboardReportingIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/projects/': {
@@ -662,6 +806,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCommunitySessionsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/announcements/': {
+      id: '/dashboard/announcements/'
+      path: '/announcements'
+      fullPath: '/dashboard/announcements'
+      preLoaderRoute: typeof DashboardAnnouncementsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/accounts/': {
       id: '/dashboard/accounts/'
       path: '/accounts'
@@ -683,6 +834,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSurveysTakeSurveyRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/surveys/review-survey': {
+      id: '/dashboard/surveys/review-survey'
+      path: '/surveys/review-survey'
+      fullPath: '/dashboard/surveys/review-survey'
+      preLoaderRoute: typeof DashboardSurveysReviewSurveyRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/surveys/report-forms': {
+      id: '/dashboard/surveys/report-forms'
+      path: '/surveys/report-forms'
+      fullPath: '/dashboard/surveys/report-forms'
+      preLoaderRoute: typeof DashboardSurveysReportFormsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/surveys/add-new': {
       id: '/dashboard/surveys/add-new'
       path: '/surveys/add-new'
@@ -697,18 +862,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSurveysViewIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/school/report': {
-      id: '/dashboard/school/report'
-      path: '/school/report'
-      fullPath: '/dashboard/school/report'
-      preLoaderRoute: typeof DashboardSchoolReportRouteImport
+    '/dashboard/stakeholders/add-new': {
+      id: '/dashboard/stakeholders/add-new'
+      path: '/stakeholders/add-new'
+      fullPath: '/dashboard/stakeholders/add-new'
+      preLoaderRoute: typeof DashboardStakeholdersAddNewRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/school/profile': {
-      id: '/dashboard/school/profile'
-      path: '/school/profile'
-      fullPath: '/dashboard/school/profile'
-      preLoaderRoute: typeof DashboardSchoolProfileRouteImport
+    '/dashboard/stakeholders/$view-id': {
+      id: '/dashboard/stakeholders/$view-id'
+      path: '/stakeholders/$view-id'
+      fullPath: '/dashboard/stakeholders/$view-id'
+      preLoaderRoute: typeof DashboardStakeholdersViewIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/stakeholders/$edit-id': {
+      id: '/dashboard/stakeholders/$edit-id'
+      path: '/stakeholders/$edit-id'
+      fullPath: '/dashboard/stakeholders/$edit-id'
+      preLoaderRoute: typeof DashboardStakeholdersEditIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/settings/add-role': {
+      id: '/dashboard/settings/add-role'
+      path: '/settings/add-role'
+      fullPath: '/dashboard/settings/add-role'
+      preLoaderRoute: typeof DashboardSettingsAddRoleRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/reporting/make-report': {
+      id: '/dashboard/reporting/make-report'
+      path: '/reporting/make-report'
+      fullPath: '/dashboard/reporting/make-report'
+      preLoaderRoute: typeof DashboardReportingMakeReportRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/projects/add-new': {
@@ -725,32 +911,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsViewIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/immunization/report': {
-      id: '/dashboard/immunization/report'
-      path: '/immunization/report'
-      fullPath: '/dashboard/immunization/report'
-      preLoaderRoute: typeof DashboardImmunizationReportRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/immunization/family': {
-      id: '/dashboard/immunization/family'
-      path: '/immunization/family'
-      fullPath: '/dashboard/immunization/family'
-      preLoaderRoute: typeof DashboardImmunizationFamilyRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/immunization/assigned': {
-      id: '/dashboard/immunization/assigned'
-      path: '/immunization/assigned'
-      fullPath: '/dashboard/immunization/assigned'
-      preLoaderRoute: typeof DashboardImmunizationAssignedRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
     '/dashboard/feedback/add-new': {
       id: '/dashboard/feedback/add-new'
       path: '/feedback/add-new'
       fullPath: '/dashboard/feedback/add-new'
       preLoaderRoute: typeof DashboardFeedbackAddNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/community-sessions/add-new': {
+      id: '/dashboard/community-sessions/add-new'
+      path: '/community-sessions/add-new'
+      fullPath: '/dashboard/community-sessions/add-new'
+      preLoaderRoute: typeof DashboardCommunitySessionsAddNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/community-sessions/$sessionId': {
+      id: '/dashboard/community-sessions/$sessionId'
+      path: '/community-sessions/$sessionId'
+      fullPath: '/dashboard/community-sessions/$sessionId'
+      preLoaderRoute: typeof DashboardCommunitySessionsSessionIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/accounts/stakeholders': {
@@ -781,11 +960,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountsCommunityMembersRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/accounts/add-new': {
+      id: '/dashboard/accounts/add-new'
+      path: '/accounts/add-new'
+      fullPath: '/dashboard/accounts/add-new'
+      preLoaderRoute: typeof DashboardAccountsAddNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/surveys/edit/$edit-id': {
       id: '/dashboard/surveys/edit/$edit-id'
       path: '/surveys/edit/$edit-id'
       fullPath: '/dashboard/surveys/edit/$edit-id'
       preLoaderRoute: typeof DashboardSurveysEditEditIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/settings/edit-role/$roleId': {
+      id: '/dashboard/settings/edit-role/$roleId'
+      path: '/settings/edit-role/$roleId'
+      fullPath: '/dashboard/settings/edit-role/$roleId'
+      preLoaderRoute: typeof DashboardSettingsEditRoleRoleIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/feedback/edit/$edit-id': {
+      id: '/dashboard/feedback/edit/$edit-id'
+      path: '/feedback/edit/$edit-id'
+      fullPath: '/dashboard/feedback/edit/$edit-id'
+      preLoaderRoute: typeof DashboardFeedbackEditEditIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
   }
@@ -811,61 +1011,82 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardAccountsAddNewRoute: typeof DashboardAccountsAddNewRoute
   DashboardAccountsCommunityMembersRoute: typeof DashboardAccountsCommunityMembersRoute
   DashboardAccountsHealthServiceProvidersRoute: typeof DashboardAccountsHealthServiceProvidersRoute
   DashboardAccountsRichMembersRoute: typeof DashboardAccountsRichMembersRoute
   DashboardAccountsStakeholdersRoute: typeof DashboardAccountsStakeholdersRoute
+  DashboardCommunitySessionsSessionIdRoute: typeof DashboardCommunitySessionsSessionIdRoute
+  DashboardCommunitySessionsAddNewRoute: typeof DashboardCommunitySessionsAddNewRoute
   DashboardFeedbackAddNewRoute: typeof DashboardFeedbackAddNewRoute
-  DashboardImmunizationAssignedRoute: typeof DashboardImmunizationAssignedRoute
-  DashboardImmunizationFamilyRoute: typeof DashboardImmunizationFamilyRoute
-  DashboardImmunizationReportRoute: typeof DashboardImmunizationReportRoute
   DashboardProjectsViewIdRoute: typeof DashboardProjectsViewIdRoute
   DashboardProjectsAddNewRoute: typeof DashboardProjectsAddNewRoute
-  DashboardSchoolProfileRoute: typeof DashboardSchoolProfileRoute
-  DashboardSchoolReportRoute: typeof DashboardSchoolReportRoute
+  DashboardReportingMakeReportRoute: typeof DashboardReportingMakeReportRoute
+  DashboardSettingsAddRoleRoute: typeof DashboardSettingsAddRoleRoute
+  DashboardStakeholdersEditIdRoute: typeof DashboardStakeholdersEditIdRoute
+  DashboardStakeholdersViewIdRoute: typeof DashboardStakeholdersViewIdRoute
+  DashboardStakeholdersAddNewRoute: typeof DashboardStakeholdersAddNewRoute
   DashboardSurveysViewIdRoute: typeof DashboardSurveysViewIdRoute
   DashboardSurveysAddNewRoute: typeof DashboardSurveysAddNewRoute
+  DashboardSurveysReportFormsRoute: typeof DashboardSurveysReportFormsRoute
+  DashboardSurveysReviewSurveyRoute: typeof DashboardSurveysReviewSurveyRoute
   DashboardSurveysTakeSurveyRoute: typeof DashboardSurveysTakeSurveyRoute
   DashboardSurveysThankYouRoute: typeof DashboardSurveysThankYouRoute
   DashboardAccountsIndexRoute: typeof DashboardAccountsIndexRoute
+  DashboardAnnouncementsIndexRoute: typeof DashboardAnnouncementsIndexRoute
   DashboardCommunitySessionsIndexRoute: typeof DashboardCommunitySessionsIndexRoute
   DashboardDocumentsIndexRoute: typeof DashboardDocumentsIndexRoute
   DashboardFeedbackIndexRoute: typeof DashboardFeedbackIndexRoute
   DashboardNotificationsIndexRoute: typeof DashboardNotificationsIndexRoute
   DashboardProjectsIndexRoute: typeof DashboardProjectsIndexRoute
+  DashboardReportingIndexRoute: typeof DashboardReportingIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
+  DashboardStakeholdersIndexRoute: typeof DashboardStakeholdersIndexRoute
   DashboardSurveysIndexRoute: typeof DashboardSurveysIndexRoute
+  DashboardFeedbackEditEditIdRoute: typeof DashboardFeedbackEditEditIdRoute
+  DashboardSettingsEditRoleRoleIdRoute: typeof DashboardSettingsEditRoleRoleIdRoute
   DashboardSurveysEditEditIdRoute: typeof DashboardSurveysEditEditIdRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardAccountsAddNewRoute: DashboardAccountsAddNewRoute,
   DashboardAccountsCommunityMembersRoute:
     DashboardAccountsCommunityMembersRoute,
   DashboardAccountsHealthServiceProvidersRoute:
     DashboardAccountsHealthServiceProvidersRoute,
   DashboardAccountsRichMembersRoute: DashboardAccountsRichMembersRoute,
   DashboardAccountsStakeholdersRoute: DashboardAccountsStakeholdersRoute,
+  DashboardCommunitySessionsSessionIdRoute:
+    DashboardCommunitySessionsSessionIdRoute,
+  DashboardCommunitySessionsAddNewRoute: DashboardCommunitySessionsAddNewRoute,
   DashboardFeedbackAddNewRoute: DashboardFeedbackAddNewRoute,
-  DashboardImmunizationAssignedRoute: DashboardImmunizationAssignedRoute,
-  DashboardImmunizationFamilyRoute: DashboardImmunizationFamilyRoute,
-  DashboardImmunizationReportRoute: DashboardImmunizationReportRoute,
   DashboardProjectsViewIdRoute: DashboardProjectsViewIdRoute,
   DashboardProjectsAddNewRoute: DashboardProjectsAddNewRoute,
-  DashboardSchoolProfileRoute: DashboardSchoolProfileRoute,
-  DashboardSchoolReportRoute: DashboardSchoolReportRoute,
+  DashboardReportingMakeReportRoute: DashboardReportingMakeReportRoute,
+  DashboardSettingsAddRoleRoute: DashboardSettingsAddRoleRoute,
+  DashboardStakeholdersEditIdRoute: DashboardStakeholdersEditIdRoute,
+  DashboardStakeholdersViewIdRoute: DashboardStakeholdersViewIdRoute,
+  DashboardStakeholdersAddNewRoute: DashboardStakeholdersAddNewRoute,
   DashboardSurveysViewIdRoute: DashboardSurveysViewIdRoute,
   DashboardSurveysAddNewRoute: DashboardSurveysAddNewRoute,
+  DashboardSurveysReportFormsRoute: DashboardSurveysReportFormsRoute,
+  DashboardSurveysReviewSurveyRoute: DashboardSurveysReviewSurveyRoute,
   DashboardSurveysTakeSurveyRoute: DashboardSurveysTakeSurveyRoute,
   DashboardSurveysThankYouRoute: DashboardSurveysThankYouRoute,
   DashboardAccountsIndexRoute: DashboardAccountsIndexRoute,
+  DashboardAnnouncementsIndexRoute: DashboardAnnouncementsIndexRoute,
   DashboardCommunitySessionsIndexRoute: DashboardCommunitySessionsIndexRoute,
   DashboardDocumentsIndexRoute: DashboardDocumentsIndexRoute,
   DashboardFeedbackIndexRoute: DashboardFeedbackIndexRoute,
   DashboardNotificationsIndexRoute: DashboardNotificationsIndexRoute,
   DashboardProjectsIndexRoute: DashboardProjectsIndexRoute,
+  DashboardReportingIndexRoute: DashboardReportingIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
+  DashboardStakeholdersIndexRoute: DashboardStakeholdersIndexRoute,
   DashboardSurveysIndexRoute: DashboardSurveysIndexRoute,
+  DashboardFeedbackEditEditIdRoute: DashboardFeedbackEditEditIdRoute,
+  DashboardSettingsEditRoleRoleIdRoute: DashboardSettingsEditRoleRoleIdRoute,
   DashboardSurveysEditEditIdRoute: DashboardSurveysEditEditIdRoute,
 }
 

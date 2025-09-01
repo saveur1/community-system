@@ -5,7 +5,6 @@ import ChatBotButton from "./chatbot-icon";
 import MainHeader from "@/components/layouts/main-header";
 import Footer from "@/components/layouts/main-footer/main-footer";
 import HeroSection from "./hero";
-import { useTranslation } from "react-i18next";
 import AboutRich from "./priorities";
 
 export const sectionVariants: Variants = {

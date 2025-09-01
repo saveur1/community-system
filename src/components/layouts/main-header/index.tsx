@@ -7,6 +7,7 @@ import { FiMenu } from "react-icons/fi"
 import { AiOutlineHome, AiOutlineInfoCircle, AiOutlineMessage, AiOutlineLogin } from "react-icons/ai"
 import MobileHeader from "./mobile-header"
 import ImigongoStarter from "../imigongo-starter"
+import { MdOutlineFiberNew } from "react-icons/md"
 
 const MainHeader = () => {
     const { t, i18n } = useTranslation();
@@ -79,8 +80,6 @@ const MainHeader = () => {
                 options={[
                     { label: "Kinyarwanda", value: "rw" },
                     { label: "English", value: "en" },
-                    { label: "Swahili", value: "sw" },
-                    { label: "Francais", value: "fr" }
                 ]}
                 dropdownClassName="min-w-36"
                 triggerClassName="py-1.5"
@@ -134,6 +133,10 @@ const MainHeader = () => {
                 {/* Mobile menu */}
                 <MobileHeader open={mobileOpen} onClose={() => setMobileOpen(false)} navLinks={navLinks} />
             </header>
+            <div className="text-white bg-primary py-1 text-center flex items-center justify-center gap-2">
+                <MdOutlineFiberNew size={40}  className="text-title"/>
+                <span>Motor Vehicle Emission Inspection service is now available. <a href="/" className="underline">Click here</a> to book your appointment. #CleanAir</span>
+            </div>
         </>
     )
 }

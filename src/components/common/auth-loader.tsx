@@ -1,13 +1,10 @@
 import useAuth from "@/hooks/useAuth";
 import FullPageLoader from "./full-page-loader";
 import { Outlet } from "@tanstack/react-router";
-import { useEffect } from "react";
+// Note: avoid triggering refetch loops here
 
 function AuthLoader() {
-    const { isUserLoading, refreshUser } = useAuth();
-    useEffect(() => {
-        refreshUser();
-    }, [refreshUser]);
+    const { isUserLoading } = useAuth();
 
     if (isUserLoading) {
         return <FullPageLoader />

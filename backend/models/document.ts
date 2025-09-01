@@ -9,7 +9,7 @@ export interface DocumentAttributes {
   addedAt: Date;
   documentUrl: string | null;
   projectId: string | null;
-  userId: string;
+  userId: string | null;
   publicId: string | null;
   deleteToken: string | null;
   createdAt?: Date;
@@ -26,7 +26,7 @@ class Document extends Model<DocumentAttributes, DocumentCreationAttributes> imp
   declare addedAt: Date;
   declare documentUrl: string | null;
   declare projectId: string | null;
-  declare userId: string;
+  declare userId: string | null;
   declare publicId: string | null;
   declare deleteToken: string | null;
   declare readonly createdAt: Date;
@@ -79,7 +79,7 @@ Document.init({
   },
   userId: {
     type: DataTypes.UUID,
-    allowNull: false,
+    allowNull: true,
     field: 'user_id',
   },
   publicId: {

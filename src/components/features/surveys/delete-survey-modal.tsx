@@ -5,9 +5,9 @@ import { FaExclamationTriangle } from 'react-icons/fa';
 interface DeleteSurveyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  surveyId?: number;
+  surveyId?: string;
   surveyTitle?: string;
-  onConfirm?: (surveyId: number) => void;
+  onConfirm?: (surveyId: string) => void;
 }
 
 const DeleteSurveyModal: React.FC<DeleteSurveyModalProps> = ({

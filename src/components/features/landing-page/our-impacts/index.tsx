@@ -12,7 +12,6 @@ import {
   FaHospital,
   FaChurch,
   FaUserFriends,
-  FaStethoscope
 } from 'react-icons/fa';
 import {
   MdFamilyRestroom,

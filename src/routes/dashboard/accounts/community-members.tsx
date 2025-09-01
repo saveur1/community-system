@@ -52,6 +52,7 @@ function CommunityAccountsPage() {
         (a.role && a.role.toLowerCase().includes(term))
       );
     }
+
     if (filters.role) items = items.filter(a => a.role === filters.role);
     if (filters.status) items = items.filter(a => a.status === filters.status as any);
     return items;
@@ -85,7 +86,8 @@ function CommunityAccountsPage() {
   return (
     <AccountsList
       accounts={accounts}
-      title="Community Accounts"
+      title="Community Members"
+      addButtonLabel="add community member"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}

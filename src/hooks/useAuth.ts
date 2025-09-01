@@ -32,7 +32,7 @@ export function useAuth() {
   const signupMutation = useMutation({
     mutationFn: authApi.signup,
     onSuccess: (data: AuthResponse) => {
-      if(data?.result?.user?.roles[0]?.name === "local_citizen"){
+      if(data?.result?.user?.roles[0]?.name === "general_population"){
         navigate({to: "/dashboard"});
       }
       else {

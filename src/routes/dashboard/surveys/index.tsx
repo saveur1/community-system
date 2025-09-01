@@ -8,90 +8,31 @@ import { SurveyToolbar } from '@/components/features/surveys/survey-toolbar';
 import { SurveyPagination } from '@/components/features/surveys/survey-pagination';
 import useAuth from '@/hooks/useAuth';
 import { User } from '@/api/auth';
+import { useSurveysList, useDeleteSurvey, useUpdateSurveyStatus } from '@/hooks/useSurveys';
+import { checkPermissions } from '@/utility/logicFunctions';
 
 const SurveyComponent = () => {
     const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [toDelete, setToDelete] = useState<{ id: number; name: string } | null>(null);
+    const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const { user } = useAuth();
+    const { data, isLoading } = useSurveysList({ page, limit: pageSize });
+    const deleteSurvey = useDeleteSurvey();
+    const updateStatus = useUpdateSurveyStatus();
 
-    // Sample data for surveys
-    const [surveys, setSurveys] = useState([
-        {
-            id: 1,
-            name: 'Customer Satisfaction Survey',
-            position: 'Active Survey',
-            email: 'customer.survey@company.com',
-            projects: 125,
-            description: 'Share your experience with our services',
-            questions: 10,
-            time: '5 min',
-            avatar: null,
-            status: 'Active'
-        },
-        {
-            id: 2,
-            name: 'Product Feedback Survey',
-            position: 'Draft Survey',
-            email: 'product.feedback@company.com',
-            projects: 132,
-            description: 'Help us improve our products',
-            questions: 8,
-            time: '4 min',
-            avatar: null,
-            status: 'Draft'
-        },
-        {
-            id: 3,
-            name: 'User Experience Survey',
-            position: 'Completed Survey',
-            email: 'ux.survey@company.com',
-            projects: 112,
-            description: 'Tell us about your app usage',
-            questions: 12,
-            time: '6 min',
-            avatar: null,
-            status: 'Completed'
-        },
-        {
-            id: 4,
-            name: 'Website Usability Test',
-            position: 'Active Survey',
-            email: 'usability@company.com',
-            projects: 121,
-            description: 'Test our website interface',
-            questions: 15,
-            time: '8 min',
-            avatar: null,
-            status: 'Active'
-        },
-        {
-            id: 5,
-            name: 'Service Quality Assessment',
-            position: 'Pending Survey',
-            email: 'service.quality@company.com',
-            projects: 145,
-            description: 'Rate our service quality',
-            questions: 6,
-            time: '3 min',
-            avatar: null,
-            status: 'Pending'
-        },
-    ]);
+    const surveys = useMemo(() => data?.result ?? [], [data]);
 
-    const getStatusColor = (status: string) => {
+    const getStatusColor = (status: 'active' | 'paused' | 'archived') => {
         switch (status) {
-            case 'Active':
+            case 'active':
                 return 'bg-green-100 text-green-800';
-            case 'Draft':
-                return 'bg-blue-100 text-blue-800';
-            case 'Completed':
-                return 'bg-red-100 text-red-800';
-            case 'Pending':
-                return 'bg-purple-100 text-purple-800';
+            case 'paused':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'archived':
+                return 'bg-gray-200 text-gray-700';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
@@ -101,7 +42,7 @@ const SurveyComponent = () => {
         return name.split(' ').map(n => n[0]).join('').toUpperCase();
     };
 
-    const handleSurveyAction = (action: string, surveyId: number, surveyName: string) => {
+    const handleSurveyAction = (action: string, surveyId: string, surveyName: string) => {
         console.log(`${action} action for survey:`, surveyId, surveyName);
         // Handle different actions
         switch (action) {
@@ -145,21 +86,20 @@ const SurveyComponent = () => {
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
         if (!q) return surveys;
-        return surveys.filter((survey) =>
-            [survey.name, survey.email, survey.status, survey.projects.toString()].some((v) =>
-                String(v).toLowerCase().includes(q)
+        return surveys.filter((survey: any) =>
+            [survey.title, survey.project, survey.description].some((v: any) =>
+                String(v ?? '').toLowerCase().includes(q)
             )
         );
     }, [surveys, search]);
 
-    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    const totalPages = data?.meta?.totalPages ?? Math.max(1, Math.ceil(filtered.length / pageSize));
     const currentPage = Math.min(page, totalPages);
-    const start = (currentPage - 1) * pageSize;
-    const paginated = filtered.slice(start, start + pageSize);
+    const paginated = filtered; // server-paginated; filter client-side only
 
     const handleConfirmDelete = () => {
-        if (toDelete) {
-            setSurveys(surveys.filter(survey => survey.id !== toDelete.id));
+        if (toDelete?.id) {
+            deleteSurvey.mutate(toDelete.id);
         }
         setDeleteModalOpen(false);
         setToDelete(null);
@@ -171,34 +111,29 @@ const SurveyComponent = () => {
         ];
 
         // Add status-specific actions
-        if (user?.roles[0]?.permissions?.some((perm: any) => perm.name?.includes('survey:update'))) {
-            if (survey.status === 'Active') {
-                baseActions.push(
-                    { key: 'pause', label: 'Pause Survey', icon: <FaPause className="w-4 h-4" />, destructive: false },
-                    { key: 'stop', label: 'Stop Survey', icon: <FaStop className="w-4 h-4" />, destructive: true }
-                );
-            } else if (survey.status === 'Draft') {
-                baseActions.push(
-                    { key: 'activate', label: 'Activate Survey', icon: <FaPlay className="w-4 h-4" />, destructive: false }
-                );
-            } else if (survey.status === 'Pending') {
-                baseActions.push(
-                    { key: 'resume', label: 'Resume Survey', icon: <FaPlay className="w-4 h-4" />, destructive: false }
-                );
-            }
-        }
-
-        // Add analytics and export for completed/active surveys
-        if (user?.roles[0]?.permissions?.some((perm: any) => perm.name === 'survey:analytics')) {
-            if (survey.status === 'Active' || survey.status === 'Completed') {
+        if (checkPermissions(user, 'survey:update')) {
+            if (survey.status === 'active') {
                 baseActions.push(
                     { key: 'analytics', label: 'View Analytics', icon: <FaChartBar className="w-4 h-4" />, destructive: false },
-                    { key: 'export', label: 'Export Data', icon: <FaDownload className="w-4 h-4" />, destructive: false, }
+                    { key: 'export', label: 'Export Data', icon: <FaDownload className="w-4 h-4" />, destructive: false },
+                    { key: 'pause', label: 'Pause Survey', icon: <FaPause className="w-4 h-4" />, destructive: false },
+                    { key: 'archive', label: 'Archive Survey', icon: <FaStop className="w-4 h-4" />, destructive: true },
+                );
+            } else if (survey.status === 'paused') {
+                baseActions.push(
+                    { key: 'activate', label: 'Activate Survey', icon: <FaPlay className="w-4 h-4" />, destructive: false },
+                    { key: 'archive', label: 'Archive Survey', icon: <FaStop className="w-4 h-4" />, destructive: true },
+                );
+            } else if (survey.status === 'archived') {
+                // Archived: analytics/export still allowed to view data if permitted
+                baseActions.push(
+                    { key: 'analytics', label: 'View Analytics', icon: <FaChartBar className="w-4 h-4" />, destructive: false },
+                    { key: 'export', label: 'Export Data', icon: <FaDownload className="w-4 h-4" />, destructive: false },
                 );
             }
         }
 
-        if (user?.roles[0]?.permissions?.some((perm: any) => perm.name === 'survey:delete')) {
+        if (checkPermissions(user, 'survey:delete')) {
             baseActions.push(
                 { key: 'delete', label: 'Delete Survey', icon: <FaTrash className="w-4 h-4" />, destructive: true }
             );
@@ -208,27 +143,31 @@ const SurveyComponent = () => {
     };
 
     const renderTableView = () => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="overflow-x-visible">
                 <table className="w-full">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Survey Name</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Survey Title</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responses</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projects</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {paginated.map((survey) => (
+                        {isLoading ? (
+                            <tr>
+                                <td className="px-6 py-4 text-sm text-gray-500" colSpan={7}>Loading surveys...</td>
+                            </tr>
+                        ) : paginated.map((survey: any) => (
                             <tr key={survey.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center">
                                         <div>
-                                            <div className="text-sm font-medium text-gray-700">{survey.name}</div>
+                                            <div className="text-sm font-medium text-gray-700">{survey.title}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -237,22 +176,23 @@ const SurveyComponent = () => {
                                         {survey.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{survey.projects}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{survey.questions}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{survey.time}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{survey.email}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{(survey.answers?.length) ?? 0}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{survey.questionItems?.length ?? 0}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{survey.estimatedTime}Min</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{survey.project}</td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center space-x-4">
-                                        <button
-                                            onClick={() => handleSurveyAction('edit', survey.id, survey.name)}
+                                        <Link
+                                            to="/dashboard/surveys/edit/$edit-id"
+                                            params={{ 'edit-id': String(survey.id) }}
                                             className="text-primary cursor-pointer hover:text-blue-700"
                                             title="Edit Survey"
                                         >
                                             <FaEdit className="w-4 h-4" />
-                                        </button>
+                                        </Link>
                                         <Link
                                             to="/dashboard/surveys/$view-id"
-                                            params={{ 'view-id': survey.id.toString() }}
+                                            params={{ 'view-id': String(survey.id) }}
                                             className="text-title cursor-pointer hover:text-shadow-title"
                                             title="View Survey"
                                         >
@@ -274,7 +214,12 @@ const SurveyComponent = () => {
                                                     key={action.key}
                                                     icon={action.icon}
                                                     destructive={action.destructive}
-                                                    onClick={() => handleSurveyAction(action.key, survey.id, survey.name)}
+                                                    onClick={() => {
+                                                        if (action.key === 'pause') updateStatus.mutate({ surveyId: String(survey.id), status: 'paused' });
+                                                        else if (action.key === 'activate') updateStatus.mutate({ surveyId: String(survey.id), status: 'active' });
+                                                        else if (action.key === 'archive') updateStatus.mutate({ surveyId: String(survey.id), status: 'archived' });
+                                                        else handleSurveyAction(action.key, survey.id, survey.title);
+                                                    }}
                                                 >
                                                     {action.label}
                                                 </DropdownItem>
@@ -292,14 +237,16 @@ const SurveyComponent = () => {
 
     const renderGridView = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginated.map((survey) => (
+            {isLoading ? (
+                <div className="col-span-full text-sm text-gray-500">Loading surveys...</div>
+            ) : paginated.map((survey: any) => (
                 <div key={survey.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-center mb-4">
                         <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white text-lg font-medium mr-4">
-                            {getInitials(survey.name)}
+                            {getInitials(survey.title)}
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-lg font-medium text-gray-700 mb-1">{survey.name}</h3>
+                            <h3 className="text-lg font-medium text-gray-700 mb-1">{survey.title}</h3>
                             <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(survey.status)}`}>
                                 {survey.status}
                             </span>
@@ -309,26 +256,27 @@ const SurveyComponent = () => {
                     <div className="space-y-3 mb-4">
                         <p className="text-sm text-gray-600">{survey.description}</p>
                         <div className="flex justify-between text-sm text-gray-500">
-                            <span>{survey.questions} questions</span>
-                            <span>{survey.time} to complete</span>
+                            <span>{survey.questionItems?.length ?? 0} questions</span>
+                            <span>{survey.estimatedTime}Min to complete</span>
                         </div>
                         <div className="text-sm text-gray-700">
-                            <span className="font-medium">{survey.projects}</span> responses received
+                            <span className="font-medium">{(survey.answers?.length) ?? 0}</span> responses received
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <span className="text-sm text-gray-500">{survey.email}</span>
+                        <span className="text-sm text-gray-500">{survey.project}</span>
                         <div className="flex items-center space-x-2">
-                            <button
-                                onClick={() => handleSurveyAction('edit', survey.id, survey.name)}
+                            <Link
+                                to="/dashboard/surveys/edit/$edit-id"
+                                params={{ 'edit-id': String(survey.id) }}
                                 className="text-primary hover:text-blue-700"
                                 title="Edit Survey"
                             >
                                 <FaEdit className="w-4 h-4" />
-                            </button>
+                            </Link>
                             <button
-                                onClick={() => handleSurveyAction('delete', survey.id, survey.name)}
+                                onClick={() => handleSurveyAction('delete', survey.id, survey.title)}
                                 className="text-red-500 hover:text-red-700"
                                 title="Delete Survey"
                             >
@@ -351,7 +299,7 @@ const SurveyComponent = () => {
                                         icon={action.icon}
                                         destructive={action.destructive}
                                         className='min-w-52'
-                                        onClick={() => handleSurveyAction(action.key, survey.id, survey.name)}
+                                        onClick={() => handleSurveyAction(action.key, survey.id, survey.title)}
                                     >
                                         {action.label}
                                     </DropdownItem>
@@ -376,6 +324,7 @@ const SurveyComponent = () => {
             <div className="pt-14">
                 {/* Survey Toolbar */}
                 <SurveyToolbar
+                    title="Surveys"
                     viewMode={viewMode}
                     setViewMode={setViewMode}
                     search={search}
@@ -392,7 +341,7 @@ const SurveyComponent = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 paginatedCount={paginated.length}
-                filteredCount={filtered.length}
+                filteredCount={data?.meta?.total ?? filtered.length}
                 pageSize={pageSize}
                 setPage={setPage}
                 setPageSize={setPageSize}
@@ -402,7 +351,7 @@ const SurveyComponent = () => {
             <DeleteSurveyModal
                 isOpen={deleteModalOpen}
                 onClose={() => { setDeleteModalOpen(false); setToDelete(null); }}
-                surveyId={toDelete?.id}
+                surveyId={toDelete?.id as any}
                 surveyTitle={toDelete?.name}
                 onConfirm={handleConfirmDelete}
             />

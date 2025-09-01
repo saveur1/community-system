@@ -7,7 +7,7 @@ import type { User } from '@/api/auth';
 
 function isRichMember(userType?: string) {
   if (!userType) return false;
-  return userType==='RICH Members';
+  return userType==='RICH Members' || userType==='System';
 }
 
 export const Route = createFileRoute('/dashboard/accounts/rich-members')({
@@ -85,7 +85,8 @@ function RichMembersAccountsPage() {
   return (
     <AccountsList
       accounts={accounts}
-      title="RICH Member Accounts"
+      title="RICH Members"
+      addButtonLabel="add RICH Member"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}

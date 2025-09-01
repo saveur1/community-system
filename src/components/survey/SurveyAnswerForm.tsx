@@ -1,158 +1,56 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaArrowRight, FaArrowLeft, FaCheck } from 'react-icons/fa';
+import { FaArrowRight, FaArrowLeft, FaCheck, FaSpinner } from 'react-icons/fa';
+import { useSubmitSurveyAnswers } from '@/hooks/useSurveys';
+import { SubmitAnswersRequest } from '@/api/surveys';
 
-// Mock survey data
-const mockSurvey = {
-  id: 'maternal-health-2023',
-  title: 'Maternal Health Survey',
-  description: 'Help us improve maternal healthcare services in your community',
-  estimatedTime: '10 minutes',
-  questions: [
-    // Step 1 - Personal Information
-    {
-      id: 1,
-      type: 'text_input',
-      title: 'What is your age?',
-      description: 'Please enter your age in years',
-      required: true,
-      placeholder: 'Enter your age',
-    },
-    {
-      id: 2,
-      type: 'single_choice',
-      title: 'What is your gender?',
-      description: 'Please select your gender identity',
-      required: true,
-      options: ['Female', 'Male', 'Non-binary', 'Prefer not to say'],
-    },
-    {
-      id: 3,
-      type: 'single_choice',
-      title: 'How many children do you have?',
-      description: 'Include all biological children',
-      required: true,
-      options: ['0', '1', '2', '3', '4', '5+'],
-    },
-    {
-      id: 4,
-      type: 'single_choice',
-      title: 'What is your highest level of education?',
-      required: true,
-      options: [
-        'No formal education',
-        'Primary school',
-        'Secondary school',
-        'Vocational training',
-        'University degree',
-        'Postgraduate degree',
-      ],
-    },
-    {
-      id: 5,
-      type: 'single_choice',
-      title: 'What is your current employment status?',
-      required: true,
-      options: [
-        'Employed full-time',
-        'Employed part-time',
-        'Self-employed',
-        'Unemployed',
-        'Student',
-        'Homemaker',
-        'Retired',
-      ],
-    },
-    // Step 2 - Healthcare Access
-    {
-      id: 6,
-      type: 'single_choice',
-      title: 'How far is the nearest healthcare facility from your home?',
-      required: true,
-      options: [
-        'Less than 1 km',
-        '1-5 km',
-        '5-10 km',
-        'More than 10 km',
-        "I don't know",
-      ],
-    },
-    {
-      id: 7,
-      type: 'single_choice',
-      title: 'How do you usually travel to the healthcare facility?',
-      required: true,
-      options: [
-        'On foot',
-        'Bicycle/motorcycle',
-        'Public transportation',
-        'Private vehicle',
-        'Ambulance/emergency transport',
-      ],
-    },
-    {
-      id: 8,
-      type: 'single_choice',
-      title: 'How long does it take you to reach the nearest healthcare facility?',
-      required: true,
-      options: [
-        'Less than 15 minutes',
-        '15-30 minutes',
-        '30-60 minutes',
-        '1-2 hours',
-        'More than 2 hours',
-      ],
-    },
-    {
-      id: 9,
-      type: 'multiple_choice',
-      title: 'What are the main challenges you face in accessing healthcare services?',
-      description: 'Select all that apply',
-      required: false,
-      options: [
-        'Long distance to facility',
-        'High transportation costs',
-        'Lack of transportation',
-        'Long waiting times',
-        'Shortage of healthcare providers',
-        'Cost of services',
-        'Language/cultural barriers',
-        'Other (please specify)',
-      ],
-    },
-    {
-      id: 10,
-      type: 'single_choice',
-      title: 'Do you have health insurance?',
-      required: true,
-      options: ['Yes', 'No', "I don't know"],
-    },
-    // Add more steps as needed
-  ],
-};
+type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea';
+
+interface QuestionItem {
+  id: string;
+  type: QuestionType;
+  title: string;
+  description: string;
+  required: boolean;
+  options: string[] | null;
+  placeholder: string | null;
+}
+
+interface SurveyAnswerFormProps {
+  onComplete: () => void;
+  survey: {
+    id: string;
+    title: string;
+    description: string;
+    estimatedTime: string;
+    questionItems: QuestionItem[];
+  };
+}
 
 interface Answer {
-  questionId: number;
+  questionId: string;
   value: string | string[];
 }
 
-const SurveyAnswerForm: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
+const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, Answer>>({});
+  const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { mutate: submitAnswers } = useSubmitSurveyAnswers(survey.id);
 
   // Group questions into steps (5 questions per step)
   const steps = [];
-  for (let i = 0; i < mockSurvey.questions.length; i += 5) {
-    steps.push(mockSurvey.questions.slice(i, i + 5));
+  for (let i = 0; i < survey.questionItems.length; i += 5) {
+    steps.push(survey.questionItems.slice(i, i + 5));
   }
 
   const currentQuestions = steps[currentStep] || [];
   const totalSteps = steps.length;
   const isLastStep = currentStep === totalSteps - 1;
 
-  const handleAnswerChange = (questionId: number, value: string | string[]) => {
+  const handleAnswerChange = (questionId: string, value: string | string[]) => {
     setAnswers((prev) => ({
       ...prev,
       [questionId]: { questionId, value },
@@ -187,21 +85,41 @@ const SurveyAnswerForm: React.FC<{ onComplete?: () => void }> = ({ onComplete })
   };
 
   const handleSubmit = () => {
-    console.log('Survey answers:', Object.values(answers));
-    // Here you would typically send the answers to your API
-    if (onComplete) onComplete();
-    navigate({ to: '/dashboard/surveys/thank-you' });
+    setIsSubmitting(true);
+    
+    // Format answers for the API
+    const formattedAnswers: SubmitAnswersRequest = {
+      answers: Object.entries(answers).map(([questionId, answer]) => ({
+        questionId,
+        answerText: Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value),
+        answerOptions: Array.isArray(answer.value) ? answer.value : undefined
+      }))
+    };
+
+    submitAnswers(formattedAnswers, {
+      onSuccess: () => {
+        if (onComplete) onComplete();
+        navigate({ to: '/dashboard/surveys/thank-you' });
+      },
+      onError: (error) => {
+        console.error('Failed to submit answers:', error);
+        // Error toast will be shown by the hook
+      },
+      onSettled: () => {
+        setIsSubmitting(false);
+      }
+    });
   };
 
-  const renderQuestion = (question: any) => {
+  const renderQuestion = (question: QuestionItem) => {
     const answer = answers[question.id]?.value || (question.type === 'multiple_choice' ? [] : '');
 
     switch (question.type) {
       case 'single_choice':
         return (
           <div className="space-y-2">
-            {question.options.map((option: string) => (
-              <label key={option} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+            {question.options?.map((option: string) => (
+              <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer">
                 <input
                   type="radio"
                   name={`question-${question.id}`}
@@ -218,10 +136,10 @@ const SurveyAnswerForm: React.FC<{ onComplete?: () => void }> = ({ onComplete })
       case 'multiple_choice':
         return (
           <div className="space-y-2">
-            {question.options.map((option: string) => {
+            {question.options?.map((option: string) => {
               const isChecked = Array.isArray(answer) && answer.includes(option);
               return (
-                <label key={option} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={isChecked}
@@ -231,7 +149,7 @@ const SurveyAnswerForm: React.FC<{ onComplete?: () => void }> = ({ onComplete })
                         : [...(answer as string[]), option];
                       handleAnswerChange(question.id, newValue);
                     }}
-                    className="h-4 w-4 text-primary focus:ring-primary"
+                    className="h-4 w-4 text-primary outline-none focus:ring-primary"
                   />
                   <span className="text-gray-700">{option}</span>
                 </label>
@@ -248,7 +166,7 @@ const SurveyAnswerForm: React.FC<{ onComplete?: () => void }> = ({ onComplete })
             value={answer as string}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             placeholder={question.placeholder || 'Type your answer here...'}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         );
 
@@ -259,11 +177,13 @@ const SurveyAnswerForm: React.FC<{ onComplete?: () => void }> = ({ onComplete })
 
   return (
     <div className="max-w-4xl mx-auto p-6 border border-gray-300 bg-white rounded-xl shadow-md">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">{mockSurvey.title}</h1>
-        <p className="text-gray-600">{mockSurvey.description}</p>
-        <div className="mt-4 text-sm text-gray-500">
-          Step {currentStep + 1} of {totalSteps} • Approximately {mockSurvey.estimatedTime}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">
+          {survey.title}
+        </h2>
+        <p className="text-gray-600">{survey.description}</p>
+        <div className="mt-2 text-sm text-gray-500">
+          Step {currentStep + 1} of {totalSteps}
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
           <div
@@ -317,7 +237,16 @@ const SurveyAnswerForm: React.FC<{ onComplete?: () => void }> = ({ onComplete })
             onClick={handleSubmit}
             className="flex items-center px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
           >
-            Submit Survey <FaCheck className="ml-2" />
+            {isSubmitting ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                Submit Survey <FaCheck className="ml-2" />
+              </>
+            )}
           </button>
         ) : (
           <button

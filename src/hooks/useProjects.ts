@@ -38,7 +38,6 @@ export function useCreateProject() {
   return useMutation({
     mutationFn: (payload: ProjectCreateRequest) => projectsApi.create(payload),
     onSuccess: async () => {
-      toast.success('Project created successfully');
       await qc.invalidateQueries({ queryKey: projectsKeys.all });
     },
     onError: (error: any) => {

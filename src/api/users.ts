@@ -27,7 +27,7 @@ export type UserResponse = ServiceResponse<User>;
 export type UserCreateRequest = {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   address?: string;
   phone?: string;
   status?: 'active' | 'inactive' | 'pending';

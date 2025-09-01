@@ -1,6 +1,7 @@
-import { FaList, FaTh } from 'react-icons/fa';
-import { Link, useLocation } from '@tanstack/react-router';
+import { FaList, FaPlus, FaTh } from 'react-icons/fa';
+import { Link } from '@tanstack/react-router';
 import useAuth from '@/hooks/useAuth';
+import { checkPermissions } from '@/utility/logicFunctions';
 
 interface SurveyToolbarProps {
   viewMode: 'list' | 'grid';
@@ -8,6 +9,8 @@ interface SurveyToolbarProps {
   search: string;
   setSearch: (value: string) => void;
   filteredCount: number;
+  title: string;
+  hideCreateButton?: boolean;
 }
 
 export const SurveyToolbar = ({
@@ -16,15 +19,15 @@ export const SurveyToolbar = ({
   search,
   setSearch,
   filteredCount,
+  title,
+  hideCreateButton,
 }: SurveyToolbarProps) => {
-  const { pathname } = useLocation();
-  const dashboard = pathname.split('/')[1];
   const { user } = useAuth();
 
   return (
     <div className="flex w-full bg-white px-4 py-2 my-6 border border-gray-300 rounded-md items-center mb-6">
       <div className="flex items-center">
-        <h2 className="text-xl font-bold text-gray-600 mr-2">Surveys</h2>
+        <h2 className="text-xl font-bold text-gray-600 mr-2">{title}</h2>
         <span className="text-gray-500 text-lg">({filteredCount})</span>
       </div>
       <div className="flex-1" />
@@ -50,10 +53,10 @@ export const SurveyToolbar = ({
           </button>
         </div>
         {/* Create Survey Permission */}
-        {user?.roles[0]?.permissions?.some((permission) => permission.name === 'survey:create') && (
-          <Link to="/dashboard/surveys/add-new" className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm flex items-center gap-2">
-            <span className="text-lg">+</span>
-            Create Survey Form
+        {checkPermissions(user, 'survey:create') && !hideCreateButton && (
+          <Link to="/dashboard/surveys/add-new" className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-sm flex items-center gap-2">
+            <span className="text-lg"><FaPlus className="w-4 h-4" /></span>
+            { title }
           </Link>
         )}
       </div>

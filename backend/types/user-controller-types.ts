@@ -3,12 +3,14 @@ import { IUserAttributes } from './user-types';
 export interface IUserCreateRequest {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   address?: string;
   phone?: string;
   role?: IUserAttributes['roles'];
   status?: IUserAttributes['status'];
   profileImage?: string;
+  // Optional: assign roles by id on creation
+  roleIds?: string[];
 }
 
 export interface IUserUpdateRequest extends Partial<IUserCreateRequest> {}

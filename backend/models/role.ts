@@ -10,6 +10,7 @@ export class Role extends Model<IRoleAttributes, IRoleCreationAttributes> implem
   declare id: string;
   declare name: string;
   declare description: string | null;
+  declare category?: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -64,6 +65,13 @@ Role.init(
       allowNull: true,
       validate: {
         len: [0, 255]
+      }
+    },
+    category: {
+      type: DataTypes.STRING(80),
+      allowNull: true,
+      validate: {
+        len: [0, 80]
       }
     },
   },

@@ -8,6 +8,7 @@ import { RiMedicineBottleFill } from 'react-icons/ri';
 import { MdBrokenImage } from 'react-icons/md';
 import { TiMessages  } from 'react-icons/ti';
 import { checkPermissions } from '@/utility/logicFunctions';
+import { SiLimesurvey } from 'react-icons/si';
 
 const summaryCards = (user: User | null) => {
 
@@ -48,12 +49,12 @@ const summaryCards = (user: User | null) => {
     if(checkPermissions(user, "dashboard:community")){
       return [
         {
-          id: "vaccinations",
-          title: "Next Vaccinations",
-          value: "27/9/2025",
+          id: "surveys",
+          title: "Surveys Completed",
+          value: 27,
           delta: NaN,
-          icon: RiMedicineBottleFill,
-          iconBgColor: "bg-primary",
+          icon: SiLimesurvey,
+          iconBgColor: "bg-success",
           period: "",
         },
         {
@@ -72,7 +73,7 @@ const summaryCards = (user: User | null) => {
           delta: 10.73,
           note: "2 launched this month",
           icon: HiOutlineCollection,
-          iconBgColor: "bg-success",
+          iconBgColor: "bg-primary",
           period: "This week",
         },
       ];
@@ -81,18 +82,18 @@ const summaryCards = (user: User | null) => {
     // Default statistics cards
     return [
           {
-            id: "vaccinations",
-            title: "Received Vaccinations",
+            id: "surveys",
+            title: "Surveys Completed",
             value: 3450,
             delta: 20.3,
             note: "12 new this week",
-            icon: RiMedicineBottleFill,
-            iconBgColor: "bg-primary",
+            icon: SiLimesurvey,
+            iconBgColor: "bg-success",
             period: "This Week",
           },
           {
-            id: "vacciantions2",
-            title: "Defective Vaccinations",
+            id: "feedback",
+            title: "Feedbacks",
             value: 128,
             delta: -8.73,
             note: "5 new today",
@@ -107,7 +108,7 @@ const summaryCards = (user: User | null) => {
             delta: 10.73,
             note: "2 launched this month",
             icon: HiOutlineCollection,
-            iconBgColor: "bg-success",
+            iconBgColor: "bg-primary",
             period: "This week",
           },
         ];

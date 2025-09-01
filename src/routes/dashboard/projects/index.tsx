@@ -4,6 +4,7 @@ import Breadcrumb from '@/components/ui/breadcrum';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import { FaList, FaTh, FaEdit, FaTrash, FaEllipsisV, FaEye } from 'react-icons/fa';
 import { useProjectsList, useDeleteProject } from '@/hooks/useProjects';
+import { spacer } from '@/utility/logicFunctions';
 
 // Align status with backend `ProjectStatus` from `src/api/projects.ts`
 type ProgrammeStatus = 'draft' | 'in_progress' | 'completed' | 'on_hold' | 'cancelled';
@@ -136,7 +137,7 @@ const ProgrammesComponent = () => {
   ];
 
   const renderTableView = () => (
-    <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
       <table className="min-w-full">
         <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
@@ -163,8 +164,8 @@ const ProgrammesComponent = () => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{programme.targetGroup ?? '-'}</td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(programme.status)}`}>
-                  {programme.status}
+                <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize border border-green-300 ${getStatusColor(programme.status)}`}>
+                  {spacer(programme.status)}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{programme.feedbacks ?? 0}</td>

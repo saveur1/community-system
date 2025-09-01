@@ -70,14 +70,33 @@ export class UserController extends Controller {
       return ServiceResponse.failure('Email already in use', null, 400);
     }
 
-    const hashedPassword = await hash(userData.password, 10);
+    // Generate default password if not provided
+    const generateDefaultPassword = () => {
+      const base = (userData.name || 'User').trim().split(' ').join('').slice(0, 6);
+      const rand = Math.random().toString(36).slice(-4);
+      return `${base}${rand}!`;
+    };
+
+    const plainPassword = userData.password ? userData.password   : generateDefaultPassword();
+
+    const hashedPassword = await hash(plainPassword, 10);
 
     const newUser = await sequelize.transaction(async (t) => {
       const user = await User.create({ ...userData, password: hashedPassword, status: 'active' }, { transaction: t });
-      const userRole = await Role.findOne({ where: { name: 'user' }, transaction: t });
-      if (userRole) {
-        await user.addRole(userRole, { transaction: t });
+
+      // Assign roles
+      if (userData.roleIds && userData.roleIds.length > 0) {
+        const roles = await Role.findAll({ where: { id: userData.roleIds }, transaction: t });
+        if (roles.length) {
+          await user.setRoles(roles, { transaction: t });
+        }
+      } else {
+        const userRole = await Role.findOne({ where: { name: 'user' }, transaction: t });
+        if (userRole) {
+          await user.addRole(userRole, { transaction: t });
+        }
       }
+
       return user;
     });
 

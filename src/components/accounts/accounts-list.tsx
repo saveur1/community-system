@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Link } from '@tanstack/react-router';
 import { FaSearch, FaListUl, FaTh, FaSort, FaSortUp, FaSortDown, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaChevronLeft, FaChevronRight, FaEye, FaTrash, FaPlus, FaEllipsisV } from 'react-icons/fa';
 import { Account, AccountFilters } from '@/types/account';
 import { SelectDropdown } from '@/components/ui/select';
@@ -7,6 +8,7 @@ import Modal, { ModalBody, ModalFooter, ModalButton } from '@/components/ui/moda
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import { spacer } from '@/utility/logicFunctions';
 import { useVerifyAndUnverify, useActivateAndDeactivate } from '@/hooks/useUsers';
+import { useRolesList } from '@/hooks/useRoles';
 
 type ViewMode = 'list' | 'grid';
 
@@ -22,6 +24,7 @@ interface AccountsListProps {
   pageSize: number;
   loading: boolean;
   onDeleteAccount?: (account: Account) => void; // optional callback
+  addButtonLabel?: string; // optional custom label for the add button
 }
 
 export function AccountsList({
@@ -36,6 +39,7 @@ export function AccountsList({
   pageSize,
   loading,
   onDeleteAccount,
+  addButtonLabel,
 }: AccountsListProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,6 +47,9 @@ export function AccountsList({
   const [sortConfig, setSortConfig] = useState<{ key: keyof Account; direction: 'asc' | 'desc' }>(
     { key: 'name', direction: 'asc' }
   );
+  const { data: rolesData } = useRolesList({ category: title==='All Accounts' ? undefined : title });
+  const roles = rolesData?.result ?? [];
+  
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -160,34 +167,30 @@ export function AccountsList({
               <FaTh />
             </button>
           </div>
-          <button
-            type="button"
+          <Link
+            to="/dashboard/accounts/add-new"
+            search={{ category: title === 'All Accounts' ? '' : title }}
             className="inline-flex items-center gap-2 bg-primary text-white px-3 py-2 rounded-md hover:bg-primary-dark"
-            title="Add User"
-            onClick={() => {/* TODO: hook up to creation flow */}}
           >
             <FaPlus />
-            <span className="hidden sm:inline">Add User</span>
-          </button>
+            <span className="hidden sm:inline">{addButtonLabel ?? 'Add User'}</span>
+          </Link>
         </div>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm  border border-gray-300 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
             <SelectDropdown
-              options={[
-                { label: 'Admin', value: 'admin' },
-                { label: 'User', value: 'user' },
-                { label: 'Moderator', value: 'moderator' },
-                { label: 'Member', value: 'member' },
-                { label: 'Leader', value: 'leader' },
-                { label: 'Volunteer', value: 'volunteer' },
-              ]}
+              options={roles.map((role) => ({ label: spacer(role.name), value: role.name }))}
               value={filters.role}
-              onChange={(value) => setFilters({ ...filters, role: value || undefined })}
+              onChange={(value) => {
+                const newFilters = { ...filters, role: value || undefined };
+                setFilters(newFilters);
+                onSearch(newFilters);
+              }}
               placeholder="All Roles"
             />
           </div>
@@ -195,33 +198,24 @@ export function AccountsList({
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <SelectDropdown
               options={[
+                { label: 'All', value: 'all' },
                 { label: 'Active', value: 'active' },
                 { label: 'Inactive', value: 'inactive' },
                 { label: 'Pending', value: 'pending' },
               ]}
               value={filters.status}
-              onChange={(value) => setFilters({ ...filters, status: (value as any) || undefined })}
+              onChange={(value) => {
+                const newFilters = { ...filters, status: value === 'all' ? undefined : (value as any) };
+                setFilters(newFilters);
+                onSearch(newFilters);
+              }}
               placeholder="All Statuses"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
-            <SelectDropdown
-              options={[
-                { label: 'Community', value: 'community' },
-                { label: 'Religious', value: 'religious' },
-                { label: 'Stakeholder', value: 'stakeholder' },
-                { label: 'Employee', value: 'employee' },
-              ]}
-              value={filters.type}
-              onChange={(value) => setFilters({ ...filters, type: (value as any) || undefined })}
-              placeholder="All Types"
             />
           </div>
           <div className="flex items-end">
             <button
-              onClick={() => onSearch({ ...filters, search: searchTerm })}
-              className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition-colors"
+              disabled
+              className="w-full bg-gray-300 text-gray-600 py-2 px-4 rounded-md cursor-not-allowed"
             >
               Apply Filters
             </button>

@@ -5,8 +5,6 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 // Your manual translations
 import translationEN from './locales/en.json'
 import translationRW from './locales/rw.json'
-import translationSW from './locales/sw.json'
-import translationFR from './locales/fr.json'
 
 i18n
   .use(LanguageDetector)
@@ -14,10 +12,8 @@ i18n
   .init({
     fallbackLng: 'rw',
     resources: {
-      en: { translation: translationEN },
       rw: { translation: translationRW },
-      sw: { translation: translationSW },
-      fr: { translation: translationFR },
+      en: { translation: translationEN },
     },
     interpolation: {
       escapeValue: false,

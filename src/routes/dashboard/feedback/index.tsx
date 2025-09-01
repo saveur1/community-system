@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { useGetFeedback, useDeleteFeedback, useUpdateFeedback } from '@/hooks/useFeedback';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { FaEye, FaShare, FaEdit, FaTrash, FaPause, FaPlay, FaStop, FaChartBar, FaDownload, FaEnvelope, FaClock, FaListOl, FaCheckCircle, FaTimesCircle, FaTag } from 'react-icons/fa';
 import DeleteFeedbackModal from '@/components/features/feedbacks/delete-feedback-modal';
@@ -8,87 +9,103 @@ import { FeedbackTable } from '@/components/features/feedbacks/feedbacks-table';
 import { FeedbackGrid } from '@/components/features/feedbacks/feedbacks-grid-view';
 import { FeedbackToolbar } from '@/components/features/feedbacks/feedback-toolbar';
 import { FeedbackPagination } from '@/components/features/feedbacks/feedback-pagination';
-import Drawer from '@/components/ui/drawer';
+import { FeedbackDetailsDrawer } from '@/components/features/feedbacks/feedback-details-drawer';
+import { FeedbackEntity } from '@/api/feedback';
 
 const FeedbacksPage = () => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([
-    { id: 1, programme: 'Immunization', feedbackType: 'Positive', response: 'Staff were kind and the service was quick.', followUpNeeded: false, email: 'immunization@community.org', responses: 210, questions: 8, time: '4 min', status: 'Active' },
-    { id: 2, programme: 'Maternal Health', feedbackType: 'Suggestion', response: 'Consider extending clinic hours for working parents.', followUpNeeded: true, email: 'maternal@community.org', responses: 145, questions: 10, time: '6 min', status: 'Draft' },
-    { id: 3, programme: 'Facility Experience', feedbackType: 'Negative', response: 'Wait times were long and seating was limited.', followUpNeeded: true, email: 'facility@community.org', responses: 320, questions: 12, time: '7 min', status: 'Completed' },
-    { id: 4, programme: 'Outreach Program', feedbackType: 'Concern', response: 'Information did not reach remote areas effectively.', followUpNeeded: false, email: 'outreach@community.org', responses: 82, questions: 6, time: '3 min', status: 'Pending' },
-  ]);
-
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
+  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [selectedTitle, setSelectedTitle] = useState('');
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | undefined>(undefined);
+  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackEntity | undefined>(undefined);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return feedbacks;
-    return feedbacks.filter((f) =>
-      [f.programme, f.feedbackType, f.response, f.email, f.status].some((v) => String(v).toLowerCase().includes(q))
-    );
-  }, [feedbacks, search]);
+  const { data, isLoading } = useGetFeedback({ page, limit: pageSize });
+  const deleteFeedback = useDeleteFeedback();
+  const updateFeedback = useUpdateFeedback();
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const start = (currentPage - 1) * pageSize;
-  const paginated = filtered.slice(start, start + pageSize);
+  const feedbacks = data?.result ?? [];
+  const meta = data;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Active': return 'bg-green-100 text-green-800';
-      case 'Draft': return 'bg-blue-100 text-blue-800';
-      case 'Completed': return 'bg-red-100 text-red-800';
-      case 'Pending': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Resolved': return 'bg-green-100 text-green-800 border border-green-200';
+      case 'Acknowledged': return 'bg-blue-100 text-blue-800 border border-blue-200';
+      case 'Rejected': return 'bg-red-100 text-red-800 border border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border border-gray-200';
     }
   };
 
-  const getInitials = (text: string) => text.split(' ').map((n) => n[0]).join('').toUpperCase();
+  const getInitials = (text: string) => text?.split(' ')?.map((n) => n[0])?.join('')?.toUpperCase();
 
-  const handleAction = (action: string, fb: FeedbackItem) => {
+  const handleAction = (action: string, fb: FeedbackEntity) => {
     switch (action) {
       case 'view':
         setSelectedFeedback(fb);
         setIsViewOpen(true);
         break;
+      case 'edit':
+        navigate({ to: '/dashboard/feedback/edit/$edit-id', params: { 'edit-id': String(fb.id) } });
+        break;
+      case 'acknowledge':
+        updateFeedback.mutate({ id: String(fb.id), data: { status: 'Acknowledged' } });
+        break;
+      case 'resolve':
+        updateFeedback.mutate({ id: String(fb.id), data: { status: 'Resolved' } });
+        setIsViewOpen(false);
+        break;
+      case 'reject':
+        updateFeedback.mutate({ id: String(fb.id), data: { status: 'Rejected' } });
+        setIsViewOpen(false);
+        break;
       case 'delete':
-        setSelectedId(fb.id);
-        setSelectedTitle(fb.programme);
+        setIsViewOpen(false); // Close drawer before opening delete modal
+        setSelectedId(String(fb.id));
+        setSelectedTitle(fb.mainMessage || 'this feedback');
         setIsDeleteOpen(true);
         break;
       default:
-        alert(`${action} → ${fb.programme}`);
+        alert(`${action} → ${fb.mainMessage}`);
         break;
     }
   };
 
-  const handleDeleteConfirm = (id: number) => {
-    setFeedbacks((prev) => prev.filter((x) => x.id !== id));
-    setIsDeleteOpen(false);
-    setSelectedId(undefined);
-    setSelectedTitle('');
+  const handleDeleteConfirm = () => {
+    if (selectedId) {
+      deleteFeedback.mutate(selectedId, {
+        onSuccess: () => {
+          setIsDeleteOpen(false);
+          setSelectedId(undefined);
+          setSelectedTitle('');
+        },
+      });
+    }
   };
 
-  const getActions = (fb: FeedbackItem): FeedbackAction[] => {
-    const base = [
+  const getActions = (fb: FeedbackEntity): FeedbackAction[] => {
+    const actions: FeedbackAction[] = [
       { key: 'view', label: 'View Details', icon: <FaEye className="w-4 h-4" />, destructive: false },
-      { key: 'edit', label: 'Edit', icon: <FaEdit className="w-4 h-4" />, destructive: false },
     ];
-    
-    if (fb.status === 'Active' || fb.status === 'Completed') {
-      base.push({ key: 'analytics', label: 'Analytics', icon: <FaChartBar className="w-4 h-4" />, destructive: false });
-      base.push({ key: 'export', label: 'Export', icon: <FaDownload className="w-4 h-4" />, destructive: false });
+
+    if (fb.status === 'submitted') {
+      actions.push({ key: 'acknowledge', label: 'Acknowledge', icon: <FaCheckCircle className="w-4 h-4" />, destructive: false });
     }
-    base.push({ key: 'delete', label: 'Delete', icon: <FaTrash className="w-4 h-4" />, destructive: true });
-    return base;
+
+    if (fb.status === 'Acknowledged') {
+      actions.push({ key: 'resolve', label: 'Resolve', icon: <FaCheckCircle className="w-4 h-4" />, destructive: false });
+    }
+
+    if (fb.status !== 'Resolved' && fb.status !== 'Rejected') {
+      actions.push({ key: 'reject', label: 'Reject', icon: <FaTimesCircle className="w-4 h-4" />, destructive: true });
+    }
+
+    actions.push({ key: 'delete', label: 'Delete', icon: <FaTrash className="w-4 h-4" />, destructive: true });
+
+    return actions;
   };
 
   return (
@@ -101,33 +118,35 @@ const FeedbacksPage = () => {
           setViewMode={setViewMode}
           search={search}
           setSearch={(value) => { setSearch(value); setPage(1); }}
-          filteredCount={filtered.length}
+          filteredCount={meta?.total ?? 0}
         />
       </div>
 
       {viewMode === 'list' ? (
         <FeedbackTable
-          feedbacks={paginated}
+          feedbacks={feedbacks}
           getStatusColor={getStatusColor}
           getInitials={getInitials}
           getActions={getActions}
           handleAction={handleAction}
+          isLoading={isLoading}
         />
       ) : (
         <FeedbackGrid
-          feedbacks={paginated}
+          feedbacks={feedbacks}
           getStatusColor={getStatusColor}
           getInitials={getInitials}
           getActions={getActions}
           handleAction={handleAction}
+          isLoading={isLoading}
         />
       )}
 
       <FeedbackPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        paginatedCount={paginated.length}
-        filteredCount={filtered.length}
+        currentPage={page}
+        totalPages={meta?.totalPages ?? 1}
+        paginatedCount={feedbacks.length}
+        filteredCount={meta?.total ?? 0}
         pageSize={pageSize}
         setPage={setPage}
         setPageSize={setPageSize}
@@ -141,107 +160,16 @@ const FeedbacksPage = () => {
         onConfirm={handleDeleteConfirm}
       />
 
-      {/* View Details Drawer */}
-      <Drawer
-        open={isViewOpen}
+      <FeedbackDetailsDrawer
+        isOpen={isViewOpen}
         onClose={() => setIsViewOpen(false)}
-        placement="right"
-        width={440}
-        title={
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
-              {selectedFeedback ? getInitials(selectedFeedback.programme) : ''}
-            </div>
-            <div className="min-w-0">
-              <div className="text-gray-900 truncate">{selectedFeedback?.programme || '—'}</div>
-              <div className="text-xs text-gray-500 truncate">Feedback details</div>
-            </div>
-          </div>
-        }
-      >
-        <div className="p-4 sm:p-6 space-y-6">
-          {/* Status and meta */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${selectedFeedback ? getStatusColor(selectedFeedback.status) : 'bg-gray-100 text-gray-800'}`}>
-              {selectedFeedback?.status || 'Unknown'}
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs text-gray-600"><FaClock /> {selectedFeedback?.time || '—'}</span>
-            <span className="inline-flex items-center gap-2 text-xs text-gray-600"><FaListOl /> {selectedFeedback?.questions ?? '—'} questions</span>
-          </div>
-
-          {/* Primary fields */}
-          <div className="space-y-4">
-            <div>
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Feedback Type</div>
-              <div className="flex items-center gap-2 text-gray-800">
-                <FaTag className="text-gray-400" /> {selectedFeedback?.feedbackType || '—'}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email</div>
-              <div className="flex items-center gap-2 text-gray-800">
-                <FaEnvelope className="text-gray-400" /> {selectedFeedback?.email || '—'}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Follow Up Needed</div>
-              <div className="flex items-center gap-2 text-gray-800">
-                {selectedFeedback?.followUpNeeded ? (
-                  <><FaCheckCircle className="text-green-500" /> Yes</>
-                ) : (
-                  <><FaTimesCircle className="text-gray-400" /> No</>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Message / Response */}
-          <div>
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Main Message</div>
-            <div className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-3">
-              {selectedFeedback?.response || 'No message provided.'}
-            </div>
-          </div>
-
-          {/* Fields from add-new (placeholders if not available in list item) */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Feedback Method</span>
-              <span className="text-gray-800">—</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Suggestions</span>
-              <span className="text-gray-800">—</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Voice Clips</span>
-              <span className="text-gray-800">—</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Videos</span>
-              <span className="text-gray-800">—</span>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-              <div className="text-xs text-gray-500">Responses</div>
-              <div className="text-lg font-semibold text-gray-800">{selectedFeedback?.responses ?? '—'}</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-              <div className="text-xs text-gray-500">Questions</div>
-              <div className="text-lg font-semibold text-gray-800">{selectedFeedback?.questions ?? '—'}</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-              <div className="text-xs text-gray-500">Est. Time</div>
-              <div className="text-lg font-semibold text-gray-800">{selectedFeedback?.time ?? '—'}</div>
-            </div>
-          </div>
-
-          <div className="h-2" />
-        </div>
-      </Drawer>
+        feedback={selectedFeedback}
+        getStatusColor={getStatusColor}
+        getInitials={getInitials}
+        onResolve={selectedFeedback?.status === 'Acknowledged' ? (fb) => handleAction('resolve', fb) : undefined}
+        onReject={selectedFeedback?.status !== 'Resolved' && selectedFeedback?.status !== 'Rejected' ? (fb) => handleAction('reject', fb) : undefined}
+        onDelete={(fb) => handleAction('delete', fb)}
+      />
     </div>
   );
 };

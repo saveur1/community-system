@@ -122,7 +122,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
       {isOpen && (
         <div
-          className={`absolute z-50 ${getPositionClasses()} ${dropdownClassName}`}
+          className={`absolute z-[9999] ${getPositionClasses()} ${dropdownClassName}`}
           onClick={handleDropdownClick}
         >
           {children}

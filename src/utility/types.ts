@@ -44,26 +44,3 @@ export type FeedbackItem = {
     icon: React.ReactNode;
     destructive: boolean;
   };
-
-  export type AssignedImmunization = {
-    id: number;
-    childName: string;
-    vaccine: string;
-    dueDate: string;
-    status: 'Pending' | 'Received' | 'Missed';
-    quantity?: number;
-    assignedBy?: string;
-  };
-
-  export type ImmunizationAction = 'confirm' | 'view' | 'deny';
-
-export interface ImmunizationReport {
-  id: number;
-  vaccine: string;
-  completionDate: string;
-  administeredBy: string;
-  reportedAt?: string;
-  tag?: string;
-}
-
-export type ReportAction = 'view' | 'download';

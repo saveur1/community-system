@@ -56,6 +56,10 @@
 						"type": "string",
 						"nullable": true
 					},
+					"category": {
+						"type": "string",
+						"nullable": true
+					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time"
@@ -407,12 +411,17 @@
 					},
 					"profileImage": {
 						"type": "string"
+					},
+					"roleIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
 					"name",
-					"email",
-					"password"
+					"email"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -445,6 +454,12 @@
 					},
 					"profileImage": {
 						"type": "string"
+					},
+					"roleIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"type": "object",
@@ -647,6 +662,224 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"SurveyCreateRequest": {
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"project": {
+						"type": "string"
+					},
+					"estimatedTime": {
+						"type": "string"
+					},
+					"questions": {
+						"items": {
+							"anyOf": [
+								{
+									"properties": {
+										"options": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"single_choice",
+												"multiple_choice"
+											]
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"options",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								},
+								{
+									"properties": {
+										"placeholder": {
+											"type": "string"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"text_input",
+												"textarea"
+											]
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"placeholder",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								}
+							]
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"title",
+					"description",
+					"project",
+					"estimatedTime",
+					"questions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SurveyUpdateRequest": {
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"project": {
+						"type": "string"
+					},
+					"estimatedTime": {
+						"type": "string"
+					},
+					"questions": {
+						"items": {
+							"anyOf": [
+								{
+									"properties": {
+										"options": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"single_choice",
+												"multiple_choice"
+											]
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"options",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								},
+								{
+									"properties": {
+										"placeholder": {
+											"type": "string"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"text_input",
+												"textarea"
+											]
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"placeholder",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								}
+							]
+						},
+						"type": "array"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"active",
+							"paused",
+							"archived"
+						]
+					}
+				},
+				"required": [
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"StakeholderCreateRequest": {
 				"properties": {
 					"name": {
@@ -670,6 +903,67 @@
 					},
 					"logo": {
 						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"StakeholderUserAttachRequest": {
+				"properties": {
+					"userId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"userId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RoleCreateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"category": {
+						"type": "string",
+						"nullable": true
+					},
+					"permissionIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RoleUpdateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"category": {
+						"type": "string",
+						"nullable": true
+					},
+					"permissionIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"type": "object",
@@ -816,6 +1110,199 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"PermissionCreateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PermissionUpdateRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DocumentInput": {
+				"properties": {
+					"documentName": {
+						"type": "string"
+					},
+					"documentUrl": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"size": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"publicId": {
+						"type": "string",
+						"nullable": true
+					},
+					"deleteToken": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"documentName",
+					"documentUrl",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FeedbackCreateRequest": {
+				"properties": {
+					"projectId": {
+						"type": "string",
+						"nullable": true
+					},
+					"mainMessage": {
+						"type": "string",
+						"nullable": true
+					},
+					"feedbackType": {
+						"type": "string",
+						"enum": [
+							"positive",
+							"negative",
+							"suggestion",
+							"concern",
+							null
+						],
+						"nullable": true
+					},
+					"feedbackMethod": {
+						"type": "string",
+						"enum": [
+							"text",
+							"voice",
+							"video"
+						]
+					},
+					"suggestions": {
+						"type": "string",
+						"nullable": true
+					},
+					"followUpNeeded": {
+						"type": "boolean"
+					},
+					"documents": {
+						"items": {
+							"$ref": "#/components/schemas/DocumentInput"
+						},
+						"type": "array"
+					},
+					"responderName": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"feedbackMethod"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FeedbackUpdateRequest": {
+				"properties": {
+					"projectId": {
+						"type": "string"
+					},
+					"mainMessage": {
+						"type": "string"
+					},
+					"feedbackType": {
+						"type": "string",
+						"enum": [
+							"positive",
+							"negative",
+							"suggestion",
+							"concern"
+						]
+					},
+					"feedbackMethod": {
+						"type": "string",
+						"enum": [
+							"text",
+							"voice",
+							"video"
+						]
+					},
+					"suggestions": {
+						"type": "string"
+					},
+					"followUpNeeded": {
+						"type": "boolean"
+					},
+					"documents": {
+						"items": {
+							"$ref": "#/components/schemas/DocumentInput"
+						},
+						"type": "array"
+					},
+					"responderName": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"submitted",
+							"Acknowledged",
+							"Resolved",
+							"Rejected"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse_any_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"DocumentCreateRequest": {
 				"properties": {
 					"projectId": {
@@ -892,6 +1379,161 @@
 						"type": "string"
 					}
 				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CommunitySessionCreateRequest": {
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"shortDescription": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"video",
+							"image",
+							"document",
+							"audio"
+						]
+					},
+					"allowedRoles": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"document": {
+						"properties": {
+							"deleteToken": {
+								"type": "string",
+								"nullable": true
+							},
+							"publicId": {
+								"type": "string",
+								"nullable": true
+							},
+							"userId": {
+								"type": "string"
+							},
+							"documentUrl": {
+								"type": "string",
+								"nullable": true
+							},
+							"addedAt": {
+								"type": "string",
+								"format": "date-time"
+							},
+							"type": {
+								"type": "string",
+								"nullable": true
+							},
+							"size": {
+								"type": "number",
+								"format": "double",
+								"nullable": true
+							},
+							"documentName": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"userId",
+							"documentName"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"title",
+					"shortDescription",
+					"type",
+					"allowedRoles",
+					"document"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CommunitySessionUpdateRequest": {
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"shortDescription": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"video",
+							"document",
+							"image",
+							"audio"
+						]
+					},
+					"allowedRoles": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"document": {
+						"properties": {
+							"deleteToken": {
+								"type": "string"
+							},
+							"publicId": {
+								"type": "string"
+							},
+							"userId": {
+								"type": "string"
+							},
+							"documentUrl": {
+								"type": "string"
+							},
+							"addedAt": {
+								"type": "string",
+								"format": "date-time"
+							},
+							"type": {
+								"type": "string"
+							},
+							"size": {
+								"type": "number",
+								"format": "double"
+							},
+							"documentName": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"userId",
+							"documentName"
+						],
+						"type": "object"
+					},
+					"isActive": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CommentCreateRequest": {
+				"properties": {
+					"content": {
+						"type": "string"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"content"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -1415,6 +2057,308 @@
 				"parameters": []
 			}
 		},
+		"/api/surveys": {
+			"get": {
+				"operationId": "GetSurveys",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"active",
+								"paused",
+								"archived"
+							]
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateSurvey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:create"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SurveyCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/surveys/{surveyId}": {
+			"get": {
+				"operationId": "GetSurveyById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Survey not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateSurvey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SurveyUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteSurvey",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/surveys/{surveyId}/answers": {
+			"post": {
+				"operationId": "SubmitAnswers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:answer"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"answers": {
+										"items": {
+											"properties": {
+												"answerOptions": {
+													"items": {
+														"type": "string"
+													},
+													"type": "array",
+													"nullable": true
+												},
+												"answerText": {
+													"type": "string",
+													"nullable": true
+												},
+												"questionId": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"questionId"
+											],
+											"type": "object"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"answers"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/stakeholders": {
 			"get": {
 				"operationId": "GetStakeholders",
@@ -1619,6 +2563,479 @@
 					{
 						"in": "path",
 						"name": "stakeholderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/stakeholders/{stakeholderId}/users": {
+			"get": {
+				"operationId": "GetStakeholderUsers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stakeholders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stakeholderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "AttachUserToStakeholder",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stakeholders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stakeholderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/StakeholderUserAttachRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/stakeholders/{stakeholderId}/users/{userId}": {
+			"delete": {
+				"operationId": "DetachUserFromStakeholder",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stakeholders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"project:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stakeholderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/roles": {
+			"get": {
+				"operationId": "ListRoles",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Roles"
+				],
+				"security": [
+					{
+						"jwt": [
+							"role:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "category",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateRole",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Roles"
+				],
+				"security": [
+					{
+						"jwt": [
+							"role:create"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RoleCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/roles/{roleId}": {
+			"get": {
+				"operationId": "GetRole",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Role not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Roles"
+				],
+				"security": [
+					{
+						"jwt": [
+							"role:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateRole",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Roles"
+				],
+				"security": [
+					{
+						"jwt": [
+							"role:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RoleUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteRole",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Roles"
+				],
+				"security": [
+					{
+						"jwt": [
+							"role:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/roles/{roleId}/permissions": {
+			"post": {
+				"operationId": "AddPermission",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Roles"
+				],
+				"security": [
+					{
+						"jwt": [
+							"role:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"permissionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"permissionId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/roles/{roleId}/permissions/{permissionId}": {
+			"delete": {
+				"operationId": "RemovePermission",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Roles"
+				],
+				"security": [
+					{
+						"jwt": [
+							"role:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "roleId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "permissionId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -1837,6 +3254,514 @@
 						}
 					}
 				]
+			}
+		},
+		"/api/permissions": {
+			"get": {
+				"operationId": "ListPermissions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Permissions"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreatePermission",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Permissions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"permission:create"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PermissionCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/permissions/{permissionId}": {
+			"get": {
+				"operationId": "GetPermission",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Permissions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"permission:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "permissionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdatePermission",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Permissions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"permission:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "permissionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PermissionUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeletePermission",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Permissions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"permission:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "permissionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/feedback": {
+			"get": {
+				"operationId": "GetFeedback",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Feedback"
+				],
+				"security": [
+					{
+						"jwt": [
+							"feedback:all:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"submitted",
+								"Acknowledged",
+								"Resolved",
+								"Rejected"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "feedbackType",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"positive",
+								"negative",
+								"suggestion",
+								"concern"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "projectId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateFeedback",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Feedback"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FeedbackCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/feedback/user": {
+			"get": {
+				"operationId": "GetUserFeedback",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Feedback"
+				],
+				"security": [
+					{
+						"jwt": [
+							"feedback:personal:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"submitted",
+								"Acknowledged",
+								"Resolved",
+								"Rejected"
+							]
+						}
+					}
+				]
+			}
+		},
+		"/api/feedback/{feedbackId}": {
+			"get": {
+				"operationId": "GetFeedbackById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Feedback not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Feedback"
+				],
+				"security": [
+					{
+						"jwt": [
+							"feedback:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "feedbackId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateFeedback",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Feedback"
+				],
+				"security": [
+					{
+						"jwt": [
+							"feedback:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "feedbackId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FeedbackUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteFeedback",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Feedback"
+				],
+				"security": [
+					{
+						"jwt": [
+							"feedback:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "feedbackId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/feedback/stats/summary": {
+			"get": {
+				"operationId": "GetFeedbackStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Feedback"
+				],
+				"security": [
+					{
+						"jwt": [
+							"feedback:read"
+						]
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/api/documents": {
@@ -2059,6 +3984,426 @@
 					{
 						"in": "path",
 						"name": "documentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/community-sessions": {
+			"get": {
+				"operationId": "GetCommunitySessions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"community_session:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "type",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"video",
+								"image",
+								"document",
+								"audio"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "isActive",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateCommunitySession",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"community_session:create"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CommunitySessionCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/community-sessions/{sessionId}": {
+			"get": {
+				"operationId": "GetCommunitySessionById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Community session not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"community_session:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateCommunitySession",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"community_session:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CommunitySessionUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteCommunitySession",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"community_session:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/community-sessions/{sessionId}/comments": {
+			"get": {
+				"operationId": "GetSessionComments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"community_session:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "AddComment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CommentCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/community-sessions/comments/{commentId}": {
+			"put": {
+				"operationId": "UpdateComment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"comment:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "commentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"content": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"content"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteComment",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Community Sessions"
+				],
+				"security": [
+					{
+						"jwt": [
+							"comment:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "commentId",
 						"required": true,
 						"schema": {
 							"type": "string"

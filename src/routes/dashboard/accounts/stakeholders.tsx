@@ -84,7 +84,8 @@ function StakeholdersAccountsPage() {
   return (
     <AccountsList
       accounts={accounts}
-      title="Stakeholder Accounts"
+      title="Stakeholders"
+      addButtonLabel="add Stakeholder"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}

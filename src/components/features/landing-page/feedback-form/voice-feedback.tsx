@@ -1,5 +1,5 @@
 // components/feedback/VoiceFeedback.tsx
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -11,15 +11,19 @@ import {
   FaTrash, 
   FaLock 
 } from 'react-icons/fa';
-import { VoiceFeedbackProps, VoiceFeedback as VoiceFeedbackType } from "@/types/feedback-types";
+import { VoiceFeedback as VoiceFeedbackType, PermissionState } from "@/types/feedback-types";
+
+interface VoiceFeedbackProps {
+  voiceFeedback: VoiceFeedbackType | null;
+  setVoiceFeedback: React.Dispatch<React.SetStateAction<VoiceFeedbackType | null>>;
+}
 
 // Waveform Component
 interface VoiceWaveformProps { 
-  isRecording: boolean; 
-  recordingSeconds: number; 
+  isRecording: boolean;
 }
 
-const VoiceWaveform: React.FC<VoiceWaveformProps> = ({ isRecording, recordingSeconds }) => {
+const VoiceWaveform: React.FC<VoiceWaveformProps> = ({ isRecording }) => {
   const waveHeights = [12, 24, 16, 32, 20, 28, 14, 36, 22, 18, 30, 26, 16, 34, 20, 24, 18, 28, 22, 32];
 
   return (
@@ -96,59 +100,129 @@ const PlayButton: React.FC<PlayButtonProps> = ({ onClick, isPlaying = false }) =
   </motion.button>
 );
 
-const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
-  voiceFeedback,
-  setVoiceFeedback,
-  micPermission,
-  setMicPermission,
-  isRecording,
-  recordingSeconds,
-  onStartRecording,
-  onStopRecording,
-}) => {
+const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFeedback }) => {
   const { t } = useTranslation();
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const requestMicrophonePermission = async () => {
+  // Internal recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [micPermission, setMicPermission] = useState<PermissionState>('prompt');
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const timerRef = useRef<number | null>(null);
+
+  const cleanupMedia = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current = null;
+    }
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setIsRecording(false);
+    setRecordingSeconds(0);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      cleanupMedia();
+      if (voiceFeedback && voiceFeedback.url) {
+        URL.revokeObjectURL(voiceFeedback.url);
+      }
+    };
+  }, [cleanupMedia, voiceFeedback]);
+
+  const startRecording = async () => {
+    if (isRecording) return;
+
+    // Clear previous recording if it exists
+    if (voiceFeedback && voiceFeedback.url) {
+      URL.revokeObjectURL(voiceFeedback.url);
+      setVoiceFeedback(null);
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((track) => track.stop());
+      streamRef.current = stream;
       setMicPermission('granted');
-      toast.success('Microphone enabled.');
-    } catch {
-      setMicPermission('denied');
-      toast.error('Microphone permission denied.');
+
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunks.push(event.data);
+      };
+
+      const startTime = Date.now();
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const duration = Math.round((Date.now() - startTime) / 1000);
+        const url = URL.createObjectURL(blob);
+        const newFeedback: VoiceFeedbackType = {
+          id: Math.random().toString(36).slice(2),
+          blob,
+          duration,
+          timestamp: new Date(),
+          url,
+        };
+        setVoiceFeedback(newFeedback);
+        cleanupMedia();
+      };
+
+      recorder.start();
+      setIsRecording(true);
+
+      timerRef.current = window.setInterval(() => {
+        setRecordingSeconds((s) => s + 1);
+      }, 1000);
+
+    } catch (err) {
+      console.error('Error starting recording:', err);
+      const e = err as { name?: string };
+      if (e?.name === 'NotAllowedError' || e?.name === 'PermissionDeniedError') {
+        setMicPermission('denied');
+        toast.error('Microphone permission denied.');
+      } else {
+        toast.error('Could not start recording.');
+      }
+      cleanupMedia();
     }
   };
 
-  const deleteRecording = (id: string) => {
-    setVoiceFeedback(prev => {
-      const updated = prev.filter(v => v.id !== id);
-      const toDelete = prev.find(v => v.id === id);
-      if (toDelete?.url) {
-        URL.revokeObjectURL(toDelete.url);
-      }
-      return updated;
-    });
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const deleteRecording = () => {
+    if (voiceFeedback && voiceFeedback.url) {
+      URL.revokeObjectURL(voiceFeedback.url);
+      setVoiceFeedback(null);
+    }
   };
 
   const playAudio = (feedback: VoiceFeedbackType) => {
-    // If currently playing this one, pause
     if (playingAudioId === feedback.id && audioRef.current) {
       audioRef.current.pause();
       setPlayingAudioId(null);
       return;
     }
     
-    // Stop any existing audio
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = '';
     }
+
+    if (!feedback.url) return;
     
-    // Create new audio element
-    const audio = new Audio(feedback.url || URL.createObjectURL(feedback.blob));
+    const audio = new Audio(feedback.url);
     audioRef.current = audio;
     setPlayingAudioId(feedback.id);
     audio.onended = () => setPlayingAudioId(null);
@@ -158,48 +232,28 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
 
   return (
     <div className="mt-4 sm:mt-6">
-      {/* Enhanced Voice Recording UI */}
       <motion.div
         className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-4 border border-purple-200"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {/* Permission state for microphone */}
-        {micPermission === 'denied' && (
-          <div className="mb-4 flex items-start gap-3 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700">
-            <FaLock className="mt-1" />
-            <div className="flex-1">
-              <p className="text-sm font-medium">Microphone blocked</p>
-              <p className="text-xs">Please enable microphone access in your browser settings.</p>
-            </div>
-            <button 
-              type="button" 
-              onClick={requestMicrophonePermission} 
-              className="text-sm px-3 py-1 rounded bg-red-600 text-white"
-            >
-              Allow
-            </button>
-          </div>
-        )}
-
-        {/* Recording Controls */}
         <div className="text-center mb-2">
           {!isRecording ? (
             <motion.button
               type="button"
-              onClick={onStartRecording}
-              className="w-14 h-14 sm:w-16 sm:h-16 bg-primary hover:bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto disabled:opacity-50"
+              onClick={startRecording}
               disabled={micPermission === 'denied'}
+              className="w-14 h-14 sm:w-16 sm:h-16 bg-primary hover:bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <FaMicrophone className="text-xl" />
+              {micPermission === 'denied' ? <FaLock /> : <FaMicrophone className="text-xl" />}
             </motion.button>
           ) : (
             <motion.button
               type="button"
-              onClick={onStopRecording}
+              onClick={stopRecording}
               className="w-14 h-14 sm:w-16 sm:h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto"
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
@@ -208,26 +262,24 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
             </motion.button>
           )}
           <p className="mt-3 text-sm text-gray-600">
-            {!isRecording ? "Tap to start recording" : "Recording in progress..."}
+            {micPermission === 'denied' 
+              ? t('feedback.mic_permission_denied') 
+              : !isRecording 
+                ? t('feedback.tap_to_record') 
+                : t('feedback.recording_in_progress')}
           </p>
         </div>
 
-        {/* Waveform Visualization */}
-        <VoiceWaveform isRecording={isRecording} recordingSeconds={recordingSeconds} />
+        <VoiceWaveform isRecording={isRecording} />
 
-        {/* Recording Timer */}
-        {isRecording && (
-          <RecordingTimer seconds={recordingSeconds} />
-        )}
+        {isRecording && <RecordingTimer seconds={recordingSeconds} />}
       </motion.div>
 
-      {/* Recorded Voice Messages */}
-      {voiceFeedback.length > 0 && (
+      {voiceFeedback && (
         <div className="mt-6 space-y-3">
-          <h4 className="text-sm font-medium text-gray-700">Recorded Messages</h4>
-          {voiceFeedback.map((feedback) => (
+          <h4 className="text-sm font-medium text-gray-700">Recorded Message</h4>
             <motion.div
-              key={feedback.id}
+              key={voiceFeedback.id}
               className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-3 border border-purple-200"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -236,11 +288,9 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 flex-1">
                   <PlayButton
-                    onClick={() => playAudio(feedback)}
-                    isPlaying={playingAudioId === feedback.id}
+                    onClick={() => playAudio(voiceFeedback)}
+                    isPlaying={playingAudioId === voiceFeedback.id}
                   />
-
-                  {/* Mini Waveform for recorded message */}
                   <div className="flex items-center space-x-1 flex-1">
                     {Array.from({ length: 15 }, (_, i) => (
                       <div
@@ -253,27 +303,24 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
                       />
                     ))}
                   </div>
-
                   <div className="text-right">
                     <div className="text-sm font-medium text-gray-700">
-                      {Math.floor(feedback.duration / 60)}:{(feedback.duration % 60).toString().padStart(2, '0')}
+                      {Math.floor(voiceFeedback.duration / 60)}:{(voiceFeedback.duration % 60).toString().padStart(2, '0')}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {feedback.timestamp.toLocaleString()}
+                      {new Date(voiceFeedback.timestamp).toLocaleTimeString()}
                     </div>
                   </div>
                 </div>
-
                 <button
                   type="button"
-                  onClick={() => deleteRecording(feedback.id)}
+                  onClick={deleteRecording}
                   className="ml-4 text-red-500 hover:text-red-700 transition-colors"
                 >
                   <FaTrash />
                 </button>
               </div>
             </motion.div>
-          ))}
         </div>
       )}
     </div>

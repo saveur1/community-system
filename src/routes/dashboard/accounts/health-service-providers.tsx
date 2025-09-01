@@ -84,7 +84,8 @@ function EmployeesAccountsPage() {
   return (
     <AccountsList
       accounts={accounts}
-      title="Health Service Provider Accounts"
+      title="Health service providers"
+      addButtonLabel="add health provider"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}

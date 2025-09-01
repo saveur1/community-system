@@ -23,6 +23,9 @@ const permissions = [
   { name: 'feedback:read', description: 'View feedback' },
   { name: 'feedback:update', description: 'Update feedback' },
   { name: 'feedback:delete', description: 'Delete feedback' },
+  { name: 'feedback:all:read', description: 'View all feedback' },
+  { name: 'feedback:personal:read', description: 'View personal feedback' },
+  { name: 'my_feedback:delete', description: 'Delete my feedback' },
 
   // Project Permissions
   { name: 'project:create', description: 'Create projects' },
@@ -36,29 +39,24 @@ const permissions = [
   { name: 'document:update', description: 'Update documents' },
   { name: 'document:delete', description: 'Delete documents' },
 
-  // Stakeholder Permissions
-  { name: 'stakeholder:create', description: 'Create stakeholders' },
-  { name: 'stakeholder:read', description: 'View stakeholders' },
-  { name: 'stakeholder:update', description: 'Update stakeholders' },
-  { name: 'stakeholder:delete', description: 'Delete stakeholders' },
-
-  // Employee Permissions
-  { name: 'employee:create', description: 'Create employees' },
-  { name: 'employee:read', description: 'View employees' },
-  { name: 'employee:update', description: 'Update employees' },
-  { name: 'employee:delete', description: 'Delete employees' },
-
   // Community Session Permissions
   { name: 'community_session:create', description: 'Create community sessions' },
   { name: 'community_session:read', description: 'View community sessions' },
   { name: 'community_session:update', description: 'Update community sessions' },
   { name: 'community_session:download', description: 'Download community sessions' },
   { name: 'community_session:delete', description: 'Delete community sessions' },
+
+  // Comments Permissions
+  { name: 'comment:create', description: 'Create comments' },
+  { name: 'comment:read', description: 'View comments' },
+  { name: 'comment:update', description: 'Update comments' },
+  { name: 'comment:delete', description: 'Delete comments' },
   
   // Reporting Permissions
-  { name: 'reporting:dashboard', description: 'View reporting dashboard' },
-  { name: 'reporting:export', description: 'Export reports' },
-  { name: 'reporting:analytics', description: 'View analytics' },
+  { name: 'report:create', description: 'Create reports' },
+  { name: 'report:read', description: 'View reports' },
+  { name: 'report:update', description: 'Update reports' },
+  { name: 'report:delete', description: 'Delete reports' },
 
   // dashboards Permissions
   { name: 'dashboard:analytics', description: 'View analytics dashboard' },
@@ -74,7 +72,8 @@ const permissions = [
   { name: 'survey:respond', description: 'Respond to surveys' },
   { name: 'survey:update', description: 'Update surveys' },
   { name: 'survey:delete', description: 'Delete surveys' },
-  /*Just added*/{ name: 'survey:analytics', description: 'View analytics' },
+  { name: 'survey:analytics', description: 'View analytics' },
+  { name: 'survey:forms', description: 'View and create other user\'s forms' },
 
   // Notification Permissions
   { name: 'notification:read', description: 'View notifications' },
@@ -86,21 +85,11 @@ const permissions = [
   { name: 'announcement:update', description: 'Update announcements' },
   { name: 'announcement:delete', description: 'Delete announcements' },
 
-  // Services Rating Permissions
-  { name: 'service:rating', description: 'View services rating' },
-
-  // Immunization permissions
-  { name: 'immunization:read', description: 'View immunizations' },
-  { name: 'immunization:create', description: 'Create immunizations' },
-  { name: 'immunization:update', description: 'Update immunizations' },
-  { name: 'immunization:delete', description: 'Delete immunizations' },
-  { name: 'immunization:report', description: 'View immunizations report' },
-
-  // school permissions
-  { name: 'school:read', description: 'View schools' },
-  { name: 'school:create', description: 'Create schools' },
-  { name: 'school:update', description: 'Update schools' },
-  { name: 'school:delete', description: 'Delete schools' },
+  //Rapid Enquiry Permissions
+  { name: 'rapid_enquiry:create', description: 'Create rapid enquiry' },
+  { name: 'rapid_enquiry:read', description: 'View rapid enquiry' },
+  { name: 'rapid_enquiry:update', description: 'Update rapid enquiry' },
+  { name: 'rapid_enquiry:delete', description: 'Delete rapid enquiry' }
 ];
 
 // Base role templates with common permissions
@@ -108,30 +97,41 @@ const roleTemplates = {
   // Stakeholders
   unicef: {
     description: 'UNICEF - Stakeholder role',
+    category: 'Stakeholders',
     permissions: [
       'survey:read', 'survey:respond',
       'feedback:read',
+      'feedback:personal:read',
+
       'document:read',
       'community_session:read', 'community_session:download',
-      'reporting:dashboard', 'reporting:export', 'reporting:analytics', 'dashboard:stakeholder',
+      'report:create', 'report:read', 'report:update', 'report:delete', 'dashboard:stakeholder',
       'notification:read',
       'notification:delete',
       'announcement:read',
-      'service:rating',
+      'project:read',
+      'comment:read',
+      'comment:create',
+      'comment:update'
     ]
   },
   rbc: {
     description: 'RBC - Stakeholder role',
+    category: 'Stakeholders',
     permissions: [
       'survey:read', 'survey:respond',
       'feedback:read',
+      'feedback:personal:read',
       'document:read',
       'community_session:read', 'community_session:download',
-      'reporting:dashboard', 'reporting:export', 'reporting:analytics', 'dashboard:stakeholder',
+      'report:create', 'report:read', 'report:update', 'report:delete', 'dashboard:stakeholder',
       'notification:read',
       'notification:delete',
       'announcement:read',
-      'service:rating',
+      'project:read',
+      'comment:read',
+      'comment:create',
+      'comment:update'
     ]
   },
   
@@ -139,253 +139,706 @@ const roleTemplates = {
   // Community Members
   volunteers: {
     description: 'Volunteers - Community role',
+    category: 'Community Members',
     permissions: [
+      //Surveys
       'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read',
-      'community_session:read',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:community',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+      //Projects
+      'project:read'
     ]
   },
   youth_leaders: {
     description: 'Youth Leaders - Community role',
+    category: 'Community Members',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read',
+      //Surveys
+      'survey:read', 'survey:respond',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:community',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+      //Projects
+      'project:read'
     ]
   },
   local_government_leaders: {
     description: 'Local Government Leaders - Community role',
+    category: 'Community Members',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read', 'community_session:create',
+      //Surveys
+      'survey:read', 'survey:respond',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:community',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   school_representatives: {
     description: 'School Representatives - Community role',
+    category: 'Community Members',
     permissions: [
+      //Surveys
       'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read',
-      'dashboard:education',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
+      'dashboard:community',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
-      'school:read',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   beneficiaries: {
     description: 'Beneficiaries - Community role',
+    category: 'Community Members',
     permissions: [
+      //Surveys
       'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read',
-      'document:read',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
+      'dashboard:community',
+
+      //Notifications
+      'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   religious_community_representatives: {
     description: 'Religious Community Representatives - Community role',
+    category: 'Community Members',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'dashboard:religious',
+      //Surveys
+      'survey:read', 'survey:respond',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
+      'dashboard:community',
+
+      //Notifications
       'notification:read',
       'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   general_population: {
     description: 'General Population - Community role',
+    category: 'Community Members',
     permissions: [
+      //Surveys
       'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read',
-      'document:read',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:community',
+
+      //Notifications
+      'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
-    ]
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
+      ]
   },
   
   // Health service providers
   nurses: {
     description: 'Nurses - Health Services role',
+    category: 'Health service providers',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'reporting:dashboard', 'reporting:export', 'dashboard:health',
+      //Surveys
+      'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
+      'dashboard:health',
+
+      //Notifications
       'notification:read',
       'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
-    ]
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
+      ]
   },
   chw: {
     description: 'Community Health Workers - Health Services role',
+    category: 'Health service providers',
     permissions: [
-      'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read',
+      //Surveys
+      'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:health',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   epi_managers: {
     description: 'EPI Managers - Health Services role',
+    category: 'Health service providers',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update', 'survey:delete',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'reporting:dashboard', 'reporting:export', 'reporting:analytics', 'dashboard:health',
+      //Surveys
+      'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
+      'dashboard:health',
+
+      //Notifications
       'notification:read',
       'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   doctors: {
     description: 'Doctors - Health Services role',
+    category: 'Health service providers',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create',
+      //Surveys
+      'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:health',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   health_facility_managers: {
     description: 'Health Facility Managers - Health Services role',
+    category: 'Health service providers',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read', 'feedback:update',
-      'document:read', 'document:create',
-      'community_session:read', 'community_session:create', 'community_session:download',
-      'reporting:dashboard', 'reporting:export', 'reporting:analytics', 'dashboard:health',
+      //Surveys
+      'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
+      'dashboard:health',
+
+      //Notifications
       'notification:read',
       'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   anc: {
     description: 'ANC - Health Services role',
+    category: 'Health service providers',
     permissions: [
-      'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read',
+      //Surveys
+      'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:health',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   cho: {
     description: 'CHO - Health Services role',
+    category: 'Health service providers',
     permissions: [
-      'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read',
+      //Surveys
+      'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:health',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   frontline_health_workers: {
     description: 'Frontline Health Workers - Health Services role',
+    category: 'Health service providers',
     permissions: [
-      'survey:read', 'survey:respond',
-      'feedback:create', 'feedback:read',
-      'document:read',
-      'community_session:read',
+      //Surveys
+      'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
+
+      //Feedback
+      'feedback:create', 'feedback:read', 'feedback:update','my_feedback:delete',
+      'feedback:personal:read',
+
+      //Documents
+      'document:read','document:download','document:update','document:delete',
+
+      //Reports
+      'report:create', 'report:read', 'report:update',
+
+      //Community Sessions
+      'community_session:read','community_session:download',
+
+      //Dashboard
       'dashboard:health',
+
+      //Notifications
       'notification:read',
+      'notification:delete',
+
+      //Announcements
       'announcement:read',
-      'service:rating',
+      'announcement:delete',
+
+      //Comments
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   
   // RICH Members
   religious_leaders: {
     description: 'Religious Leaders - RICH Members role',
+    category: 'RICH Members',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read',
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update','survey:forms',
+      'feedback:create', 'feedback:read','feedback:all:read',
       'document:read',
       'community_session:read', 'community_session:create', 'community_session:download',
       'dashboard:religious',
       'notification:read',
       'announcement:read',
       'service:rating',
+      'project:read',
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'rapid_enquiry:create',
+      'rapid_enquiry:read',
+      'rapid_enquiry:update',
+      'rapid_enquiry:delete',
+
+      //Projects
+      'project:read'
     ]
   },
   rich_members_representatives: {
     description: 'RICH Members Representatives - RICH Members role',
+    category: 'RICH Members',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update',
-      'feedback:create', 'feedback:read',
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update','survey:forms',
+      'feedback:create', 'feedback:read','feedback:all:read',
       'document:read',
       'community_session:read', 'community_session:create',
       'dashboard:religious',
       'notification:read',
       'announcement:read',
       'service:rating',
+      'project:read',
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'rapid_enquiry:create',
+      'rapid_enquiry:read',
+      'rapid_enquiry:update',
+      'rapid_enquiry:delete',
+
+       //Projects
+      'project:read'
     ]
   },
   
   // System roles
   super_admin: {
     description: 'Has all permissions',
+    category: 'System',
     permissions: permissions.map(p => p.name)
   },
   admin: {
     description: 'System administrator with most permissions',
+    category: 'System',
     permissions: [
       'user:create', 'user:read', 'user:update', 'user:delete','user:view','users:view',
       'role:create', 'role:read', 'role:update', 'role:delete',
-      'feedback:create', 'feedback:read', 'feedback:update', 'feedback:delete',
+      'feedback:create', 'feedback:read', 'feedback:update', 'feedback:delete','feedback:all:read',
       'project:create', 'project:read', 'project:update', 'project:delete',
       'document:create', 'document:read', 'document:update', 'document:delete',
       'stakeholder:create', 'stakeholder:read', 'stakeholder:update', 'stakeholder:delete',
       'employee:create', 'employee:read', 'employee:update', 'employee:delete',
       'community_session:create', 'community_session:read', 'community_session:update', 'community_session:download', 'community_session:delete',
-      'reporting:dashboard', 'reporting:export', 'reporting:analytics',
-      'dashboard:analytics',
-      'survey:create', 'survey:read', 'survey:respond', 'survey:update', 'survey:delete',
+      'report:create', 'report:read', 'report:update', 'report:delete', 'dashboard:analytics',
+      'survey:create', 'survey:read', 'survey:respond', 'survey:update', 'survey:delete', 'survey:forms',
       'notification:read',
       'notification:delete',
       'announcement:read',
       'service:rating',
+      'comment:read',
+      'comment:create',
+      'comment:update',
+      'comment:delete',
+      'rapid_enquiry:create',
+      'rapid_enquiry:read',
+      'rapid_enquiry:update',
+      'rapid_enquiry:delete',
+
+      //Projects
+      'project:read'
     ]
   }
 };
@@ -489,7 +942,8 @@ const setupSystem = async () => {
         // Create new role (tables are empty due to force: true)
         const role = await db.Role.create({
           name: String(roleData.name).trim(),
-          description: roleData.description
+          description: roleData.description,
+          category: (roleData as any).category ?? null,
         });
         console.log(`✅ Created role: ${role.name}`);
 
@@ -578,7 +1032,8 @@ const setupSystemPreserveData = async () => {
           where: { name: roleData.name },
           defaults: {
             name: roleData.name.trim(),
-            description: roleData.description
+            description: roleData.description,
+            category: (roleData as any).category ?? null,
           }
         });
 

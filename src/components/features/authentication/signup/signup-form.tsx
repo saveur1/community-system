@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -15,8 +15,9 @@ import {
   FiChevronRight,
   FiChevronLeft
 } from "react-icons/fi";
-import { CustomDropdown } from "@/components/ui/dropdown";
 import { SelectDropdown } from "@/components/ui/select";
+import locations from '@/components/common/locations.json';
+import { SelectSearch } from "@/components/ui/select-search";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -80,26 +81,12 @@ function SignupForm({ className = "" }: SignupFormProps) {
   type Sector = { name: string; cells: Cell[] };
   type District = { name: string; sectors: Sector[] };
   type Province = { name: string; districts: District[] };
-  const [provinces, setProvinces] = React.useState<Province[]>([]);
-  const [districtQuery, setDistrictQuery] = React.useState("");
+  const [provinces, setProvinces] = React.useState<Province[]>(locations.provinces);
   const [selectedDistrict, setSelectedDistrict] = React.useState<District | null>(null);
   const [selectedSector, setSelectedSector] = React.useState<Sector | null>(null);
   const [selectedCell, setSelectedCell] = React.useState<Cell | null>(null);
   const [selectedVillage, setSelectedVillage] = React.useState<Village | null>(null);
-  // Control district dropdown open state to avoid closing when focusing search
-  const [isDistrictOpen, setIsDistrictOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    // Fetch locations.json from public
-    fetch("/locations.json")
-      .then(res => res.json())
-      .then((data) => {
-        if (data?.provinces) setProvinces(data.provinces as Province[]);
-      })
-      .catch(() => {
-        // Silent fail but keep UX alive
-      });
-  }, []);
+  const [expandedCategory, setExpandedCategory] = React.useState<string | null>(null);
 
   const userTypes = [
     {
@@ -146,11 +133,13 @@ function SignupForm({ className = "" }: SignupFormProps) {
     'cho',
     'frontline_health_workers',
     'epi_managers',
-    'epi_supervisor'
+    'health_facility_managers'
   ].includes(form.userType);
-  
-  const needsLocationStep = form.userType && !['local_influencer', 'unicef', 'rbc'].includes(form.userType);
-  const totalSteps = needsLocationStep ? (needsAdditionalSteps ? 5 : 4) : (needsAdditionalSteps ? 4 : 3);
+
+  const needsLocationStep = form.userType && !['general_population', 'unicef', 'rbc'].includes(form.userType);
+
+  // Fixed to maximum 2 steps
+  const totalSteps = 2;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -160,12 +149,9 @@ function SignupForm({ className = "" }: SignupFormProps) {
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    
-    // Show verification warning for certain user types
+
+    // Reset location fields when user type changes
     if (name === 'userType') {
-      showVerificationWarning(value);
-      
-      // Reset location fields when user type changes
       setForm(prev => ({
         ...prev,
         [name]: value,
@@ -174,34 +160,31 @@ function SignupForm({ className = "" }: SignupFormProps) {
         cell: undefined,
         village: undefined
       }));
-      
+
       // Reset location state
       setSelectedDistrict(null);
       setSelectedSector(null);
       setSelectedCell(null);
       setSelectedVillage(null);
     }
-    
+
     // Reset userType when category changes
     if (name === 'userTypeCategory') {
       setForm(prev => ({ ...prev, userType: "" }));
+      setExpandedCategory(value);
     }
   };
 
-  const showVerificationWarning = (userType: string) => {
-    const communityTypes = ['local_citizen'];
-    if (!communityTypes.includes(userType)) {
-      toast.dismiss();
-      toast.warning(t('signup.verify_before_login'), {
-        autoClose: false,
-        theme: "dark",
-        closeOnClick: true,
-        draggable: true,
-        closeButton: true,
-        position: "bottom-center"
-      });
+  const handleCategoryToggle = (categoryTitle: string) => {
+    if (expandedCategory === categoryTitle) {
+      setExpandedCategory(null);
     } else {
-      toast.dismiss();
+      setExpandedCategory(categoryTitle);
+      // Only update category if not already set, to preserve user selection
+      setForm(prev => ({
+        ...prev,
+        userTypeCategory: categoryTitle
+      }));
     }
   };
 
@@ -209,99 +192,87 @@ function SignupForm({ className = "" }: SignupFormProps) {
     switch (step) {
       case 1:
         if (!form.fullName.trim()) {
-          toast.error(t('signup.validation.full_name_required'));
+          toast.error(t("signup.full_name_required"));
           return false;
         }
-        if (!form.email.trim()) {
-          toast.error(t('signup.validation.email_required'));
-          return false;
-        }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-          toast.error(t('signup.validation.email_invalid'));
+        if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+          toast.error(t("signup.email_invalid"));
           return false;
         }
         if (!form.phone.trim()) {
-          toast.error(t('signup.validation.phone_required'));
+          toast.error(t("signup.phone_required"));
           return false;
         }
         if (!form.password.trim()) {
-          toast.error(t('signup.validation.password_required'));
+          toast.error(t("signup.password_required"));
           return false;
         }
         if (form.password.length < 6) {
-          toast.error(t('signup.validation.password_min_length'));
+          toast.error(t("signup.password_min_length"));
           return false;
         }
-        return true;
-      
-      case 2:
         if (!form.userTypeCategory.trim()) {
-          toast.error(t('signup.validation.user_type_category_required'));
+          toast.error(t("signup.user_type_category_required"));
           return false;
         }
-        return true;
-      
-      case 3:
         if (!form.userType.trim()) {
-          toast.error(t('signup.validation.user_type_required'));
+          toast.error(t("signup.user_type_required"));
           return false;
         }
-        if (form.userType === 'other' && !form.otherType.trim()) {
-          toast.error(t('signup.validation.other_type_required'));
+        if (form.userType === "other" && !form.otherType.trim()) {
+          toast.error(t("signup.other_type_required"));
           return false;
         }
         return true;
-      
-      case 4:
-        // Location validation for users who need it
+
+      case 2:
+        // Validate location if needed
         if (needsLocationStep) {
           if (!form.district) {
-            toast.error(t('signup.validation.district_required'));
+            toast.error(t("signup.district_required"));
             return false;
           }
           if (!form.sector) {
-            toast.error(t('signup.validation.sector_required'));
+            toast.error(t("signup.sector_required"));
             return false;
           }
           if (!form.cell) {
-            toast.error(t('signup.validation.cell_required'));
+            toast.error(t("signup.cell_required"));
             return false;
           }
           if (!form.village) {
-            toast.error(t('signup.validation.village_required'));
+            toast.error(t("signup.village_required"));
+            return false;
+          }
+        }
+        // Validate additional details if needed
+        if (needsAdditionalSteps) {
+          if (form.userType === "school_representatives" && !form.schoolName?.trim()) {
+            toast.error(t("signup.school_name_required"));
+            return false;
+          }
+          if (form.userType === "religious_community_representatives" && !form.churchName?.trim()) {
+            toast.error(t("signup.church_name_required"));
+            return false;
+          }
+          if (form.userType === "doctors" && !form.hospitalName?.trim()) {
+            toast.error(t("signup.hospital_name_required"));
+            return false;
+          }
+          if (
+            ["nurses", "chw", "anc", "cho", "frontline_health_workers"].includes(form.userType) &&
+            !form.healthCenterName?.trim()
+          ) {
+            toast.error(t("signup.health_center_name_required"));
+            return false;
+          }
+          if (form.userType === "epi_managers" && !form.nearByHealthCenter?.trim()) {
+            toast.error(t("signup.nearby_health_center_required"));
             return false;
           }
         }
         return true;
-      
-      case 5:
-        // Additional details validation
-        if (form.userType === 'school_representatives' && !form.schoolName?.trim()) {
-          toast.error(t('signup.validation.school_name_required'));
-          return false;
-        }
-        if (form.userType === 'religious_community_representatives' && !form.churchName?.trim()) {
-          toast.error(t('signup.validation.church_name_required'));
-          return false;
-        }
-        if (form.userType === 'doctors' && !form.hospitalName?.trim()) {
-          toast.error(t('signup.validation.hospital_name_required'));
-          return false;
-        }
-        if (['nurses', 'chw', 'anc', 'cho', 'frontline_health_workers'].includes(form.userType) && !form.healthCenterName?.trim()) {
-          toast.error(t('signup.validation.health_center_name_required'));
-          return false;
-        }
-        if (form.userType === 'epi_managers' && !form.nearByHealthCenter?.trim()) {
-          toast.error(t('signup.validation.nearby_health_center_required'));
-          return false;
-        }
-        if (form.userType === 'epi_supervisor' && !form.epiDistrict?.trim()) {
-          toast.error(t('signup.validation.epi_district_required'));
-          return false;
-        }
-        return true;
-      
+
       default:
         return true;
     }
@@ -327,15 +298,15 @@ function SignupForm({ className = "" }: SignupFormProps) {
       // Normalize to required backend values
       const userTypeForBackend =
         groupTitle === 'Community' ? 'community'
-        : groupTitle === 'Stakeholders' ? 'stakeholders'
-        : groupTitle; // 'Religious Leaders' | 'Health Services Providers'
+          : groupTitle === 'Stakeholders' ? 'stakeholders'
+            : groupTitle; // 'Religious Leaders' | 'Health Services Providers'
 
       const payload: any = {
         name: form.fullName,
         email: form.email || undefined,
         phone: form.phone,
         password: form.password,
-        roleType: form.userType || 'local_influencer',
+        roleType: form.userType || 'general_population',
         userType: userTypeForBackend || undefined,
         // Additional optional fields (removed nationalId)
         district: form.district,
@@ -345,7 +316,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
         nearByHealthCenter: form.nearByHealthCenter,
         schoolName: form.schoolName,
         schoolAddress: form.schoolAddress,
-        churchName: form.churchName,  
+        churchName: form.churchName,
         churchAddress: form.churchAddress,
         hospitalName: form.hospitalName,
         hospitalAddress: form.hospitalAddress,
@@ -356,14 +327,14 @@ function SignupForm({ className = "" }: SignupFormProps) {
 
       await signup(payload);
     } catch (error: any) {
-      toast.error(error?.message || t('signup.error_creating'),{
+      toast.error(error?.message || t('signup.error_creating'), {
         position: "bottom-center",
         theme: "dark"
       });
     }
   };
 
-  // Combined Step 1: Basic Information (name, phone, email, password)
+  // Step 1: Basic Information + User Type Selection
   const renderStep1 = () => (
     <motion.div
       key="step1"
@@ -372,164 +343,177 @@ function SignupForm({ className = "" }: SignupFormProps) {
       exit="hidden"
       variants={sectionVariants}
       transition={springTransition}
-      className="absolute top-0 left-0 w-full"
+      className="absolute top-0 left-0 w-full space-y-6"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.full_name_label')} *</label>
-          <div className="relative">
-            <AiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              name="fullName"
-              value={form.fullName}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
-              placeholder={t('signup.full_name_placeholder')}
-            />
+      {/* Basic Information */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">{t('signup.basic_information')}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.full_name_label')} *</label>
+            <div className="relative">
+              <AiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                name="fullName"
+                value={form.fullName}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
+                placeholder={t('signup.full_name_placeholder')}
+              />
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.phone_label')} *</label>
-          <div className="relative">
-            <AiOutlinePhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="tel"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
-              placeholder={t('signup.phone_placeholder')}
-            />
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.phone_label')} *</label>
+            <div className="relative">
+              <AiOutlinePhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="tel"
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
+                placeholder={t('signup.phone_placeholder')}
+              />
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.email_label_optional')}</label>
-          <div className="relative">
-            <AiOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
-              placeholder={t('signup.email_placeholder')}
-            />
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.email_label_optional')}</label>
+            <div className="relative">
+              <AiOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
+                placeholder={t('signup.email_placeholder')}
+              />
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.password_label')} *</label>
-          <div className="relative">
-            <AiOutlineLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
-              placeholder={t('signup.password_placeholder')}
-            />
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.password_label')} *</label>
+            <div className="relative">
+              <AiOutlineLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
+                placeholder={t('signup.password_placeholder')}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </motion.div>
-  );
 
-  const renderStep2 = () => (
-    <motion.div
-      key="step2"
-      initial="hidden"
-      animate="visible"
-      exit="hidden"
-      variants={sectionVariants}
-      transition={springTransition}
-    >
-      <label className="block mb-3 text-lg font-medium text-gray-700">{t('signup.select_category')} *</label>
-      <div className="grid grid-cols-1 gap-4 w-full">
-        {userTypes.map((group, index) => (
-          <div key={index} className="mb-3">
-            <label className="flex items-center space-x-3 cursor-pointer p-4 rounded-lg border-2 border-gray-300 hover:bg-gray-50 transition-colors duration-200 hover:border-primary/30">
-              <input
-                type="radio"
-                name="userTypeCategory"
-                value={group.title}
-                checked={form.userTypeCategory === group.title}
-                onChange={handleRadioChange}
-                className="h-5 w-5 text-primary focus:ring-primary"
-              />
-              <div>
-                <span className="text-gray-900 font-medium text-base">{group.title}</span>
-                <p className="text-gray-600 text-sm mt-1">
-                  {group.options.length} options available
-                </p>
+      {/* User Type Selection */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">{t('signup.who_are_you')} *</h2>
+
+        {/* Category Selection with Expandable Options */}
+        <div className="mb-4">
+          <label className="block mb-3 text-sm font-medium text-gray-700">{t('signup.select_category')} *</label>
+          <div className="space-y-3">
+            {userTypes.map((group, index) => (
+              <div key={index} className="border border-gray-300 rounded-lg overflow-hidden">
+                {/* Category Header */}
+                <div
+                  onClick={() => handleCategoryToggle(group.title)}
+                  className={`flex items-center justify-between cursor-pointer p-4 hover:bg-gray-50 transition-colors duration-200 ${expandedCategory === group.title ? 'bg-primary/5 border-primary/30' : 'hover:border-primary/30'
+                    }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-4 h-4 rounded-full border-2 ${form.userTypeCategory === group.title
+                      ? 'border-primary bg-primary'
+                      : 'border-gray-300'
+                      }`}>
+                      {form.userTypeCategory === group.title && (
+                        <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-gray-900 font-medium text-base">{group.title}</span>
+                      <p className="text-gray-600 text-sm mt-1">
+                        {group.options.length} options available
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`transform transition-transform duration-200 ${expandedCategory === group.title ? 'rotate-180' : ''
+                    }`}>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Expandable Options */}
+                {expandedCategory === group.title && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="border-t border-gray-200 bg-gray-50/50"
+                  >
+                    <div className="p-3 space-y-2">
+                      {group.options.map((option) => (
+                        <div key={option.value}>
+                          <label className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-white border border-transparent hover:border-primary/20 transition-colors duration-200">
+                            <input
+                              type="radio"
+                              name="userType"
+                              value={option.value}
+                              checked={form.userType === option.value}
+                              onChange={handleRadioChange}
+                              className="h-4 w-4 text-primary focus:ring-primary"
+                            />
+                            <span className="text-gray-700 text-sm">{option.label}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
               </div>
-            </label>
+            ))}
           </div>
-        ))}
+
+          {form.userType === "other" && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-3"
+            >
+              <input
+                type="text"
+                name="otherType"
+                value={form.otherType}
+                onChange={handleChange}
+                className="w-full border outline-none border-primary/30 rounded-lg p-3 outline-primary/50"
+                placeholder={t('signup.specify_role_placeholder')}
+              />
+            </motion.div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
 
   const districts: District[] = React.useMemo(() => provinces.flatMap(p => p.districts || []), [provinces]);
-  const filteredDistricts = React.useMemo(() => (districtQuery
-    ? districts.filter(d => d.name.toLowerCase().includes(districtQuery.toLowerCase()))
-    : districts), [districts, districtQuery]);
 
-  const renderStep3 = () => {
-    const selectedCategory = userTypes.find(group => group.title === form.userTypeCategory);
-    
+  // Step 2: Location Details (combined with additional details if needed)
+  const renderStep2 = () => {
+    // Skip location step if not needed, go directly to additional details
+    if (!needsLocationStep && needsAdditionalSteps) {
+      return renderAdditionalDetails();
+    }
+
+    // Show location step
     return (
       <motion.div
-        key="step3"
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        variants={sectionVariants}
-        transition={springTransition}
-      >
-        <label className="block mb-3 text-lg font-medium text-gray-700">{t('signup.who_are_you')} *</label>
-        <p className="text-sm text-gray-600 mb-4">Category: <span className="font-medium">{form.userTypeCategory}</span></p>
-        <div className="grid grid-cols-1 gap-3 w-full">
-          {selectedCategory?.options.map((option) => (
-            <div key={option.value}>
-              <label className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 border border-gray-300 hover:border-primary/30 transition-colors duration-200">
-                <input
-                  type="radio"
-                  name="userType"
-                  value={option.value}
-                  checked={form.userType === option.value}
-                  onChange={handleRadioChange}
-                  className="h-4 w-4 text-primary focus:ring-primary"
-                />
-                <span className="text-gray-700 text-sm">{option.label}</span>
-              </label>
-            </div>
-          )) || []}
-        </div>
-        {form.userType === "other" && (
-          <div className="mt-4">
-            <input
-              type="text"
-              name="otherType"
-              value={form.otherType}
-              onChange={handleChange}
-              className="w-full border outline-none border-primary/30 rounded-lg p-3 outline-primary/50"
-              placeholder={t('signup.specify_role_placeholder')}
-            />
-          </div>
-        )}
-      </motion.div>
-    );
-  };
-
-  // Combined Step 4: Location Details
-  const renderStep4 = () => {
-    // Only show location step if needed
-    if (!needsLocationStep) return null;
-    
-    return (
-      <motion.div
-        key="location-step"
+        key="step2"
         initial="hidden"
         animate="visible"
         exit="hidden"
@@ -538,71 +522,36 @@ function SignupForm({ className = "" }: SignupFormProps) {
         className="space-y-4"
       >
         <h2 className="text-xl font-semibold mb-4">{t('signup.location_details')}</h2>
-        
-        {/* Location Selection - Single Column Layout */}
+
         <div className="space-y-4">
-          {/* District with search */}
+          {/* District with SelectSearch */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">{t('signup.district_label')} *</label>
-            <CustomDropdown
-              trigger={
-                <div className="w-full cursor-default rounded-md bg-white py-2.5 pr-2 pl-3 text-left border border-gray-300 outline-1 -outline-offset-1 outline-gray-300 sm:text-sm">
-                  <span className="flex items-center">
-                    <span className={`block truncate ${selectedDistrict ? 'text-gray-900' : 'text-gray-500'}`}>
-                      {selectedDistrict ? selectedDistrict.name : t('signup.search_or_select_district')}
-                    </span>
-                  </span>
-                </div>
-              }
-              dropdownClassName="w-full max-h-72 overflow-auto rounded-md p-2 text-base shadow-lg border border-gray-300 overflow-hidden bg-gray-50 sm:text-sm"
-              position="bottom-right"
-              isOpen={isDistrictOpen}
-              onToggle={setIsDistrictOpen}
-              closeOnClick={false}
-            >
-              <div className="p-2">
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 outline-primary rounded-md p-2 mb-2 text-sm"
-                  placeholder={t('signup.search_district_placeholder')}
-                  value={districtQuery}
-                  onChange={(e) => setDistrictQuery(e.target.value)}
-                />
-                <div className="max-h-56 overflow-auto">
-                  {filteredDistricts.map((d) => (
-                    <div
-                      key={d.name}
-                      onClick={() => {
-                        setSelectedDistrict(d);
-                        setDistrictQuery("");
-                        setSelectedSector(null);
-                        setSelectedCell(null);
-                        setSelectedVillage(null);
-                        setForm(prev => ({
-                          ...prev,
-                          district: d.name,
-                          sector: undefined,
-                          cell: undefined,
-                          village: undefined
-                        }));
-                        setIsDistrictOpen(false);
-                      }}
-                      className={`px-3 py-2 cursor-pointer hover:bg-primary hover:text-white ${
-                        selectedDistrict?.name === d.name ? 'bg-indigo-50 text-[#004f64] font-semibold' : ''
-                      }`}
-                    >
-                      {d.name}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CustomDropdown>
+            <SelectSearch
+              options={districts.map(d => ({ label: d.name, value: d.name }))}
+              value={selectedDistrict?.name}
+              dropdownClassName="w-full border border-gray-300 bg-gray-50"
+              onChange={(val) => {
+                const d = districts.find(x => x.name === val) || null;
+                setSelectedDistrict(d);
+                setSelectedSector(null);
+                setSelectedCell(null);
+                setSelectedVillage(null);
+                setForm(prev => ({
+                  ...prev,
+                  district: val,
+                  sector: undefined,
+                  cell: undefined,
+                  village: undefined
+                }));
+              }}
+              placeholder={t('signup.search_or_select_district')}
+            />
           </div>
 
-          {/* Sector */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">{t('signup.sector_label')} *</label>
-            <SelectDropdown
+            <SelectSearch
               options={(selectedDistrict?.sectors || []).map(s => ({ label: s.name, value: s.name }))}
               value={selectedSector?.name}
               dropdownClassName="w-full border border-gray-300 bg-gray-50"
@@ -623,10 +572,9 @@ function SignupForm({ className = "" }: SignupFormProps) {
             />
           </div>
 
-          {/* Cell */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">{t('signup.cell_label')} *</label>
-            <SelectDropdown
+            <SelectSearch
               options={(selectedSector?.cells || []).map(c => ({ label: c.name, value: c.name }))}
               value={selectedCell?.name}
               dropdownClassName="w-full border border-gray-300 bg-gray-50"
@@ -645,10 +593,9 @@ function SignupForm({ className = "" }: SignupFormProps) {
             />
           </div>
 
-          {/* Village */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">{t('signup.village_label')} *</label>
-            <SelectDropdown
+            <SelectSearch
               options={(selectedCell?.villages || []).map(v => ({ label: v.name, value: v.name }))}
               value={selectedVillage?.name}
               dropdownClassName="w-full border border-gray-300 bg-gray-50"
@@ -665,211 +612,173 @@ function SignupForm({ className = "" }: SignupFormProps) {
             />
           </div>
         </div>
+
+        {/* If additional details are needed and this is step 2, also show them */}
+        {needsAdditionalSteps && (
+          <div className="mt-8">
+            {renderAdditionalDetailsContent()}
+          </div>
+        )}
       </motion.div>
     );
   };
 
-  // Combined Step 5: All Additional Details
-  const renderStep5 = () => {
-    const hasAdditionalFields = [
-      'school_representatives',
-      'religious_community_representatives',
-      'doctors',
-      'nurses',
-      'chw',
-      'anc',
-      'cho',
-      'frontline_health_workers',
-      'epi_managers',
-      'epi_supervisor'
-    ].includes(form.userType);
+  const renderAdditionalDetailsContent = () => (
+    <div className="space-y-4">
+      {/* Health Worker */}
+      {form.userType === 'health_facility_managers' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-900 mb-1">
+            {t('signup.nearby_health_center_label')} *
+          </label>
+          <input
+            type="text"
+            name="nearByHealthCenter"
+            value={form.nearByHealthCenter || ''}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+            placeholder={t('signup.nearby_health_center_placeholder')}
+            required
+          />
+        </div>
+      )}
 
-    // Don't show this step if there are no additional fields for this user type
-    if (!hasAdditionalFields) {
-      return null;
+      {/* School Representative */}
+      {form.userType === 'school_representatives' && (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
+              {t('signup.school_name_label')} *
+            </label>
+            <input
+              type="text"
+              name="schoolName"
+              value={form.schoolName || ''}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              placeholder={t('signup.school_name_placeholder')}
+              required
+            />
+          </div>
+        </>
+      )}
+
+      {/* Religious Community Representative */}
+      {form.userType === 'religious_community_representatives' && (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
+              {t('signup.church_mosque_name_label')} *
+            </label>
+            <input
+              type="text"
+              name="churchName"
+              value={form.churchName || ''}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              placeholder={t('signup.church_mosque_name_placeholder')}
+              required
+            />
+          </div>
+        </>
+      )}
+
+      {/* Doctors */}
+      {form.userType === 'doctors' && (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
+              {t('signup.hospital_name_label')} *
+            </label>
+            <input
+              type="text"
+              name="hospitalName"
+              value={form.hospitalName || ''}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              placeholder={t('signup.hospital_name_placeholder')}
+              required
+            />
+          </div>
+        </>
+      )}
+
+      {/* Nurses, CHW, ANC, CHO, Frontline Health Workers */}
+      {['nurses', 'chw', 'anc', 'cho', 'frontline_health_workers'].includes(form.userType) && (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
+              {t('signup.health_center_name_label')} *
+            </label>
+            <input
+              type="text"
+              name="healthCenterName"
+              value={form.healthCenterName || ''}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              placeholder={t('signup.health_center_name_placeholder')}
+              required
+            />
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const renderAdditionalDetails = () => (
+    <motion.div
+      key="additional-details"
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
+      variants={sectionVariants}
+      transition={springTransition}
+      className="space-y-4"
+    >
+      <h2 className="text-xl font-semibold mb-4">{t('signup.additional_details')}</h2>
+      {renderAdditionalDetailsContent()}
+    </motion.div>
+  );
+
+  const shouldShowStep = (step: number) => {
+    if (step === 1) return true; // Always show step 1
+    if (step === 2) {
+      // Step 2 shows location and/or additional details
+      return needsLocationStep || needsAdditionalSteps;
+    }
+    return false;
+  };
+
+  // Calculate actual total steps based on user type
+  const actualTotalSteps = useMemo(() => {
+    if (!needsLocationStep && !needsAdditionalSteps) return 1;
+    return 2; // Always max 2 steps
+  }, [needsLocationStep, needsAdditionalSteps]);
+
+  const getDynamicHeight = () => {
+    if (currentStep === 1) {
+      let baseHeight = 410;
+      userTypes.forEach(group => {
+        if (group.title === expandedCategory) {
+          baseHeight += group.options.length * 44 + 60;
+        } else {
+          baseHeight += 60;
+        }
+      });
+      if (form.userType === "other") {
+        baseHeight += 60;
+      }
+      return baseHeight;
     }
 
-    return (
-      <motion.div
-        key="additional-details"
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        variants={sectionVariants}
-        transition={springTransition}
-        className="space-y-4"
-      >
-        <h2 className="text-xl font-semibold mb-4">{t('signup.additional_details')}</h2>
-        
-        <div className="space-y-4">
-          {/* Health Worker */}
-          {form.userType === 'epi_managers' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1">
-                {t('signup.nearby_health_center_label')} *
-              </label>
-              <input
-                type="text"
-                name="nearByHealthCenter"
-                value={form.nearByHealthCenter || ''}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                placeholder={t('signup.nearby_health_center_placeholder')}
-                required
-              />
-            </div>
-          )}
+    if (currentStep === 2) {
+      if (needsLocationStep) {
+        return needsAdditionalSteps ? 470 : 400;
+      }
+      return 200;
+    }
 
-          {/* School Representative */}
-          {form.userType === 'school_representatives' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  {t('signup.school_name_label')} *
-                </label>
-                <input
-                  type="text"
-                  name="schoolName"
-                  value={form.schoolName || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                  placeholder={t('signup.school_name_placeholder')}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  {t('signup.school_address_label')}
-                </label>
-                <input
-                  type="text"
-                  name="schoolAddress"
-                  value={form.schoolAddress || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                  placeholder={t('signup.school_address_placeholder')}
-                />
-              </div>
-            </>
-          )}
-
-          {/* Religious Community Representative */}
-          {form.userType === 'religious_community_representatives' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  {t('signup.church_mosque_name_label')} *
-                </label>
-                <input
-                  type="text"
-                  name="churchName"
-                  value={form.churchName || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                  placeholder={t('signup.church_mosque_name_placeholder')}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  {t('signup.church_mosque_address_label')}
-                </label>
-                <input
-                  type="text"
-                  name="churchAddress"
-                  value={form.churchAddress || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                  placeholder={t('signup.church_mosque_address_placeholder')}
-                />
-              </div>
-            </>
-          )}
-
-          {/* Doctors */}
-          {form.userType === 'doctors' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  {t('signup.hospital_name_label')} *
-                </label>
-                <input
-                  type="text"
-                  name="hospitalName"
-                  value={form.hospitalName || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                  placeholder={t('signup.hospital_name_placeholder')}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  {t('signup.hospital_address_label')}
-                </label>
-                <input
-                  type="text"
-                  name="hospitalAddress"
-                  value={form.hospitalAddress || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                  placeholder={t('signup.hospital_address_placeholder')}
-                />
-              </div>
-            </>
-          )}
-
-          {/* Nurses, CHW, ANC, CHO, Frontline Health Workers */}
-          {['nurses', 'chw', 'anc', 'cho', 'frontline_health_workers'].includes(form.userType) && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  {t('signup.health_center_name_label')} *
-                </label>
-                <input
-                  type="text"
-                  name="healthCenterName"
-                  value={form.healthCenterName || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                  placeholder={t('signup.health_center_name_placeholder')}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  {t('signup.health_center_address_label')}
-                </label>
-                <input
-                  type="text"
-                  name="healthCenterAddress"
-                  value={form.healthCenterAddress || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
-                  placeholder={t('signup.health_center_address_placeholder')}
-                />
-              </div>
-            </>
-          )}
-
-          {/* EPI Supervisor */}
-          {form.userType === 'epi_supervisor' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1">
-                {t('signup.epi_district_label')} *
-              </label>
-              <SelectDropdown
-                options={districts.map(d => ({ label: d.name, value: d.name }))}
-                value={form.epiDistrict}
-                onChange={(val) => setForm(prev => ({ ...prev, epiDistrict: val }))}
-                placeholder={t('signup.select_district')}
-                dropdownClassName="w-full border border-gray-300 bg-white rounded-lg shadow-lg"
-              />
-            </div>
-          )}
-        </div>
-      </motion.div>
-    );
+    return 400;
   };
 
   return (
@@ -880,32 +789,33 @@ function SignupForm({ className = "" }: SignupFormProps) {
             <FiUserPlus className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-2xl font-bold mb-2">{t('signup.create_title')}</h1>
-          <div className="flex justify-center mb-4">
-            {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
-              <div key={step} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    currentStep >= step ? "bg-primary text-white" : "bg-gray-100 text-gray-400"
-                  }`}
-                >
-                  {step}
+          {actualTotalSteps > 1 && (
+            <div className="flex justify-center mb-4">
+              {Array.from({ length: actualTotalSteps }, (_, i) => i + 1).map((step) => (
+                <div key={step} className="flex items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= step ? "bg-primary text-white" : "bg-gray-100 text-gray-400"
+                      }`}
+                  >
+                    {step}
+                  </div>
+                  {step < actualTotalSteps && (
+                    <div className={`w-8 h-1 ${currentStep > step ? "bg-primary" : "bg-gray-200"}`} />
+                  )}
                 </div>
-                {step < totalSteps && (
-                  <div className={`w-8 h-1 ${currentStep > step ? "bg-primary" : "bg-gray-200"}`} />
-                )}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className={`relative ${currentStep >= 2 ? "min-h-[440px]" : "min-h-[240px]"}`}>
+          <div
+            className={`relative`}
+            style={{ minHeight: `${getDynamicHeight()}px` }}
+          >
             <AnimatePresence mode="wait">
               {currentStep === 1 && renderStep1()}
-              {currentStep === 2 && renderStep2()}
-              {currentStep === 3 && renderStep3()}
-              {currentStep === 4 && needsLocationStep && renderStep4()}
-              {currentStep === 5 && needsLocationStep && renderStep5()}
+              {currentStep === 2 && shouldShowStep(2) && renderStep2()}
             </AnimatePresence>
           </div>
 
@@ -922,7 +832,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               <span></span>
             )}
 
-            {currentStep < totalSteps ? (
+            {currentStep < actualTotalSteps ? (
               <button
                 type="button"
                 onClick={nextStep}

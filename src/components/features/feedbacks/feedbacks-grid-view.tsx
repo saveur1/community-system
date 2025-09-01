@@ -1,13 +1,14 @@
 import { FeedbackItem } from "@/utility/types";
 import { FeedbackCard } from "./feedback-card";
-
+import { FeedbackEntity } from "@/api/feedback";
 
 interface FeedbackGridProps {
-  feedbacks: FeedbackItem[];
+  feedbacks: FeedbackEntity[];
   getStatusColor: (status: string) => string;
   getInitials: (text: string) => string;
-  getActions: (fb: FeedbackItem) => any[];
-  handleAction: (action: string, fb: FeedbackItem) => void;
+  getActions: (fb: FeedbackEntity) => any[];
+  handleAction: (action: string, fb: FeedbackEntity) => void;
+  isLoading?: boolean;
 }
 
 export const FeedbackGrid = ({
@@ -16,19 +17,48 @@ export const FeedbackGrid = ({
   getInitials,
   getActions,
   handleAction,
+  isLoading,
 }: FeedbackGridProps) => {
   return (
     <div className="grid grid-cols-1 w-full md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {feedbacks.map((fb) => (
-        <FeedbackCard
-          key={fb.id}
-          feedback={fb}
-          getStatusColor={getStatusColor}
-          getInitials={getInitials}
-          getActions={getActions}
-          handleAction={handleAction}
-        />
-      ))}
+      {isLoading
+        ? Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 animate-pulse">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-200"></div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-28 mb-1"></div>
+                    <div className="h-3 bg-gray-200 rounded w-20"></div>
+                  </div>
+                </div>
+                <div className="h-5 bg-gray-200 rounded-full w-20"></div>
+              </div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-200">
+                <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+                <div className="h-8 bg-gray-200 rounded w-24"></div>
+              </div>
+            </div>
+          ))
+        : feedbacks.length === 0
+        ? (
+          <div className="col-span-full text-center py-10 text-gray-500">
+            No feedbacks found.
+          </div>
+          )
+        : (feedbacks.map((fb) => (
+            <FeedbackCard
+              key={fb.id}
+              feedback={fb}
+              getStatusColor={getStatusColor}
+              getInitials={getInitials}
+              getActions={getActions}
+              handleAction={handleAction}
+            />
+          )))
+      }
     </div>
   );
 };

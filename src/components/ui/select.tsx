@@ -81,7 +81,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
               option.value === value ? 'bg-indigo-50 text-[#004f64] font-semibold' : 'text-gray-900'
             }`}
           >
-            <span className="block truncate">{option.label}</span>
+            <span className="block truncate capitalize">{option.label}</span>
             {option.value === value && (
               <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary">
                 <FiCheck className="size-5 group-hover:text-white" />
