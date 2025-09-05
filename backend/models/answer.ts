@@ -23,6 +23,7 @@ class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> implement
   declare questionId: string;
   declare answerText: string | null;
   declare answerOptions: string[] | null;
+  declare userId?: string;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }

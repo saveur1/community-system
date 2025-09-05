@@ -3,18 +3,20 @@ import { createFileRoute, useParams } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { FaClock, FaListOl, FaUsers, FaAsterisk, FaChevronLeft, FaChevronRight, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
-import { useSurvey } from '@/hooks/useSurveys';
+import { useSurvey, useSurveysList } from '@/hooks/useSurveys';
+import type { SurveysListParams } from '@/api/surveys';
+import { timeAgo } from '@/utility/logicFunctions';
 
 function formatStatus(status: 'active' | 'paused' | 'archived' | undefined) {
   switch (status) {
     case 'active':
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-300 text-green-900';
     case 'paused':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-yellow-300 text-yellow-900';
     case 'archived':
-      return 'bg-gray-200 text-gray-700';
+      return 'bg-gray-300 text-gray-900';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-300 text-gray-900';
   }
 }
 
@@ -126,7 +128,7 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
           ID: {question.id}
         </div>
       </div>
-      
+
       <div className="ml-11">
         <div className="border-l-2 border-gray-100 pl-4">
           {renderQuestionInput()}
@@ -143,35 +145,84 @@ const SurveyDetail = () => {
   const questions = useMemo(() => survey?.questionItems ?? [], [survey]);
   const answersCount = survey?.answers?.length ?? 0;
   const [activeTab, setActiveTab] = useState<'questions' | 'responses'>('questions');
-
-  type ResponseRow = { id: number; respondent: string; date: string; score?: number; status: 'Completed' | 'Partial' };
-  const [responses] = useState<ResponseRow[]>([
-    { id: 1001, respondent: 'John Doe', date: '2025-08-10', score: 85, status: 'Completed' },
-    { id: 1002, respondent: 'Jane Smith', date: '2025-08-11', score: 72, status: 'Partial' },
-    { id: 1003, respondent: 'Alex Lee', date: '2025-08-12', score: 90, status: 'Completed' },
-    { id: 1004, respondent: 'Sam Parker', date: '2025-08-13', score: 66, status: 'Partial' },
-    { id: 1005, respondent: 'Chris Fox', date: '2025-08-13', score: 78, status: 'Completed' },
-  ]);
   const [search, setSearch] = useState('');
-  const [sortKey, setSortKey] = useState<keyof ResponseRow>('date');
+  const [sortKey, setSortKey] = useState<'time' | 'respondentName' | 'surveyTitle'>('time');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
 
+  // Fetch surveys the current user has responded to and build response rows
+  // params: page and pageSize are used for our pagination controls below
+  const params = useMemo((): SurveysListParams => {
+    return { page, limit: pageSize, responded: true, owner: 'me' };
+  }, [page, pageSize]);
+
+  const { data: userAnsweredSurveysResp, isLoading: isLoadingUserResponses } = useSurveysList(params);
+
+  // Flatten surveys -> answers into rows used by the table
+  const fetchedResponses = useMemo(() => {
+    const rows: Array<{
+      id: string;
+      respondentName: string;
+      respondentRole?: string;
+      time?: string | null;
+      surveyTitle: string;
+      surveyStatus?: string;
+    }> = [];
+
+    const surveys = userAnsweredSurveysResp?.result ?? [];
+    for (const s of surveys) {
+      const answers = s.answers ?? [];
+      for (const a of answers) {
+        const respondentName = (a as any).user?.name ?? (a as any).userId ?? 'Unknown';
+        const respondentRole = (a as any).user?.roles?.[0]?.name ?? '';
+        const time = (a as any).createdAt ?? (a as any).updatedAt ?? s.updatedAt ?? null;
+        rows.push({
+          id: String((a as any).id ?? `${s.id}:${rows.length}`),
+          respondentName,
+          respondentRole,
+          time,
+          surveyTitle: s.title ?? 'Untitled',
+          surveyStatus: s.status ?? 'unknown',
+        });
+      }
+    }
+    // sort newest first by time by default
+    rows.sort((x, y) => {
+      const tx = x.time ? new Date(x.time).getTime() : 0;
+      const ty = y.time ? new Date(y.time).getTime() : 0;
+      return ty - tx;
+    });
+    return rows;
+  }, [userAnsweredSurveysResp]);
+
+
+
   const filtered = useMemo(() => {
     const term = search.toLowerCase();
-    return responses.filter(r =>
-      r.respondent.toLowerCase().includes(term) ||
+    return fetchedResponses.filter((r) =>
+      r.respondentName.toLowerCase().includes(term) ||
+      r.surveyTitle.toLowerCase().includes(term) ||
       String(r.id).includes(term) ||
-      r.status.toLowerCase().includes(term)
+      (r.respondentRole ?? '').toLowerCase().includes(term)
     );
-  }, [responses, search]);
+  }, [fetchedResponses, search]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
     arr.sort((a, b) => {
-      const va = a[sortKey] as any;
-      const vb = b[sortKey] as any;
+      let va: any;
+      let vb: any;
+      if (sortKey === 'time') {
+        va = a.time ? new Date(a.time).getTime() : 0;
+        vb = b.time ? new Date(b.time).getTime() : 0;
+      } else if (sortKey === 'respondentName') {
+        va = a.respondentName.toLowerCase();
+        vb = b.respondentName.toLowerCase();
+      } else {
+        va = a.surveyTitle.toLowerCase();
+        vb = b.surveyTitle.toLowerCase();
+      }
       if (va == null && vb == null) return 0;
       if (va == null) return sortDir === 'asc' ? -1 : 1;
       if (vb == null) return sortDir === 'asc' ? 1 : -1;
@@ -188,7 +239,7 @@ const SurveyDetail = () => {
     return sorted.slice(start, start + pageSize);
   }, [sorted, page, pageSize]);
 
-  const toggleSort = (key: keyof ResponseRow) => {
+  const toggleSort = (key: 'time' | 'respondentName' | 'surveyTitle') => {
     if (sortKey === key) {
       setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
     } else {
@@ -197,7 +248,7 @@ const SurveyDetail = () => {
     }
   };
 
-  const sortIcon = (key: keyof ResponseRow) => {
+  const sortIcon = (key: 'time' | 'respondentName' | 'surveyTitle') => {
     if (sortKey !== key) return <FaSort className="inline ml-1" />;
     return sortDir === 'asc' ? <FaSortUp className="inline ml-1" /> : <FaSortDown className="inline ml-1" />;
   };
@@ -282,21 +333,30 @@ const SurveyDetail = () => {
               <table className="min-w-full">
                 <thead className="border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('id')}>ID {sortIcon('id')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('respondent')}>Respondent {sortIcon('respondent')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('date')}>Date {sortIcon('date')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('score')}>Score {sortIcon('score')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Status</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('respondentName')}>Responder {sortIcon('respondentName')}</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('time')}>Time {sortIcon('time')}</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('surveyTitle')}>Survey Title {sortIcon('surveyTitle')}</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Survey Status</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {pageData.map((r) => (
+                  {(isLoadingUserResponses || isLoading) ? (
+                    <tr><td colSpan={4} className="py-8 text-center text-gray-500">Loading responses...</td></tr>
+                  ) : pageData.length === 0 ? (
+                    <tr><td colSpan={4} className="py-8 text-center text-gray-500">No responses found.</td></tr>
+                  ) : pageData.map((r) => (
                     <tr key={r.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-700">{r.id}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{r.respondent}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{r.date}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{r.score ?? '-'}</td>
-                      <td className="px-6 py-4"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus(r.status as any)}`}>{r.status}</span></td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        <div className="font-medium">{r.respondentName}</div>
+                        <div className="text-xs text-gray-500">{r.respondentRole ? r.respondentRole.replace('_', ' ') : ''}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{timeAgo(r.time)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{r.surveyTitle}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus(r.surveyStatus as any)}`}>
+                          {r.surveyStatus}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

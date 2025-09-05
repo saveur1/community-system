@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowRight, FaArrowLeft, FaCheck, FaSpinner } from 'react-icons/fa';
 import { useSubmitSurveyAnswers } from '@/hooks/useSurveys';
 import { SubmitAnswersRequest } from '@/api/surveys';
+import useAuth from '@/hooks/useAuth';
 
 type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea';
 
@@ -39,6 +40,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { mutate: submitAnswers } = useSubmitSurveyAnswers(survey.id);
+  const { user } = useAuth();
 
   // Group questions into steps (5 questions per step)
   const steps = [];
@@ -92,7 +94,8 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
       answers: Object.entries(answers).map(([questionId, answer]) => ({
         questionId,
         answerText: Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value),
-        answerOptions: Array.isArray(answer.value) ? answer.value : undefined
+        answerOptions: Array.isArray(answer.value) ? answer.value : undefined,
+        userId: user?.id
       }))
     };
 

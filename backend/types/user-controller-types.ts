@@ -9,8 +9,10 @@ export interface IUserCreateRequest {
   role?: IUserAttributes['roles'];
   status?: IUserAttributes['status'];
   profileImage?: string;
+  userType?: string; // Optional: a broader category than role
   // Optional: assign roles by id on creation
   roleIds?: string[];
+  stakeholderId?: string; // Optional: associate user with a stakeholder on creation
 }
 
 export interface IUserUpdateRequest extends Partial<IUserCreateRequest> {}

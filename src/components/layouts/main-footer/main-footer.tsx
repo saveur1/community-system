@@ -58,7 +58,7 @@ const FooterMain = () => {
               {t('footer.terms_of_use')}
             </div>
             <div className="text-gray-700 text-sm">
-              {t('footer.programmes')}
+              {t('footer.developed')}
             </div>
           </div>
         </div>
@@ -106,9 +106,7 @@ const FooterMain = () => {
               {t('footer.terms_of_use')}
             </div>
             
-            <div className="text-gray-700 text-sm">
-              {t('footer.programmes')}
-            </div>
+            <div className="text-gray-700 text-sm" dangerouslySetInnerHTML={{__html:t('footer.developed')}} />
           </div>
         </div>
       </div>

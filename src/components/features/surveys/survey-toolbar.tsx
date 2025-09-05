@@ -11,6 +11,7 @@ interface SurveyToolbarProps {
   filteredCount: number;
   title: string;
   hideCreateButton?: boolean;
+  createButtonLink?: string; // Optional custom link for the create button
 }
 
 export const SurveyToolbar = ({
@@ -21,6 +22,7 @@ export const SurveyToolbar = ({
   filteredCount,
   title,
   hideCreateButton,
+  createButtonLink = "/dashboard/surveys/add-new"
 }: SurveyToolbarProps) => {
   const { user } = useAuth();
 
@@ -53,12 +55,12 @@ export const SurveyToolbar = ({
           </button>
         </div>
         {/* Create Survey Permission */}
-        {checkPermissions(user, 'survey:create') && !hideCreateButton && (
-          <Link to="/dashboard/surveys/add-new" className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-sm flex items-center gap-2">
+        {/* {checkPermissions(user, 'survey:create') && !hideCreateButton && ( */}
+          <Link to={ createButtonLink } className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-sm flex items-center gap-2">
             <span className="text-lg"><FaPlus className="w-4 h-4" /></span>
             { title }
           </Link>
-        )}
+        {/* )} */}
       </div>
     </div>
   );

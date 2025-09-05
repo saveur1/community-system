@@ -2,15 +2,13 @@ import { NavItemType } from '@/utility/types';
 import { FaQuestionCircle, FaUserFriends } from 'react-icons/fa';
 import {
   HiChartBar,
-  HiDocumentText,
   HiClipboardList,
 } from 'react-icons/hi';
 import { HiChatBubbleBottomCenter } from "react-icons/hi2";
 import { User } from '@/api/auth';
 import { checkPermissions } from '@/utility/logicFunctions';
-import { IoIosVideocam, IoMdSchool } from 'react-icons/io';
-import { PiSpeakerSimpleHighBold, PiSubtitlesFill } from 'react-icons/pi';
-import { MdHealthAndSafety } from 'react-icons/md';
+import { IoIosVideocam } from 'react-icons/io';
+import { PiSpeakerSimpleHighBold } from 'react-icons/pi';
 import { GrProjects } from "react-icons/gr";
 
 const navItems = (user: User | null, path: string): NavItemType[] => {
@@ -89,7 +87,9 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
     navigationItems.push({ name: "Rapid Enquiry", icon: FaQuestionCircle, active: false, link: `/${path}/rapid-enquiry` })
   }
 
-  navigationItems.push({ name: "Stakeholders", icon: FaUserFriends, active: false, link: `/${path}/stakeholders` })
+  if (checkPermissions(user, 'stakeholder:create')) {
+    navigationItems.push({ name: "Stakeholders", icon: FaUserFriends, active: false, link: `/${path}/stakeholders` })
+  }
   return navigationItems;
 };
 

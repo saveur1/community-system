@@ -22,11 +22,11 @@ interface FeedbackFormState {
     followUpNeeded: boolean;
     voiceFeedback: VoiceFeedbackType | null;
     videoFeedback: VideoFeedbackType | null;
+    otherFeedbackOn: string;
 }
 
 const CreateFeedbackComponent: React.FC = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
     const { data: projectsData } = useProjectsList({ limit: 100 }); // Fetch projects
     const createFeedback = useCreateFeedback();
 
@@ -37,17 +37,20 @@ const CreateFeedbackComponent: React.FC = () => {
         feedbackMethod: 'text',
         followUpNeeded: false,
         voiceFeedback: null,
-        videoFeedback: null
+        videoFeedback: null,
+        otherFeedbackOn: ''
     });
 
     // Step management
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 2;
 
-
     const selectedProjectName = useMemo(() => {
+        if (feedback.projectId === 'other') {
+            return feedback.otherFeedbackOn || 'Other';
+        }
         return projectsData?.result?.find(p => p.id === feedback.projectId)?.name || 'Select a project';
-    }, [feedback.projectId, projectsData]);
+    }, [feedback.projectId, feedback.otherFeedbackOn, projectsData]);
 
     const feedbackTypes = [
         { value: 'positive', label: 'Positive Experience', icon: '😊' },
@@ -74,7 +77,6 @@ const CreateFeedbackComponent: React.FC = () => {
         }));
     };
 
-
     const nextStep = () => currentStep < totalSteps && setCurrentStep(currentStep + 1);
     const prevStep = () => currentStep > 1 && setCurrentStep(currentStep - 1);
 
@@ -92,15 +94,24 @@ const CreateFeedbackComponent: React.FC = () => {
 
     const canProceedToNextStep = () => {
         switch (currentStep) {
-            case 1: return feedback.projectId && feedback.feedbackMethod;
-            case 2: return feedback.feedbackType && (feedback.mainMessage || feedback.voiceFeedback || feedback.videoFeedback);
-            default: return true;
+            case 1: 
+                return feedback.projectId && feedback.feedbackMethod && 
+                       (feedback.projectId !== 'other' || feedback.otherFeedbackOn.trim());
+            case 2: 
+                return feedback.feedbackType && (feedback.mainMessage || feedback.voiceFeedback || feedback.videoFeedback);
+            default: 
+                return true;
         }
     };
 
     const handleSubmit = async () => {
         if (!feedback.projectId || (!feedback.mainMessage && !feedback.voiceFeedback && !feedback.videoFeedback)) {
             toast.error('Please fill in all required fields.');
+            return;
+        }
+
+        if (feedback.projectId === 'other' && !feedback.otherFeedbackOn.trim()) {
+            toast.error('Please specify what you are providing feedback on.');
             return;
         }
 
@@ -140,12 +151,13 @@ const CreateFeedbackComponent: React.FC = () => {
             }
 
             await createFeedback.mutateAsync({
-                projectId: feedback.projectId,
+                projectId: feedback.projectId === 'other' ? undefined : feedback.projectId,
                 mainMessage: feedback.mainMessage || null,
                 feedbackType: feedback.feedbackType,
                 feedbackMethod: feedback.feedbackMethod,
                 followUpNeeded: feedback.followUpNeeded,
                 documents: uploadedDocuments,
+                otherFeedbackOn: feedback.projectId === 'other' ? feedback.otherFeedbackOn : undefined,
             });
 
             toast.success('Feedback submitted successfully!');
@@ -184,9 +196,9 @@ const CreateFeedbackComponent: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-4">Feedback Method <span className="text-red-500">*</span></label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {feedbackMethods.map((method) => (
-                        <div key={method.value} onClick={() => updateFeedback('feedbackMethod', method.value as any)} className={`p-6 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${feedback.feedbackMethod === method.value ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <div key={method.value} onClick={() => updateFeedback('feedbackMethod', method.value as any)} className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${feedback.feedbackMethod === method.value ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
                             <div className="text-center">
-                                <div className="text-4xl mb-3">{method.icon}</div>
+                                <div className="text-4xl mb-2">{method.icon}</div>
                                 <h3 className="font-semibold text-gray-900 mb-2">{method.label}</h3>
                                 <p className="text-sm text-gray-600">{method.description}</p>
                             </div>
@@ -195,22 +207,44 @@ const CreateFeedbackComponent: React.FC = () => {
                 </div>
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Project <span className="text-red-500">*</span></label>
-                <CustomDropdown
-                    trigger={
-                        <div className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary bg-white cursor-pointer flex justify-between items-center hover:border-primary transition-colors">
-                            <span className={feedback.projectId ? 'text-gray-900' : 'text-gray-500'}>{selectedProjectName}</span>
-                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                    }
-                    dropdownClassName="w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-4">Share feedback On <span className="text-red-500">*</span></label>
+                <div className="space-y-3">
                     {projectsData?.result?.map((project) => (
-                        <DropdownItem key={project.id} onClick={() => updateFeedback('projectId', project.id)} className="hover:bg-blue-50 py-3">
-                            {project.name}
-                        </DropdownItem>
+                        <label key={project.id} className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer transition-colors">
+                            <input
+                                type="radio"
+                                name="projectId"
+                                value={project.id}
+                                checked={feedback.projectId === project.id}
+                                onChange={(e) => updateFeedback('projectId', e.target.value)}
+                                className="mr-3 text-primary focus:ring-primary"
+                            />
+                            <span className="text-gray-900">{project.name}</span>
+                        </label>
                     ))}
-                </CustomDropdown>
+                    <label className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer transition-colors">
+                        <input
+                            type="radio"
+                            name="projectId"
+                            value="other"
+                            checked={feedback.projectId === 'other'}
+                            onChange={(e) => updateFeedback('projectId', e.target.value)}
+                            className="mr-3 text-primary focus:ring-primary"
+                        />
+                        <span className="text-gray-900">Other</span>
+                    </label>
+                    {feedback.projectId === 'other' && (
+                        <div className="ml-6">
+                            <input
+                                type="text"
+                                value={feedback.otherFeedbackOn}
+                                onChange={(e) => updateFeedback('otherFeedbackOn', e.target.value)}
+                                placeholder="Please specify..."
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary outline-none focus:border-primary transition-colors"
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
         </motion.div>
     );
@@ -264,7 +298,6 @@ const CreateFeedbackComponent: React.FC = () => {
             </div>
         </motion.div>
     );
-
 
     return (
         <div className="w-full">

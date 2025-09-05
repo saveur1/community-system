@@ -6,16 +6,13 @@ import {
     HiSun,
     HiMoon,
     HiX,
-    HiOutlineChatAlt,
-    HiOutlineClipboardList,
-    HiOutlineShieldCheck,
-    HiOutlineClock
 } from "react-icons/hi";
 import { CustomDropdown, DropdownItem } from "@/components/ui/dropdown";
 import useAuth from "@/hooks/useAuth";
 import { User } from "@/api/auth";
 import { spacer } from "@/utility/logicFunctions";
 import NotificationsDropdown from "../notifications/notifications-dropdown";
+import { useRouter } from "@tanstack/react-router";
 
 
 
@@ -32,7 +29,9 @@ const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
             </div>
         );
     }
-    const displayName = user?.name?.split(" ")?.[0]?.charAt(0) + "." + user?.name?.split(" ")?.[1];
+    const displayName = user?.name?.split(" ").length === 1
+        ? user.name
+        : (user?.name?.split(" ")?.[0]?.charAt(0) || 'U') + "." + (user?.name?.split(" ")?.[1] || '');
 
     return (
         <div className="flex items-center min-w-24 gap-2 px-2 py-1 bg-gray-100 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg cursor-pointer transition-colors">
@@ -68,6 +67,7 @@ const Header: React.FC<HeaderProps> = ({
 
     // Use the useAuth hook which will handle user data fetching if needed
     const { user, logout } = useAuth();
+    const router = useRouter();
 
     return (
         <header className="flex bg-white dark:bg-gray-800 border-b border-gray-200 items-center w-full justify-between px-6 py-4">
@@ -131,8 +131,8 @@ const Header: React.FC<HeaderProps> = ({
                 >
                     <div className="py-2">
                         <DropdownItem onClick={() => console.log('Profile')}>Profile</DropdownItem>
-                        <DropdownItem onClick={() => console.log('Settings')}>Settings</DropdownItem>
-                        <DropdownItem onClick={() => console.log('Notifications')}>Notifications</DropdownItem>
+                        <DropdownItem onClick={() => router.navigate({to: "/dashboard/settings"})}>Settings</DropdownItem>
+                        <DropdownItem onClick={() => router.navigate({to: "/dashboard/notifications"})}>Notifications</DropdownItem>
                         <DropdownItem onClick={() => console.log('Help & Support')}>Help & Support</DropdownItem>
                         <div className="my-1 h-px bg-gray-200 dark:bg-gray-700" />
                         <DropdownItem destructive onClick={() => logout()}>Logout</DropdownItem>

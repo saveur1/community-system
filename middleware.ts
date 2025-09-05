@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 // Define user type
 export interface User {
     id: string;
-    email: string;
+    email?: string;
     roles?: string[];
 }
 
@@ -21,6 +21,7 @@ declare global {
 // Public routes that don't require authentication
 const publicPaths = [
     '/',
+    '/verify-organization',
     '/auth/login',
     '/auth/signup',
     '/auth/google',
@@ -66,11 +67,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
             return res.redirect('/auth/login?error=user-not-found');
         }
 
-        req.user = {
-            id: user.id,
-            email: user.email,
-            roles: user.roles?.map((r: any) => r.name) ?? []
-        };
+        req.user = user;
 
         if (path.startsWith('/auth')) {
             return res.redirect('/dashboard');

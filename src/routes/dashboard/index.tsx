@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   HiOutlineUsers,
   HiOutlineChartBar,
@@ -15,48 +15,11 @@ import useAuth from "@/hooks/useAuth";
 import summaryCards from "@/components/features/dashboard/summary-cards-items";
 import AnnouncementCard from "@/components/features/dashboard/announcement-card";
 import { checkPermissions } from "@/utility/logicFunctions";
-import { toast } from "react-toastify";
 import RecentUserActivities from "@/components/features/dashboard/recent-activities-summary";
-
-const genMonthly = (base: number) =>
-  Array.from({ length: 12 }).map((_, i) =>
-    Math.max(0, Math.round(base + Math.sin(i / 2) * base * 0.25 + i * 2))
-  );
-
-const surveys = [
-  { id: "all", name: "All Surveys" },
-  { id: "immunization", name: "Immunization Feedback" },
-  { id: "maternal", name: "Maternal Health" },
-  { id: "facility", name: "Facility Feedback" },
-];
-
-const mockData: Record<string, number[]> = {
-  all: genMonthly(60),
-  immunization: genMonthly(40),
-  maternal: genMonthly(30),
-  facility: genMonthly(18),
-};
+import { useAnnouncementsList } from "@/hooks/useAnnouncements";
 
 function DashboardHome() {
-  const [selectedSurvey, setSelectedSurvey] = useState<string>("immunization");
-  const [showAnnouncement, setShowAnnouncement] = useState<boolean>(true);
   const { user } = useAuth();
-
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  const chartSeries = [
-    { name: "Participants", type: "line", data: mockData[selectedSurvey] },
-  ];
-
-  const chartOptions: any = {
-    chart: { height: 320, type: "line", toolbar: { show: false } },
-    stroke: { width: 3, curve: "smooth" },
-    markers: { size: 4 },
-    xaxis: { categories: months, labels: { style: { fontSize: "12px" } } },
-    grid: { show: true, borderColor: "#edf2f7" },
-    tooltip: { shared: true, intersect: false },
-    colors: ["#67462A"],
-  };
 
   // Define quick links with permission checks
   const quickLinks = [
@@ -67,7 +30,7 @@ function DashboardHome() {
         ]
       : []),
     ...(checkPermissions(user, "survey:respond")
-      ? [{ id: "surveys", label: "Surveys", icon: <FaClipboardList size={22} />, to: "/dashboard/surveys", color: "bg-teal-100" }]
+      ? [{ id: "surveys", label: "Surveys", icon: <FaClipboardList size={22} />, to: "/dashboard/surveys/take-survey", color: "bg-teal-100" }]
       : []),
     ...(checkPermissions(user, "report:create")
       ? [{ id: "reports", label: "Reports", icon: <HiOutlineChartBar size={22} />, to: "/dashboard/reporting", color: "bg-sky-100" }]
@@ -81,28 +44,79 @@ function DashboardHome() {
     { id: "docs", label: "Guides", icon: <HiOutlineDocumentText size={22} />, to: "/dashboard/docs", color: "bg-violet-100" },
   ];
 
+  // Fetch latest announcement for this user
+  const { data: announcementsResp, isLoading: announcementsLoading } = useAnnouncementsList({
+    allowed: true,
+    status: "sent",
+    limit: 1,
+    page: 1
+  });
+
+  // Announcement visibility state
+  const [activeAnnouncement, setActiveAnnouncement] = useState<{
+    id: string;
+    title: string;
+    message: string;
+    viewDetailsLink?: string | null;
+  } | null>(null);
+
+  // Load latest announcement if not dismissed
+  useEffect(() => {
+    if (!announcementsLoading && announcementsResp?.result?.[0]) {
+      const latest = announcementsResp.result[0];
+      
+      // Check if this announcement was dismissed (using local storage)
+      const dismissedAnnouncements = JSON.parse(localStorage.getItem('dismissedAnnouncements') || '{}');
+      
+      if (!dismissedAnnouncements[latest.id]) {
+        setActiveAnnouncement({
+          id: latest.id,
+          title: latest.title,
+          message: latest.message,
+          viewDetailsLink: latest.viewDetailsLink
+        });
+      }
+    }
+  }, [announcementsLoading, announcementsResp]);
+
+  const handleDismissAnnouncement = () => {
+    if (activeAnnouncement?.id) {
+      // Save to localStorage
+      const dismissed = JSON.parse(localStorage.getItem('dismissedAnnouncements') || '{}');
+      dismissed[activeAnnouncement.id] = new Date().toISOString();
+      localStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissed));
+      
+      // Update state
+      setActiveAnnouncement(null);
+    }
+  };
+
   const handleAnnouncementAction = () => {
-    toast.info("Announcement action clicked");
+    if (activeAnnouncement?.viewDetailsLink) {
+      window.open(activeAnnouncement.viewDetailsLink, '_blank');
+    }
   };
 
   return (
     <div className="mt-6">
-      {/* Announcement Card */}
-      <AnnouncementCard
-        type="primary"
-        title="🎉 New Feature Available!"
-        message="We've just released our new advanced analytics dashboard with real-time survey insights and enhanced reporting capabilities. Check it out now!"
-        isVisible={showAnnouncement}
-        onDismiss={() => setShowAnnouncement(false)}
-        actionButton={{
-          text: "View Details",
-          onClick: handleAnnouncementAction,
-        }}
-      />
+      {/* Dynamic Announcement Card */}
+      {activeAnnouncement && (
+        <AnnouncementCard
+          type="primary"
+          title={activeAnnouncement.title}
+          message={activeAnnouncement.message}
+          isVisible={true}
+          onDismiss={handleDismissAnnouncement}
+          actionButton={activeAnnouncement.viewDetailsLink ? {
+            text: "View Details",
+            onClick: handleAnnouncementAction,
+          } : undefined}
+        />
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        {summaryCards(user)?.map((card) => (
+        {summaryCards()?.map((card) => (
           <SummaryCard key={card.id} {...card} />
         ))}
       </div>
@@ -111,14 +125,7 @@ function DashboardHome() {
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-9">
           {checkPermissions(user, "dashboard:analytics") ? (
-            
-            <SurveyParticipants
-              selectedSurvey={selectedSurvey}
-              setSelectedSurvey={setSelectedSurvey}
-              surveys={surveys}
-              chartSeries={chartSeries}
-              chartOptions={chartOptions}
-            />
+            <SurveyParticipants />
           ) : (
             <RecentUserActivities />
           )}

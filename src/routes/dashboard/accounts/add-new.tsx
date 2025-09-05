@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import { SelectDropdown } from '@/components/ui/select';
+import { SelectSearch } from '@/components/ui/select-search';
 import locations from '@/components/common/locations.json';
 import { useRolesList } from '@/hooks/useRoles';
 import { useCreateUser } from '@/hooks/useUsers';
@@ -40,6 +40,7 @@ const AddUserPage = () => {
     cell: '',
     village: '',
     userType: category || '',
+    stakeholderId: '',
     roleId: '',
   });
 
@@ -79,6 +80,7 @@ const AddUserPage = () => {
       email: formData.email,
       phone: formData.phoneNumber,
       userType: formData.userType,
+      stakeholderId: formData.stakeholderId || undefined,
       address: `${formData.village}, ${formData.cell}, ${formData.sector}, ${formData.district}`,
       roleIds: [formData.roleId],
     };
@@ -126,18 +128,18 @@ const AddUserPage = () => {
 
   const roleGroups = useMemo(() => {
     const list = rolesResp?.result ?? [];
-    const map = new Map<string, { title: string; options: { value: string; label: string }[] }>();
+    const map = new Map<string, { title: string; options: { value: string; label: string, stakeholderId?: string | null }[] }>();
     for (const r of list) {
       const cat = r.category?.trim() || 'Other';
       if (!map.has(cat)) {
         map.set(cat, { title: cat, options: [] });
       }
-      map.get(cat)!.options.push({ value: r.id, label: toLabel(r.name) });
+      map.get(cat)!.options.push({ value: r.id, label: toLabel(r.name), stakeholderId: r?.stakeholderId || null });
     }
     return Array.from(map.values());
   }, [rolesResp]);
 
-  const userTypeOptions = useMemo(() => roleGroups.map(g => ({ value: g.title, label: g.title })), [roleGroups]);
+  const userTypeOptions = useMemo(() => roleGroups.map(g => ({ value: g.title, label: g.title, stakeholderId: g.options[0]?.stakeholderId || null })), [roleGroups]);
   const roleOptions = useMemo(() => {
     const selectedGroup = roleGroups.find(g => g.title === formData.userType);
     return selectedGroup?.options ?? [];
@@ -219,14 +221,14 @@ const AddUserPage = () => {
       className="space-y-4"
     >
       <h3 className="text-xl font-semibold text-gray-800 mb-4">Location Details</h3>
-      <SelectDropdown
+      <SelectSearch
         label="District"
         value={formData.district}
         onChange={(value) => handleSelectChange('district', value)}
         options={districtOptions}
         placeholder="Select a district"
       />
-      <SelectDropdown
+      <SelectSearch
         label="Sector"
         value={formData.sector}
         onChange={(value) => handleSelectChange('sector', value)}
@@ -234,7 +236,7 @@ const AddUserPage = () => {
         placeholder="Select a sector"
         disabled={!formData.district}
       />
-      <SelectDropdown
+      <SelectSearch
         label="Cell"
         value={formData.cell}
         onChange={(value) => handleSelectChange('cell', value)}
@@ -242,7 +244,7 @@ const AddUserPage = () => {
         placeholder="Select a cell"
         disabled={!formData.sector}
       />
-      <SelectDropdown
+      <SelectSearch
         label="Village"
         value={formData.village}
         onChange={(value) => handleSelectChange('village', value)}
@@ -252,6 +254,16 @@ const AddUserPage = () => {
       />
     </motion.div>
   );
+
+  const handleSelectRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const selectedRole = roleOptions.find(r => r.value === value);
+    setFormData(prev => ({
+      ...prev,
+      roleId: value,
+      stakeholderId: selectedRole?.stakeholderId || '',
+    }));
+  }
 
   const renderStep3 = () => (
     <motion.div
@@ -265,7 +277,7 @@ const AddUserPage = () => {
     >
       <h3 className="text-xl font-semibold text-gray-800 mb-4">Role and Additional Details</h3>
       {!category && (
-        <SelectDropdown
+        <SelectSearch
           label="User Category"
           value={formData.userType}
           onChange={(value) => handleSelectChange('userType', value)}
@@ -284,7 +296,7 @@ const AddUserPage = () => {
                   name="roleId"
                   value={opt.value}
                   checked={formData.roleId === opt.value}
-                  onChange={(e) => handleSelectChange('roleId', e.target.value)}
+                  onChange={handleSelectRoleChange}
                   className="h-4 w-4 text-primary focus:ring-primary"
                 />
                 <span className="text-gray-700 text-sm">{opt.label}</span>
@@ -293,7 +305,7 @@ const AddUserPage = () => {
           </div>
         </div>
       ) : (
-        <SelectDropdown
+        <SelectSearch
           label="User Role"
           value={formData.roleId}
           onChange={(value) => handleSelectChange('roleId', value)}

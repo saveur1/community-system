@@ -15,12 +15,14 @@ import {
 } from 'react-icons/fi';
 import { checkPermissions, spacer } from '@/utility/logicFunctions';
 import useAuth from '@/hooks/useAuth';
+// system logs hook
+import { useSystemLogsList, useDeleteSystemLog } from '@/hooks/useSystemLogs';
 
 export const Route = createFileRoute('/dashboard/settings/')({
   component: SettingsPage,
 });
 
-type SettingsTab = 'Authentication' | 'Roles' | 'Website' | 'Notifications';
+type SettingsTab = 'Authentication' | 'Roles' | 'Website' | 'Notifications' | 'System Logs';
 
 function SettingsPage() {
   const { user } = useAuth();
@@ -30,6 +32,13 @@ function SettingsPage() {
     if (checkPermissions(user, 'role:create')) {
       t.unshift('Website');
       t.unshift('Roles');
+    }
+    // show system logs tab if user can read logs
+    if (checkPermissions(user, 'system_log:read')) {
+      // place before Notifications
+      const idx = t.indexOf('Notifications');
+      if (idx >= 0) t.splice(idx, 0, 'System Logs');
+      else t.push('System Logs');
     }
     return t as SettingsTab[];
   }, [user, baseTabs]);
@@ -45,6 +54,16 @@ function SettingsPage() {
     roleId: '', 
     roleName: '' 
   });
+  // System logs state
+  const [logsSearch, setLogsSearch] = useState('');
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsPageSize] = useState(10);
+  const { data: logsResponse, isLoading: logsLoading, error: logsError } = useSystemLogsList({
+    page: logsPage,
+    limit: logsPageSize,
+    action: logsSearch || undefined,
+  });
+  const deleteLog = useDeleteSystemLog();
 
   // Ensure active tab is valid based on permissions
   useEffect(() => {
@@ -86,6 +105,11 @@ function SettingsPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to first page when searching
+  };
+  // logs search handler
+  const handleLogsSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLogsSearch(e.target.value);
+    setLogsPage(1);
   };
 
   const renderRolesTab = () => (
@@ -357,8 +381,6 @@ function SettingsPage() {
     </div>
   );
 
-  // System tab content has been removed
-
   const renderNotificationsTab = () => (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-gray-900">Notification Settings</h3>
@@ -436,12 +458,121 @@ function SettingsPage() {
     </div>
   );
 
+  const renderSystemLogsTab = () => {
+    const logs = logsResponse?.result ?? [];
+    const totalLogs = logsResponse?.meta?.total ?? 0;
+    const totalPages = Math.max(1, Math.ceil((logsResponse?.meta?.total ?? 0) / logsPageSize));
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900">System Logs</h3>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <input
+                value={logsSearch}
+                onChange={handleLogsSearchChange}
+                placeholder="Search action (e.g. created user)..."
+                className="pl-4 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500">Action</th>
+                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500">Resource</th>
+                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500">User</th>
+                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500">Meta</th>
+                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500">Created</th>
+                  <th className="text-right py-3 px-6 text-sm font-medium text-gray-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {logsLoading ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-gray-500">Loading logs...</td>
+                  </tr>
+                ) : logs.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-gray-500">No logs found</td>
+                  </tr>
+                ) : (
+                  logs.map((log: any) => (
+                    <tr key={log.id} className="hover:bg-gray-50">
+                      <td className="py-4 px-6 text-sm text-gray-700 capitalize">{spacer(log.action)}</td>
+                      <td className="py-4 px-6 text-sm text-gray-700">
+                        <div className="capitalize">{log.resourceType || '-'}</div>
+                        <div className="text-xs text-gray-500">{log.resourceId ?? ''}</div>
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-700">{log.userId ?? '-'}</td>
+                      <td className="py-4 px-6 text-sm text-gray-700">
+                        <div className="line-clamp-1 text-xs text-gray-500">{log.meta ? JSON.stringify(log.meta) : '-'}</div>
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-700">{new Date(log.createdAt || '').toLocaleString()}</td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            className="p-2 hover:bg-gray-100 rounded-lg text-red-500"
+                            title="Delete log"
+                            onClick={async () => {
+                              if (!confirm('Delete this system log?')) return;
+                              await deleteLog.mutateAsync(log.id);
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-200 text-sm">
+              <div className="text-gray-600">Showing {logs.length} of {totalLogs}</div>
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={logsPage <= 1}
+                  onClick={() => setLogsPage((p) => Math.max(1, p - 1))}
+                  className="px-3 py-1.5 border rounded disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                <span className="px-2">{logsPage} / {totalPages}</span>
+                <button
+                  disabled={logsPage >= totalPages}
+                  onClick={() => setLogsPage((p) => Math.min(totalPages, p + 1))}
+                  className="px-3 py-1.5 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+                <select value={logsPageSize} onChange={(e) => { /* page size fixed for simplicity */ }} className="ml-2 border rounded px-2 py-1" disabled>
+                  <option value={10}>10</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderTabContent = () => {
     const tabComponents = {
       'Authentication': renderAuthenticationTab,
       'Roles': renderRolesTab,
       'Website': renderWebsiteTab,
-      'Notifications': renderNotificationsTab
+      'Notifications': renderNotificationsTab,
+      'System Logs': renderSystemLogsTab,
     };
 
     return tabComponents[activeTab]();

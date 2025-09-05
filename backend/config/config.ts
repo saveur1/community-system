@@ -25,7 +25,7 @@ const config: Config = {
   bcryptSaltRounds: 10, // Number of salt rounds for bcrypt hashing
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '3000', 10),
-  appUrl: process.env.VITE_APP_URL || 'http://localhost:3000',
+  frontendUrl: process.env.VITE_APP_URL || 'http://localhost:3000',
   cookieDomain: process.env.COOKIE_DOMAIN || 'localhost',
   isDev: process.env.NODE_ENV === 'development',
 };

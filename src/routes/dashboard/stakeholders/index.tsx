@@ -2,18 +2,23 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
-import { FaList, FaTh, FaEdit, FaTrash, FaEllipsisV, FaEye } from 'react-icons/fa';
-import { useStakeholdersList, useDeleteStakeholder } from '@/hooks/useStakeholders';
-
-interface StakeholderItem {
-  id: string;
-  name: string;
-  logo: string | null;
-  projects?: any[];
-}
+import { FaList, FaTh, FaEdit, FaTrash, FaEllipsisV, FaEye, FaPlus } from 'react-icons/fa';
+import { useOrganizationsList, useDeleteOrganization, useOrganization, useUpdateOrganization } from '@/hooks/useOrganizations';
+import { toast } from 'react-toastify';
+import { User } from '@/api/auth';
+import { ProjectEntity } from '@/api/projects';
+import { MdBlock } from 'react-icons/md';
+import { CgUnblock } from 'react-icons/cg';
+import Drawer from '@/components/ui/drawer';
+import { OrganizationEntity, OrganizationListResponse } from '@/api/organizations';
 
 const StakeholdersComponent = () => {
   const navigate = useNavigate();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedStakeholderId, setSelectedStakeholderId] = useState<string | null>(null);
+  // pass undefined when no id so the hook is disabled cleanly
+  const { data: selectedStakeholderResp, isLoading: isLoadingSelected, isError: isErrorSelected } = useOrganization(selectedStakeholderId || undefined);
+  const selectedStakeholder = selectedStakeholderResp?.result ?? null;
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
@@ -21,19 +26,25 @@ const StakeholdersComponent = () => {
   // Backend pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
-  const { data, isLoading, isError, refetch, isFetching } = useStakeholdersList({ page, limit: pageSize });
-  const deleteStakeholder = useDeleteStakeholder();
+  // fetch organizations (get a reasonably large pageSize or rely on server pagination) and filter to type === 'stakeholder'
+  const { data, isLoading, isError, refetch, isFetching } = useOrganizationsList({ page, limit: pageSize });
+  const deleteOrganization = useDeleteOrganization();
 
   // search & pagination
   const [search, setSearch] = useState('');
-  const serverItems: StakeholderItem[] = useMemo(() => {
+  const serverItems: OrganizationEntity[] = useMemo(() => {
     const list = data?.result ?? [];
+    // keep only organizations of type 'stakeholder'
+    const stakeholders = list.filter((it: any) => (it.type ?? 'stakeholder') === 'stakeholder');
     // Map API shape to UI shape if needed
-    return list.map((it) => ({
+    return stakeholders.map((it: any) => ({
       id: it.id,
       name: it.name,
       logo: it.logo,
       projects: it.projects ?? [],
+      // backend organization status uses 'active' | 'suspended' | 'deleted'
+      status: it.status as any,
+      users: it.users ?? [],
     }));
   }, [data]);
 
@@ -45,24 +56,25 @@ const StakeholdersComponent = () => {
     );
   }, [serverItems, search]);
 
-  const totalPages = Math.max(1, data?.totalPages ?? 1);
-  const currentPage = Math.min(data?.page ?? page, totalPages);
-  const totalCount = data?.total ?? filtered.length;
+  const totalPages = Math.max(1, data?.meta?.totalPages ?? 1);
+  const currentPage = Math.min(data?.meta?.page ?? page, totalPages);
+  const totalCount = data?.meta?.total ?? filtered.length;
   const paginated = filtered; // server already paginates; filtering is within current page only
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   const handleStakeholderAction = (action: string, stakeholderId: string, stakeholderName: string) => {
-    console.log(`${action} action for stakeholder:`, stakeholderId, stakeholderName);
     switch (action) {
       case 'view':
-        navigate({ to: '/dashboard/stakeholders/$view-id', params: { 'view-id': String(stakeholderId) } });
+        // open right drawer to view basic stakeholder details
+        setSelectedStakeholderId(stakeholderId);
+        setDrawerOpen(true);
         break;
       case 'edit':
         navigate({ to: '/dashboard/stakeholders/$edit-id', params: { 'edit-id': String(stakeholderId) } });
         break;
-      case 'duplicate':
-        alert(`Duplicating stakeholder: ${stakeholderName}`);
+      case 'deactivate':
+        alert(`Deactivating stakeholder: ${stakeholderName}`);
         break;
       case 'share':
         alert(`Sharing stakeholder: ${stakeholderName}`);
@@ -83,7 +95,7 @@ const StakeholdersComponent = () => {
   };
 
   const handleConfirmDelete = (stakeholderId: string) => {
-    deleteStakeholder.mutate(stakeholderId, {
+    deleteOrganization.mutate(stakeholderId, {
       onSettled: () => {
         setDeleteModalOpen(false);
         setToDelete(null);
@@ -93,11 +105,56 @@ const StakeholdersComponent = () => {
     });
   };
 
-  const getStakeholderActions = (stakeholder: StakeholderItem) => [
-    { label: 'View', onClick: () => handleStakeholderAction('view', stakeholder.id, stakeholder.name), icon: <FaEye /> },
-    { label: 'Edit', onClick: () => handleStakeholderAction('edit', stakeholder.id, stakeholder.name), icon: <FaEdit /> },
-    { label: 'Delete', onClick: () => handleStakeholderAction('delete', stakeholder.id, stakeholder.name), icon: <FaTrash />, destructive: true },
-  ];
+  // Action items sub-component that uses the hook per-stakeholder
+  const ActionItems: React.FC<{ stakeholder: OrganizationEntity; onDelete: (id: string, name: string) => void }> = ({ stakeholder, onDelete }) => {
+    const update = useUpdateOrganization(stakeholder.id);
+
+    const handleChangeStatus = async (newStatus: 'active' | 'inactive') => {
+      // prevent no-op attempts
+      if (stakeholder.status === newStatus) return;
+      try {
+        // map UI action to organization status values (use 'suspended' for deactive)
+        const payloadStatus = newStatus === 'inactive' ? 'suspended' : newStatus;
+        await update.mutateAsync({ status: payloadStatus } as any);
+        toast.success(`Organization ${payloadStatus === 'active' ? 'activated' : 'updated'} successfully`);
+        // optional: parent refetch is called elsewhere; update hook invalidates queries as well
+      } catch (err: any) {
+        toast.error(err?.message || 'Failed to update stakeholder status');
+      }
+    };
+
+    const deactivateDisabled = stakeholder.status === 'suspended';
+    const activateDisabled = stakeholder.status === 'active';
+
+    return (
+      <>
+        <DropdownItem
+          icon={<MdBlock />}
+          onClick={() => !deactivateDisabled && handleChangeStatus('inactive')}
+          className={deactivateDisabled ? 'opacity-50 pointer-events-none min-w-52' : 'min-w-52'}
+        >
+          Deactivate
+        </DropdownItem>
+
+        <DropdownItem
+          icon={<CgUnblock />}
+          onClick={() => !activateDisabled && handleChangeStatus('active')}
+          className={activateDisabled ? 'opacity-50 pointer-events-none min-w-52' : 'min-w-52'}
+        >
+          Activate
+        </DropdownItem>
+
+        <DropdownItem
+          icon={<FaTrash />}
+          destructive
+          onClick={() => onDelete(stakeholder.id, stakeholder.name)}
+          className='min-w-52'
+        >
+          Delete
+        </DropdownItem>
+      </>
+    );
+  };
 
   const renderTableView = () => (
     <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
@@ -105,9 +162,10 @@ const StakeholdersComponent = () => {
         <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stakeholder</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Logo</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Users</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Projects</th>
-            <th className="px-6 py-3" />
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -116,7 +174,15 @@ const StakeholdersComponent = () => {
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
-                    {getInitials(stakeholder.name)}
+                    {stakeholder.logo ? (
+                      <img
+                        src={stakeholder.logo}
+                        alt={`${stakeholder.name} logo`}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      getInitials(stakeholder.name)
+                    )}
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{stakeholder.name}</div>
@@ -124,38 +190,42 @@ const StakeholdersComponent = () => {
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                {stakeholder.logo ? (
-                  <img 
-                    src={stakeholder.logo} 
-                    alt={`${stakeholder.name} logo`}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-xs text-gray-500">No logo</span>
-                  </div>
-                )}
+                {stakeholder.users?.length ?? 0} users
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                 {stakeholder.projects?.length ?? 0} projects
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td className="px-6 py-4 whitespace-nowrap">
+                <span className={`px-2 inline-flex text-xs capitalize leading-5 font-semibold rounded-full ${stakeholder.status === 'active'
+                  ? 'bg-green-100 text-green-800'
+                  : stakeholder.status === 'suspended'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                  { stakeholder?.status }
+                </span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap flex gap-6 text-sm font-medium">
+                <button
+                  onClick={() => handleStakeholderAction('edit', stakeholder.id, stakeholder.name)}
+                  className="text-primary cursor-pointer hover:text-primary-dark p-2"
+                  title="Edit Stakeholder"
+                >
+                  <FaEdit className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleStakeholderAction('view', stakeholder.id, stakeholder.name)}
+                  className="text-success hover:text-success-dark cursor-pointer p-2"
+                  title="View Stakeholder"
+                >
+                  <FaEye className="w-4 h-4" />
+                </button>
                 <CustomDropdown
                   trigger={<button className="p-2 hover:bg-gray-100 rounded-md transition-colors" aria-label="More actions"><FaEllipsisV /></button>}
                   position="bottom-right"
                   dropdownClassName="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-48"
                 >
-                  {getStakeholderActions(stakeholder).map((action) => (
-                    <DropdownItem
-                      key={action.label}
-                      icon={action.icon}
-                      destructive={action.destructive as boolean}
-                      className='min-w-52'
-                      onClick={action.onClick}
-                    >
-                      {action.label}
-                    </DropdownItem>
-                  ))}
+                  <ActionItems stakeholder={stakeholder} onDelete={(id, name) => { setToDelete({ id, name }); setDeleteModalOpen(true); }} />
                 </CustomDropdown>
               </td>
             </tr>
@@ -178,24 +248,31 @@ const StakeholdersComponent = () => {
         <div key={stakeholder.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-300 p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center mb-4">
             <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-lg font-medium mr-4">
-              {getInitials(stakeholder.name)}
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">{stakeholder.name}</h3>
-            </div>
-          </div>
-          <div className="space-y-3 mb-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500 dark:text-gray-300">Logo:</span>
               {stakeholder.logo ? (
-                <img 
-                  src={stakeholder.logo} 
+                <img
+                  src={stakeholder.logo}
                   alt={`${stakeholder.name} logo`}
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (
-                <span className="text-xs text-gray-400">No logo</span>
+                getInitials(stakeholder.name)
               )}
+            </div>
+            <div className="flex-1 flex-col">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">{stakeholder.name}</h3>
+              <span className={`px-2 inline-flex text-xs capitalize leading-5 font-semibold rounded-full ${stakeholder.status === 'active'
+                  ? 'bg-green-100 text-green-800'
+                  : stakeholder.status === 'suspended'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                  { stakeholder?.status }
+                </span>
+            </div>
+          </div>
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between text-sm text-gray-500 dark:text-gray-300">
+              <span>{stakeholder.users?.length ?? 0} users</span>
             </div>
             <div className="flex justify-between text-sm text-gray-500 dark:text-gray-300">
               <span>{stakeholder.projects?.length ?? 0} projects</span>
@@ -212,28 +289,18 @@ const StakeholdersComponent = () => {
                 <FaEdit className="w-4 h-4" />
               </button>
               <button
-                onClick={() => handleStakeholderAction('delete', stakeholder.id, stakeholder.name)}
-                className="text-red-500 hover:text-red-700"
-                title="Delete Stakeholder"
+                onClick={() => handleStakeholderAction('view', stakeholder.id, stakeholder.name)}
+                className="text-success hover:text-success-dark cursor-pointer p-2"
+                title="View Stakeholder"
               >
-                <FaTrash className="w-4 h-4" />
+                <FaEye className="w-4 h-4" />
               </button>
               <CustomDropdown
                 trigger={<button className="text-gray-400 hover:text-gray-600 p-1"><FaEllipsisV className="w-4 h-4" /></button>}
                 position="bottom-right"
                 dropdownClassName="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-48"
               >
-                {getStakeholderActions(stakeholder).map((action) => (
-                  <DropdownItem
-                    key={action.label}
-                    icon={action.icon}
-                    destructive={action.destructive as boolean}
-                    className='min-w-52'
-                    onClick={action.onClick}
-                  >
-                    {action.label}
-                  </DropdownItem>
-                ))}
+                <ActionItems stakeholder={stakeholder} onDelete={(id, name) => { setToDelete({ id, name }); setDeleteModalOpen(true); }} />
               </CustomDropdown>
             </div>
           </div>
@@ -281,8 +348,8 @@ const StakeholdersComponent = () => {
                 <FaTh className="w-4 h-4" />
               </button>
             </div>
-            <Link to="/dashboard/stakeholders/add-new" className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm flex items-center gap-2">
-              <span className="text-lg">+</span>
+            <Link to="/dashboard/stakeholders/add-new" className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-sm flex items-center gap-2">
+              <FaPlus className="w-4 h-4" />
               Add Stakeholder
             </Link>
           </div>
@@ -290,6 +357,93 @@ const StakeholdersComponent = () => {
       </div>
 
       {viewMode === 'list' ? renderTableView() : renderGridView()}
+
+      {/* Right drawer: view stakeholder */}
+      <Drawer
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setSelectedStakeholderId(null); }}
+        title={selectedStakeholder ? selectedStakeholder.name : 'Stakeholder'}
+        placement="right"
+        width={480}
+      >
+        <div className="p-4 space-y-4">
+          {/* Header with logo */}
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-md bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-300">
+              {selectedStakeholder?.logo ? (
+                // eslint-disable-next-line jsx-a11y/img-redundant-alt
+                (<img src={selectedStakeholder.logo} alt={`${selectedStakeholder.name} logo`} className="w-full h-full object-cover" />)
+              ) : (
+                <span className="text-lg font-semibold text-gray-600">{(selectedStakeholder?.name || "").split(" ").map((n: string) => n[0]).join("").toUpperCase()}</span>
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">{selectedStakeholder?.name}</h3>
+              <p className="text-sm text-gray-500">{selectedStakeholder?.projects?.length ?? 0} projects • {selectedStakeholder?.users?.length ?? 0} users</p>
+            </div>
+          </div>
+
+          {/* Users (up to 5) */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium text-gray-900">Users</h4>
+              <button
+                onClick={() => {
+                  setDrawerOpen(false);
+                  navigate({ to: '/dashboard/accounts/stakeholders' });
+                }}
+                className="text-sm text-primary hover:underline"
+              >
+                View more
+              </button>
+            </div>
+            <div className="space-y-2">
+              {(selectedStakeholder?.users ?? []).slice(0, 5).map((u: any) => (
+                <div key={u.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
+                    {u.profile ? <img src={u.profile} alt={u.name} className="w-10 h-10 rounded-full object-cover" /> : (u.name || u.email || "").split(" ").map((n: string) => n[0]).join("").toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">{u.name || u.email}</div>
+                    <div className="text-xs text-gray-500">{u.email ?? ""}</div>
+                  </div>
+                </div>
+              ))}
+              {!(selectedStakeholder?.users ?? []).length && <div className="text-sm text-gray-500">No users associated</div>}
+            </div>
+          </div>
+
+          {/* Projects (up to 5) */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium text-gray-900">Projects</h4>
+              <button
+                onClick={() => {
+                  setDrawerOpen(false);
+                  navigate({ to: '/dashboard/projects' });
+                }}
+                className="text-sm text-primary hover:underline"
+              >
+                View more
+              </button>
+            </div>
+            <div className="space-y-2">
+              {(selectedStakeholder?.projects ?? []).slice(0, 5).map((p: any) => (
+                <div key={p.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50">
+                  <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center overflow-hidden border">
+                    {p.logo ? <img src={p.logo} alt={p.name} className="w-full h-full object-cover" /> : <span className="text-sm font-medium">{(p.name || "").slice(0, 2).toUpperCase()}</span>}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">{p.name}</div>
+                    <div className="text-xs text-gray-500">Status: {p.status ?? "unknown"}</div>
+                  </div>
+                </div>
+              ))}
+              {!(selectedStakeholder?.projects ?? []).length && <div className="text-sm text-gray-500">No projects associated</div>}
+            </div>
+          </div>
+        </div>
+      </Drawer>
 
       {/* Pagination */}
       <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -299,7 +453,7 @@ const StakeholdersComponent = () => {
         <div className="flex items-center gap-2">
           <button
             className="px-3 py-1 rounded border disabled:opacity-50"
-            onClick={() => setPage((p) => Math.max(1, (data?.page ?? p) - 1))}
+            onClick={() => setPage((p) => Math.max(1, (data?.meta?.page ?? p) - 1))}
             disabled={currentPage === 1 || isLoading}
           >
             Prev
@@ -309,7 +463,7 @@ const StakeholdersComponent = () => {
           </span>
           <button
             className="px-3 py-1 rounded border disabled:opacity-50"
-            onClick={() => setPage((p) => Math.min(totalPages, (data?.page ?? p) + 1))}
+            onClick={() => setPage((p) => Math.min(totalPages, (data?.meta?.page ?? p) + 1))}
             disabled={currentPage === totalPages || isLoading}
           >
             Next
@@ -334,8 +488,8 @@ const StakeholdersComponent = () => {
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Are you sure you want to delete <span className="font-medium">{toDelete?.name}</span>? This action cannot be undone.</p>
             <div className="flex justify-end gap-3">
               <button className="px-4 py-2 rounded-md border" onClick={() => { setDeleteModalOpen(false); setToDelete(null); }}>Cancel</button>
-              <button className="px-4 py-2 rounded-md bg-red-600 text-white" onClick={() => toDelete && handleConfirmDelete(toDelete.id)} disabled={deleteStakeholder.isPending}>
-                {deleteStakeholder.isPending ? 'Deleting...' : 'Delete'}
+              <button className="px-4 py-2 rounded-md bg-red-600 text-white" onClick={() => toDelete && handleConfirmDelete(toDelete.id)} disabled={deleteOrganization.isPending}>
+                {deleteOrganization.isPending ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>
@@ -347,4 +501,4 @@ const StakeholdersComponent = () => {
 
 export const Route = createFileRoute('/dashboard/stakeholders/')({
   component: StakeholdersComponent,
-}) 
+})

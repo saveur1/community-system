@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { FaEye, FaShare, FaEdit, FaTrash, FaPause, FaPlay, FaStop, FaChartBar, FaDownload, FaList, FaTh, FaEllipsisV } from 'react-icons/fa';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
@@ -10,31 +10,52 @@ import useAuth from '@/hooks/useAuth';
 import { User } from '@/api/auth';
 import { useSurveysList, useDeleteSurvey, useUpdateSurveyStatus } from '@/hooks/useSurveys';
 import { checkPermissions } from '@/utility/logicFunctions';
+import Modal, { ModalFooter, ModalButton } from '@/components/ui/modal';
+import { QRCodeCanvas } from 'qrcode.react';
+import { FiCopy } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import { SurveysListParams } from '@/api/surveys';
 
 const SurveyComponent = () => {
     const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
+    // Share modal state
+    const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [shareSurvey, setShareSurvey] = useState<any | null>(null);
+    const [isCopying, setIsCopying] = useState(false);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const { user } = useAuth();
-    const { data, isLoading } = useSurveysList({ page, limit: pageSize });
+
+    const params = useMemo(() => {
+        const param: SurveysListParams = { page, limit: pageSize, surveyType: "general", owner: "me" };
+
+        if(checkPermissions(user, 'survey:view:all')) {
+            param.owner = "any";
+        }
+
+        return param;
+    }, [page, pageSize]);
+
+    const { data, isLoading } = useSurveysList(params);
     const deleteSurvey = useDeleteSurvey();
     const updateStatus = useUpdateSurveyStatus();
+    const router = useRouter();
 
     const surveys = useMemo(() => data?.result ?? [], [data]);
 
     const getStatusColor = (status: 'active' | 'paused' | 'archived') => {
         switch (status) {
             case 'active':
-                return 'bg-green-100 text-green-800';
+                return 'bg-green-300 text-green-900';
             case 'paused':
-                return 'bg-yellow-100 text-yellow-800';
+                return 'bg-yellow-300 text-yellow-900';
             case 'archived':
-                return 'bg-gray-200 text-gray-700';
+                return 'bg-gray-200 text-gray-900';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-300 text-gray-900';
         }
     };
 
@@ -43,7 +64,6 @@ const SurveyComponent = () => {
     };
 
     const handleSurveyAction = (action: string, surveyId: string, surveyName: string) => {
-        console.log(`${action} action for survey:`, surveyId, surveyName);
         // Handle different actions
         switch (action) {
             case 'view':
@@ -68,7 +88,7 @@ const SurveyComponent = () => {
                 alert(`Stopping survey: ${surveyName}`);
                 break;
             case 'analytics':
-                alert(`Viewing analytics for: ${surveyName}`);
+                router.navigate({ to: `/dashboard/surveys/analytics/${surveyId}` });
                 break;
             case 'export':
                 alert(`Exporting data for: ${surveyName}`);
@@ -103,6 +123,47 @@ const SurveyComponent = () => {
         }
         setDeleteModalOpen(false);
         setToDelete(null);
+    };
+
+    const buildShareLink = (s: any) => {
+        // link to the take page — this assumes route /dashboard/surveys/take/:id (adjust if different)
+        return `${window.location.origin}/dashboard/surveys/take/${s.id}`;
+    };
+
+    const openShareModal = (s: any) => {
+      setShareSurvey(s);
+      setShareModalOpen(true);
+    };
+
+    const handleCopyLink = async (link: string) => {
+      try {
+        setIsCopying(true);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(link);
+        } else {
+          // fallback
+          const ta = document.createElement('textarea');
+          ta.value = link;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        toast.success('Link copied to clipboard');
+      } catch (e: any) {
+        toast.error('Failed to copy link');
+      } finally {
+        setIsCopying(false);
+      }
+    };
+
+    const handleActionClick = (actionKey: string, survey: any) => {
+      if (actionKey === 'pause') updateStatus.mutate({ surveyId: String(survey.id), status: 'paused' });
+      else if (actionKey === 'activate') updateStatus.mutate({ surveyId: String(survey.id), status: 'active' });
+      else if (actionKey === 'archive') updateStatus.mutate({ surveyId: String(survey.id), status: 'archived' });
+      else if (actionKey === 'share') openShareModal(survey);
+      else if (actionKey === 'delete') { setToDelete({ id: survey.id, name: survey.title }); setDeleteModalOpen(true); }
+      else handleSurveyAction(actionKey, survey.id, survey.title);
     };
 
     const getSurveyActions = (survey: any, user: User | null) => {
@@ -214,12 +275,8 @@ const SurveyComponent = () => {
                                                     key={action.key}
                                                     icon={action.icon}
                                                     destructive={action.destructive}
-                                                    onClick={() => {
-                                                        if (action.key === 'pause') updateStatus.mutate({ surveyId: String(survey.id), status: 'paused' });
-                                                        else if (action.key === 'activate') updateStatus.mutate({ surveyId: String(survey.id), status: 'active' });
-                                                        else if (action.key === 'archive') updateStatus.mutate({ surveyId: String(survey.id), status: 'archived' });
-                                                        else handleSurveyAction(action.key, survey.id, survey.title);
-                                                    }}
+                                                    onClick={() => handleActionClick(action.key, survey)}
+                                                    className='min-w-52'
                                                 >
                                                     {action.label}
                                                 </DropdownItem>
@@ -299,7 +356,7 @@ const SurveyComponent = () => {
                                         icon={action.icon}
                                         destructive={action.destructive}
                                         className='min-w-52'
-                                        onClick={() => handleSurveyAction(action.key, survey.id, survey.title)}
+                                        onClick={() => handleActionClick(action.key, survey)}
                                     >
                                         {action.label}
                                     </DropdownItem>
@@ -311,6 +368,9 @@ const SurveyComponent = () => {
             ))}
         </div>
     );
+
+    // Share modal (placed near bottom)
+    const shareLink = shareSurvey ? buildShareLink(shareSurvey) : '';
 
     return (
         <div className="pb-10">
@@ -355,6 +415,64 @@ const SurveyComponent = () => {
                 surveyTitle={toDelete?.name}
                 onConfirm={handleConfirmDelete}
             />
+
+            {/* Share Survey Modal */}
+            <Modal isOpen={shareModalOpen} onClose={() => setShareModalOpen(false)} title="Share Survey" size="lg" closeOnOverlayClick>
+              <div className="p-4">
+                <div className="flex gap-6">
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold mb-2">{shareSurvey?.title}</h4>
+                    <p className="text-sm text-gray-600 mb-4">Share the survey link or scan the QR code to allow respondents to open the survey on their device.</p>
+
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Shareable link</label>
+                    <div className="flex items-center gap-2">
+                      <input readOnly value={shareLink} className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50" />
+                      <button onClick={() => handleCopyLink(shareLink)} className="px-3 py-2 bg-primary text-white rounded-md flex items-center gap-2">
+                        <FiCopy />
+                        {isCopying ? 'Copying' : 'Copy'}
+                      </button>
+                    </div>
+
+                    {/* Allowed roles (view-only badges) */}
+                    {shareSurvey?.allowedRoles && (shareSurvey.allowedRoles.length > 0) && (
+                      <div className="mt-4 border border-gray-200 p-3 rounded-md">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Allowed roles</label>
+                        <div className="flex flex-wrap gap-2">
+                          {shareSurvey.allowedRoles.map((r: any) => {
+                            const label = (r.name || r.displayName || '').toString().split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                            return (
+                              <span key={r.id} className="inline-flex items-center bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                                {label || r.id}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <a href={`mailto:?subject=${encodeURIComponent('Please take this survey')}&body=${encodeURIComponent(shareLink)}`} className="text-sm text-primary hover:underline">Share via Email</a>
+                      <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Please take this survey')}&url=${encodeURIComponent(shareLink)}`} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">Share on Twitter</a>
+                    </div>
+
+                    <div className="mt-4 text-sm text-gray-500">
+                      <p>Tip: You can paste this link into chat, email or copy it to your clipboard. The QR code on the right can be scanned by mobile users.</p>
+                    </div>
+                  </div>
+
+                  <div className="w-48 flex-shrink-0 flex flex-col items-center justify-center border-l border-gray-100 pl-4">
+                    <div className="bg-white p-3 rounded-md shadow-sm">
+                      {shareLink ? <QRCodeCanvas value={shareLink} size={160} /> : <div className="w-40 h-40 bg-gray-100" />}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-3 text-center">Scan to open survey</div>
+                  </div>
+                </div>
+              </div>
+              <ModalFooter>
+                <ModalButton onClick={() => setShareModalOpen(false)} variant="secondary">Close</ModalButton>
+                <ModalButton onClick={() => { handleCopyLink(shareLink); }} variant="primary">Copy link</ModalButton>
+              </ModalFooter>
+            </Modal>
         </div>
     );
 };

@@ -20,7 +20,6 @@ const createTransporter = async () => {
     console.log("Credentials", {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_SECURE,
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASSWORD,
     })
@@ -32,6 +31,9 @@ const createTransporter = async () => {
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false, // <--- allow self-signed certs if needed
       },
     });
   }
@@ -46,6 +48,9 @@ const createTransporter = async () => {
       user: testAccount?.user,
       pass: testAccount?.pass,
     },
+    tls: {
+    rejectUnauthorized: false, // <--- allow self-signed certs if needed
+  },
   });
 };
 
@@ -118,5 +123,105 @@ export const sendWelcomeEmail = async (to: string, name: string): Promise<void> 
   } catch (error) {
     console.error('Error sending welcome email:', error);
     // Don't throw the error to prevent exposing email sending issues to the client
+  }
+};
+
+/**
+ * Send an organization invite email with signup link
+ */
+export const sendOrganizationInviteEmail = async (
+  to: string,
+  organizationName: string,
+  token: string,
+  organizationId: string
+): Promise<boolean> => {
+  try {
+    const transporter = await createTransporter();
+    // In your email service
+    const email = to.replace('@', '-').replace('.', '_');
+    const verificationLink = `${config.frontendUrl}/verify-organization?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+
+    await transporter.sendMail({
+      from: '"Community Tool" <no-reply@communitytool.com>',
+      to,
+      subject: `Invitation to join ${organizationName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Organization Invitation</h2>
+          <p>You have been invited to join <strong>${organizationName}</strong> on Community Tool.</p>
+          <p>Click the button below to set up your account:</p>
+          <a href="${verificationLink}" 
+             style="display: inline-block; background: #004f64; color: white; padding: 12px 24px; 
+                    text-decoration: none; border-radius: 4px; margin: 16px 0;">
+            Accept Invitation
+          </a>
+          <p style="color: #666; font-size: 14px;">This link will expire in 24 hours.</p>
+          <p style="color: #666; font-size: 12px;">Verification code: ${token}</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending organization invite:', error);
+    return false;
+  }
+};
+
+// Email templates
+export const EmailTemplates = {
+  ORGANIZATION_INVITE: (data: {
+    organizationName: string;
+    verificationLink: string;
+    expiresIn: string;
+  }) => ({
+    subject: `Invitation to join ${data.organizationName}`,
+    html: `
+      <h1>Welcome to ${data.organizationName}</h1>
+      <p>You have been invited to join the organization as an owner/administrator.</p>
+      <p>Please click the link below to set up your account:</p>
+      <a href="${data.verificationLink}" style="
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #0066cc;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+      ">Set Up Account</a>
+      <p>This link will expire in ${data.expiresIn}.</p>
+      <p>If you did not expect this invitation, please ignore this email.</p>
+    `,
+  }),
+};
+
+/**
+ * Send organization invite email
+ */
+export const sendOrganizationInvite = async (
+  email: string,
+  organizationName: string,
+  verificationLink: string,
+  expiresIn: string
+): Promise<boolean> => {
+  try {
+    const template = EmailTemplates.ORGANIZATION_INVITE({
+      organizationName,
+      verificationLink,
+      expiresIn,
+    });
+    const transporter = await createTransporter();
+
+    await transporter.sendMail({
+      from: '"Community Tool" <no-reply@communitytool.com>',
+      to: email,
+      subject: template.subject,
+      html: template.html,
+      tls: {
+        rejectUnauthorized: false, // <--- allow self-signed certs if needed
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error('Failed to send organization invite:', error);
+    return false;
   }
 };

@@ -1,8 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { feedbackApi, FeedbackListParams, FeedbackCreateRequest, FeedbackUpdateRequest } from '../api/feedback';
-// import { toast } from 'react-toastify';
-import { checkPermissions } from '@/utility/logicFunctions';
-import useAuth from './useAuth';
 
 const feedbackKeys = {
   all: ['feedback'] as const,
@@ -13,20 +10,10 @@ const feedbackKeys = {
   stats: () => [...feedbackKeys.all, 'stats'] as const,
 };
 
-// Unified hook: chooses scope based on permissions
-// If user has 'feedback:all:read' -> fetch all
-// else if user has 'feedback:personal:read' -> fetch personal
-// else -> disabled query
 export const useGetFeedback = (params: FeedbackListParams) => {
-  const { user, isUserLoading } = useAuth();
-  const canReadAll = checkPermissions(user, 'feedback:all:read');
-  const canReadPersonal = checkPermissions(user, 'feedback:personal:read');
-  const scope = canReadAll ? 'all' : canReadPersonal ? 'personal' : 'none';
-
   return useQuery({
-    queryKey: [...feedbackKeys.lists(), scope, params],
-    enabled: !isUserLoading && scope !== 'none',
-    queryFn: () => (canReadAll ? feedbackApi.list(params) : feedbackApi.getUserFeedback(params)),
+    queryKey: [...feedbackKeys.lists(), params],
+    queryFn: () => feedbackApi.list(params),
   });
 };
 

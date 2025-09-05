@@ -1,8 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useSurvey } from '@/hooks/useSurveys';
-import { useUserSurveyAnswers } from '@/hooks/useSurveys';
+import { useSurvey, useSurveysList } from '@/hooks/useSurveys';
 import { FaArrowLeft } from 'react-icons/fa';
-import type { SurveyEntity, QuestionItem, AnswerItem } from '@/api/surveys';
+import type { QuestionItem, AnswerItem } from '@/api/surveys';
 
 export const Route = createFileRoute('/dashboard/surveys/review-survey')({
   component: RouteComponent,
@@ -20,7 +19,7 @@ function RouteComponent() {
   const survey = surveyResponse?.result;
   
   // Get user's answers for this survey
-  const { data: userAnswers } = useUserSurveyAnswers(true);
+  const { data: userAnswers } = useSurveysList({responded: true});
   const userSurveyAnswers = userAnswers?.result?.find(s => s.id === surveyId)?.answers || [];
   
   // Create a map of questionId to answer for easy lookup

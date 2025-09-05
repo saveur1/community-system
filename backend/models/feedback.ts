@@ -12,6 +12,7 @@ export interface FeedbackAttributes {
   projectId: string | null;
   responderName: string | null;
   userId: string | null;
+  otherFeedbackOn: string | null; // New field for "Other feedback on"
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -29,6 +30,7 @@ class Feedback extends Model<FeedbackAttributes, FeedbackCreationAttributes> imp
   declare responderName: string | null;
   declare projectId: string | null;
   declare userId: string | null;
+  declare otherFeedbackOn: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -53,6 +55,11 @@ Feedback.init({
     type: DataTypes.ENUM('positive', 'negative', 'suggestion', 'concern'),
     allowNull: true,
     field: 'feedback_type',
+  },
+  otherFeedbackOn: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'other_feedback_on',
   },
   feedbackMethod: {
     type: DataTypes.ENUM('text', 'voice', 'video'),

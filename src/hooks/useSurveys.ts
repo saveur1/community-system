@@ -5,11 +5,15 @@ import { toast } from 'react-toastify';
 // Query keys for surveys
 export const surveysKeys = {
   all: ['surveys'] as const,
+  // include status and surveyType in the key so queries are differentiated
   list: (params?: SurveysListParams) => [
     ...surveysKeys.all,
     'list',
     params?.page ?? 1,
     params?.limit ?? 10,
+    params?.status ?? null,
+    params?.surveyType ?? null,
+    params?.responded ?? null,
   ] as const,
   detail: (id: string) => [...surveysKeys.all, 'detail', id] as const,
   // New key for user answers
@@ -17,7 +21,7 @@ export const surveysKeys = {
 };
 
 // List surveys
-export function useSurveysList(params: SurveysListParams = { page: 1, limit: 10 }) {
+export function useSurveysList(params: SurveysListParams = { page: 1, limit: 10, surveyType: undefined }) {
   return useQuery<SurveysListResponse>({
     queryKey: surveysKeys.list(params),
     queryFn: () => surveysApi.list(params),
@@ -50,7 +54,6 @@ export function useCreateSurvey() {
     mutationFn: (payload: SurveyCreateRequest) => surveysApi.create(payload),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: surveysKeys.all });
-      toast.success('Survey created successfully');
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to create survey';
@@ -119,7 +122,6 @@ export function useSubmitSurveyAnswers(surveyId: string) {
   return useMutation({
     mutationFn: (payload: SubmitAnswersRequest) => surveysApi.submitAnswers(surveyId, payload),
     onSuccess: async () => {
-      toast.success('Answers submitted successfully');
       await qc.invalidateQueries({ queryKey: surveysKeys.detail(surveyId) });
     },
     onError: (error: any) => {

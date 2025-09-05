@@ -8,6 +8,7 @@ import { Op } from 'sequelize';
 import { User } from '@/models/users';
 import Project from '@/models/project';
 import Role from '@/models/role';
+import { createSystemLog } from '../utils/systemLog';
 
 interface DocumentInput {
   documentName: string;
@@ -27,6 +28,7 @@ interface FeedbackCreateRequest {
   followUpNeeded?: boolean;
   documents?: DocumentInput[];
   responderName?: string | null;
+  otherFeedbackOn?: string;
 }
 
 interface FeedbackUpdateRequest extends Partial<FeedbackCreateRequest> {
@@ -36,15 +38,19 @@ interface FeedbackUpdateRequest extends Partial<FeedbackCreateRequest> {
 @Route('api/feedback')
 @Tags('Feedback')
 export class FeedbackController extends Controller {
-  @Security('jwt', ['feedback:all:read'])
+  @Security('jwt', ['feedback:read'])
   @Get('/')
   @asyncCatch
   public async getFeedback(
+    @Request() req: { user: IUserAttributes },
     @Query() page: number = 1,
     @Query() limit: number = 10,
     @Query() status?: 'submitted' | 'Acknowledged' | 'Resolved' | 'Rejected',
     @Query() feedbackType?: 'positive' | 'negative' | 'suggestion' | 'concern',
-    @Query() projectId?: string
+    @Query() projectId?: string,
+    @Query() owner?: 'me' | 'other',
+    @Query() startDate?: string,
+    @Query() endDate?: string
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
     const where: any = {};
@@ -52,6 +58,14 @@ export class FeedbackController extends Controller {
     if (status) where.status = status;
     if (feedbackType) where.feedbackType = feedbackType;
     if (projectId) where.projectId = projectId;
+    if (owner) {
+      where.userId = owner === 'me' ? req.user.id : { [Op.ne]: req.user.id };
+    }
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt[Op.gte] = new Date(startDate);
+      if (endDate) where.createdAt[Op.lte] = new Date(endDate);
+    }
 
     const { count, rows } = await Feedback.findAndCountAll({
       limit,
@@ -68,14 +82,16 @@ export class FeedbackController extends Controller {
         { 
           model: User, 
           as: 'user',
-          attributes:['id', 'name', 'email'],
+          attributes: ['id', 'name', 'email'],
           include: [
             { model: Role, as: 'roles', attributes: ['id', 'name'] }
           ]
         },
-        { model: Project, 
+        { 
+          model: Project, 
           as: 'project', 
-          attributes: ['id', 'name', 'status'] },
+          attributes: ['id', 'name', 'status'] 
+        },
       ],
       distinct: true,
     });
@@ -95,13 +111,20 @@ export class FeedbackController extends Controller {
     @Request() req: { user: IUserAttributes },
     @Query() page: number = 1,
     @Query() limit: number = 10,
-    @Query() status?: 'submitted' | 'Acknowledged' | 'Resolved' | 'Rejected'
+    @Query() status?: 'submitted' | 'Acknowledged' | 'Resolved' | 'Rejected',
+    @Query() startDate?: string,
+    @Query() endDate?: string
   ): Promise<ServiceResponse<any[]>> {
     const userId = req.user.id;
     const offset = (page - 1) * limit;
     const where: any = { userId };
     
     if (status) where.status = status;
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt[Op.gte] = new Date(startDate);
+      if (endDate) where.createdAt[Op.lte] = new Date(endDate);
+    }
 
     const { count, rows } = await Feedback.findAndCountAll({
       limit,
@@ -118,14 +141,16 @@ export class FeedbackController extends Controller {
         { 
           model: User, 
           as: 'user',
-          attributes:['id', 'name', 'email'],
+          attributes: ['id', 'name', 'email'],
           include: [
             { model: Role, as: 'roles', attributes: ['id', 'name'] }
           ]
         },
-        { model: Project, 
+        { 
+          model: Project, 
           as: 'project', 
-          attributes: ['id', 'name', 'status'] },
+          attributes: ['id', 'name', 'status'] 
+        },
       ],
       distinct: true,
     });
@@ -156,6 +181,7 @@ export class FeedbackController extends Controller {
     return ServiceResponse.success('Feedback retrieved successfully', feedback);
   }
 
+  @Security('jwt', ['feedback:create'])
   @Post('/')
   @asyncCatch
   public async createFeedback(
@@ -172,6 +198,7 @@ export class FeedbackController extends Controller {
       userId: req.user?.id || null,
       status: 'submitted',
       responderName: data.responderName || null,
+      otherFeedbackOn: data.otherFeedbackOn || null,
     });
 
     if (data.documents && data.documents.length > 0) {
@@ -195,6 +222,8 @@ export class FeedbackController extends Controller {
       ],
     });
     
+    await createSystemLog(req ?? null, 'created_feedback', 'Feedback', feedback.id, { feedbackType: data.feedbackType });
+
     return ServiceResponse.success('Feedback created successfully', result, 201);
   }
 
@@ -202,6 +231,7 @@ export class FeedbackController extends Controller {
   @Put('/{feedbackId}')
   @asyncCatch
   public async updateFeedback(
+    @Request() req: any,
     @Path() feedbackId: string,
     @Body() data: FeedbackUpdateRequest
   ): Promise<ServiceResponse<any | null>> {
@@ -217,11 +247,10 @@ export class FeedbackController extends Controller {
       followUpNeeded: data.followUpNeeded ?? feedback.followUpNeeded,
       status: data.status ?? feedback.status,
       responderName: data.responderName ?? feedback.responderName,
+      otherFeedbackOn: data.otherFeedbackOn ?? feedback.otherFeedbackOn,
     });
 
     if (data.documents) {
-      // For simplicity, this example replaces all documents.
-      // A more sophisticated approach might involve diffing the arrays.
       const existingDocuments = await feedback.getDocuments();
       if (existingDocuments.length > 0) {
         const idsToRemove = existingDocuments.map((doc: any) => doc.id);
@@ -247,7 +276,7 @@ export class FeedbackController extends Controller {
         },
       ],
     });
-    
+    await createSystemLog(req ?? null, 'updated_feedback', 'Feedback', feedback.id, { changes: Object.keys(data) });
     return ServiceResponse.success('Feedback updated successfully', result);
   }
 
@@ -255,17 +284,20 @@ export class FeedbackController extends Controller {
   @Delete('/{feedbackId}')
   @SuccessResponse(204, 'No Content')
   @asyncCatch
-  public async deleteFeedback(@Path() feedbackId: string): Promise<ServiceResponse<null>> {
+  public async deleteFeedback(
+    @Request() req: any,
+    @Path() feedbackId: string
+  ): Promise<ServiceResponse<null>> {
     const feedback = await Feedback.findByPk(feedbackId);
     if (!feedback) return ServiceResponse.failure('Feedback not found', null, 404);
 
-    // Remove associated documents
     const documents = await feedback.getDocuments();
     for (const doc of documents) {
       await doc.destroy();
     }
 
     await feedback.destroy();
+    await createSystemLog(req ?? null, 'deleted_feedback', 'Feedback', feedbackId, { mainMessage: feedback.mainMessage });
     this.setStatus(204);
     return ServiceResponse.success('Feedback deleted successfully', null, 204);
   }

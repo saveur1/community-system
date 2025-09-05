@@ -21,7 +21,7 @@ export async function expressAuthentication(
   if (securityName === 'jwt') {
     const token = request.cookies.token;
     if (!token) {
-      throw new Error('No token provided');
+      return Promise.resolve(null);
     }
 
     try {
@@ -53,7 +53,7 @@ export async function expressAuthentication(
 
       if (scopes && scopes.length > 0) {
         const userPermissions = user.roles?.flatMap((role: RoleWithPermissions) => role.permissions?.map(p => p.name) || []) || [];
-        const hasAllScopes = scopes.every(scope => userPermissions.includes(scope));
+        const hasAllScopes = scopes.some(scope => userPermissions.includes(scope));
 
         if (!hasAllScopes) {
           throw new Error('Forbidden: Insufficient permissions');

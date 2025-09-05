@@ -11,6 +11,7 @@ export class Role extends Model<IRoleAttributes, IRoleCreationAttributes> implem
   declare name: string;
   declare description: string | null;
   declare category?: string | null;
+  declare stakeholderId?: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -59,6 +60,11 @@ Role.init(
         notEmpty: true,
         len: [2, 50]
       }
+    },
+    stakeholderId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      unique: true
     },
     description: {
       type: DataTypes.STRING(255),

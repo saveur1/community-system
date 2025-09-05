@@ -33,6 +33,7 @@ export type UserCreateRequest = {
   status?: 'active' | 'inactive' | 'pending';
   verified?: boolean;
   roleIds?: string[]; // optional: if backend supports setting roles
+  stakeholderId?: string; // Optional: associate user with a stakeholder on creation
 };
 
 export type UserUpdateRequest = Partial<Omit<UserCreateRequest, 'password'>> & {

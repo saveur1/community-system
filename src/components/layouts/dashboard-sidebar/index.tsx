@@ -66,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* Navigation */}
-          <div className="py-4">
+          <div className="py-4 h-[calc(100vh-178px)] overflow-y-auto scroll_nav">
             {navItems.map((item) => (
               <NavItem key={item.name} item={item} collapsed={!sidebarOpen} />
             ))}

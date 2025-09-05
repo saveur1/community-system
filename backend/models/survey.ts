@@ -1,7 +1,9 @@
-import { DataTypes, Model, Optional, type HasManyGetAssociationsMixin, type HasManyAddAssociationMixin, type HasManyAddAssociationsMixin, type HasManySetAssociationsMixin, type HasManyCreateAssociationMixin } from 'sequelize';
+import { DataTypes, Model, Optional, type HasManyGetAssociationsMixin, type HasManyAddAssociationMixin, type HasManyAddAssociationsMixin, type HasManySetAssociationsMixin, type HasManyCreateAssociationMixin, type BelongsToManyGetAssociationsMixin, type BelongsToManyAddAssociationMixin, type BelongsToManyAddAssociationsMixin, type BelongsToManySetAssociationsMixin, type BelongsToManyRemoveAssociationMixin, type BelongsToGetAssociationMixin } from 'sequelize';
 import sequelize from '../config/database';
 import Question from './question';
 import Answer from './answer';
+import Role from './role';
+import { User } from './users';
 
 export type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea';
 
@@ -34,6 +36,11 @@ export interface SurveyAttributes {
   project: string; // from UI currently a string label; can be changed to FK later
   estimatedTime: string; // keep as string per UI (e.g., "15")
   status: 'active' | 'paused' | 'archived';
+  surveyType?: 'general' | 'report-form';
+  createdBy?: string | null;
+  // New: when survey opens and closes
+  startAt: Date;
+  endAt: Date;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -48,6 +55,10 @@ class Survey extends Model<SurveyAttributes, SurveyCreationAttributes> implement
   declare project: string;
   declare estimatedTime: string;
   declare status: 'active' | 'paused' | 'archived';
+  declare surveyType?: 'general' | 'report-form';
+  declare createdBy?: string | null;
+  declare startAt: Date;
+  declare endAt: Date;
 
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
@@ -67,6 +78,18 @@ class Survey extends Model<SurveyAttributes, SurveyCreationAttributes> implement
   declare setAnswers: HasManySetAssociationsMixin<Answer, string>;
   declare createAnswer: HasManyCreateAssociationMixin<Answer>;
   declare readonly answers?: Answer[];
+
+  // Many-to-many (Survey <-> Role) mixins for allowedRoles
+  declare getAllowedRoles: BelongsToManyGetAssociationsMixin<Role>;
+  declare addAllowedRole: BelongsToManyAddAssociationMixin<Role, string>;
+  declare addAllowedRoles: BelongsToManyAddAssociationsMixin<Role, string>;
+  declare setAllowedRoles: BelongsToManySetAssociationsMixin<Role, string>;
+  declare removeAllowedRole: BelongsToManyRemoveAssociationMixin<Role, string>;
+  declare readonly allowedRoles?: Role[];
+
+  // BelongsTo (Survey -> User) mixin for creator
+  declare getCreator: BelongsToGetAssociationMixin<User>;
+  declare readonly creator?: User | null;
 }
 
 Survey.init(
@@ -99,6 +122,33 @@ Survey.init(
       allowNull: false,
       defaultValue: '0',
       comment: 'Estimated time in minutes (string to match UI)',
+    },
+    // required timestamps for survey availability window
+    startAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      comment: 'When survey becomes available (required)',
+    },
+    endAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      comment: 'When survey closes (required)',
+    },
+    surveyType: {
+      type: DataTypes.ENUM('general', 'report-form'),
+      defaultValue: 'general',
+      allowNull: false,
+      comment: 'Type of survey',
+    },
+    createdBy: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+      comment: 'User who created this survey',
     },
     status: {
       type: DataTypes.ENUM('active', 'paused', 'archived'),

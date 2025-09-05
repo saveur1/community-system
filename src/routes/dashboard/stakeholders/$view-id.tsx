@@ -1,5 +1,5 @@
 import { createFileRoute, useParams } from '@tanstack/react-router';
-import { useStakeholder } from '@/hooks/useStakeholders';
+import { useOrganization } from '@/hooks/useOrganizations';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { FaBuilding, FaCalendar, FaEdit, FaTrash, FaEllipsisV } from 'react-icons/fa';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
@@ -8,7 +8,7 @@ import { useNavigate } from '@tanstack/react-router';
 const StakeholderViewComponent = () => {
   const { 'view-id': stakeholderId } = useParams({ from: '/dashboard/stakeholders/$view-id' });
   const navigate = useNavigate();
-  const { data, isLoading, error } = useStakeholder(stakeholderId);
+  const { data, isLoading, error } = useOrganization(stakeholderId);
 
   const stakeholder = data?.result;
 
@@ -231,4 +231,4 @@ const StakeholderViewComponent = () => {
 
 export const Route = createFileRoute('/dashboard/stakeholders/$view-id')({
   component: StakeholderViewComponent,
-}); 
+});

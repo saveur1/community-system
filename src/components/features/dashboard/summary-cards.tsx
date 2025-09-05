@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
 import { IconType } from "react-icons/lib";
 
-type SummaryCardProps = {
+export type SummaryCardProps = {
   id: string;
   title: string;
   value: string | number;

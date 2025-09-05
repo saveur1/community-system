@@ -25,6 +25,7 @@ export interface SurveyDraft {
   description: string;
   project: string;
   estimatedTime: string;
+  status?: 'active' | 'paused' | 'archived';
   questions: Question[];
 }
 

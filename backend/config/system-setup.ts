@@ -9,10 +9,11 @@ const permissions = [
   // User Permissions
   { name: 'user:create', description: 'Create users' },
   { name: 'user:view', description: 'View users' },
-  { name: 'users:view', description: 'View All users'},
   { name: 'user:read', description: 'View users' },
   { name: 'user:update', description: 'Update users' },
   { name: 'user:delete', description: 'Delete users' },
+
+  // Role Permissions
   { name: 'role:create', description: 'Create roles' },
   { name: 'role:read', description: 'View roles' },
   { name: 'role:update', description: 'Update roles' },
@@ -25,7 +26,6 @@ const permissions = [
   { name: 'feedback:delete', description: 'Delete feedback' },
   { name: 'feedback:all:read', description: 'View all feedback' },
   { name: 'feedback:personal:read', description: 'View personal feedback' },
-  { name: 'my_feedback:delete', description: 'Delete my feedback' },
 
   // Project Permissions
   { name: 'project:create', description: 'Create projects' },
@@ -33,11 +33,6 @@ const permissions = [
   { name: 'project:update', description: 'Update projects' },
   { name: 'project:delete', description: 'Delete projects' },
 
-  // Document Permissions
-  { name: 'document:create', description: 'Create documents' },
-  { name: 'document:read', description: 'View documents' },
-  { name: 'document:update', description: 'Update documents' },
-  { name: 'document:delete', description: 'Delete documents' },
 
   // Community Session Permissions
   { name: 'community_session:create', description: 'Create community sessions' },
@@ -74,6 +69,7 @@ const permissions = [
   { name: 'survey:delete', description: 'Delete surveys' },
   { name: 'survey:analytics', description: 'View analytics' },
   { name: 'survey:forms', description: 'View and create other user\'s forms' },
+  { name: 'survey:all:read', description: 'View all surveys' },
 
   // Notification Permissions
   { name: 'notification:read', description: 'View notifications' },
@@ -89,58 +85,31 @@ const permissions = [
   { name: 'rapid_enquiry:create', description: 'Create rapid enquiry' },
   { name: 'rapid_enquiry:read', description: 'View rapid enquiry' },
   { name: 'rapid_enquiry:update', description: 'Update rapid enquiry' },
-  { name: 'rapid_enquiry:delete', description: 'Delete rapid enquiry' }
+  { name: 'rapid_enquiry:delete', description: 'Delete rapid enquiry' },
+
+  // Stakeholder Permissions
+  { name: 'stakeholder:create', description: 'Create stakeholders' },
+  { name: 'stakeholder:read', description: 'View stakeholders' },
+  { name: 'stakeholder:update', description: 'Update stakeholders' },
+  { name: 'stakeholder:delete', description: 'Delete stakeholders' },
+
+  // System Logs
+  { name: 'system_log:create', description: 'Create system logs' },
+  { name: 'system_log:read', description: 'View system logs' },
+  { name: 'system_log:update', description: 'Update system logs' },
+  { name: 'system_log:delete', description: 'Delete system logs' }
 ];
 
 // Base role templates with common permissions
-const roleTemplates = { 
-  // Stakeholders
-  unicef: {
-    description: 'UNICEF - Stakeholder role',
-    category: 'Stakeholders',
-    permissions: [
-      'survey:read', 'survey:respond',
-      'feedback:read',
-      'feedback:personal:read',
-
-      'document:read',
-      'community_session:read', 'community_session:download',
-      'report:create', 'report:read', 'report:update', 'report:delete', 'dashboard:stakeholder',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'project:read',
-      'comment:read',
-      'comment:create',
-      'comment:update'
-    ]
-  },
-  rbc: {
-    description: 'RBC - Stakeholder role',
-    category: 'Stakeholders',
-    permissions: [
-      'survey:read', 'survey:respond',
-      'feedback:read',
-      'feedback:personal:read',
-      'document:read',
-      'community_session:read', 'community_session:download',
-      'report:create', 'report:read', 'report:update', 'report:delete', 'dashboard:stakeholder',
-      'notification:read',
-      'notification:delete',
-      'announcement:read',
-      'project:read',
-      'comment:read',
-      'comment:create',
-      'comment:update'
-    ]
-  },
-  
+const roleTemplates = {
   // Frontend-aligned roles from signup userTypes
   // Community Members
   volunteers: {
     description: 'Volunteers - Community role',
     category: 'Community Members',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond',
 
@@ -155,7 +124,7 @@ const roleTemplates = {
       'report:create', 'report:read', 'report:update',
 
       //Community Sessions
-      'community_session:read','community_session:download',
+      'community_session:read','community_session:download','community_session:create',
 
       //Dashboard
       'dashboard:community',
@@ -175,13 +144,18 @@ const roleTemplates = {
       'comment:delete',
 
       //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   youth_leaders: {
     description: 'Youth Leaders - Community role',
     category: 'Community Members',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond',
 
@@ -191,9 +165,6 @@ const roleTemplates = {
 
       //Documents
       'document:read','document:download','document:update','document:delete',
-
-      //Reports
-      'report:create', 'report:read', 'report:update',
 
       //Community Sessions
       'community_session:read','community_session:download',
@@ -216,13 +187,18 @@ const roleTemplates = {
       'comment:delete',
 
       //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   local_government_leaders: {
     description: 'Local Government Leaders - Community role',
     category: 'Community Members',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond',
 
@@ -232,9 +208,6 @@ const roleTemplates = {
 
       //Documents
       'document:read','document:download','document:update','document:delete',
-
-      //Reports
-      'report:create', 'report:read', 'report:update',
 
       //Community Sessions
       'community_session:read','community_session:download',
@@ -257,13 +230,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   school_representatives: {
     description: 'School Representatives - Community role',
     category: 'Community Members',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond',
 
@@ -298,13 +276,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   beneficiaries: {
     description: 'Beneficiaries - Community role',
     category: 'Community Members',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond',
 
@@ -339,13 +322,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   religious_community_representatives: {
     description: 'Religious Community Representatives - Community role',
     category: 'Community Members',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond',
 
@@ -380,13 +368,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   general_population: {
     description: 'General Population - Community role',
     category: 'Community Members',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond',
 
@@ -418,7 +411,10 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
       ]
   },
   
@@ -427,6 +423,8 @@ const roleTemplates = {
     description: 'Nurses - Health Services role',
     category: 'Health service providers',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
 
@@ -461,13 +459,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
       ]
   },
   chw: {
     description: 'Community Health Workers - Health Services role',
     category: 'Health service providers',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
 
@@ -502,13 +505,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   epi_managers: {
     description: 'EPI Managers - Health Services role',
     category: 'Health service providers',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
 
@@ -543,13 +551,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   doctors: {
     description: 'Doctors - Health Services role',
     category: 'Health service providers',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
 
@@ -584,13 +597,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   health_facility_managers: {
     description: 'Health Facility Managers - Health Services role',
     category: 'Health service providers',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
 
@@ -625,13 +643,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   anc: {
     description: 'ANC - Health Services role',
     category: 'Health service providers',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
 
@@ -666,13 +689,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   cho: {
     description: 'CHO - Health Services role',
     category: 'Health service providers',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
 
@@ -707,13 +735,18 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   frontline_health_workers: {
     description: 'Frontline Health Workers - Health Services role',
     category: 'Health service providers',
     permissions: [
+      'system_log:read',
+      'role:read',
       //Surveys
       'survey:read', 'survey:respond','survey:create','survey:update','survey:delete',
 
@@ -748,7 +781,10 @@ const roleTemplates = {
       'comment:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read'
     ]
   },
   
@@ -757,6 +793,8 @@ const roleTemplates = {
     description: 'Religious Leaders - RICH Members role',
     category: 'RICH Members',
     permissions: [
+      'system_log:read',
+      'role:read',
       'survey:read', 'survey:respond', 'survey:create', 'survey:update','survey:forms',
       'feedback:create', 'feedback:read','feedback:all:read',
       'document:read',
@@ -775,14 +813,22 @@ const roleTemplates = {
       'rapid_enquiry:delete',
 
       //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read',
+      'stakeholder:create',
+      'stakeholder:update',
+      'stakeholder:delete'
     ]
   },
   rich_members_representatives: {
     description: 'RICH Members Representatives - RICH Members role',
     category: 'RICH Members',
     permissions: [
-      'survey:read', 'survey:respond', 'survey:create', 'survey:update','survey:forms',
+      'system_log:read',
+      'role:read',
+      'survey:read', 'survey:respond', 'survey:create', 'survey:update','survey:forms','survey:all:read',
       'feedback:create', 'feedback:read','feedback:all:read',
       'document:read',
       'community_session:read', 'community_session:create',
@@ -800,7 +846,13 @@ const roleTemplates = {
       'rapid_enquiry:delete',
 
        //Projects
-      'project:read'
+      'project:read',
+
+      //Stakeholders
+      'stakeholder:read',
+      'stakeholder:create',
+      'stakeholder:update',
+      'stakeholder:delete'
     ]
   },
   
@@ -814,7 +866,9 @@ const roleTemplates = {
     description: 'System administrator with most permissions',
     category: 'System',
     permissions: [
-      'user:create', 'user:read', 'user:update', 'user:delete','user:view','users:view',
+      'system_log:read',
+      'role:read',
+      'user:create', 'user:read', 'user:update', 'user:delete','user:view',
       'role:create', 'role:read', 'role:update', 'role:delete',
       'feedback:create', 'feedback:read', 'feedback:update', 'feedback:delete','feedback:all:read',
       'project:create', 'project:read', 'project:update', 'project:delete',
@@ -823,7 +877,7 @@ const roleTemplates = {
       'employee:create', 'employee:read', 'employee:update', 'employee:delete',
       'community_session:create', 'community_session:read', 'community_session:update', 'community_session:download', 'community_session:delete',
       'report:create', 'report:read', 'report:update', 'report:delete', 'dashboard:analytics',
-      'survey:create', 'survey:read', 'survey:respond', 'survey:update', 'survey:delete', 'survey:forms',
+      'survey:create', 'survey:read', 'survey:respond', 'survey:update', 'survey:delete', 'survey:forms', 'survey:all:read', 'survey:analytics',
       'notification:read',
       'notification:delete',
       'announcement:read',
@@ -838,7 +892,13 @@ const roleTemplates = {
       'rapid_enquiry:delete',
 
       //Projects
-      'project:read'
+      'project:read',
+      
+      //Stakeholders
+      'stakeholder:read',
+      'stakeholder:create',
+      'stakeholder:update',
+      'stakeholder:delete'
     ]
   }
 };

@@ -1,4 +1,4 @@
-import { FaList, FaTh } from 'react-icons/fa';
+import { FaList, FaPlus, FaTh } from 'react-icons/fa';
 import { Link } from '@tanstack/react-router';
 
 interface FeedbackToolbarProps {
@@ -45,8 +45,8 @@ export const FeedbackToolbar = ({
             <FaTh className="w-4 h-4" />
           </button>
         </div>
-        <Link to="/dashboard/feedback/add-new" className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm flex items-center gap-2">
-          <span className="text-lg">+</span>
+        <Link to="/dashboard/feedback/add-new" className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-sm flex items-center gap-2">
+          <FaPlus className="w-4 h-4" />
           Make Feedback
         </Link>
       </div>

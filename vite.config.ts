@@ -44,7 +44,7 @@ const clientBuildConfig: BuildEnvironmentOptions = {
 
 // https://vitejs.dev/config/
 export default defineConfig((configEnv) => {
-  const { command, mode, isSsrBuild } = configEnv;
+  const {  mode, isSsrBuild } = configEnv;
   
   // Load environment variables based on the current mode
   const env = loadEnv(mode, process.cwd(), '')
@@ -68,6 +68,6 @@ export default defineConfig((configEnv) => {
       tailwindcss()
     ],
     build: isSsrBuild ? ssrBuildConfig : clientBuildConfig,
-    
+   
   }
 })

@@ -3,12 +3,15 @@ import { useEffect, useMemo, useState, type DragEvent, type FC, type JSX } from 
 import Breadcrumb from '@/components/ui/breadcrum';
 import { useSurvey, useUpdateSurvey } from '@/hooks/useSurveys';
 import { useProjectsList } from '@/hooks/useProjects';
+import { useRolesList } from '@/hooks/useRoles';
 import SurveyInfoForm from '@/components/features/surveys/SurveyInfoForm';
 import QuestionsSection from '@/components/features/surveys/QuestionsSection';
 import SidebarQuestionPicker from '@/components/features/surveys/SidebarQuestionPicker';
 import SurveyFooterActions from '@/components/features/surveys/SurveyFooterActions';
 import { Question, SurveyDraft, ChoiceQuestion, TextQuestion } from '@/components/features/surveys/types';
 import { toast } from 'react-toastify';
+import Modal, { ModalFooter, ModalButton } from '@/components/ui/modal';
+import { FaX } from 'react-icons/fa6';
 
 export const Route = createFileRoute('/dashboard/surveys/edit/$edit-id')({
   component: EditSurveyComponent,
@@ -40,6 +43,7 @@ function mapFromServerToDraft(entity: any): SurveyDraft {
 
   return {
     title: entity?.title ?? '',
+    status: entity?.status ?? undefined,
     description: entity?.description ?? '',
     project: entity?.project ?? '',
     estimatedTime: entity?.estimatedTime ?? '',
@@ -53,6 +57,7 @@ function mapDraftToUpdatePayload(draft: SurveyDraft) {
     description: draft.description,
     project: draft.project,
     estimatedTime: draft.estimatedTime,
+    status: draft.status,
     questions: draft.questions.map(q => {
       if (q.type === 'single_choice' || q.type === 'multiple_choice') {
         const c = q as ChoiceQuestion;
@@ -85,6 +90,51 @@ function EditSurveyComponent(): JSX.Element {
   const { data } = useSurvey(surveyId, true);
   const updateSurvey = useUpdateSurvey(surveyId);
   const { data: projectsData } = useProjectsList({ page: 1, limit: 100 });
+  const { data: rolesData, isLoading: rolesLoading, isError: rolesError } = useRolesList({ page: 1, limit: 200 });
+
+  const [rolesModalOpen, setRolesModalOpen] = useState(false);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const isReportForm = data?.result?.surveyType === 'report-form';
+  const backHomeLink = isReportForm ? '/dashboard/surveys/report-forms' : '/dashboard/surveys';
+
+  const roleGroups = useMemo(() => {
+    const list = rolesData?.result ?? [];
+    const toLabel = (name: string) =>
+      name
+        .split('_')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+    const map = new Map<string, { title: string; options: { value: string; label: string }[] }>();
+    for (const r of list) {
+      const cat = r.category?.trim() || 'Other';
+      if (!map.has(cat)) map.set(cat, { title: cat, options: [] });
+      map.get(cat)!.options.push({ value: r.id, label: toLabel(r.name) });
+    }
+    return Array.from(map.values()).map(g => ({ title: g.title, options: g.options.sort((a,b)=>a.label.localeCompare(b.label)) }));
+  }, [rolesData]);
+
+  // Replace previous simple toggle with report-form aware toggle
+  const handleRoleToggle = (roleId: string) => {
+    if (isReportForm) {
+      // radio behavior: single selection
+      setSelectedRoles([roleId]);
+    } else {
+      setSelectedRoles(prev => prev.includes(roleId) ? prev.filter(r => r !== roleId) : [...prev, roleId]);
+    }
+  };
+  const toggleGroupRoles = (roleValues: string[], selectAll: boolean) => {
+    setSelectedRoles(prev => {
+      const set = new Set(prev);
+      if (selectAll) roleValues.forEach(v => set.add(v)); else roleValues.forEach(v => set.delete(v));
+      return Array.from(set);
+    });
+  };
+  const removeSelectedRole = (roleId: string) => setSelectedRoles(prev => prev.filter(r => r !== roleId));
+  const roleLabelById = (id: string) => {
+    const r = rolesData?.result?.find((x:any) => x.id === id);
+    if (r) return r.name.split('_').map((w:string)=>w[0].toUpperCase()+w.slice(1)).join(' ');
+    return id;
+  };
 
   const visibleProjects = projectsData?.result.slice(0, 5) ?? [];
   const moreProjects = projectsData?.result.slice(5) ?? [];
@@ -94,6 +144,7 @@ function EditSurveyComponent(): JSX.Element {
     description: '',
     project: '',
     estimatedTime: '',
+    status: undefined,
     questions: [],
   });
 
@@ -105,10 +156,20 @@ function EditSurveyComponent(): JSX.Element {
       if (saved) {
         try {
           setSurvey(JSON.parse(saved));
+          // attempt to prefill allowed roles from server if present
+          const serverAllowed = (data.result as any)?.allowedRoles;
+          if (Array.isArray(serverAllowed) && serverAllowed.length > 0) {
+            setSelectedRoles(serverAllowed.map((r: any) => r.id ?? r));
+          }
           return;
         } catch {}
       }
       setSurvey(mapFromServerToDraft(data.result));
+      // also prefill allowedRoles if present on server result
+      const serverAllowed = (data.result as any)?.allowedRoles;
+      if (Array.isArray(serverAllowed) && serverAllowed.length > 0) {
+        setSelectedRoles(serverAllowed.map((r: any) => r.id ?? r));
+      }
     }
   }, [data, surveyId]);
 
@@ -216,16 +277,17 @@ function EditSurveyComponent(): JSX.Element {
     if (hasEmptyOption) { toast.error('All options in choice questions must have a value.'); return; }
 
     const payload = mapDraftToUpdatePayload(survey);
-    updateSurvey.mutate(payload as any, {
-      onSuccess: () => {
-        toast.success('Survey updated successfully');
-        localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + surveyId);
-        navigate({ to: '/dashboard/surveys' });
-      },
-    });
+    // include allowedRoles selected via modal
+    updateSurvey.mutate({ ...(payload as any), allowedRoles: selectedRoles }, {
+       onSuccess: () => {
+         toast.success('Survey updated successfully');
+         localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + surveyId);
+         navigate({ to: backHomeLink });
+       },
+     });
   };
 
-  const handleCancel = (): void => { navigate({ to: '/dashboard/surveys' }); };
+  const handleCancel = (): void => { navigate({ to: backHomeLink }); };
 
   return (
     <div className="pb-10">
@@ -247,6 +309,35 @@ function EditSurveyComponent(): JSX.Element {
             moreProjects={moreProjects}
           />
 
+          {/* Roles input (click to open modal) */}
+          <div className="mt-4 mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Allowed Roles (who can view)</label>
+            <div
+              onClick={() => setRolesModalOpen(true)}
+              role="button"
+              tabIndex={0}
+              className="min-h-[44px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 flex items-center gap-2 flex-wrap cursor-pointer"
+            >
+              {selectedRoles.length === 0 ? (
+                <span className="text-sm text-gray-400">Click to select roles...</span>
+              ) : (
+                selectedRoles.map(id => (
+                  <span key={id} className="inline-flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full text-xs mr-2 mb-2">
+                    <span className="mr-2">{roleLabelById(id)}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); removeSelectedRole(id); }}
+                      className="text-primary/80 hover:text-primary text-sm leading-none"
+                      aria-label={`Remove ${id}`}
+                    >
+                      <FaX className="w-2.5 h-2.5" />
+                    </button>
+                  </span>
+                ))
+              )}
+            </div>
+          </div>
+
           <QuestionsSection
             questions={survey.questions}
             onUpdate={updateQuestion}
@@ -260,6 +351,57 @@ function EditSurveyComponent(): JSX.Element {
             onDrop={handleDrop}
           />
 
+          {/* Roles selection modal */}
+          <Modal 
+            isOpen={rolesModalOpen} 
+            onClose={() => setRolesModalOpen(false)} 
+            title="Select Roles"
+            size="lg" 
+            closeOnOverlayClick
+            >
+            <div className="p-4 space-y-4 max-h-[60vh] overflow-auto">
+              {rolesLoading && <div className="text-sm text-gray-500">Loading roles...</div>}
+              {rolesError && <div className="text-sm text-red-600">Failed to load roles</div>}
+              {!rolesLoading && !rolesError && roleGroups.length === 0 && <div className="text-sm text-gray-500">No roles found.</div>}
+              {roleGroups.map(group => (
+                <div key={group.title} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-gray-900">{group.title}</h4>
+                    {/* hide select/clear for report-forms (single-selection) */}
+                    {!isReportForm && (() => {
+                      const groupValues = group.options.map(o => o.value);
+                      const allSelected = groupValues.every(v => selectedRoles.includes(v));
+                      const nextSelectAll = !allSelected;
+                      return (
+                        <button type="button" onClick={() => toggleGroupRoles(groupValues, nextSelectAll)} className={`text-xs px-2 py-1 rounded border transition-colors ${allSelected ? 'text-red-600 border-red-300 hover:bg-red-50' : 'text-primary border-primary/40 hover:bg-primary/5'}`}>
+                          {allSelected ? 'Clear all' : 'Select all'}
+                        </button>
+                      );
+                    })()}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {group.options.map(option => (
+                      <label key={option.value} className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <input
+                          type={isReportForm ? 'radio' : 'checkbox'}
+                          name={isReportForm ? 'allowedRoleSelect' : undefined}
+                          checked={isReportForm ? selectedRoles[0] === option.value : selectedRoles.includes(option.value)}
+                          onChange={() => handleRoleToggle(option.value)}
+                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        />
+                        <span className="text-sm text-gray-700">{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <ModalFooter>
+              <ModalButton onClick={() => setRolesModalOpen(false)} variant="secondary">Cancel</ModalButton>
+              <ModalButton onClick={() => setRolesModalOpen(false)} variant="primary">Done</ModalButton>
+            </ModalFooter>
+          </Modal>
+
           <SurveyFooterActions
             questionsCount={survey.questions.length}
             estimatedTime={survey.estimatedTime}
@@ -269,14 +411,18 @@ function EditSurveyComponent(): JSX.Element {
           />
         </div>
 
+        {/* Fixed Right Sidebar */}
         <div className="w-80 flex-shrink-0">
           <div className="sticky top-20">
-            <SidebarQuestionPicker types={[
-              { id: 'single_choice', label: 'Single Choice', icon: '◉' },
-              { id: 'multiple_choice', label: 'Multiple Choice', icon: '☑' },
-              { id: 'text_input', label: 'Text Input', icon: '📝' },
-              { id: 'textarea', label: 'Long Text', icon: '📄' }
-            ]} onAdd={addQuestion} />
+            <SidebarQuestionPicker
+              types={[
+                { id: 'single_choice', label: 'Single Choice', icon: '◉' },
+                { id: 'multiple_choice', label: 'Multiple Choice', icon: '☑' },
+                { id: 'text_input', label: 'Text Input', icon: '📝' },
+                { id: 'textarea', label: 'Long Text', icon: '📄' }
+              ]}
+              onAdd={addQuestion}
+            />
           </div>
         </div>
       </div>

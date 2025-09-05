@@ -6,7 +6,7 @@ export type UserStatus = 'pending' | 'active' | 'inactive';
 export interface IUserAttributes {
   id: string;
   name: string;
-  email: string;
+  email?: string | null;
   password: string;
   address?: string | null;
   phone?: string | null;

@@ -6,13 +6,15 @@ import Permission from './permission';
 import Tweet from './tweet';
 import Project from './project';
 import Document from './document';
-import Stakeholder from './stakeholder';
+import Organization from './organization';
 import Survey from './survey';
 import Question from './question';
 import Answer from './answer';
 import Feedback from './feedback';
 import CommunitySession from './community-session';
 import Comment from './comment';
+import SystemLog from './systemLog';
+import Announcement from './announcement';
 
 // Centralized associations to avoid circular imports
 User.belongsToMany(Role, {
@@ -52,31 +54,41 @@ Document.belongsTo(Project, {
   foreignKey: 'projectId',
 });
 
-Project.belongsToMany(Stakeholder, {
+Project.belongsToMany(Organization, {
   through: 'project_stakeholders',
   as: 'stakeholders',
   foreignKey: 'projectId',
-  otherKey: 'stakeholderId',
+  otherKey: 'organizationId',
 });
-Stakeholder.belongsToMany(Project, {
+Organization.belongsToMany(Project, {
   through: 'project_stakeholders',
   as: 'projects',
-  foreignKey: 'stakeholderId',
+  foreignKey: 'organizationId',
   otherKey: 'projectId',
 });
 
-// New Stakeholder <-> User many-to-many association
-Stakeholder.belongsToMany(User, {
-  through: 'stakeholder_users',
+// New Organization <-> User many-to-many association (was Stakeholder <-> User)
+Organization.belongsToMany(User, {
+  through: 'organization_users',
   as: 'users',
-  foreignKey: 'stakeholderId',
+  foreignKey: 'organizationId',
   otherKey: 'userId',
 });
-User.belongsToMany(Stakeholder, {
-  through: 'stakeholder_users',
-  as: 'stakeholders',
+User.belongsToMany(Organization, {
+  through: 'organization_users',
+  as: 'organizations',
   foreignKey: 'userId',
-  otherKey: 'stakeholderId',
+  otherKey: 'organizationId',
+});
+
+// Organizations and Owners (Users)
+Organization.belongsTo(User, {
+  as: 'owner',
+  foreignKey: 'ownerId',
+});
+User.hasMany(Organization, {
+  as: 'ownedOrganizations',
+  foreignKey: 'ownerId',
 });
 
 // Survey associations (new)
@@ -100,6 +112,30 @@ Survey.hasMany(Answer, {
 Answer.belongsTo(Survey, {
   as: 'survey',
   foreignKey: 'surveyId',
+});
+
+// Survey <-> Role many-to-many for allowed roles
+Survey.belongsToMany(Role, {
+  through: 'survey_allowed_roles',
+  as: 'allowedRoles',
+  foreignKey: 'surveyId',
+  otherKey: 'roleId',
+});
+Role.belongsToMany(Survey, {
+  through: 'survey_allowed_roles',
+  as: 'surveys',
+  foreignKey: 'roleId',
+  otherKey: 'surveyId',
+});
+
+// Survey -> User (creator) association
+Survey.belongsTo(User, {
+  as: 'creator',
+  foreignKey: 'createdBy',
+});
+User.hasMany(Survey, {
+  as: 'surveys',
+  foreignKey: 'createdBy',
 });
 
 // Feedback associations
@@ -189,6 +225,49 @@ User.hasMany(Comment, {
   foreignKey: 'userId',
 });
 
-const db = { sequelize, User, Role, UserRole, Permission, Tweet, Project, Document, Stakeholder, Survey, Question, Answer, Feedback, CommunitySession, Comment };
+// New: SystemLog associations
+User.hasMany(SystemLog, {
+  as: 'systemLogs',
+  foreignKey: 'userId',
+});
+SystemLog.belongsTo(User, {
+  as: 'user',
+  foreignKey: 'userId',
+});
+
+//SURVEYS ANSWERS to include user who answered
+Answer.belongsTo(User, {
+  as: 'user',
+  foreignKey: 'userId',
+});
+User.hasMany(Answer, {
+  as: 'answers',
+  foreignKey: 'userId',
+});
+
+// New: Announcement associations
+Announcement.belongsToMany(Role, {
+  through: 'announcement_roles',
+  as: 'allowedRoles',
+  foreignKey: 'announcementId',
+  otherKey: 'roleId',
+});
+Role.belongsToMany(Announcement, {
+  through: 'announcement_roles',
+  as: 'announcements',
+  foreignKey: 'roleId',
+  otherKey: 'announcementId',
+});
+
+Announcement.belongsTo(User, {
+  as: 'creator',
+  foreignKey: 'createdBy',
+});
+User.hasMany(Announcement, {
+  as: 'announcements',
+  foreignKey: 'createdBy',
+});
+
+const db = { sequelize, User, Role, UserRole, Permission, Tweet, Project, Document, Organization, Survey, Question, Answer, Feedback, CommunitySession, Comment, SystemLog, Announcement };
 
 export default db;

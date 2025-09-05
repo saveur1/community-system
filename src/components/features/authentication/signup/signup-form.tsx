@@ -15,7 +15,6 @@ import {
   FiChevronRight,
   FiChevronLeft
 } from "react-icons/fi";
-import { SelectDropdown } from "@/components/ui/select";
 import locations from '@/components/common/locations.json';
 import { SelectSearch } from "@/components/ui/select-search";
 
@@ -455,7 +454,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="border-t border-gray-200 bg-gray-50/50"
+                    className="border-t pl-10 border-gray-200 bg-gray-50/50"
                   >
                     <div className="p-3 space-y-2">
                       {group.options.map((option) => (

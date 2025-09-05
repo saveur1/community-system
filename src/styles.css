@@ -25,3 +25,13 @@
     font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
       monospace;
   }
+
+  .scroll_nav::-webkit-scrollbar {
+    @apply bg-primary/30;
+    width:5px;
+  }
+
+  .scroll_nav::-webkit-scrollbar-thumb {
+    @apply bg-white/50;
+    border-radius: 10px;
+  }

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Route, Tags, Response, SuccessRespo
 import { ServiceResponse } from '../utils/serviceResponse';
 import Project from '../models/project';
 import Document from '../models/document';
-import Stakeholder from '../models/stakeholder';
+import Stakeholder from '../models/organization';
 import { asyncCatch } from '../middlewares/errorHandler';
 import sequelize from '../config/database';
 

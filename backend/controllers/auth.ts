@@ -19,6 +19,7 @@ import sequelize from '../config/database';
 import { asyncCatch } from '@/middlewares/errorHandler';
 import db from '@/models';
 import { IUserAttributes } from '../types/user-types';
+import { verifyInviteToken } from '../utils/tokenService';
 
 // Extend the Express Request type to include the user property
 declare global {
@@ -69,7 +70,7 @@ export class AuthController extends Controller {
     const { type, email, phone, password } = credentials as any;
 
     if ((!email && !phone) || !password) {
-      
+
       res(401, ServiceResponse.failure('Invalid credentials', { user: null }));
       return;
     }
@@ -233,17 +234,11 @@ export class AuthController extends Controller {
       return;
     }
     const token = await this.generateToken(newUser);
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      path: '/',
-    };
+    const cookieString = await this.getCookieString(token);
 
     const userResponse = await this._buildUserResponse(newUser);
     res(201, ServiceResponse.success('Signup successful', { user: userResponse }), {
-      'Set-Cookie': `token=${token}; ${Object.entries(cookieOptions).map(([k, v]) => `${k}=${v}`).join('; ')}`,
+      'Set-Cookie': cookieString,
     });
   }
 
@@ -263,7 +258,7 @@ export class AuthController extends Controller {
     const resetExpires = new Date(Date.now() + 3600000); // 1 hour
 
     await userModel?.update({ resetPasswordCode: resetCode, resetPasswordExpires: resetExpires });
-    await sendPasswordResetEmail(user.email, resetCode);
+    await sendPasswordResetEmail(user.email || '', resetCode);
 
 
     return ServiceResponse.success('A password reset link has been sent to your email.', null);
@@ -309,13 +304,13 @@ export class AuthController extends Controller {
 
     if (error) {
       console.error('OAuth error:', error);
-      res(302, undefined, { Location: `${config.appUrl}/login?error=oauth_${error}` });
+      res(302, undefined, { Location: `${config.frontendUrl}/login?error=oauth_${error}` });
       return;
     }
 
     if (!code) {
       console.error('No code received from Google');
-      res(302, undefined, { Location: `${config.appUrl}/login?error=no_code` });
+      res(302, undefined, { Location: `${config.frontendUrl}/login?error=no_code` });
       return;
     }
 
@@ -331,7 +326,7 @@ export class AuthController extends Controller {
         }],
         transaction: t
       });
-      
+
       if (!user) {
         user = await db.User.findOne({
           where: { email: googleUser.email },
@@ -386,24 +381,11 @@ export class AuthController extends Controller {
     });
 
     const token = await this.generateToken(user);
-
-    const isProduction = process.env.NODE_ENV === 'production';
-    const cookieOptions = {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site cookies
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      path: '/',
-      domain: isProduction ? 'community-tool.onrender.com' : 'localhost',
-    };
-
-    const cookieString = `token=${token}; ${Object.entries(cookieOptions)
-      .map(([k, v]) => `${k}=${v}`)
-      .join('; ')}`;
+    const cookieString = await this.getCookieString(token);
 
     console.log('Redirecting to dashboard');
     res(302, undefined, {
-      Location: `${config.appUrl}/dashboard`,
+      Location: `${config.frontendUrl}/dashboard`,
       'Set-Cookie': cookieString,
     });
   }
@@ -446,6 +428,102 @@ export class AuthController extends Controller {
     });
   }
 
+  // Updated signup endpoint
+  @Post('/organization-signup')
+  @asyncCatch
+  @SuccessResponse(201, 'Account created successfully')
+  @Response(400, 'Invalid or expired invite link')
+  public async organizationSignup(
+    @Body() data: {
+      token: string;
+      organizationId: string;
+      name: string;
+      password: string;
+      phone: string;
+    },
+    @Res() res: TsoaResponse<201 | 400, ServiceResponse<any>, { 'Set-Cookie': string }>
+  ): Promise<void> {
+    // Verify token with email
+    const verified = verifyInviteToken(data.token);
+    if (!verified) {
+      console.log('Token verification failed:', {
+        verified,
+        providedOrgId: data.organizationId,
+      });
+      res(400, ServiceResponse.failure('Invalid or expired invite link', null, 400));
+      return;
+    }
+
+    const t = await sequelize.transaction();
+    try {
+      // Check if user with this phone number already exists
+      const existingUser = await db.User.findOne({
+        where: { phone: data.phone },
+        transaction: t
+      });
+
+      if (existingUser) {
+        await t.rollback();
+        res(400, ServiceResponse.failure('User with this phone number already exists', null, 400));
+        return;
+      }
+
+      // 1. Create user with email
+      const user = await db.User.create({
+        name: data.name,
+        // email: data.email, // ADD EMAIL
+        password: await hash(data.password, 10),
+        phone: data.phone,
+        status: 'active',
+        emailVerified: true, // auto-verify since we sent invite
+      }, { transaction: t });
+
+      // 2. Find organization and its role
+      const organization = await db.Organization.findByPk(verified.organizationId, {
+        // include: [{ model: db.Role, as: 'role' }],
+        transaction: t,
+      });
+
+      if (!organization) {
+        await t.rollback();
+        res(400, ServiceResponse.failure('Organization not found', null, 400));
+        return;
+      }
+
+      // 3. Associate user with organization
+      await (organization as any).addUser(user, { transaction: t });
+
+      // 4. Set user as organization owner
+      await organization.update({ ownerId: user.id }, { transaction: t });
+
+      // 5. Assign organization role to user
+      const organizationRole = await db.Role.findOne({
+        where: {
+          stakeholderId: verified.organizationId
+        },
+        transaction: t
+      });
+
+      if (organizationRole) {
+        await user.addRole(organizationRole, { transaction: t });
+      }
+
+      const token = await this.generateToken(user);
+      const cookieString = await this.getCookieString(token);
+      await t.commit();
+
+      return res(201, ServiceResponse.success('Account created successfully', {
+        user: { id: user.id, name: user.name, email: user.email }
+      }), {
+        'Set-Cookie': cookieString
+      });
+    } catch (err) {
+      await t.rollback();
+      console.error('Organization signup error:', err);
+      throw err;
+    }
+  }
+
   private async generateToken(userModel: User): Promise<string> {
     const roles = await userModel.getRoles({ attributes: ['name'] });
     const roleNames = roles.map(role => role.name);
@@ -457,5 +535,20 @@ export class AuthController extends Controller {
       roles: roleNames,
     });
   }
-}
 
+  private async getCookieString(token: string): Promise<string> {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site cookies
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      path: '/',
+      domain: isProduction ? 'community-tool.onrender.com' : 'localhost',
+    };
+
+    return `token=${token}; ${Object.entries(cookieOptions)
+      .map(([k, v]) => `${k}=${v}`)
+      .join('; ')}`;
+  }
+}

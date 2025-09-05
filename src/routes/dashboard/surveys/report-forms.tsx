@@ -19,7 +19,7 @@ const SurveyReportForms = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const { user } = useAuth();
-    const { data, isLoading } = useSurveysList({ page, limit: pageSize });
+    const { data, isLoading } = useSurveysList({ page, limit: pageSize, surveyType: "report-form" });
     const deleteSurvey = useDeleteSurvey();
     const updateStatus = useUpdateSurveyStatus();
 
@@ -149,7 +149,7 @@ const SurveyReportForms = () => {
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Survey Title</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responses</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target User</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
@@ -161,7 +161,7 @@ const SurveyReportForms = () => {
                             <tr>
                                 <td className="px-6 py-4 text-sm text-gray-500" colSpan={7}>Loading surveys...</td>
                             </tr>
-                        ) : paginated?.map((survey: any) => (
+                        ) : paginated?.map((survey) => (
                             <tr key={survey.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center">
@@ -171,11 +171,14 @@ const SurveyReportForms = () => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(survey.status)}`}>
+                                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full capitalize ${getStatusColor(survey.status)}`}>
                                         {survey.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{(survey.answers?.length) ?? 0}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700 flex gap-2">{
+                                        survey?.allowedRoles?.slice(0, 4).map(role => 
+                                            <p className="bg-gray-300 capitalize text-gray-800 rounded-lg p-1">{role.name}</p>
+                                )}</td>
                                 <td className="px-6 py-4 text-sm text-gray-700">{survey.questionItems?.length ?? 0}</td>
                                 <td className="px-6 py-4 text-sm text-gray-700">{survey.estimatedTime}Min</td>
                                 <td className="px-6 py-4 text-sm text-gray-700">{survey.project}</td>
@@ -335,6 +338,7 @@ const SurveyReportForms = () => {
                     setSearch={setSearch}
                     filteredCount={filtered.length}
                     title="Report Forms"
+                    createButtonLink='/dashboard/surveys/add-new?type=report'
                 />
             </div>
 

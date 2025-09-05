@@ -10,7 +10,7 @@ class User extends Model<IUserAttributes, IUserCreationAttributes> implements IU
   // Use declare to prevent shadowing Sequelize's getters/setters
   declare id: string;
   declare name: string;
-  declare email: string;
+  declare email: string | null;
   declare password: string;
   declare address: string | null;
   declare phone: string | null;

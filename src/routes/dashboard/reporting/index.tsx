@@ -4,50 +4,7 @@ import Breadcrumb from '@/components/ui/breadcrum';
 import { FaList, FaTh } from 'react-icons/fa';
 import { SurveyToolbar } from '@/components/features/surveys/survey-toolbar';
 import { SurveyPagination } from '@/components/features/surveys/survey-pagination';
-
-// Mock report forms (admin-created)
-const mockReports = [
-  {
-    id: 'r1',
-    title: 'Weekly Activity Report',
-    description: 'Report your weekly activities and outcomes.',
-    status: 'active' as 'active' | 'paused' | 'archived',
-    estimatedTime: 10,
-    project: 'Community Health',
-    questionCount: 7,
-  },
-  {
-    id: 'r2',
-    title: 'Outreach Log',
-    description: 'Capture your daily outreach interactions.',
-    status: 'active' as 'active' | 'paused' | 'archived',
-    estimatedTime: 6,
-    project: 'Maternal Care',
-    questionCount: 5
-  },
-  {
-    id: 'r3',
-    title: 'Training Attendance',
-    description: 'Submit attendance for your recent training.',
-    status: 'archived' as 'active' | 'paused' | 'archived',
-    estimatedTime: 4,
-    project: 'Capacity Building',
-    questionCount: 4,
-  },
-];
-
-const getStatusColor = (status: 'active' | 'paused' | 'archived') => {
-  switch (status) {
-    case 'active':
-      return 'bg-green-100 text-green-800';
-    case 'paused':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'archived':
-      return 'bg-gray-200 text-gray-700';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
+import { useSurveysList } from '@/hooks/useSurveys';
 
 const ReportingList = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -55,17 +12,46 @@ const ReportingList = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return mockReports;
-    return mockReports.filter((r) =>
-      [r.title, r.description, r.project].some((v) => String(v ?? '').toLowerCase().includes(q))
-    );
-  }, [search]);
+  // Use API to fetch report-forms the user can access
+  const { data: reportsResp, isLoading: isLoadingReports, isError: isErrorReports } = useSurveysList({
+    surveyType: 'report-form',
+    status: 'active',
+    page,
+    limit: pageSize,
+    responded: true,
+    allowed: true,
+  });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const getStatusColor = (status: 'active' | 'paused' | 'archived') => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'paused':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'archived':
+        return 'bg-gray-200 text-gray-700';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Map backend Survey -> UI report shape
+  const reports = (reportsResp?.result ?? []).map((s: any) => ({
+    id: s.id,
+    title: s.title,
+    description: s.description ?? '',
+    status: s.status ?? 'active',
+    estimatedTime: Number(s.estimatedTime) || 0,
+    project: s.project || '',
+    questionCount: (s.questionItems ?? []).length,
+  }));
+
+  // derive pagination from backend meta when available
+  const totalItems = reportsResp?.meta?.total ?? (reportsResp ? reports.length : 0);
+  const totalPages = Math.max(1, Math.ceil((totalItems || 0) / pageSize));
   const currentPage = Math.min(page, totalPages);
-  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginated = reports; // server already paginates
+  const filteredCount = reportsResp?.meta?.total ?? reports.length;
 
   const renderTableView = () => (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -96,18 +82,20 @@ const ReportingList = () => {
                 <td className="px-6 py-4 text-sm text-gray-700">{r.project}</td>
                 <td className="px-6 py-4">
                   <Link
-                    to="/dashboard/reporting/make-report"
+                    to="/dashboard/reporting/review-report"
                     search={{ reportId: r.id }}
-                    className="inline-flex items-center gap-2 bg-primary text-white px-3 py-1.5 rounded-md hover:bg-primary/90"
+                    className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-md hover:bg-primary hover:text-white"
                   >
-                    Make report
+                    Review
                   </Link>
                 </td>
               </tr>
             ))}
             {paginated.length === 0 && (
               <tr>
-                <td className="px-6 py-4 text-center text-sm text-gray-500" colSpan={7}>No report forms found.</td>
+                <td className="px-6 py-4 text-center text-sm text-gray-500" colSpan={7}>
+                  {isLoadingReports ? 'Loading report forms...' : isErrorReports ? 'Failed to load report forms.' : 'No report submissions available.'}
+                </td>
               </tr>
             )}
           </tbody>
@@ -154,9 +142,9 @@ const ReportingList = () => {
           setViewMode={setViewMode}
           search={search}
           setSearch={setSearch}
-          filteredCount={filtered.length}
+          filteredCount={filteredCount}
           title="Reports"
-          hideCreateButton
+          createButtonLink="/dashboard/reporting/make-report"
         />
       </div>
 
@@ -166,7 +154,7 @@ const ReportingList = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         paginatedCount={paginated.length}
-        filteredCount={filtered.length}
+        filteredCount={filteredCount}
         pageSize={pageSize}
         setPage={setPage}
         setPageSize={setPageSize}

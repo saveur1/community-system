@@ -7,6 +7,7 @@ import { User } from '../models/users';
 import { Role } from '../models/role';
 import { asyncCatch } from '../middlewares/errorHandler';
 import { IUserAttributes } from '@/types';
+import { createSystemLog } from '../utils/systemLog';
 
 interface CommunitySessionCreateRequest {
   title: string;
@@ -57,40 +58,15 @@ export class CommunitySessionController extends Controller {
       order: [['createdAt', 'DESC']],
       where,
       include: [
-        { 
-          model: Document, 
-          as: 'document',
-          attributes: ['id', 'documentName', 'documentUrl', 'type', 'size']
-        },
-        {
-          model: Role,
-          as: 'roles',
-          attributes: ['id', 'name', 'description']
-        },
-        { 
-          model: User, 
-          as: 'creator',
-          attributes: ['id', 'name', 'email', 'profile']
-        },
-        { 
-          model: Comment, 
-          as: 'comments',
-          include: [{
-            model: User,
-            as: 'user',
-            attributes: ['id', 'name', 'profile']
-          }]
-        }
+        { model: Document, as: 'document', attributes: ['id', 'documentName', 'documentUrl', 'type', 'size'] },
+        { model: Role, as: 'roles', attributes: ['id', 'name', 'description'] },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email', 'profile'] },
+        { model: Comment, as: 'comments', include: [{ model: User, as: 'user', attributes: ['id', 'name', 'profile'] }] }
       ],
       distinct: true,
     });
 
-    return ServiceResponse.success(
-      'Community sessions retrieved successfully',
-      rows,
-      200,
-      { total: count, page, totalPages: Math.ceil(count / limit) }
-    );
+    return ServiceResponse.success('Community sessions retrieved successfully', rows, 200, { total: count, page, totalPages: Math.ceil(count / limit) });
   }
 
   @Security('jwt', ['community_session:read'])
@@ -100,31 +76,10 @@ export class CommunitySessionController extends Controller {
   public async getCommunitySessionById(@Path() sessionId: string): Promise<ServiceResponse<any | null>> {
     const session = await CommunitySession.findByPk(sessionId, {
       include: [
-        { 
-          model: Document, 
-          as: 'document',
-          attributes: ['id', 'documentName', 'documentUrl', 'type', 'size']
-        },
-        {
-          model: Role,
-          as: 'roles',
-          attributes: ['id', 'name', 'description']
-        },
-        { 
-          model: User, 
-          as: 'creator',
-          attributes: ['id', 'name', 'email', 'profile']
-        },
-        { 
-          model: Comment, 
-          as: 'comments',
-          include: [{
-            model: User,
-            as: 'user',
-            attributes: ['id', 'name', 'profile']
-          }],
-          order: [['createdAt', 'ASC']]
-        }
+        { model: Document, as: 'document', attributes: ['id', 'documentName', 'documentUrl', 'type', 'size'] },
+        { model: Role, as: 'roles', attributes: ['id', 'name', 'description'] },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email', 'profile'] },
+        { model: Comment, as: 'comments', include: [{ model: User, as: 'user', attributes: ['id', 'name', 'profile'] }] }
       ],
     });
 
@@ -139,7 +94,7 @@ export class CommunitySessionController extends Controller {
     @Request() req: { user: IUserAttributes },
     @Body() data: CommunitySessionCreateRequest
   ): Promise<ServiceResponse<any | null>> {
-    // 1) Create the session first (no document yet)
+    // create session
     const created = await CommunitySession.create({
       title: data.title,
       shortDescription: data.shortDescription,
@@ -161,7 +116,7 @@ export class CommunitySessionController extends Controller {
       addedAt: data.document.addedAt ?? new Date(),
       documentUrl: data.document.documentUrl ?? null,
       projectId: null,
-      userId: req.user.id, // enforce server-side user
+      userId: req.user.id,
       publicId: data.document.publicId ?? null,
       deleteToken: data.document.deleteToken ?? null,
     });
@@ -171,24 +126,14 @@ export class CommunitySessionController extends Controller {
     this.setStatus(201);
     const result = await CommunitySession.findByPk(created.id, {
       include: [
-        { 
-          model: Document, 
-          as: 'document',
-          attributes: ['id', 'documentName', 'documentUrl', 'type', 'size']
-        },
-        {
-          model: Role,
-          as: 'roles',
-          attributes: ['id', 'name', 'description']
-        },
-        { 
-          model: User, 
-          as: 'creator',
-          attributes: ['id', 'name', 'email', 'profile']
-        },
+        { model: Document, as: 'document', attributes: ['id', 'documentName', 'documentUrl', 'type', 'size'] },
+        { model: Role, as: 'roles', attributes: ['id', 'name', 'description'] },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email', 'profile'] },
         { model: Comment, as: 'comments' }
       ],
     });
+
+    await createSystemLog(req ?? null, 'created_community_session', 'CommunitySession', created.id, { type: data.type });
 
     return ServiceResponse.success('Community session created successfully', result, 201);
   }
@@ -216,7 +161,6 @@ export class CommunitySessionController extends Controller {
       await session.setAllowedRolesByIds(data.allowedRoles);
     }
 
-    // If a new document payload is provided, create it and relink
     if (data.document) {
       const newDoc = await Document.create({
         documentName: data.document.documentName,
@@ -234,24 +178,15 @@ export class CommunitySessionController extends Controller {
 
     const result = await CommunitySession.findByPk(session.id, {
       include: [
-        { 
-          model: Document, 
-          as: 'document',
-          attributes: ['id', 'documentName', 'documentUrl', 'type', 'size']
-        },
-        {
-          model: Role,
-          as: 'roles',
-          attributes: ['id', 'name', 'description']
-        },
-        { 
-          model: User, 
-          as: 'creator',
-          attributes: ['id', 'name', 'email', 'profile']
-        },
+        { model: Document, as: 'document', attributes: ['id', 'documentName', 'documentUrl', 'type', 'size'] },
+        { model: Role, as: 'roles', attributes: ['id', 'name', 'description'] },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email', 'profile'] },
         { model: Comment, as: 'comments' }
       ],
     });
+
+    await createSystemLog(req ?? null, 'updated_community_session', 'CommunitySession', session.id, { changes: Object.keys(data) });
+
 
     return ServiceResponse.success('Community session updated successfully', result);
   }
@@ -286,11 +221,7 @@ export class CommunitySessionController extends Controller {
       limit,
       offset,
       order: [['createdAt', 'ASC']],
-      include: [{
-        model: User,
-        as: 'user',
-        attributes: ['id', 'name', 'profile']
-      }],
+      include: [{ model: User, as: 'user', attributes: ['id', 'name', 'profile'] }],
     });
 
     return ServiceResponse.success(
@@ -380,7 +311,7 @@ export class CommunitySessionController extends Controller {
       return ServiceResponse.failure('Unauthorized to delete this comment', null, 403);
     }
 
-    await comment.update({ isActive: false }); // Soft delete
+    await comment.update({ isActive: false }); // soft delete
     this.setStatus(204);
     return ServiceResponse.success('Comment deleted successfully', null, 204);
   }

@@ -10,7 +10,9 @@ import { FeedbackGrid } from '@/components/features/feedbacks/feedbacks-grid-vie
 import { FeedbackToolbar } from '@/components/features/feedbacks/feedback-toolbar';
 import { FeedbackPagination } from '@/components/features/feedbacks/feedback-pagination';
 import { FeedbackDetailsDrawer } from '@/components/features/feedbacks/feedback-details-drawer';
-import { FeedbackEntity } from '@/api/feedback';
+import { FeedbackEntity, FeedbackListParams } from '@/api/feedback';
+import { checkPermissions } from '@/utility/logicFunctions';
+import { useAuth } from '@/hooks/useAuth';
 
 const FeedbacksPage = () => {
   const navigate = useNavigate();
@@ -23,8 +25,19 @@ const FeedbacksPage = () => {
   const [selectedTitle, setSelectedTitle] = useState('');
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackEntity | undefined>(undefined);
+  const { user } = useAuth();
 
-  const { data, isLoading } = useGetFeedback({ page, limit: pageSize });
+  const feedbackParams = useMemo(() => {
+    const param: FeedbackListParams = { page, limit: pageSize, search: search || undefined, owner: 'me' };
+
+    if (checkPermissions(user, 'feedback:all:read')) {
+      param.owner = undefined;
+    }
+
+    return param;
+  }, [page, pageSize]);
+
+  const { data, isLoading } = useGetFeedback(feedbackParams);
   const deleteFeedback = useDeleteFeedback();
   const updateFeedback = useUpdateFeedback();
 

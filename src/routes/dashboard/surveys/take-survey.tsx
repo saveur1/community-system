@@ -1,71 +1,26 @@
 import Breadcrumb from '@/components/ui/breadcrum';
-import { createFileRoute } from '@tanstack/react-router'
-import { FaPoll, FaCheckCircle } from 'react-icons/fa';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { FaPoll } from 'react-icons/fa';
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import SurveyAnswerForm from "@/components/survey/SurveyAnswerForm";
-import { useSurveysList, useUserSurveyAnswers } from '@/hooks/useSurveys';
+// import SurveyAnswerForm from "@/components/survey/SurveyAnswerForm";
+import { useSurveysList } from '@/hooks/useSurveys';
 
 const SurveyComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null);
-
-    const handleStartSurvey = (surveyId: string) => {
-        setSelectedSurveyId(surveyId);
-        // Optional: Scroll to the form
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const handleSurveyComplete = () => {
-        // Reset selected survey and navigate to thank you page
-        setSelectedSurveyId(null);
-        navigate({ to: '/dashboard/surveys/thank-you' });
-    };
-
-    const handleBackToList = () => {
-        setSelectedSurveyId(null);
-    };
 
     // Fetch active surveys from API
-    const { data: activeSurveysResponse, isLoading: isLoadingActive, isError: isErrorActive } = useSurveysList({ status: 'active' });
-    // Fetch completed surveys from API
-    const { data: completedSurveysResponse, isLoading: isLoadingCompleted, isError: isErrorCompleted } = useUserSurveyAnswers();
+    const { data: completedSurveysResponse } = useSurveysList({ surveyType: "general", responded: true });
+    const { data: activeSurveysResponse, isLoading: isLoadingActive, isError: isErrorActive } = useSurveysList({ status: 'active', surveyType: "general" });
     
+
     const completedSurveys = completedSurveysResponse?.result || [];
     const completedSurveyIds = new Set(completedSurveys.map(s => s.id));
     const availableSurveys = (activeSurveysResponse?.result || []).filter(survey => 
       !completedSurveyIds.has(survey.id)
     );
 
-    // If a survey is selected, show the form
-    if (selectedSurveyId) {
-        const survey = availableSurveys.find(s => s.id === selectedSurveyId);
-        return (
-            <div>
-            <Breadcrumb 
-                items={["Dashboard", "Surveys"]}
-                title="Survey"
-                className='absolute top-0 left-0 w-full'
-            />
-            <div className="container mx-auto pt-20 px-4 py-8">
-                {survey && (
-                  <SurveyAnswerForm 
-                    survey={{
-                      id: survey.id,
-                      title: survey.title,
-                      description: survey.description,
-                      estimatedTime: survey.estimatedTime,
-                      questionItems: survey.questionItems || []
-                    }}
-                    onComplete={handleSurveyComplete} 
-                  />
-                )}
-            </div>
-            </div>
-        );
-    }
+    // Independent answer page will handle showing the form; this list only links to it.
 
     // Otherwise, show the list of available surveys
     return (
@@ -95,12 +50,13 @@ const SurveyComponent = () => {
                                 <span>{survey.questionItems?.length || 0} Questions</span>
                                 <span>Est. {survey.estimatedTime}</span>
                             </div>
-                            <button 
-                              onClick={() => handleStartSurvey(survey.id)}
-                              className="bg-title cursor-pointer px-4 text-white py-1.5 rounded-md hover:bg-title transition-colors duration-300"
+                            <Link
+                              to="/dashboard/surveys/take/$survey-answer"
+                              params={{ 'survey-answer': String(survey.id) }}
+                              className="inline-block bg-title cursor-pointer px-4 text-white py-1.5 rounded-md hover:bg-title transition-colors duration-300"
                             >
                               Start Survey
-                            </button>
+                            </Link>
                         </div>
                     ))
                 ) : (

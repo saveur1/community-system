@@ -1,5 +1,6 @@
 // src/api/surveys.ts
 import { client } from './client';
+import { RoleEntity } from './roles';
 
 // Mirror backend ServiceResponse shape
 export type ServiceResponse<T> = {
@@ -67,15 +68,28 @@ export type SurveyEntity = {
   project: string;
   estimatedTime: string;
   status: 'active' | 'paused' | 'archived';
+  surveyType?: 'general' | 'report-form';
   questions: AuthoredQuestion[]; // JSON array as authored in UI
   createdAt?: string;
   updatedAt?: string;
   // included relations
   questionItems?: QuestionItem[];
   answers?: AnswerItem[];
+  allowedRoles?: RoleEntity[];
 };
 
-export type SurveysListParams = { page?: number; limit?: number; status?: 'active' | 'paused' | 'archived' };
+export type SurveysListParams = { 
+  page?: number; 
+  limit?: number; 
+  status?: 'active' | 'paused' | 'archived'; 
+  surveyType?: 'general' | 'report-form';
+  responded?: boolean;
+  owner?: 'me' | 'any' | "other" | undefined;
+  allowed?: boolean;
+  startDate?: string;
+  endDate?: string;
+};
+
 export type SurveysListResponse = ServiceResponse<SurveyEntity[]>;
 export type SurveyResponse = ServiceResponse<SurveyEntity>;
 
@@ -94,13 +108,14 @@ export type SubmitAnswersRequest = {
     questionId: string;
     answerText?: string | null;
     answerOptions?: string[] | null;
+    userId?: string | null;
   }>;
 };
 
 export const surveysApi = {
   list: async (params: SurveysListParams = { page: 1, limit: 10 }): Promise<SurveysListResponse> => {
-    const { page = 1, limit = 10, status } = params;
-    const { data } = await client.get(`/surveys`, { params: { page, limit, status } });
+    const { page = 1, limit = 10, status, surveyType, responded, owner, allowed, startDate, endDate } = params;
+    const { data } = await client.get(`/surveys`, { params: { page, limit, status, surveyType, responded, owner, allowed, startDate, endDate } });
     return data;
   },
 

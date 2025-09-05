@@ -21,6 +21,7 @@ export type RoleEntity = {
   name: string;
   description: string | null;
   category?: string | null;
+  stakeholderId?: string | null;
   createdAt: string;
   updatedAt: string;
   permissions?: PermissionEntity[];
@@ -40,6 +41,7 @@ export type RoleCreateRequest = {
   name: string;
   description?: string | null;
   category: string | null;
+  stakeholderId?: string | null;
   permissionIds?: string[];
 };
 

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyOrganizationRouteImport } from './routes/verify-organization'
 import { Route as ErrorRouteImport } from './routes/error'
 import { Route as ApprovalRequiredRouteImport } from './routes/approval-required'
 import { Route as PostsRouteRouteImport } from './routes/posts/route'
@@ -27,10 +28,12 @@ import { Route as DashboardSurveysIndexRouteImport } from './routes/dashboard/su
 import { Route as DashboardStakeholdersIndexRouteImport } from './routes/dashboard/stakeholders/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as DashboardReportingIndexRouteImport } from './routes/dashboard/reporting/index'
+import { Route as DashboardRapidEnquiryIndexRouteImport } from './routes/dashboard/rapid-enquiry/index'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
 import { Route as DashboardNotificationsIndexRouteImport } from './routes/dashboard/notifications/index'
 import { Route as DashboardFeedbackIndexRouteImport } from './routes/dashboard/feedback/index'
 import { Route as DashboardDocumentsIndexRouteImport } from './routes/dashboard/documents/index'
+import { Route as DashboardDocsIndexRouteImport } from './routes/dashboard/docs/index'
 import { Route as DashboardCommunitySessionsIndexRouteImport } from './routes/dashboard/community-sessions/index'
 import { Route as DashboardAnnouncementsIndexRouteImport } from './routes/dashboard/announcements/index'
 import { Route as DashboardAccountsIndexRouteImport } from './routes/dashboard/accounts/index'
@@ -44,21 +47,34 @@ import { Route as DashboardStakeholdersAddNewRouteImport } from './routes/dashbo
 import { Route as DashboardStakeholdersViewIdRouteImport } from './routes/dashboard/stakeholders/$view-id'
 import { Route as DashboardStakeholdersEditIdRouteImport } from './routes/dashboard/stakeholders/$edit-id'
 import { Route as DashboardSettingsAddRoleRouteImport } from './routes/dashboard/settings/add-role'
+import { Route as DashboardReportingReviewReportRouteImport } from './routes/dashboard/reporting/review-report'
 import { Route as DashboardReportingMakeReportRouteImport } from './routes/dashboard/reporting/make-report'
+import { Route as DashboardRapidEnquiryAddNewRouteImport } from './routes/dashboard/rapid-enquiry/add-new'
+import { Route as DashboardRapidEnquiryEditIdRouteImport } from './routes/dashboard/rapid-enquiry/$edit-id'
 import { Route as DashboardProjectsAddNewRouteImport } from './routes/dashboard/projects/add-new'
 import { Route as DashboardProjectsViewIdRouteImport } from './routes/dashboard/projects/$view-id'
 import { Route as DashboardFeedbackAddNewRouteImport } from './routes/dashboard/feedback/add-new'
 import { Route as DashboardCommunitySessionsAddNewRouteImport } from './routes/dashboard/community-sessions/add-new'
 import { Route as DashboardCommunitySessionsSessionIdRouteImport } from './routes/dashboard/community-sessions/$sessionId'
+import { Route as DashboardAnnouncementsAddNewRouteImport } from './routes/dashboard/announcements/add-new'
+import { Route as DashboardAnnouncementsEditIdRouteImport } from './routes/dashboard/announcements/$edit-id'
 import { Route as DashboardAccountsStakeholdersRouteImport } from './routes/dashboard/accounts/stakeholders'
 import { Route as DashboardAccountsRichMembersRouteImport } from './routes/dashboard/accounts/rich-members'
 import { Route as DashboardAccountsHealthServiceProvidersRouteImport } from './routes/dashboard/accounts/health-service-providers'
 import { Route as DashboardAccountsCommunityMembersRouteImport } from './routes/dashboard/accounts/community-members'
 import { Route as DashboardAccountsAddNewRouteImport } from './routes/dashboard/accounts/add-new'
+import { Route as DashboardSurveysTakeSurveyAnswerRouteImport } from './routes/dashboard/surveys/take.$survey-answer'
 import { Route as DashboardSurveysEditEditIdRouteImport } from './routes/dashboard/surveys/edit.$edit-id'
+import { Route as DashboardSurveysAnswerSurveyAnswerRouteImport } from './routes/dashboard/surveys/answer.$survey-answer'
+import { Route as DashboardSurveysAnalyticsSurveyIdRouteImport } from './routes/dashboard/surveys/analytics.$survey-id'
 import { Route as DashboardSettingsEditRoleRoleIdRouteImport } from './routes/dashboard/settings/edit-role.$roleId'
 import { Route as DashboardFeedbackEditEditIdRouteImport } from './routes/dashboard/feedback/edit.$edit-id'
 
+const VerifyOrganizationRoute = VerifyOrganizationRouteImport.update({
+  id: '/verify-organization',
+  path: '/verify-organization',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ErrorRoute = ErrorRouteImport.update({
   id: '/error',
   path: '/error',
@@ -150,6 +166,12 @@ const DashboardReportingIndexRoute = DashboardReportingIndexRouteImport.update({
   path: '/reporting/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardRapidEnquiryIndexRoute =
+  DashboardRapidEnquiryIndexRouteImport.update({
+    id: '/rapid-enquiry/',
+    path: '/rapid-enquiry/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
@@ -169,6 +191,11 @@ const DashboardFeedbackIndexRoute = DashboardFeedbackIndexRouteImport.update({
 const DashboardDocumentsIndexRoute = DashboardDocumentsIndexRouteImport.update({
   id: '/documents/',
   path: '/documents/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardDocsIndexRoute = DashboardDocsIndexRouteImport.update({
+  id: '/docs/',
+  path: '/docs/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardCommunitySessionsIndexRoute =
@@ -246,10 +273,28 @@ const DashboardSettingsAddRoleRoute =
     path: '/settings/add-role',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardReportingReviewReportRoute =
+  DashboardReportingReviewReportRouteImport.update({
+    id: '/reporting/review-report',
+    path: '/reporting/review-report',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardReportingMakeReportRoute =
   DashboardReportingMakeReportRouteImport.update({
     id: '/reporting/make-report',
     path: '/reporting/make-report',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardRapidEnquiryAddNewRoute =
+  DashboardRapidEnquiryAddNewRouteImport.update({
+    id: '/rapid-enquiry/add-new',
+    path: '/rapid-enquiry/add-new',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardRapidEnquiryEditIdRoute =
+  DashboardRapidEnquiryEditIdRouteImport.update({
+    id: '/rapid-enquiry/$edit-id',
+    path: '/rapid-enquiry/$edit-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardProjectsAddNewRoute = DashboardProjectsAddNewRouteImport.update({
@@ -277,6 +322,18 @@ const DashboardCommunitySessionsSessionIdRoute =
   DashboardCommunitySessionsSessionIdRouteImport.update({
     id: '/community-sessions/$sessionId',
     path: '/community-sessions/$sessionId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardAnnouncementsAddNewRoute =
+  DashboardAnnouncementsAddNewRouteImport.update({
+    id: '/announcements/add-new',
+    path: '/announcements/add-new',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardAnnouncementsEditIdRoute =
+  DashboardAnnouncementsEditIdRouteImport.update({
+    id: '/announcements/$edit-id',
+    path: '/announcements/$edit-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardAccountsStakeholdersRoute =
@@ -308,10 +365,28 @@ const DashboardAccountsAddNewRoute = DashboardAccountsAddNewRouteImport.update({
   path: '/accounts/add-new',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardSurveysTakeSurveyAnswerRoute =
+  DashboardSurveysTakeSurveyAnswerRouteImport.update({
+    id: '/surveys/take/$survey-answer',
+    path: '/surveys/take/$survey-answer',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardSurveysEditEditIdRoute =
   DashboardSurveysEditEditIdRouteImport.update({
     id: '/surveys/edit/$edit-id',
     path: '/surveys/edit/$edit-id',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardSurveysAnswerSurveyAnswerRoute =
+  DashboardSurveysAnswerSurveyAnswerRouteImport.update({
+    id: '/surveys/answer/$survey-answer',
+    path: '/surveys/answer/$survey-answer',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardSurveysAnalyticsSurveyIdRoute =
+  DashboardSurveysAnalyticsSurveyIdRouteImport.update({
+    id: '/surveys/analytics/$survey-id',
+    path: '/surveys/analytics/$survey-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardSettingsEditRoleRoleIdRoute =
@@ -334,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/posts': typeof PostsRouteRouteWithChildren
   '/approval-required': typeof ApprovalRequiredRoute
   '/error': typeof ErrorRoute
+  '/verify-organization': typeof VerifyOrganizationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -347,12 +423,17 @@ export interface FileRoutesByFullPath {
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
   '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
+  '/dashboard/announcements/$edit-id': typeof DashboardAnnouncementsEditIdRoute
+  '/dashboard/announcements/add-new': typeof DashboardAnnouncementsAddNewRoute
   '/dashboard/community-sessions/$sessionId': typeof DashboardCommunitySessionsSessionIdRoute
   '/dashboard/community-sessions/add-new': typeof DashboardCommunitySessionsAddNewRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
   '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
+  '/dashboard/rapid-enquiry/$edit-id': typeof DashboardRapidEnquiryEditIdRoute
+  '/dashboard/rapid-enquiry/add-new': typeof DashboardRapidEnquiryAddNewRoute
   '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
+  '/dashboard/reporting/review-report': typeof DashboardReportingReviewReportRoute
   '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
   '/dashboard/stakeholders/$edit-id': typeof DashboardStakeholdersEditIdRoute
   '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
@@ -366,23 +447,29 @@ export interface FileRoutesByFullPath {
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions': typeof DashboardCommunitySessionsIndexRoute
+  '/dashboard/docs': typeof DashboardDocsIndexRoute
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/dashboard/rapid-enquiry': typeof DashboardRapidEnquiryIndexRoute
   '/dashboard/reporting': typeof DashboardReportingIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/stakeholders': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
+  '/dashboard/surveys/analytics/$survey-id': typeof DashboardSurveysAnalyticsSurveyIdRoute
+  '/dashboard/surveys/answer/$survey-answer': typeof DashboardSurveysAnswerSurveyAnswerRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
+  '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/approval-required': typeof ApprovalRequiredRoute
   '/error': typeof ErrorRoute
+  '/verify-organization': typeof VerifyOrganizationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -396,12 +483,17 @@ export interface FileRoutesByTo {
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
   '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
+  '/dashboard/announcements/$edit-id': typeof DashboardAnnouncementsEditIdRoute
+  '/dashboard/announcements/add-new': typeof DashboardAnnouncementsAddNewRoute
   '/dashboard/community-sessions/$sessionId': typeof DashboardCommunitySessionsSessionIdRoute
   '/dashboard/community-sessions/add-new': typeof DashboardCommunitySessionsAddNewRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
   '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
+  '/dashboard/rapid-enquiry/$edit-id': typeof DashboardRapidEnquiryEditIdRoute
+  '/dashboard/rapid-enquiry/add-new': typeof DashboardRapidEnquiryAddNewRoute
   '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
+  '/dashboard/reporting/review-report': typeof DashboardReportingReviewReportRoute
   '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
   '/dashboard/stakeholders/$edit-id': typeof DashboardStakeholdersEditIdRoute
   '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
@@ -415,17 +507,22 @@ export interface FileRoutesByTo {
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions': typeof DashboardCommunitySessionsIndexRoute
+  '/dashboard/docs': typeof DashboardDocsIndexRoute
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/dashboard/rapid-enquiry': typeof DashboardRapidEnquiryIndexRoute
   '/dashboard/reporting': typeof DashboardReportingIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/stakeholders': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
+  '/dashboard/surveys/analytics/$survey-id': typeof DashboardSurveysAnalyticsSurveyIdRoute
+  '/dashboard/surveys/answer/$survey-answer': typeof DashboardSurveysAnswerSurveyAnswerRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
+  '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -435,6 +532,7 @@ export interface FileRoutesById {
   '/posts': typeof PostsRouteRouteWithChildren
   '/approval-required': typeof ApprovalRequiredRoute
   '/error': typeof ErrorRoute
+  '/verify-organization': typeof VerifyOrganizationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -448,12 +546,17 @@ export interface FileRoutesById {
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
   '/dashboard/accounts/rich-members': typeof DashboardAccountsRichMembersRoute
   '/dashboard/accounts/stakeholders': typeof DashboardAccountsStakeholdersRoute
+  '/dashboard/announcements/$edit-id': typeof DashboardAnnouncementsEditIdRoute
+  '/dashboard/announcements/add-new': typeof DashboardAnnouncementsAddNewRoute
   '/dashboard/community-sessions/$sessionId': typeof DashboardCommunitySessionsSessionIdRoute
   '/dashboard/community-sessions/add-new': typeof DashboardCommunitySessionsAddNewRoute
   '/dashboard/feedback/add-new': typeof DashboardFeedbackAddNewRoute
   '/dashboard/projects/$view-id': typeof DashboardProjectsViewIdRoute
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
+  '/dashboard/rapid-enquiry/$edit-id': typeof DashboardRapidEnquiryEditIdRoute
+  '/dashboard/rapid-enquiry/add-new': typeof DashboardRapidEnquiryAddNewRoute
   '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
+  '/dashboard/reporting/review-report': typeof DashboardReportingReviewReportRoute
   '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
   '/dashboard/stakeholders/$edit-id': typeof DashboardStakeholdersEditIdRoute
   '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
@@ -467,17 +570,22 @@ export interface FileRoutesById {
   '/dashboard/accounts/': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements/': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions/': typeof DashboardCommunitySessionsIndexRoute
+  '/dashboard/docs/': typeof DashboardDocsIndexRoute
   '/dashboard/documents/': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback/': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications/': typeof DashboardNotificationsIndexRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/dashboard/rapid-enquiry/': typeof DashboardRapidEnquiryIndexRoute
   '/dashboard/reporting/': typeof DashboardReportingIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/dashboard/stakeholders/': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys/': typeof DashboardSurveysIndexRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
+  '/dashboard/surveys/analytics/$survey-id': typeof DashboardSurveysAnalyticsSurveyIdRoute
+  '/dashboard/surveys/answer/$survey-answer': typeof DashboardSurveysAnswerSurveyAnswerRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
+  '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -488,6 +596,7 @@ export interface FileRouteTypes {
     | '/posts'
     | '/approval-required'
     | '/error'
+    | '/verify-organization'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -501,12 +610,17 @@ export interface FileRouteTypes {
     | '/dashboard/accounts/health-service-providers'
     | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
+    | '/dashboard/announcements/$edit-id'
+    | '/dashboard/announcements/add-new'
     | '/dashboard/community-sessions/$sessionId'
     | '/dashboard/community-sessions/add-new'
     | '/dashboard/feedback/add-new'
     | '/dashboard/projects/$view-id'
     | '/dashboard/projects/add-new'
+    | '/dashboard/rapid-enquiry/$edit-id'
+    | '/dashboard/rapid-enquiry/add-new'
     | '/dashboard/reporting/make-report'
+    | '/dashboard/reporting/review-report'
     | '/dashboard/settings/add-role'
     | '/dashboard/stakeholders/$edit-id'
     | '/dashboard/stakeholders/$view-id'
@@ -520,23 +634,29 @@ export interface FileRouteTypes {
     | '/dashboard/accounts'
     | '/dashboard/announcements'
     | '/dashboard/community-sessions'
+    | '/dashboard/docs'
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
     | '/dashboard/projects'
+    | '/dashboard/rapid-enquiry'
     | '/dashboard/reporting'
     | '/dashboard/settings'
     | '/dashboard/stakeholders'
     | '/dashboard/surveys'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
+    | '/dashboard/surveys/analytics/$survey-id'
+    | '/dashboard/surveys/answer/$survey-answer'
     | '/dashboard/surveys/edit/$edit-id'
+    | '/dashboard/surveys/take/$survey-answer'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/approval-required'
     | '/error'
+    | '/verify-organization'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -550,12 +670,17 @@ export interface FileRouteTypes {
     | '/dashboard/accounts/health-service-providers'
     | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
+    | '/dashboard/announcements/$edit-id'
+    | '/dashboard/announcements/add-new'
     | '/dashboard/community-sessions/$sessionId'
     | '/dashboard/community-sessions/add-new'
     | '/dashboard/feedback/add-new'
     | '/dashboard/projects/$view-id'
     | '/dashboard/projects/add-new'
+    | '/dashboard/rapid-enquiry/$edit-id'
+    | '/dashboard/rapid-enquiry/add-new'
     | '/dashboard/reporting/make-report'
+    | '/dashboard/reporting/review-report'
     | '/dashboard/settings/add-role'
     | '/dashboard/stakeholders/$edit-id'
     | '/dashboard/stakeholders/$view-id'
@@ -569,17 +694,22 @@ export interface FileRouteTypes {
     | '/dashboard/accounts'
     | '/dashboard/announcements'
     | '/dashboard/community-sessions'
+    | '/dashboard/docs'
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
     | '/dashboard/projects'
+    | '/dashboard/rapid-enquiry'
     | '/dashboard/reporting'
     | '/dashboard/settings'
     | '/dashboard/stakeholders'
     | '/dashboard/surveys'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
+    | '/dashboard/surveys/analytics/$survey-id'
+    | '/dashboard/surveys/answer/$survey-answer'
     | '/dashboard/surveys/edit/$edit-id'
+    | '/dashboard/surveys/take/$survey-answer'
   id:
     | '__root__'
     | '/'
@@ -588,6 +718,7 @@ export interface FileRouteTypes {
     | '/posts'
     | '/approval-required'
     | '/error'
+    | '/verify-organization'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -601,12 +732,17 @@ export interface FileRouteTypes {
     | '/dashboard/accounts/health-service-providers'
     | '/dashboard/accounts/rich-members'
     | '/dashboard/accounts/stakeholders'
+    | '/dashboard/announcements/$edit-id'
+    | '/dashboard/announcements/add-new'
     | '/dashboard/community-sessions/$sessionId'
     | '/dashboard/community-sessions/add-new'
     | '/dashboard/feedback/add-new'
     | '/dashboard/projects/$view-id'
     | '/dashboard/projects/add-new'
+    | '/dashboard/rapid-enquiry/$edit-id'
+    | '/dashboard/rapid-enquiry/add-new'
     | '/dashboard/reporting/make-report'
+    | '/dashboard/reporting/review-report'
     | '/dashboard/settings/add-role'
     | '/dashboard/stakeholders/$edit-id'
     | '/dashboard/stakeholders/$view-id'
@@ -620,17 +756,22 @@ export interface FileRouteTypes {
     | '/dashboard/accounts/'
     | '/dashboard/announcements/'
     | '/dashboard/community-sessions/'
+    | '/dashboard/docs/'
     | '/dashboard/documents/'
     | '/dashboard/feedback/'
     | '/dashboard/notifications/'
     | '/dashboard/projects/'
+    | '/dashboard/rapid-enquiry/'
     | '/dashboard/reporting/'
     | '/dashboard/settings/'
     | '/dashboard/stakeholders/'
     | '/dashboard/surveys/'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
+    | '/dashboard/surveys/analytics/$survey-id'
+    | '/dashboard/surveys/answer/$survey-answer'
     | '/dashboard/surveys/edit/$edit-id'
+    | '/dashboard/surveys/take/$survey-answer'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -640,11 +781,19 @@ export interface RootRouteChildren {
   PostsRouteRoute: typeof PostsRouteRouteWithChildren
   ApprovalRequiredRoute: typeof ApprovalRequiredRoute
   ErrorRoute: typeof ErrorRoute
+  VerifyOrganizationRoute: typeof VerifyOrganizationRoute
   FeedbackProgrammeRoute: typeof FeedbackProgrammeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify-organization': {
+      id: '/verify-organization'
+      path: '/verify-organization'
+      fullPath: '/verify-organization'
+      preLoaderRoute: typeof VerifyOrganizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/error': {
       id: '/error'
       path: '/error'
@@ -771,6 +920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardReportingIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/rapid-enquiry/': {
+      id: '/dashboard/rapid-enquiry/'
+      path: '/rapid-enquiry'
+      fullPath: '/dashboard/rapid-enquiry'
+      preLoaderRoute: typeof DashboardRapidEnquiryIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/projects/': {
       id: '/dashboard/projects/'
       path: '/projects'
@@ -797,6 +953,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/dashboard/documents'
       preLoaderRoute: typeof DashboardDocumentsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/docs/': {
+      id: '/dashboard/docs/'
+      path: '/docs'
+      fullPath: '/dashboard/docs'
+      preLoaderRoute: typeof DashboardDocsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/community-sessions/': {
@@ -890,11 +1053,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingsAddRoleRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/reporting/review-report': {
+      id: '/dashboard/reporting/review-report'
+      path: '/reporting/review-report'
+      fullPath: '/dashboard/reporting/review-report'
+      preLoaderRoute: typeof DashboardReportingReviewReportRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/reporting/make-report': {
       id: '/dashboard/reporting/make-report'
       path: '/reporting/make-report'
       fullPath: '/dashboard/reporting/make-report'
       preLoaderRoute: typeof DashboardReportingMakeReportRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/rapid-enquiry/add-new': {
+      id: '/dashboard/rapid-enquiry/add-new'
+      path: '/rapid-enquiry/add-new'
+      fullPath: '/dashboard/rapid-enquiry/add-new'
+      preLoaderRoute: typeof DashboardRapidEnquiryAddNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/rapid-enquiry/$edit-id': {
+      id: '/dashboard/rapid-enquiry/$edit-id'
+      path: '/rapid-enquiry/$edit-id'
+      fullPath: '/dashboard/rapid-enquiry/$edit-id'
+      preLoaderRoute: typeof DashboardRapidEnquiryEditIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/projects/add-new': {
@@ -932,6 +1116,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCommunitySessionsSessionIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/announcements/add-new': {
+      id: '/dashboard/announcements/add-new'
+      path: '/announcements/add-new'
+      fullPath: '/dashboard/announcements/add-new'
+      preLoaderRoute: typeof DashboardAnnouncementsAddNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/announcements/$edit-id': {
+      id: '/dashboard/announcements/$edit-id'
+      path: '/announcements/$edit-id'
+      fullPath: '/dashboard/announcements/$edit-id'
+      preLoaderRoute: typeof DashboardAnnouncementsEditIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/accounts/stakeholders': {
       id: '/dashboard/accounts/stakeholders'
       path: '/accounts/stakeholders'
@@ -967,11 +1165,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountsAddNewRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/surveys/take/$survey-answer': {
+      id: '/dashboard/surveys/take/$survey-answer'
+      path: '/surveys/take/$survey-answer'
+      fullPath: '/dashboard/surveys/take/$survey-answer'
+      preLoaderRoute: typeof DashboardSurveysTakeSurveyAnswerRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/surveys/edit/$edit-id': {
       id: '/dashboard/surveys/edit/$edit-id'
       path: '/surveys/edit/$edit-id'
       fullPath: '/dashboard/surveys/edit/$edit-id'
       preLoaderRoute: typeof DashboardSurveysEditEditIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/surveys/answer/$survey-answer': {
+      id: '/dashboard/surveys/answer/$survey-answer'
+      path: '/surveys/answer/$survey-answer'
+      fullPath: '/dashboard/surveys/answer/$survey-answer'
+      preLoaderRoute: typeof DashboardSurveysAnswerSurveyAnswerRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/surveys/analytics/$survey-id': {
+      id: '/dashboard/surveys/analytics/$survey-id'
+      path: '/surveys/analytics/$survey-id'
+      fullPath: '/dashboard/surveys/analytics/$survey-id'
+      preLoaderRoute: typeof DashboardSurveysAnalyticsSurveyIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/settings/edit-role/$roleId': {
@@ -1016,12 +1235,17 @@ interface DashboardRouteRouteChildren {
   DashboardAccountsHealthServiceProvidersRoute: typeof DashboardAccountsHealthServiceProvidersRoute
   DashboardAccountsRichMembersRoute: typeof DashboardAccountsRichMembersRoute
   DashboardAccountsStakeholdersRoute: typeof DashboardAccountsStakeholdersRoute
+  DashboardAnnouncementsEditIdRoute: typeof DashboardAnnouncementsEditIdRoute
+  DashboardAnnouncementsAddNewRoute: typeof DashboardAnnouncementsAddNewRoute
   DashboardCommunitySessionsSessionIdRoute: typeof DashboardCommunitySessionsSessionIdRoute
   DashboardCommunitySessionsAddNewRoute: typeof DashboardCommunitySessionsAddNewRoute
   DashboardFeedbackAddNewRoute: typeof DashboardFeedbackAddNewRoute
   DashboardProjectsViewIdRoute: typeof DashboardProjectsViewIdRoute
   DashboardProjectsAddNewRoute: typeof DashboardProjectsAddNewRoute
+  DashboardRapidEnquiryEditIdRoute: typeof DashboardRapidEnquiryEditIdRoute
+  DashboardRapidEnquiryAddNewRoute: typeof DashboardRapidEnquiryAddNewRoute
   DashboardReportingMakeReportRoute: typeof DashboardReportingMakeReportRoute
+  DashboardReportingReviewReportRoute: typeof DashboardReportingReviewReportRoute
   DashboardSettingsAddRoleRoute: typeof DashboardSettingsAddRoleRoute
   DashboardStakeholdersEditIdRoute: typeof DashboardStakeholdersEditIdRoute
   DashboardStakeholdersViewIdRoute: typeof DashboardStakeholdersViewIdRoute
@@ -1035,17 +1259,22 @@ interface DashboardRouteRouteChildren {
   DashboardAccountsIndexRoute: typeof DashboardAccountsIndexRoute
   DashboardAnnouncementsIndexRoute: typeof DashboardAnnouncementsIndexRoute
   DashboardCommunitySessionsIndexRoute: typeof DashboardCommunitySessionsIndexRoute
+  DashboardDocsIndexRoute: typeof DashboardDocsIndexRoute
   DashboardDocumentsIndexRoute: typeof DashboardDocumentsIndexRoute
   DashboardFeedbackIndexRoute: typeof DashboardFeedbackIndexRoute
   DashboardNotificationsIndexRoute: typeof DashboardNotificationsIndexRoute
   DashboardProjectsIndexRoute: typeof DashboardProjectsIndexRoute
+  DashboardRapidEnquiryIndexRoute: typeof DashboardRapidEnquiryIndexRoute
   DashboardReportingIndexRoute: typeof DashboardReportingIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
   DashboardStakeholdersIndexRoute: typeof DashboardStakeholdersIndexRoute
   DashboardSurveysIndexRoute: typeof DashboardSurveysIndexRoute
   DashboardFeedbackEditEditIdRoute: typeof DashboardFeedbackEditEditIdRoute
   DashboardSettingsEditRoleRoleIdRoute: typeof DashboardSettingsEditRoleRoleIdRoute
+  DashboardSurveysAnalyticsSurveyIdRoute: typeof DashboardSurveysAnalyticsSurveyIdRoute
+  DashboardSurveysAnswerSurveyAnswerRoute: typeof DashboardSurveysAnswerSurveyAnswerRoute
   DashboardSurveysEditEditIdRoute: typeof DashboardSurveysEditEditIdRoute
+  DashboardSurveysTakeSurveyAnswerRoute: typeof DashboardSurveysTakeSurveyAnswerRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
@@ -1057,13 +1286,18 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
     DashboardAccountsHealthServiceProvidersRoute,
   DashboardAccountsRichMembersRoute: DashboardAccountsRichMembersRoute,
   DashboardAccountsStakeholdersRoute: DashboardAccountsStakeholdersRoute,
+  DashboardAnnouncementsEditIdRoute: DashboardAnnouncementsEditIdRoute,
+  DashboardAnnouncementsAddNewRoute: DashboardAnnouncementsAddNewRoute,
   DashboardCommunitySessionsSessionIdRoute:
     DashboardCommunitySessionsSessionIdRoute,
   DashboardCommunitySessionsAddNewRoute: DashboardCommunitySessionsAddNewRoute,
   DashboardFeedbackAddNewRoute: DashboardFeedbackAddNewRoute,
   DashboardProjectsViewIdRoute: DashboardProjectsViewIdRoute,
   DashboardProjectsAddNewRoute: DashboardProjectsAddNewRoute,
+  DashboardRapidEnquiryEditIdRoute: DashboardRapidEnquiryEditIdRoute,
+  DashboardRapidEnquiryAddNewRoute: DashboardRapidEnquiryAddNewRoute,
   DashboardReportingMakeReportRoute: DashboardReportingMakeReportRoute,
+  DashboardReportingReviewReportRoute: DashboardReportingReviewReportRoute,
   DashboardSettingsAddRoleRoute: DashboardSettingsAddRoleRoute,
   DashboardStakeholdersEditIdRoute: DashboardStakeholdersEditIdRoute,
   DashboardStakeholdersViewIdRoute: DashboardStakeholdersViewIdRoute,
@@ -1077,17 +1311,24 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardAccountsIndexRoute: DashboardAccountsIndexRoute,
   DashboardAnnouncementsIndexRoute: DashboardAnnouncementsIndexRoute,
   DashboardCommunitySessionsIndexRoute: DashboardCommunitySessionsIndexRoute,
+  DashboardDocsIndexRoute: DashboardDocsIndexRoute,
   DashboardDocumentsIndexRoute: DashboardDocumentsIndexRoute,
   DashboardFeedbackIndexRoute: DashboardFeedbackIndexRoute,
   DashboardNotificationsIndexRoute: DashboardNotificationsIndexRoute,
   DashboardProjectsIndexRoute: DashboardProjectsIndexRoute,
+  DashboardRapidEnquiryIndexRoute: DashboardRapidEnquiryIndexRoute,
   DashboardReportingIndexRoute: DashboardReportingIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
   DashboardStakeholdersIndexRoute: DashboardStakeholdersIndexRoute,
   DashboardSurveysIndexRoute: DashboardSurveysIndexRoute,
   DashboardFeedbackEditEditIdRoute: DashboardFeedbackEditEditIdRoute,
   DashboardSettingsEditRoleRoleIdRoute: DashboardSettingsEditRoleRoleIdRoute,
+  DashboardSurveysAnalyticsSurveyIdRoute:
+    DashboardSurveysAnalyticsSurveyIdRoute,
+  DashboardSurveysAnswerSurveyAnswerRoute:
+    DashboardSurveysAnswerSurveyAnswerRoute,
   DashboardSurveysEditEditIdRoute: DashboardSurveysEditEditIdRoute,
+  DashboardSurveysTakeSurveyAnswerRoute: DashboardSurveysTakeSurveyAnswerRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
@@ -1115,6 +1356,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostsRouteRoute: PostsRouteRouteWithChildren,
   ApprovalRequiredRoute: ApprovalRequiredRoute,
   ErrorRoute: ErrorRoute,
+  VerifyOrganizationRoute: VerifyOrganizationRoute,
   FeedbackProgrammeRoute: FeedbackProgrammeRoute,
 }
 export const routeTree = rootRouteImport

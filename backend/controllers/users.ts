@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Route, Tags, Response, SuccessResponse, Body, Path, Query, Security } from 'tsoa';
+import { Controller, Get, Post, Put, Delete, Route, Tags, Response, SuccessResponse, Body, Path, Query, Security, Request } from 'tsoa';
 import { ServiceResponse } from '../utils/serviceResponse';
 import { User } from '../models/users';
 import { Role } from '../models/role';
@@ -6,6 +6,8 @@ import { IUserCreateRequest, IUserResponse, IUserUpdateRequest } from '../types/
 import { asyncCatch } from '../middlewares/errorHandler';
 import { hash } from 'bcrypt';
 import sequelize from '../config/database';
+import Stakeholder from '../models/organization';
+import { createSystemLog } from '../utils/systemLog';
 
 @Route("api/users")
 @Tags("Users")
@@ -64,6 +66,7 @@ export class UserController extends Controller {
   @Post("/")
   @Response<ServiceResponse<null>>(400, "Email already in use")
   public async createUser(
+    @Request() req: any,
     @Body() userData: IUserCreateRequest
   ): Promise<ServiceResponse<IUserResponse | null>> {
     if (await User.findOne({ where: { email: userData.email } })) {
@@ -84,16 +87,26 @@ export class UserController extends Controller {
     const newUser = await sequelize.transaction(async (t) => {
       const user = await User.create({ ...userData, password: hashedPassword, status: 'active' }, { transaction: t });
 
-      // Assign roles
-      if (userData.roleIds && userData.roleIds.length > 0) {
-        const roles = await Role.findAll({ where: { id: userData.roleIds }, transaction: t });
+      // Assign explicit roleIds if provided
+      if ((userData as any).roleIds && (userData as any).roleIds.length > 0) {
+        const roles = await Role.findAll({ where: { id: (userData as any).roleIds }, transaction: t });
         if (roles.length) {
           await user.setRoles(roles, { transaction: t });
         }
       } else {
-        const userRole = await Role.findOne({ where: { name: 'user' }, transaction: t });
+        const userRole = await Role.findOne({ where: { name: 'general_population' }, transaction: t });
         if (userRole) {
           await user.addRole(userRole, { transaction: t });
+        }
+      }
+
+      // If a stakeholderId was provided, associate user -> stakeholder
+      const stakeholderId = (userData as any).stakeholderId;
+      if (stakeholderId) {
+        const stakeholder = await Stakeholder.findByPk(stakeholderId, { transaction: t });
+        if (stakeholder) {
+          // create association
+          await (stakeholder as any).addUser(user, { transaction: t });
         }
       }
 
@@ -102,6 +115,8 @@ export class UserController extends Controller {
 
     const userResponse = await this._buildUserResponse(newUser);
     this.setStatus(201);
+    // Log activity
+    await createSystemLog(req ?? null, 'created_user', 'User', newUser.id, { email: newUser.email });
     return ServiceResponse.success('User created successfully', userResponse, 201);
   }
 
@@ -111,6 +126,7 @@ export class UserController extends Controller {
   @Response<ServiceResponse<null>>(400, "Email already in use")
   @asyncCatch
   public async updateUser(
+    @Request() req: any,
     @Path() userId: string,
     @Body() userData: IUserUpdateRequest
   ): Promise<ServiceResponse<IUserResponse | null>> {
@@ -127,6 +143,7 @@ export class UserController extends Controller {
 
     await user.update(userData);
     const userResponse = await this._buildUserResponse(user);
+    await createSystemLog(req ?? null, 'updated_user', 'User', user.id, { changes: Object.keys(userData) });
     return ServiceResponse.success('User updated successfully', userResponse);
   }
 
@@ -136,6 +153,7 @@ export class UserController extends Controller {
   @Response<ServiceResponse<null>>(404, "User not found")
   @asyncCatch
   public async deleteUser(
+    @Request() req: any,
     @Path() userId: string
   ): Promise<ServiceResponse<null>> {
     const user = await User.findByPk(userId);
@@ -144,6 +162,7 @@ export class UserController extends Controller {
     }
 
     await user.destroy();
+    await createSystemLog(req ?? null, 'deleted_user', 'User', userId, { deletedEmail: user.email });
     this.setStatus(204);
     return ServiceResponse.success('User deleted successfully', null, 204);
   }

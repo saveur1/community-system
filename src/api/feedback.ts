@@ -59,6 +59,7 @@ export interface FeedbackCreateRequest {
   responderName?: string | null;
   followUpNeeded?: boolean;
   documents?: DocumentInput[];
+  otherFeedbackOn?: string;
 }
 
 export interface FeedbackUpdateRequest extends Partial<FeedbackCreateRequest> {
@@ -70,7 +71,11 @@ export interface FeedbackListParams {
   limit?: number;
   status?: 'submitted' | 'Acknowledged' | 'Resolved' | 'Rejected';
   feedbackType?: 'positive' | 'negative' | 'suggestion' | 'concern';
+  owner?: 'me' | 'other';
   projectId?: string;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 // Replace 'any' with more specific types if you have them
