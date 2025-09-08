@@ -22,6 +22,7 @@ import {
 import { useCreateFeedback } from "@/hooks/useFeedback";
 import { uploadToCloudinary } from "@/utility/logicFunctions";
 import { DocumentInput } from "@/api/feedback";
+import { cn } from "@/utility/utility";
 
 function FeedbackForm() {
   const [form, setForm] = useState<FormState>({
@@ -162,51 +163,17 @@ function FeedbackForm() {
   ];
 
   return (
-    <div className="w-full rounded-2xl bg-gray-100 border border-gray-300">
-      <div className="max-w-8xl mx-auto  px-3 sm:px-4 py-6 sm:py-8" id="feedback">
+    <div className="w-full lg:col-span-2 rounded-2xl bg-gray-100 border border-gray-300">
+      <div className="max-w-8xl mx-auto  px-3 sm:px-4 lg:p-8 py-6 sm:py-2 pb-4" id="feedback">
         {/* Header Section */}
-        <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-title mb-2">{t('feedback.feedback_title')}</h1>
-          <p className="text-base sm:text-lg text-gray-600">{t('feedback.feedback_subtitle')}</p>
+        <div className="text-center py-2 lg:py-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-title">{t('feedback.feedback_title')}</h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 max-w-7xl mx-auto">
-          {/* Left Side - Contact Details */}
-          <motion.div
-            className="flex flex-col justify-between py-2"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={sectionVariants}
-            custom={-1}
-          >
-            {/* Our Contact Details */}
-            <div>
-              <h2 className="text-2xl font-light text-gray-700 mb-4">{t('contact.title')}</h2>
-              <div className="space-y-2 text-gray-500">
-                <p>Kimihurura Kigali-Gasabo</p>
-                <p>KN14 Avenue, KG 621 ST#3 </p>
-                <p>Phone: +250788307845</p>
-                <p>
-                  <a href="mailto: info@rwandainterfaith.org" className="text-primary hover:underline">
-                    info@rwandainterfaith.org
-                  </a>
-                </p>
-              </div>
-            </div>
-
-            {/* Can't Wait to Meet You */}
-            <div>
-              <h2 className="text-2xl font-light text-gray-700 mb-3">{t('contact.title2')}</h2>
-              <div className="text-gray-500 leading-relaxed">
-                <p>{t('contact.description')}</p>
-              </div>
-            </div>
-          </motion.div>
-
+        <div className="gap-6 sm:gap-8 lg:gap-12 max-w-7xl mx-auto">
           {/* Right Side - Feedback Form */}
           <motion.div
-            className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 flex flex-col justify-between space-y-6 sm:space-y-8"
+            className="rounded-lg w-full p-2 flex flex-col justify-between space-y-4 sm:space-y-6"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
@@ -229,22 +196,24 @@ function FeedbackForm() {
               </div>
 
               {/* Feedback Method */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3 mt-4">
                 {feedbackMethods.map((method) => (
-                  <button
-                    key={method.value}
-                    type="button"
-                    onClick={() => handleFormChange({ feedbackMethod: method.value })}
-                    className={`w-full h-full p-2 py-3 border rounded-lg text-left transition-colors ${form.feedbackMethod === method.value ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary'}`}
-                  >
-                    <div className="flex items-center">
-                      <span className="text-2xl mr-2 p-1 bg-primary/10 rounded-full">{method.icon}</span>
-                      <div>
-                        <div className="font-medium text-sm">{method.label}</div>
-                        <div className="text-xs sm:text-sm text-gray-500">{method.description}</div>
+                  <div className="bg-white rounded-lg">
+                    <button
+                      key={method.value}
+                      type="button"
+                      onClick={() => handleFormChange({ feedbackMethod: method.value })}
+                      className={cn(`w-full h-full p-3 border rounded-lg text-left transition-colors`, `${form.feedbackMethod === method.value ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50'}`)}
+                    >
+                      <div className="flex flex-col items-center">
+                        <span className="text-2xl mr-2 p-1 bg-primary/10 rounded-full">{method.icon}</span>
+                        <div className="mt-1">
+                          <div className="font-medium text-sm text-center">{method.label}</div>
+                          <div className="text-xs sm:text-xs mt-1 text-gray-500 text-center">{method.description}</div>
+                        </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 ))}
               </div>
 
@@ -276,7 +245,7 @@ function FeedbackForm() {
             </motion.div>
 
             {/* Submit */}
-            <div className="flex justify-end sm:justify-end items-center mt-4">
+            <div className="flex justify-end sm:justify-end items-center">
               <button
                 type="button"
                 onClick={handleSubmit}

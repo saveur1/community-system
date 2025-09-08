@@ -8,7 +8,7 @@ const STORAGE_KEY = 'rapid_enquiries';
 
 export const Route = createFileRoute('/dashboard/rapid-enquiry/$edit-id')({
   component: RouteComponent,
-  validate: (params) => ({ 'edit-id': String(params['edit-id'] ?? '') }),
+  validate: (params: any) => ({ 'edit-id': String(params['edit-id'] ?? '') }),
 });
 
 function RouteComponent() {

@@ -157,18 +157,18 @@ const OurImpacts: React.FC = () => {
 
   return (
     <motion.div
-      className="bg-white/80 backdrop-blur-sm"
+      className="bg-white/80 backdrop-blur-sm "
       variants={statsVariants}
       initial="hidden"
       animate="visible"
     >
 
-      <div className="max-w-8xl mx-auto py-2 px-3 sm:px-4">
-        <div className="px-1 sm:px-2 text-center mb-3 sm:mb-4">
+      <div className="max-w-8xl mx-auto py-2 mt-2 px-3 sm:px-4">
+        {/* <div className="px-1 sm:px-2 text-center mb-3 sm:mb-4">
           <motion.h2 className="text-lg sm:text-2xl font-bold text-title">Our Impacts</motion.h2>
-        </div>
+        </div> */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          {statsData.map((stat, index) => (
+          {statsData.slice(0,4).map((stat, index) => (
             <motion.div
               key={index}
               variants={itemVariants}

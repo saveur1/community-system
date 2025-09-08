@@ -36,7 +36,7 @@ const OurPriorities = () => {
   ];
 
   return (
-    <div className="w-full flex justify-start col-span-1 md:col-span-2 mb-8 md:mb-0">
+    <div className="w-full flex justify-start col-span-1 md:col-span-2 lg:col-span-3 mb-8 md:mb-0">
       <motion.section
         className="w-full px-2 sm:px-4"
         initial="hidden"

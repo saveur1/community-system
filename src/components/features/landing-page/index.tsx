@@ -1,11 +1,10 @@
 import { type Variants, animate } from "framer-motion";
 import { useEffect } from "react";
-import FeedbackForm from "./feedback-form";
 import ChatBotButton from "./chatbot-icon";
-import MainHeader from "@/components/layouts/main-header";
 import Footer from "@/components/layouts/main-footer/main-footer";
-import HeroSection from "./hero";
 import AboutRich from "./priorities";
+import HealthHeroSection from "./hero";
+import MainHeader from "@/components/layouts/main-header";
 
 export const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -50,12 +49,9 @@ const LandingPage = () => {
 
       <ChatBotButton />
       {/* Hero Section */}
-      {/* <HomeSection /> */}
-      <HeroSection />
+      <HealthHeroSection />
 
       <AboutRich />
-
-      <FeedbackForm />
 
       <Footer />
 

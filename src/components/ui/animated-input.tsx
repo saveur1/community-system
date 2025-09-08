@@ -29,7 +29,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({ label, value, onChange, t
         {...props}
       />
       <motion.label
-        className="absolute left-4 text-gray-500 pointer-events-none origin-top-left"
+        className="absolute left-4 text-gray-500 rounded-lg pointer-events-none origin-top-left"
         initial={false}
         animate={{
           top: isFloating ? '-8px' : '50%',

@@ -233,7 +233,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFe
   return (
     <div className="mt-4 sm:mt-6">
       <motion.div
-        className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-4 border border-purple-200"
+        className="bg-white rounded-2xl p-4 border border-gray-300"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}

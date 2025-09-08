@@ -7,7 +7,6 @@ import { FiMenu } from "react-icons/fi"
 import { AiOutlineHome, AiOutlineInfoCircle, AiOutlineMessage, AiOutlineLogin } from "react-icons/ai"
 import MobileHeader from "./mobile-header"
 import ImigongoStarter from "../imigongo-starter"
-import { MdOutlineFiberNew } from "react-icons/md"
 
 const MainHeader = () => {
     const { t, i18n } = useTranslation();
@@ -102,15 +101,15 @@ const MainHeader = () => {
             <ImigongoStarter />
             <header className="w-full bg-white border-b border-gray-200 z-50 sticky top-0">
                 <div className="max-w-8xl mx-auto px-4">
-                    <div className="flex items-center justify-between h-16 px-4">
+                    <div className="flex items-center justify-between h-16">
                         {/* Logo/TC on the left */}
                         <Link to="/">
                             <OptimizedImage
                                 src="/images/web_logo.png"
                                 alt="Logo"
-                                width={200}
+                                width={170}
                                 height={56}
-                                className="h-16 w-[200px] max-sm:w-[130px] object-contain"
+                                className="h-16 w-[170px] max-sm:w-[130px] object-contain"
                             />
                         </Link>
 
@@ -133,10 +132,10 @@ const MainHeader = () => {
                 {/* Mobile menu */}
                 <MobileHeader open={mobileOpen} onClose={() => setMobileOpen(false)} navLinks={navLinks} />
             </header>
-            <div className="text-white bg-primary py-1 text-center flex items-center justify-center gap-2">
+            {/* <div className="text-white bg-primary py-1 text-center flex items-center justify-center gap-2">
                 <MdOutlineFiberNew size={40}  className="text-title"/>
                 <span>Motor Vehicle Emission Inspection service is now available. <a href="/" className="underline">Click here</a> to book your appointment. #CleanAir</span>
-            </div>
+            </div> */}
         </>
     )
 }
