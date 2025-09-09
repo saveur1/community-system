@@ -6,8 +6,6 @@ import {  fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UserController } from './../controllers/users';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { TweetsController } from './../controllers/tweets';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { SystemLogController } from './../controllers/system-logs';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { SurveyController } from './../controllers/surveys';
@@ -182,57 +180,6 @@ const models: TsoaRoute.Models = {
             "userType": {"dataType":"string"},
             "roleIds": {"dataType":"array","array":{"dataType":"string"}},
             "stakeholderId": {"dataType":"string"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Record_string.unknown_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ITweetResponse": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"string","required":true},
-            "text": {"dataType":"string","required":true},
-            "authorId": {"dataType":"string","required":true},
-            "authorUsername": {"dataType":"string","required":true},
-            "createdAtTweet": {"dataType":"string","required":true},
-            "data": {"ref":"Record_string.unknown_","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ServiceResponse_ITweetResponse-Array-or-_error-string__": {
-        "dataType": "refObject",
-        "properties": {
-            "success": {"dataType":"boolean","required":true},
-            "message": {"dataType":"string","required":true},
-            "result": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"ITweetResponse"}},{"dataType":"nestedObjectLiteral","nestedProperties":{"error":{"dataType":"string","required":true}}}]},{"dataType":"enum","enums":[null]}],"required":true},
-            "statusCode": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ServiceResponse_ITweetResponse-Array_": {
-        "dataType": "refObject",
-        "properties": {
-            "success": {"dataType":"boolean","required":true},
-            "message": {"dataType":"string","required":true},
-            "result": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"ITweetResponse"}},{"dataType":"enum","enums":[null]}],"required":true},
-            "statusCode": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ServiceResponse__error-string__": {
-        "dataType": "refObject",
-        "properties": {
-            "success": {"dataType":"boolean","required":true},
-            "message": {"dataType":"string","required":true},
-            "result": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"error":{"dataType":"string","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
-            "statusCode": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -736,35 +683,6 @@ export function RegisterRoutes(app: Router) {
                 next,
                 validatedArgs,
                 successStatus: 204,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsTweetsController_getLatestTweets: Record<string, TsoaRoute.ParameterSchema> = {
-        };
-        app.get('/api/tweets/latest',
-            ...(fetchMiddlewares<RequestHandler>(TweetsController)),
-            ...(fetchMiddlewares<RequestHandler>(TweetsController.prototype.getLatestTweets)),
-
-            async function TweetsController_getLatestTweets(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsTweetsController_getLatestTweets, request, response });
-
-                const controller = new TweetsController();
-
-              await templateService.apiHandler({
-                methodName: 'getLatestTweets',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
               });
             } catch (err) {
                 return next(err);

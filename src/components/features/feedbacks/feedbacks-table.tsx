@@ -3,6 +3,7 @@ import { FeedbackAction, FeedbackItem } from '@/utility/types';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import { FeedbackEntity } from '@/api/feedback';
 import FeedbackActionsDropdown from './feedback-actions-dropdown';
+import { spacer } from '@/utility/logicFunctions';
 
 interface FeedbackTableProps {
   feedbacks: FeedbackEntity[];
@@ -32,23 +33,23 @@ export const FeedbackTable = ({
   };
 
   return (
-    <div className="bg-white w-full rounded-lg shadow-sm border border-gray-200">
-      <table className="min-w-full">
+    <div className="bg-white w-full rounded-lg shadow-sm border border-gray-200 overflow-x-auto"> {/* Added overflow-x-auto for responsiveness */}
+      <table className="min-w-full table-auto"> {/* table-auto helps with column sizing */}
         <thead className="border-b border-gray-200">
           <tr>
-            <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Feedback</th>
-            <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Project</th>
-            <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">User</th>
-            <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Status</th>
-            <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Follow-up</th>
-            <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Actions</th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm">Feedback</th> {/* Adjusted padding/text for mobile */}
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">Project</th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">User</th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm">Status</th>
+            <th className="hidden sm:table-cell px-6 py-4 text-left text-sm font-medium text-gray-900">Follow-up</th> {/* Hide on mobile */}
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {isLoading
             ? Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="animate-pulse">
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-2 sm:px-6 sm:py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gray-200"></div>
                       <div>
@@ -57,11 +58,11 @@ export const FeedbackTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
-                  <td className="px-6 py-4"><div className="h-5 bg-gray-200 rounded-full w-20"></div></td>
-                  <td className="px-6 py-4"><div className="h-5 bg-gray-200 rounded-full w-16"></div></td>
-                  <td className="px-6 py-4"><div className="h-6 bg-gray-200 rounded w-24"></div></td>
+                  <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
+                  <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
+                  <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-5 bg-gray-200 rounded-full w-20"></div></td>
+                  <td className="hidden sm:table-cell px-6 py-4"><div className="h-5 bg-gray-200 rounded-full w-16"></div></td>
+                  <td className="px-3 py-2 sm:px-6 sm:py-4"><div className="h-6 bg-gray-200 rounded w-24"></div></td>
                 </tr>
               ))
             : feedbacks?.length === 0
@@ -74,7 +75,7 @@ export const FeedbackTable = ({
               )
             : (feedbacks?.map((fb) => (
                 <tr key={fb.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-2 sm:px-6 sm:py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold">
                         {getInitials(fb.feedbackMethod || 'No Message')}
@@ -85,14 +86,14 @@ export const FeedbackTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
+                  <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">
                     {fb.project ? fb.project.name : 'N/A'}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
+                  <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">
                     {fb.user ? (
                       <div>
                         <div className="font-medium text-gray-900">{fb.user.name}</div>
-                        <div className="text-xs text-gray-500 capitalize">{fb.user.roles?.[0]?.name || 'No role'}</div>
+                        <div className="text-xs text-gray-500 capitalize">{spacer(fb.user.roles?.[0]?.name || 'No role')}</div>
                       </div>
                     ) : fb.responderName ? (
                       fb.responderName
@@ -100,17 +101,17 @@ export const FeedbackTable = ({
                       'Unknown user'
                     )}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-2 sm:px-6 sm:py-4">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(fb.status)}`}>
                       {fb.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
+                  <td className="hidden sm:table-cell px-6 py-4 text-sm text-gray-700">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${fb.followUpNeeded ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 'bg-gray-100 text-gray-800 border border-gray-200'}`}>
                       {fb.followUpNeeded ? 'Needed' : 'No'}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-2 sm:px-6 sm:py-4">
                     <div className="flex items-center space-x-3">
                       <button
                         onClick={() => handleAction('edit', fb)}

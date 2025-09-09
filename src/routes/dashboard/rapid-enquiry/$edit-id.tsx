@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { toast } from 'react-toastify';
@@ -7,8 +7,7 @@ import { FiChevronLeft } from 'react-icons/fi';
 const STORAGE_KEY = 'rapid_enquiries';
 
 export const Route = createFileRoute('/dashboard/rapid-enquiry/$edit-id')({
-  component: RouteComponent,
-  validate: (params: any) => ({ 'edit-id': String(params['edit-id'] ?? '') }),
+  component: RouteComponent
 });
 
 function RouteComponent() {

@@ -11,7 +11,8 @@
     "translate": "node src/utility/translate-languages-script.cjs",
     "debug": "tsx --inspect-brk server.ts",
     "lint": "npx tsc --noEmit",
-    "setup:system": "tsx backend/config/system-setup.ts"
+    "setup:system": "tsx backend/config/system-setup.ts",
+    "seed":"tsx backend/scripts/seedMockData.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",

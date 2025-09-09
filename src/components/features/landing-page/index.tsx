@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import ChatBotButton from "./chatbot-icon";
 import Footer from "@/components/layouts/main-footer/main-footer";
 import AboutRich from "./priorities";
-import HealthHeroSection from "./hero";
+import HeroSection from "./hero";
 import MainHeader from "@/components/layouts/main-header";
 
 export const sectionVariants: Variants = {
@@ -49,7 +49,7 @@ const LandingPage = () => {
 
       <ChatBotButton />
       {/* Hero Section */}
-      <HealthHeroSection />
+      <HeroSection />
 
       <AboutRich />
 

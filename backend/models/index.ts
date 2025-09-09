@@ -3,7 +3,6 @@ import { User } from './users';
 import { Role } from './role';
 import UserRole from './userRole';
 import Permission from './permission';
-import Tweet from './tweet';
 import Project from './project';
 import Document from './document';
 import Organization from './organization';
@@ -268,6 +267,37 @@ User.hasMany(Announcement, {
   foreignKey: 'createdBy',
 });
 
-const db = { sequelize, User, Role, UserRole, Permission, Tweet, Project, Document, Organization, Survey, Question, Answer, Feedback, CommunitySession, Comment, SystemLog, Announcement };
+// Associate Organization with other models for tracking
+Organization.hasMany(Project, { as: 'organizationProjects', foreignKey: 'organizationId' });
+Project.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Organization.hasMany(Document, { as: 'organizationDocuments', foreignKey: 'organizationId' });
+Document.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Organization.hasMany(Survey, { as: 'organizationSurveys', foreignKey: 'organizationId' });
+Survey.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Organization.hasMany(Question, { as: 'organizationQuestions', foreignKey: 'organizationId' });
+Question.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Organization.hasMany(Answer, { as: 'organizationAnswers', foreignKey: 'organizationId' });
+Answer.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Organization.hasMany(Feedback, { as: 'organizationFeedback', foreignKey: 'organizationId' });
+Feedback.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Organization.hasMany(CommunitySession, { as: 'organizationSessions', foreignKey: 'organizationId' });
+CommunitySession.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Organization.hasMany(Comment, { as: 'organizationComments', foreignKey: 'organizationId' });
+Comment.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Organization.hasMany(Announcement, { as: 'organizationAnnouncements', foreignKey: 'organizationId' });
+Announcement.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+
+Role.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+Organization.hasMany(Role, { as: 'organizationRoles', foreignKey: 'organizationId' });
+
+const db = { sequelize, User, Role, UserRole, Permission, Project, Document, Organization, Survey, Question, Answer, Feedback, CommunitySession, Comment, SystemLog, Announcement };
 
 export default db;
