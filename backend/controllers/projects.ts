@@ -1,16 +1,17 @@
 import { Controller, Get, Post, Put, Delete, Route, Tags, Response, SuccessResponse, Body, Path, Query, Security } from 'tsoa';
 import { ServiceResponse } from '../utils/serviceResponse';
-import Project from '../models/project';
-import Document from '../models/document';
-import Stakeholder from '../models/organization';
 import { asyncCatch } from '../middlewares/errorHandler';
 import sequelize from '../config/database';
+import db from '@/models';
 
 interface ProjectCreateRequest {
   name: string;
   status?: 'draft' | 'in_progress' | 'completed' | 'on_hold' | 'cancelled';
   targetGroup?: string | null;
+  projectDuration?: string | null; // New field
+  geographicArea?: string | null; // New field
   stakeholderIds?: string[]; // optional to attach stakeholders
+  donorIds?: string[]; // New field - optional to attach donors
   // Inline resources to be created and associated
   documents?: Array<{
     documentName: string;
@@ -37,12 +38,14 @@ export class ProjectController extends Controller {
     @Query() limit: number = 10
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
-    const { count, rows } = await Project.findAndCountAll({
+    const { count, rows } = await db.Project.findAndCountAll({
       limit,
       offset,
       include: [
-        { model: Document, as: 'documents' },
-        { model: Stakeholder, as: 'stakeholders', through: { attributes: [] } },
+        { model: db.Document, as: 'documents' },
+        { model: db.Organization, as: 'stakeholders', through: { attributes: [] } },
+        { model: db.Organization, as: 'donors', through: { attributes: [] } },
+        { model: db.Survey, as: 'surveys' },
       ],
       order: [['createdAt', 'DESC']],
       distinct: true,
@@ -56,10 +59,12 @@ export class ProjectController extends Controller {
   @asyncCatch
   @Response<ServiceResponse<null>>(404, 'Project not found')
   public async getProjectById(@Path() projectId: string): Promise<ServiceResponse<any | null>> {
-    const project = await Project.findByPk(projectId, {
+    const project = await db.Project.findByPk(projectId, {
       include: [
-        { model: Document, as: 'documents' },
-        { model: Stakeholder, as: 'stakeholders', through: { attributes: [] } },
+        { model: db.Document, as: 'documents' },
+        { model: db.Organization, as: 'stakeholders', through: { attributes: [] } },
+        { model: db.Organization, as: 'donors', through: { attributes: [] } },
+        { model: db.Survey, as: 'surveys' },
       ],
     });
     if (!project) return ServiceResponse.failure('Project not found', null, 404);
@@ -72,14 +77,20 @@ export class ProjectController extends Controller {
   public async createProject(@Body() data: ProjectCreateRequest): Promise<ServiceResponse<any | null>> {
     const tx = await sequelize.transaction();
     try {
-      const project = await Project.create({
+      const project = await db.Project.create({
         name: data.name,
         status: data.status ?? 'in_progress',
         targetGroup: data.targetGroup ?? null,
+        projectDuration: data.projectDuration ?? null,
+        geographicArea: data.geographicArea ?? null,
       }, { transaction: tx });
 
       if (data.stakeholderIds && data.stakeholderIds.length) {
         await (project as any).setStakeholders(data.stakeholderIds, { transaction: tx });
+      }
+
+      if (data.donorIds && data.donorIds.length) {
+        await (project as any).setDonors(data.donorIds, { transaction: tx });
       }
 
       // Optionally create incoming document resources and associate
@@ -98,16 +109,19 @@ export class ProjectController extends Controller {
         }
       }
 
-      await tx.commit();
+      
 
-      const result = await Project.findByPk(project.id, {
+      const result = await db.Project.findByPk(project.id, {
         include: [
-          { model: Document, as: 'documents' },
-          { model: Stakeholder, as: 'stakeholders', through: { attributes: [] } },
+          { model: db.Document, as: 'documents' },
+          { model: db.Organization, as: 'stakeholders', through: { attributes: [] } },
+          { model: db.Organization, as: 'donors', through: { attributes: [] } },
+          { model: db.Survey, as: 'surveys' },
         ],
       });
 
       this.setStatus(201);
+      await tx.commit();
       return ServiceResponse.success('Project created successfully', result, 201);
     } catch (err) {
       await tx.rollback();
@@ -122,23 +136,31 @@ export class ProjectController extends Controller {
     @Path() projectId: string,
     @Body() data: ProjectUpdateRequest
   ): Promise<ServiceResponse<any | null>> {
-    const project = await Project.findByPk(projectId);
+    const project = await db.Project.findByPk(projectId);
     if (!project) return ServiceResponse.failure('Project not found', null, 404);
 
     await project.update({
       name: data.name ?? project.name,
       status: (data.status as any) ?? project.status,
       targetGroup: data.targetGroup ?? project.targetGroup,
+      projectDuration: data.projectDuration ?? project.projectDuration,
+      geographicArea: data.geographicArea ?? project.geographicArea,
     });
 
     if (data.stakeholderIds) {
       await (project as any).setStakeholders(data.stakeholderIds);
     }
 
-    const result = await Project.findByPk(project.id, {
+    if (data.donorIds) {
+      await (project as any).setDonors(data.donorIds);
+    }
+
+    const result = await db.Project.findByPk(project.id, {
       include: [
-        { model: Document, as: 'documents' },
-        { model: Stakeholder, as: 'stakeholders', through: { attributes: [] } },
+        { model: db.Document, as: 'documents' },
+        { model: db.Organization, as: 'stakeholders', through: { attributes: [] } },
+        { model: db.Organization, as: 'donors', through: { attributes: [] } },
+        { model: db.Survey, as: 'surveys' },
       ],
     });
 
@@ -150,7 +172,7 @@ export class ProjectController extends Controller {
   @SuccessResponse(204, 'No Content')
   @asyncCatch
   public async deleteProject(@Path() projectId: string): Promise<ServiceResponse<null>> {
-    const project = await Project.findByPk(projectId);
+    const project = await db.Project.findByPk(projectId);
     if (!project) return ServiceResponse.failure('Project not found', null, 404);
 
     await project.destroy();

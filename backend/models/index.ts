@@ -55,6 +55,7 @@ Document.belongsTo(Project, {
   foreignKey: 'projectId',
 });
 
+// Project stakeholders (existing)
 Project.belongsToMany(Organization, {
   through: 'project_stakeholders',
   as: 'stakeholders',
@@ -64,6 +65,42 @@ Project.belongsToMany(Organization, {
 Organization.belongsToMany(Project, {
   through: 'project_stakeholders',
   as: 'projects',
+  foreignKey: 'organizationId',
+  otherKey: 'projectId',
+});
+
+// Survey belongs to Project (Survey has projectId foreign key)
+Survey.belongsTo(Project, {
+  foreignKey: {
+    name: 'projectId',
+    allowNull: true, // Set to false if you want to make it required
+  },
+  as: 'projectDetails', // Alias to avoid confusion with the existing 'project' string field
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
+});
+
+// Project has many Surveys
+Project.hasMany(Survey, {
+  foreignKey: {
+    name: 'projectId',
+    allowNull: true,
+  },
+  as: 'surveys',
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
+});
+
+// Project donors (new)
+Project.belongsToMany(Organization, {
+  through: 'project_donors',
+  as: 'donors',
+  foreignKey: 'projectId',
+  otherKey: 'organizationId',
+});
+Organization.belongsToMany(Project, {
+  through: 'project_donors',
+  as: 'donatedProjects',
   foreignKey: 'organizationId',
   otherKey: 'projectId',
 });
@@ -90,6 +127,17 @@ Organization.belongsTo(User, {
 User.hasMany(Organization, {
   as: 'ownedOrganizations',
   foreignKey: 'ownerId',
+});
+
+// Answer <-> Document association for file uploads
+Answer.hasMany(Document, {
+  as: 'documents',
+  foreignKey: 'answerId',
+  onDelete: 'CASCADE',
+});
+Document.belongsTo(Answer, {
+  as: 'answer',
+  foreignKey: 'answerId',
 });
 
 // Survey associations (new)
@@ -159,6 +207,18 @@ Response.hasMany(Answer, {
 Answer.belongsTo(Response, {
   as: 'response',
   foreignKey: 'responseId',
+});
+
+// Answer ↔ Question associations
+Question.hasMany(Answer, {
+  as: 'answers',
+  foreignKey: 'questionId',
+  onDelete: 'CASCADE',
+  hooks: true,
+});
+Answer.belongsTo(Question, {
+  as: 'question',
+  foreignKey: 'questionId',
 });
 
 // Survey <-> Role many-to-many for allowed roles

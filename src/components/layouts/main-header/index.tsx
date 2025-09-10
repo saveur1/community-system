@@ -99,8 +99,8 @@ const MainHeader = () => {
     return (
         <>
             <ImigongoStarter />
-            <header className="w-full bg-white border-b border-gray-200 z-50 sticky top-0">
-                <div className="max-w-8xl mx-auto px-4">
+            <header className="w-full bg-gray-50 border-b border-gray-200 z-50 sticky top-0">
+                <div className="px-4">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo/TC on the left */}
                         <Link to="/">

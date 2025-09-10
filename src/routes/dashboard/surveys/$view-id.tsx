@@ -1,5 +1,5 @@
 import Breadcrumb from '@/components/ui/breadcrum';
-import { createFileRoute, useParams } from '@tanstack/react-router';
+import { createFileRoute, Link, useParams } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { FaClock, FaListOl, FaUsers, FaAsterisk, FaChevronLeft, FaChevronRight, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
@@ -63,8 +63,95 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
             className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed resize-none"
           />
         );
+      case 'file_upload':
+        return (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <p className="text-sm text-gray-500">
+                {question.allowedTypes?.includes('*') 
+                  ? 'Upload any file type' 
+                  : `Allowed: ${(question.allowedTypes || []).join(', ')}`}
+              </p>
+              <p className="text-xs text-gray-400">
+                Max size: {question.maxSize || 10}MB
+              </p>
+              <button 
+                type="button" 
+                disabled
+                className="mt-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                Choose file
+              </button>
+            </div>
+          </div>
+        );
+      case 'rating':
+        const maxRating = question.maxRating || 5;
+        const ratingLabel = question.ratingLabel || 'Rating';
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">{ratingLabel}</span>
+              <span className="text-xs text-gray-500">1 - {maxRating}</span>
+            </div>
+            <div className="flex space-x-1">
+              {Array.from({ length: maxRating }).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  disabled
+                  className="w-10 h-10 flex items-center justify-center text-gray-400 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <span className="sr-only">Rate {i + 1} out of {maxRating}</span>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      case 'linear_scale':
+        const minValue = question.minValue || 1;
+        const maxValue = question.maxValue || 5;
+        const minLabel = question.minLabel || '';
+        const maxLabel = question.maxLabel || '';
+        const range = maxValue - minValue + 1;
+        
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">Scale</span>
+              <span className="text-xs text-gray-500">{minValue} - {maxValue}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              {minLabel && (
+                <span className="text-xs text-gray-500 w-24">{minLabel}</span>
+              )}
+              <div className="flex-1 flex items-center justify-between">
+                {Array.from({ length: range }).map((_, i) => (
+                  <div key={i} className="flex flex-col items-center">
+                    <input
+                      type="radio"
+                      name={`scale-${question.id}`}
+                      disabled
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="mt-1 text-xs text-gray-500">{minValue + i}</span>
+                  </div>
+                ))}
+              </div>
+              {maxLabel && (
+                <span className="text-xs text-gray-500 w-24 text-right">{maxLabel}</span>
+              )}
+            </div>
+          </div>
+        );
       default:
-        return <div className="text-gray-400 italic">Question preview not available</div>;
+        return <div className="text-gray-400 italic">Question type not supported in preview</div>;
     }
   };
 
@@ -72,8 +159,11 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
     switch (question.type) {
       case 'single_choice': return 'Single Choice';
       case 'multiple_choice': return 'Multiple Choice';
-      case 'text_input': return 'Text Input';
-      case 'textarea': return 'Long Text';
+      case 'text_input': return 'Short Answer';
+      case 'textarea': return 'Paragraph';
+      case 'file_upload': return 'File Upload';
+      case 'rating': return 'Rating';
+      case 'linear_scale': return 'Linear Scale';
       default: return question.type;
     }
   };
@@ -84,6 +174,9 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
       case 'multiple_choice': return 'bg-purple-100 text-purple-800';
       case 'text_input': return 'bg-gray-100 text-gray-800';
       case 'textarea': return 'bg-indigo-100 text-indigo-800';
+      case 'file_upload': return 'bg-green-100 text-green-800';
+      case 'rating': return 'bg-yellow-100 text-yellow-800';
+      case 'linear_scale': return 'bg-pink-100 text-pink-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -169,6 +262,7 @@ const SurveyDetail = () => {
       time?: string | null;
       surveyTitle: string;
       surveyStatus?: string;
+      surveyId: string;
     }> = [];
     const list = surveyResponses?.result ?? [];
     for (const r of list as any[]) {
@@ -180,8 +274,9 @@ const SurveyDetail = () => {
         respondentName,
         respondentRole,
         time,
-        surveyTitle: r.survey?.title ?? 'Untitled',
+        surveyTitle: r?.survey?.title ?? 'Untitled',
         surveyStatus: (survey as any)?.status ?? 'unknown',
+        surveyId: r?.survey?.id ?? '',
       });
     }
     rows.sort((x, y) => {
@@ -257,7 +352,7 @@ const SurveyDetail = () => {
         className='absolute top-0 left-0 w-full px-6'
       />
 
-      <div className="pt-14 space-y-6">
+      <div className="pt-20 space-y-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 bg-title/5 w-full overflow-hidden pb-0">
             <div className="flex items-start gap-4">
@@ -333,6 +428,7 @@ const SurveyDetail = () => {
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('time')}>Time {sortIcon('time')}</th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('surveyTitle')}>Survey Title {sortIcon('surveyTitle')}</th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Survey Status</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -344,7 +440,7 @@ const SurveyDetail = () => {
                     <tr key={r.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-700">
                         <div className="font-medium">{r.respondentName}</div>
-                        <div className="text-xs text-gray-500">{r.respondentRole ? r.respondentRole.replace('_', ' ') : ''}</div>
+                        <div className="text-xs text-gray-500 capitalize">{r.respondentRole ? r.respondentRole.replace('_', ' ') : ''}</div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">{timeAgo(r.time)}</td>
                       <td className="px-6 py-4 text-sm text-gray-700">{r.surveyTitle}</td>
@@ -352,6 +448,15 @@ const SurveyDetail = () => {
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus(r.surveyStatus as any)}`}>
                           {r.surveyStatus}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          to="/dashboard/surveys/review-survey"
+                          search={{ surveyId: r.surveyId }}
+                          className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-md hover:bg-primary hover:text-white"
+                        >
+                          Review
+                        </Link>
                       </td>
                     </tr>
                   ))}

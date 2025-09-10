@@ -1,10 +1,10 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useMemo, useState, FC, JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight, FaSave, FaTrash, FaUpload } from 'react-icons/fa';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { toast } from 'react-toastify';
-import { useCreateProject } from '@/hooks/useProjects';
+import { useUpdateProject, useProject } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganizationsList } from '@/hooks/useOrganizations';
 import { SelectSearch } from '@/components/ui/select-search';
@@ -22,10 +22,14 @@ interface ProgrammeForm {
   resourceFiles: File[];
 }
 
-const AddProjectComponent: FC = (): JSX.Element => {
+const EditProjectComponent: FC = (): JSX.Element => {
   const navigate = useNavigate();
+  const { 'edit-id': editId } = useParams({ strict: false }) as { 'edit-id': string };
   const { user } = useAuth();
-  const createProject = useCreateProject();
+  const updateProject = useUpdateProject(editId);
+  
+  // Fetch the existing project data
+  const { data: projectData, isLoading: isLoadingProject, isError } = useProject(editId);
   
   // Fetch organizations for donors selection
   const { data: organizationsData } = useOrganizationsList({ 
@@ -40,6 +44,7 @@ const AddProjectComponent: FC = (): JSX.Element => {
       value: org.id
     }));
   }, [organizationsData]);
+
   const [programme, setProgramme] = useState<ProgrammeForm>({
     title: '',
     slug: '',
@@ -54,6 +59,23 @@ const AddProjectComponent: FC = (): JSX.Element => {
   // Steps
   const [currentStep, setCurrentStep] = useState<number>(1);
   const totalSteps = 2;
+
+  // Populate form with existing project data
+  useEffect(() => {
+    if (projectData?.result) {
+      const project = projectData.result;
+      setProgramme({
+        title: project.name || '',
+        slug: project.name?.toLowerCase().replace(/\s+/g, '-') || '',
+        description: '', // Description might not be available in the API response
+        targetGroup: project.targetGroup || '',
+        projectDuration: project.projectDuration || '',
+        geographicArea: project.geographicArea || '',
+        donorIds: project.donors?.map((d: any) => d.id) || [],
+        resourceFiles: [], // Files will be handled separately
+      });
+    }
+  }, [projectData]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -77,6 +99,7 @@ const AddProjectComponent: FC = (): JSX.Element => {
     const newFiles = Array.from(files);
     setProgramme(prev => ({ ...prev, resourceFiles: [...prev.resourceFiles, ...newFiles] }));
   };
+
   const removeFile = (idx: number) => {
     setProgramme(prev => ({
       ...prev,
@@ -126,20 +149,20 @@ const AddProjectComponent: FC = (): JSX.Element => {
           }
         }
 
-        // 2) Submit project with new fields and documents array
-        await createProject.mutateAsync({
+        // 2) Submit project update with new fields and documents array
+        await updateProject.mutateAsync({
           name: programme.title,
           targetGroup: programme.targetGroup || null,
           projectDuration: programme.projectDuration || null,
           geographicArea: programme.geographicArea || null,
           donorIds: programme.donorIds,
-          documents: uploads,
+          ...(uploads.length > 0 && { documents: uploads }),
         });
 
-        toast.success('Project created successfully');
+        toast.success('Project updated successfully');
         navigate({ to: '/dashboard/projects' });
       } catch (err) {
-        const msg = (err as any)?.response?.data?.message || 'Failed to create project';
+        const msg = (err as any)?.response?.data?.message || 'Failed to update project';
         toast.error(msg);
       }
     })();
@@ -147,9 +170,42 @@ const AddProjectComponent: FC = (): JSX.Element => {
 
   const handleCancel = () => navigate({ to: '/dashboard/projects' });
 
+  if (isLoadingProject) {
+    return (
+      <div className="pb-10">
+        <Breadcrumb items={["Community", "Projects", "Edit Project"]} title="Edit Project" className="absolute top-0 left-0 w-full px-6" />
+        <div className="pt-20 max-w-5xl mx-auto">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-gray-600">Loading project data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !projectData?.result) {
+    return (
+      <div className="pb-10">
+        <Breadcrumb items={["Community", "Projects", "Edit Project"]} title="Edit Project" className="absolute top-0 left-0 w-full px-6" />
+        <div className="pt-20 max-w-5xl mx-auto">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+            <p className="text-red-600">Failed to load project data. Please try again.</p>
+            <button 
+              onClick={() => navigate({ to: '/dashboard/projects' })}
+              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600"
+            >
+              Back to Projects
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-10">
-      <Breadcrumb items={["Community", "Projects", "Add Project"]} title="Create New Project" className="absolute top-0 left-0 w-full px-6" />
+      <Breadcrumb items={["Community", "Projects", "Edit Project"]} title={`Edit: ${projectData.result.name}`} className="absolute top-0 left-0 w-full px-6" />
 
       <div className="pt-20 max-w-5xl mx-auto">
 
@@ -163,8 +219,6 @@ const AddProjectComponent: FC = (): JSX.Element => {
               transition={{ duration: 0.25 }}
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6"
             >
-
-              {/* <h3 className="text-lg font-semibold text-center text-title mb-4 px-2">{stepTitle}</h3> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="md:col-span-2">
@@ -215,7 +269,7 @@ const AddProjectComponent: FC = (): JSX.Element => {
               </div>
 
               <div className="flex justify-between items-center mt-4">
-                <button onClick={() => navigate({ to: '/dashboard/projects' })} className='px-4 py-2 rounded-md border flex items-center gap-2'>
+                <button onClick={handleCancel} className='px-4 py-2 rounded-md border flex items-center gap-2'>
                   <FaChevronLeft className="opacity-70" /> Cancel
                 </button>
 
@@ -307,7 +361,7 @@ const AddProjectComponent: FC = (): JSX.Element => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Resources (Upload files)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Resources (Upload new files)</label>
                   <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
                     <input
                       id="resourceFiles"
@@ -324,7 +378,7 @@ const AddProjectComponent: FC = (): JSX.Element => {
 
                   {programme.resourceFiles.length > 0 && (
                     <div className="mt-3">
-                      <h4 className="text-sm font-semibold text-gray-800 mb-2">Selected files</h4>
+                      <h4 className="text-sm font-semibold text-gray-800 mb-2">New files to upload</h4>
                       <ul className="space-y-2">
                         {programme.resourceFiles.map((f, i) => (
                           <li key={i} className="flex items-center justify-between text-sm bg-gray-50 border border-gray-200 rounded px-3 py-2">
@@ -358,8 +412,12 @@ const AddProjectComponent: FC = (): JSX.Element => {
                   ))}
                 </div>
 
-                <button onClick={handleSave} className="px-4 py-2 rounded-md bg-primary text-white flex items-center gap-2">
-                  <FaSave /> Submit Project
+                <button 
+                  onClick={handleSave} 
+                  disabled={updateProject.isPending}
+                  className="px-4 py-2 rounded-md bg-primary text-white flex items-center gap-2 disabled:opacity-50"
+                >
+                  <FaSave /> {updateProject.isPending ? 'Updating...' : 'Update Project'}
                 </button>
               </div>
             </motion.div>
@@ -370,6 +428,6 @@ const AddProjectComponent: FC = (): JSX.Element => {
   );
 };
 
-export const Route = createFileRoute('/dashboard/projects/add-new')({
-  component: AddProjectComponent,
+export const Route = createFileRoute('/dashboard/projects/edit/$edit-id')({
+  component: EditProjectComponent,
 });

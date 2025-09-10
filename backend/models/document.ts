@@ -9,6 +9,7 @@ export interface DocumentAttributes {
   addedAt: Date;
   documentUrl: string | null;
   projectId: string | null;
+  answerId: string | null;
   userId: string | null;
   publicId: string | null;
   deleteToken: string | null;
@@ -16,7 +17,7 @@ export interface DocumentAttributes {
   updatedAt?: Date;
 }
 
-export type DocumentCreationAttributes = Optional<DocumentAttributes, 'id' | 'size' | 'type' | 'addedAt' | 'documentUrl' | 'projectId' | 'publicId' | 'deleteToken' | 'createdAt' | 'updatedAt'>;
+export type DocumentCreationAttributes = Optional<DocumentAttributes, 'id' | 'size' | 'type' | 'addedAt' | 'documentUrl' | 'projectId' | 'answerId' | 'publicId' | 'deleteToken' | 'createdAt' | 'updatedAt'>;
 
 class Document extends Model<DocumentAttributes, DocumentCreationAttributes> implements DocumentAttributes {
   declare id: string;
@@ -26,6 +27,7 @@ class Document extends Model<DocumentAttributes, DocumentCreationAttributes> imp
   declare addedAt: Date;
   declare documentUrl: string | null;
   declare projectId: string | null;
+  declare answerId: string | null;
   declare userId: string | null;
   declare publicId: string | null;
   declare deleteToken: string | null;
@@ -76,6 +78,11 @@ Document.init({
     type: DataTypes.UUID,
     allowNull: true,
     field: 'project_id',
+  },
+  answerId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'answer_id',
   },
   userId: {
     type: DataTypes.UUID,

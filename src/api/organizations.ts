@@ -48,6 +48,8 @@ export interface OrganizationUpdateRequest extends Partial<OrganizationCreateReq
 export interface OrganizationListParams {
   page?: number;
   limit?: number;
+  type?: 'stakeholder' | 'system_owner';
+  status?: 'active' | 'suspended' | 'deleted';
 }
 
 // Response types
@@ -57,8 +59,8 @@ export type OrganizationListResponse = ServiceResponse<OrganizationEntity[]>;
 // Organizations API (was stakeholdersApi)
 export const organizationsApi = {
   list: async (params: OrganizationListParams = { page: 1, limit: 10 }): Promise<OrganizationListResponse> => {
-    const { page = 1, limit = 10 } = params;
-    const { data } = await client.get(`/organizations`, { params: { page, limit } });
+    const { page = 1, limit = 10, type, status } = params;
+    const { data } = await client.get(`/organizations`, { params: { page, limit, type, status } });
     return data;
   },
 

@@ -16,7 +16,8 @@ interface ProgrammeItem {
   description?: string;
   status: ProgrammeStatus;
   targetGroup: string | null;
-  feedbacks?: number; // optionally from analytics in future
+  projectDuration?: string | null;
+  geographicArea?: string | null;
 }
 
 const ProgrammesComponent = () => {
@@ -42,7 +43,8 @@ const ProgrammesComponent = () => {
       status: it.status as ProgrammeStatus,
       targetGroup: it.targetGroup ?? null,
       slug: it.name?.toLowerCase().replace(/\s+/g, '-'),
-      feedbacks: undefined,
+      projectDuration: it.projectDuration ?? null,
+      geographicArea: it.geographicArea ?? null,
       description: undefined,
     }));
   }, [data]);
@@ -51,7 +53,7 @@ const ProgrammesComponent = () => {
     const q = search.trim().toLowerCase();
     if (!q) return serverItems;
     return serverItems.filter((p) =>
-      [p.name, p.slug ?? '', p.description ?? '', p.status, p.targetGroup ?? '']
+      [p.name, p.slug ?? '', p.description ?? '', p.status, p.targetGroup ?? '', p.projectDuration ?? '', p.geographicArea ?? '']
         .some((v) => String(v).toLowerCase().includes(q))
     );
   }, [serverItems, search]);
@@ -87,7 +89,7 @@ const ProgrammesComponent = () => {
         navigate({ to: '/dashboard/projects/$view-id', params: { 'view-id': String(programmeId) } });
         break;
       case 'edit':
-        alert(`Editing project: ${programmeName}`);
+        navigate({ to: '/dashboard/projects/edit/$edit-id', params: { 'edit-id': String(programmeId) } });
         break;
       case 'duplicate':
         alert(`Duplicating project: ${programmeName}`);
@@ -144,7 +146,8 @@ const ProgrammesComponent = () => {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Project</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Target Group</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Feedbacks</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Geographic Area</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Duration</th>
             <th className="px-6 py-3" />
           </tr>
         </thead>
@@ -168,7 +171,8 @@ const ProgrammesComponent = () => {
                   {spacer(programme.status)}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{programme.feedbacks ?? 0}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{programme.geographicArea ?? '-'}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{programme.projectDuration ?? '-'}</td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <CustomDropdown
                   trigger={<button className="p-2 hover:bg-gray-100 rounded-md transition-colors" aria-label="More actions"><FaEllipsisV /></button>}
@@ -192,7 +196,7 @@ const ProgrammesComponent = () => {
           ))}
           {paginated.length === 0 && (
             <tr>
-              <td className="px-6 py-8 text-center text-sm text-gray-500" colSpan={5}>
+              <td className="px-6 py-8 text-center text-sm text-gray-500" colSpan={6}>
                 {isLoading || isFetching ? 'Loading projects...' : isError ? 'Failed to load projects.' : 'No projects found.'}
               </td>
             </tr>
@@ -219,9 +223,10 @@ const ProgrammesComponent = () => {
           </div>
           <div className="space-y-3 mb-4">
             <p className="text-sm text-gray-600 dark:text-gray-300">{programme.description}</p>
-            <div className="flex justify-between text-sm text-gray-500 dark:text-gray-300">
-              <span>{programme.feedbacks} feedbacks</span>
-              <span>Target: {programme.targetGroup}</span>
+            <div className="grid grid-cols-2 gap-2 text-sm text-gray-500 dark:text-gray-300">
+              <span>Target: {programme.targetGroup ?? '-'}</span>
+              <span>Area: {programme.geographicArea ?? '-'}</span>
+              <span>Duration: {programme.projectDuration ?? '-'}</span>
             </div>
           </div>
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">

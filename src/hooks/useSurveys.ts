@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { surveysApi, type SurveysListParams, type SurveysListResponse, type SurveyResponse, type SurveyCreateRequest, type SurveyUpdateRequest, type SubmitAnswersRequest, type SurveyResponsesList } from '../api/surveys';
+import { surveysApi, type SurveysListParams, type SurveysListResponse, type SurveyResponse, type SurveyCreateRequest, type SurveyUpdateRequest, type SubmitAnswersRequest, type SurveyResponsesList, type SurveyAnalytics, type QuestionAnalytics, type ServiceResponse } from '../api/surveys';
 import { toast } from 'react-toastify';
 
 // Query keys for surveys
@@ -17,6 +17,8 @@ export const surveysKeys = {
   ] as const,
   detail: (id: string) => [...surveysKeys.all, 'detail', id] as const,
   responses: (id: string, page: number, limit: number) => [...surveysKeys.all, 'responses', id, page, limit] as const,
+  analytics: (id: string) => [...surveysKeys.all, 'analytics', id] as const,
+  questionAnalytics: (surveyId: string, questionId: string) => [...surveysKeys.all, 'question-analytics', surveyId, questionId] as const,
 };
 
 // List surveys
@@ -128,5 +130,25 @@ export function useSubmitSurveyAnswers(surveyId: string) {
       const msg = error?.response?.data?.message || 'Failed to submit answers';
       toast.error(msg);
     },
+  });
+}
+
+// Get survey analytics
+export function useSurveyAnalytics(surveyId: string, enabled: boolean = true) {
+  return useQuery<ServiceResponse<SurveyAnalytics>>({
+    queryKey: surveysKeys.analytics(surveyId),
+    queryFn: () => surveysApi.analytics(surveyId),
+    enabled: !!surveyId && enabled,
+    placeholderData: keepPreviousData,
+  });
+}
+
+// Get question analytics
+export function useQuestionAnalytics(surveyId: string, questionId: string, enabled: boolean = true) {
+  return useQuery<ServiceResponse<QuestionAnalytics>>({
+    queryKey: surveysKeys.questionAnalytics(surveyId, questionId),
+    queryFn: () => surveysApi.questionAnalytics(surveyId, questionId),
+    enabled: !!surveyId && !!questionId && enabled,
+    placeholderData: keepPreviousData,
   });
 }

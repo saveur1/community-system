@@ -75,7 +75,7 @@ export interface Section {
 export interface SurveyDraft {
   title: string
   description: string
-  project: string
+  projectId: string
   estimatedTime: string
   sections: Section[] // Added sections array
   questions: Question[]

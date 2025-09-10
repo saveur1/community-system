@@ -10,7 +10,7 @@ import { FaChevronDown, FaChevronUp, FaX } from "react-icons/fa6"
 interface SurveyInfoFormProps {
   title: string
   description: string
-  project: string
+  projectId: string
   estimatedTime: string
   onChange: (fields: any) => void
   visibleProjects: any[]
@@ -32,7 +32,7 @@ interface SurveyInfoFormProps {
 const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
   title,
   description,
-  project,
+  projectId,
   estimatedTime,
   onChange,
   visibleProjects,
@@ -158,9 +158,9 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                         type="radio"
                         id={`project-${p.id}`}
                         name="project"
-                        value={p.name}
-                        checked={project === p.name}
-                        onChange={(e) => onChange({ project: e.target.value })}
+                        value={p.id}
+                        checked={projectId === p.id}
+                        onChange={(e) => onChange({ projectId: e.target.value })}
                         className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                       />
                       <span className="ml-3 text-sm font-medium text-gray-900">{p.name}</span>
@@ -171,8 +171,8 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                     <div className="pt-2 border-t border-gray-200">
                       <ViewMoreProjects
                         projects={moreProjects}
-                        selectedProject={project}
-                        onProjectSelect={(projectName: string) => onChange({ project: projectName })}
+                        selectedProject={projectId}
+                        onProjectSelect={(projectId: string) => onChange({ projectId })}
                         dropDownPosition="bottom-left"
                       />
                     </div>
@@ -180,7 +180,7 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                 </div>
               )}
             </div>
-            {!project && (
+            {!projectId && (
               <p className="text-xs text-red-500 mt-2">Please select a project to associate with this survey</p>
             )}
           </div>

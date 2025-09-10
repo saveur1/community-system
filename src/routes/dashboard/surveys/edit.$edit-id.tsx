@@ -10,7 +10,9 @@ import SidebarQuestionPicker from '@/components/features/surveys/add-survey/Side
 import SurveyFooterActions from '@/components/features/surveys/SurveyFooterActions';
 import { Question, SurveyDraft, Section } from '@/components/features/surveys/types';
 import { toast } from 'react-toastify';
-import Modal, { ModalFooter, ModalButton } from '@/components/ui/modal';
+import Modal, { ModalBody, ModalFooter, ModalButton } from '@/components/ui/modal';
+import CustomCalendar from '@/components/ui/calendar';
+import { SelectDropdown } from '@/components/ui/select';
 import { FaX } from 'react-icons/fa6';
 
 export const Route = createFileRoute('/dashboard/surveys/edit/$edit-id')({
@@ -62,17 +64,17 @@ function mapFromServerToDraft(entity: any): SurveyDraft {
       description: s.description ?? '',
     })),
     description: entity?.description ?? '',
-    project: entity?.project ?? '',
+    projectId: entity?.projectId ?? '',
     estimatedTime: entity?.estimatedTime ?? '',
     questions,
   };
 }
 
-function mapDraftToUpdatePayload(draft: SurveyDraft) {
+function mapDraftToUpdatePayload(draft: SurveyDraft, startAt?: string, endAt?: string, allowedRoles?: string[]) {
   return {
     title: draft.title,
     description: draft.description,
-    project: draft.project,
+    projectId: draft.projectId,
     estimatedTime: draft.estimatedTime,
     sections: (draft.sections ?? []).map((s: any) => ({ id: s.id, title: s.title, description: s.description ?? '' })),
     questions: draft.questions.map((q: any) => {
@@ -112,6 +114,8 @@ function mapDraftToUpdatePayload(draft: SurveyDraft) {
           return common;
       }
     }),
+    ...(startAt && endAt ? { startAt, endAt } : {}),
+    ...(allowedRoles && allowedRoles.length > 0 ? { allowedRoles } : {}),
   };
 }
 
@@ -128,6 +132,18 @@ function EditSurveyComponent(): JSX.Element {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const isReportForm = data?.result?.surveyType === 'report-form';
   const backHomeLink = isReportForm ? '/dashboard/surveys/report-forms' : '/dashboard/surveys';
+
+  // Date/time state - copied from add-new component
+  const now = new Date();
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [startHour, setStartHour] = useState<string>(String(now.getHours()).padStart(2, "0"));
+  const [startMinute, setStartMinute] = useState<string>(String(now.getMinutes()).padStart(2, "0"));
+  const [startPickerOpen, setStartPickerOpen] = useState(false);
+
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [endHour, setEndHour] = useState<string>(String(now.getHours()).padStart(2, "0"));
+  const [endMinute, setEndMinute] = useState<string>(String(now.getMinutes()).padStart(2, "0"));
+  const [endPickerOpen, setEndPickerOpen] = useState(false);
 
   const roleGroups = useMemo(() => {
     const list = rolesData?.result ?? [];
@@ -174,7 +190,7 @@ function EditSurveyComponent(): JSX.Element {
   const [survey, setSurvey] = useState<SurveyDraft>({
     title: '',
     description: '',
-    project: '',
+    projectId: '',
     estimatedTime: '',
     sections: [],
     questions: [],
@@ -208,6 +224,26 @@ function EditSurveyComponent(): JSX.Element {
       const serverSections: Section[] = (data.result.sections ?? []).map((s: any) => ({ id: s.id, title: s.title }));
       setSections(serverSections);
       if (serverSections.length > 0) setCurrentSectionId(serverSections[0].id);
+      
+      // Prefill date/time from server data if available
+      const serverResult = data.result as any;
+      if (serverResult.startAt) {
+        const startDateTime = new Date(serverResult.startAt);
+        if (!isNaN(startDateTime.getTime())) {
+          setStartDate(startDateTime);
+          setStartHour(String(startDateTime.getHours()).padStart(2, "0"));
+          setStartMinute(String(startDateTime.getMinutes()).padStart(2, "0"));
+        }
+      }
+      if (serverResult.endAt) {
+        const endDateTime = new Date(serverResult.endAt);
+        if (!isNaN(endDateTime.getTime())) {
+          setEndDate(endDateTime);
+          setEndHour(String(endDateTime.getHours()).padStart(2, "0"));
+          setEndMinute(String(endDateTime.getMinutes()).padStart(2, "0"));
+        }
+      }
+      
       // also prefill allowedRoles if present on server result
       const serverAllowed = (data.result as any)?.allowedRoles;
       if (Array.isArray(serverAllowed) && serverAllowed.length > 0) {
@@ -359,16 +395,50 @@ function EditSurveyComponent(): JSX.Element {
 
   const handleSave = (): void => {
     if (!survey.title.trim()) { toast.error('Survey title is required.'); return; }
-    if (!survey.project) { toast.error('Please select a project.'); return; }
+    if (!survey.projectId) { toast.error('Please select a project.'); return; }
     if (survey.questions.length === 0) { toast.error('Please add at least one question.'); return; }
+
+    // Date/time validation - copied from add-new component
+    if (!startDate || !endDate) {
+      toast.error("Please set both start and end times for the survey availability.");
+      return;
+    }
+    const composedStart = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate(),
+      Number(startHour || "0"),
+      Number(startMinute || "0"),
+      0,
+      0,
+    );
+    const composedEnd = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate(),
+      Number(endHour || "0"),
+      Number(endMinute || "0"),
+      0,
+      0,
+    );
+    if (isNaN(composedStart.getTime()) || isNaN(composedEnd.getTime()) || composedEnd <= composedStart) {
+      toast.error("Invalid availability window. Ensure end time is after start time.");
+      return;
+    }
+
     const hasEmptyTitle = survey.questions.some(q => !q.title.trim());
     if (hasEmptyTitle) { toast.error('All questions must have a title.'); return; }
     const hasEmptyOption = survey.questions.some(q => (q.type === 'single_choice' || q.type === 'multiple_choice') && (Array.isArray((q as any).options) ? (q as any).options : []).some((opt: string) => !String(opt).trim()));
     if (hasEmptyOption) { toast.error('All options in choice questions must have a value.'); return; }
 
-    const payload = mapDraftToUpdatePayload(survey);
-    // include allowedRoles selected via modal
-    updateSurvey.mutate({ ...(payload as any), allowedRoles: selectedRoles }, {
+    const payload = mapDraftToUpdatePayload(
+      survey, 
+      composedStart.toISOString(), 
+      composedEnd.toISOString(), 
+      selectedRoles
+    );
+
+    updateSurvey.mutate(payload as any, {
        onSuccess: () => {
          toast.success('Survey updated successfully');
          localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + surveyId);
@@ -392,53 +462,24 @@ function EditSurveyComponent(): JSX.Element {
           <SurveyInfoForm
             title={survey.title}
             description={survey.description}
-            project={survey.project}
+            projectId={survey.projectId}
             estimatedTime={survey.estimatedTime}
             onChange={(fields) => setSurvey(prev => ({ ...prev, ...fields }))}
             visibleProjects={visibleProjects}
             moreProjects={moreProjects}
-            startDate={null}
-            endDate={null}
-            startHour={"00"}
-            startMinute={"00"}
-            endHour={"00"}
-            endMinute={"00"}
+            startDate={startDate}
+            endDate={endDate}
+            startHour={startHour}
+            startMinute={startMinute}
+            endHour={endHour}
+            endMinute={endMinute}
             selectedRoles={selectedRoles}
-            onStartPickerOpen={() => {}}
-            onEndPickerOpen={() => {}}
+            onStartPickerOpen={() => setStartPickerOpen(true)}
+            onEndPickerOpen={() => setEndPickerOpen(true)}
             onRolesModalOpen={() => setRolesModalOpen(true)}
-            onRemoveRole={(id: string) => setSelectedRoles(prev => prev.filter(r => r !== id))}
-            roleLabelById={(id: string) => roleLabelById(id)}
+            onRemoveRole={removeSelectedRole}
+            roleLabelById={roleLabelById}
           />
-
-          {/* Roles input (click to open modal) */}
-          <div className="mt-4 mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Allowed Roles (who can view)</label>
-            <div
-              onClick={() => setRolesModalOpen(true)}
-              role="button"
-              tabIndex={0}
-              className="min-h-[44px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 flex items-center gap-2 flex-wrap cursor-pointer"
-            >
-              {selectedRoles.length === 0 ? (
-                <span className="text-sm text-gray-400">Click to select roles...</span>
-              ) : (
-                selectedRoles.map(id => (
-                  <span key={id} className="inline-flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full text-xs mr-2 mb-2">
-                    <span className="mr-2">{roleLabelById(id)}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); removeSelectedRole(id); }}
-                      className="text-primary/80 hover:text-primary text-sm leading-none"
-                      aria-label={`Remove ${id}`}
-                    >
-                      <FaX className="w-2.5 h-2.5" />
-                    </button>
-                  </span>
-                ))
-              )}
-            </div>
-          </div>
 
           <QuestionsSection
             questions={survey.questions}
@@ -464,12 +505,12 @@ function EditSurveyComponent(): JSX.Element {
             size="lg" 
             closeOnOverlayClick
             >
-            <div className="p-4 space-y-4 max-h-[60vh] overflow-auto">
+            <ModalBody className="p-4 space-y-4 max-h-[57vh] overflow-auto">
               {rolesLoading && <div className="text-sm text-gray-500">Loading roles...</div>}
               {rolesError && <div className="text-sm text-red-600">Failed to load roles</div>}
               {!rolesLoading && !rolesError && roleGroups.length === 0 && <div className="text-sm text-gray-500">No roles found.</div>}
               {roleGroups.map(group => (
-                <div key={group.title} className="border border-gray-200 rounded-lg p-4">
+                <div key={group.title} className="border border-gray-200 rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium text-gray-900">{group.title}</h4>
                     {/* hide select/clear for report-forms (single-selection) */}
@@ -500,10 +541,106 @@ function EditSurveyComponent(): JSX.Element {
                   </div>
                 </div>
               ))}
-            </div>
-            <ModalFooter>
+            </ModalBody>
+            <ModalFooter className="py-2">
               <ModalButton onClick={() => setRolesModalOpen(false)} variant="secondary">Cancel</ModalButton>
               <ModalButton onClick={() => setRolesModalOpen(false)} variant="primary">Done</ModalButton>
+            </ModalFooter>
+          </Modal>
+
+          {/* Start picker modal */}
+          <Modal
+            isOpen={startPickerOpen}
+            onClose={() => setStartPickerOpen(false)}
+            title="Pick start date & time"
+            size="lg"
+            closeOnOverlayClick
+          >
+            <ModalBody>
+              <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CustomCalendar selectedDate={startDate} setSelectedDate={setStartDate} />
+                <div>
+                  <div className="mb-3 text-sm text-gray-700 font-medium">Time</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <SelectDropdown
+                      label="Hour"
+                      value={startHour}
+                      onChange={(v) => setStartHour(v)}
+                      options={Array.from({ length: 24 }).map((_, i) => ({
+                        label: String(i).padStart(2, "0"),
+                        value: String(i).padStart(2, "0"),
+                      }))}
+                    />
+                    <SelectDropdown
+                      label="Minute"
+                      value={startMinute}
+                      onChange={(v) => setStartMinute(v)}
+                      options={Array.from({ length: 60 }).map((_, i) => ({
+                        label: String(i).padStart(2, "0"),
+                        value: String(i).padStart(2, "0"),
+                      }))}
+                    />
+                  </div>
+                  <div className="mt-4 text-xs text-gray-500">
+                    {startDate
+                      ? `Selected: ${startDate.toLocaleDateString()} ${startHour}:${startMinute}`
+                      : "Pick a date"}
+                  </div>
+                </div>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <ModalButton variant="secondary" onClick={() => setStartPickerOpen(false)}>
+                Close
+              </ModalButton>
+              <ModalButton onClick={() => setStartPickerOpen(false)}>Save</ModalButton>
+            </ModalFooter>
+          </Modal>
+
+          {/* End picker modal */}
+          <Modal
+            isOpen={endPickerOpen}
+            onClose={() => setEndPickerOpen(false)}
+            title="Pick end date & time"
+            size="lg"
+            closeOnOverlayClick
+          >
+            <ModalBody>
+              <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CustomCalendar selectedDate={endDate} setSelectedDate={setEndDate} />
+                <div>
+                  <div className="mb-3 text-sm text-gray-700 font-medium">Time</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <SelectDropdown
+                      label="Hour"
+                      value={endHour}
+                      onChange={(v) => setEndHour(v)}
+                      options={Array.from({ length: 24 }).map((_, i) => ({
+                        label: String(i).padStart(2, "0"),
+                        value: String(i).padStart(2, "0"),
+                      }))}
+                    />
+                    <SelectDropdown
+                      label="Minute"
+                      value={endMinute}
+                      onChange={(v) => setEndMinute(v)}
+                      options={Array.from({ length: 60 }).map((_, i) => ({
+                        label: String(i).padStart(2, "0"),
+                        value: String(i).padStart(2, "0"),
+                      }))}
+                    />
+                  </div>
+                  <div className="mt-4 text-xs text-gray-500">
+                    {endDate ? `Selected: ${endDate.toLocaleDateString()} ${endHour}:${endMinute}` : "Pick a date"}
+                  </div>
+                </div>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <ModalButton variant="secondary" onClick={() => setEndPickerOpen(false)}>
+                Close
+              </ModalButton>
+              <ModalButton onClick={() => setEndPickerOpen(false)}>Save</ModalButton>
             </ModalFooter>
           </Modal>
 
@@ -526,6 +663,27 @@ function EditSurveyComponent(): JSX.Element {
               onSectionChange={setCurrentSectionId}
               onAddSection={addSection}
             />
+
+            {/* Survey Summary */}
+            {survey.questions.length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Survey Summary</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Questions:</span>
+                    <span className="font-medium">{survey.questions.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Estimated Time:</span>
+                    <span className="font-medium">{survey.estimatedTime || "0"} min</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Required Questions:</span>
+                    <span className="font-medium">{survey.questions.filter((q) => q.required).length}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

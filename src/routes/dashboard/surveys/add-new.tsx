@@ -108,7 +108,7 @@ const CreateSurveyComponent: FC = () => {
   const [survey, setSurvey] = useState<SurveyDraft>({
     title: "",
     description: "",
-    project: "",
+    projectId: "",
     estimatedTime: "",
     sections: [],
     questions: [],
@@ -435,7 +435,7 @@ const CreateSurveyComponent: FC = () => {
       toast.error("Survey title is required.")
       return
     }
-    if (!survey.project) {
+    if (!survey.projectId) {
       toast.error("Please select a project.")
       return
     }
@@ -592,7 +592,7 @@ const CreateSurveyComponent: FC = () => {
           <SurveyInfoForm
             title={survey.title}
             description={survey.description}
-            project={survey.project}
+            projectId={survey.projectId}
             estimatedTime={survey.estimatedTime}
             onChange={(fields) => setSurvey((prev) => ({ ...prev, ...fields }))}
             visibleProjects={visibleProjects}

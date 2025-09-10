@@ -11,6 +11,13 @@ interface SlideImage {
   id: number;
   url: string;
   alt: string;
+  statistics: {
+    title: string;
+    items: {
+      label: string;
+      value: string;
+    }[];
+  };
 }
 
 const HeroSection: React.FC = () => {
@@ -20,23 +27,47 @@ const HeroSection: React.FC = () => {
   const slideImages: SlideImage[] = [
     {
       id: 1,
-      url: "/images/trainees.png",
-      alt: "Community health workers in Rwanda"
+      url: "/images/religious_trainees.jpg",
+      alt: "Community health workers in Rwanda",
+      statistics: {
+        title: "Training Impact",
+        items: [
+          { label: "Community health workers", value: "450+ trained" },
+        ]
+      }
     },
     {
       id: 2,
-      url: "/images/gbv_supported.png",
-      alt: "Gender based violence"
+      url: "/images/gbc_support.jpg",
+      alt: "Gender based violence",
+      statistics: {
+        title: "GBV Support",
+        items: [
+          { label: "Gender based victims supported", value: "2,720+" }
+        ]
+      }
     },
     {
       id: 3,
-      url: "/images/ecd_program.png",
-      alt: "ECD Program for children"
+      url: "/images/ecd_children.jpg",
+      alt: "ECD Program for children",
+      statistics: {
+        title: "ECD Program",
+        items: [
+          { label: "Children enrolled in ECD", value: "5,854 children" },
+        ]
+      }
     },
     {
       id: 4,
-      url: "/images/community.png",
-      alt: "Community reached"
+      url: "/images/counciljpg.jpg",
+      alt: "Community reached",
+      statistics: {
+        title: "Community Outreach",
+        items: [
+          { label: "Community members", value: "2M+ members" },
+        ]
+      }
     }
   ];
 
@@ -81,7 +112,7 @@ const HeroSection: React.FC = () => {
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-16 h-16 md:w-32 md:h-32 bg-white/10 rounded-full -translate-y-8 md:-translate-y-16 translate-x-8 md:translate-x-16"></div>
         
-        <div className="relative z-10 min-h-[calc(100vh-64px)] md:h-[calc(100vh-64px)] w-full flex flex-col md:flex-row max-w-8xl mx-auto px-4 py-8 md:py-0">
+        <div className="relative z-10 min-h-[calc(100vh-64px)] md:h-[calc(100vh-64px)] w-full flex flex-col md:flex-row px-4 py-8 md:py-0">
           
           {/* Left side - Image slideshow (hidden on small screens, shown on medium+) */}
           <div className="hidden md:flex md:w-3/5 lg:w-3/5 relative z-20">
@@ -101,6 +132,37 @@ const HeroSection: React.FC = () => {
                       transition={{ duration: 1.2, ease: 'easeInOut' }}
                     />
                   </AnimatePresence>
+                  
+                  {/* Statistics Card */}
+                  <motion.div
+                  key={slideImages[currentSlide].statistics.title}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.6 }}
+                  className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-primary backdrop-blur-md text-white px-8 py-6 rounded-2xl shadow-2xl w-11/12 sm:w-4/5 lg:w-3/5"
+                >
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-4">
+                    {slideImages[currentSlide].statistics.title}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    {slideImages[currentSlide].statistics.items.map(
+                      (item, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/10 rounded-xl p-3"
+                        >
+                          <span className="text-sm sm:text-base text-blue-100">
+                            {item.label}
+                          </span>
+                          <span className="text-lg sm:text-xl font-bold">
+                            {item.value}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </motion.div>
                 </div>
               </div>
 

@@ -1,23 +1,30 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { useReactToPrint } from 'react-to-print';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { useSurvey } from '@/hooks/useSurveys';
-import { FaDownload, FaShareAlt } from 'react-icons/fa';
+import { useSurvey, useSurveyAnalytics } from '@/hooks/useSurveys';
+import { FaDownload, FaShareAlt, FaChartBar, FaUsers, FaClock, FaCheckCircle, FaPrint } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
-/*
-  Survey Analytics Page (design-only, AI features removed)
-  - Uses useSurvey to show survey title
-  - Contains placeholders and sample charts using react-apexcharts
-  - Replace sampleSeries / sampleOptions with real data when available
-  - Removed AI-dependent features (sentiment, word cloud, auto-summary)
-  - Removed Quality & Insights column
-  - Added non-AI metrics: unique respondents, response count table, response time breakdown
-*/
-
-const KPICard: React.FC<{ title: string; value: string; hint?: string }> = ({ title, value, hint }) => (
+const KPICard: React.FC<{ 
+  title: string; 
+  value: string | number; 
+  hint?: string;
+  icon?: React.ReactNode;
+  isLoading?: boolean;
+}> = ({ title, value, hint, icon, isLoading }) => (
   <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
-    <div className="text-gray-700">{title}</div>
-    <div className="mt-2 text-2xl font-semibold text-gray-800">{value}</div>
+    <div className="flex items-center justify-between">
+      <div className="text-gray-700">{title}</div>
+      {icon && <div className="text-primary">{icon}</div>}
+    </div>
+    <div className="mt-2 text-2xl font-semibold text-gray-800">
+      {isLoading ? (
+        <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+      ) : (
+        typeof value === 'number' ? value.toLocaleString() : value
+      )}
+    </div>
     {hint && <div className="text-xs text-gray-500 mt-1">{hint}</div>}
   </div>
 );
@@ -27,68 +34,81 @@ function formatPct(n: number) {
 }
 
 const AnalyticsPage: React.FC = () => {
-  const params = Route.useParams();
-  const surveyId = String(params['survey-id'] ?? '');
+  const { 'survey-id': surveyId } = Route.useParams();
+  const { data: survey, isLoading: surveyLoading } = useSurvey(surveyId);
+  const { data: analytics, isLoading } = useSurveyAnalytics(surveyId);
+  const [selectedTimeRange, setSelectedTimeRange] = useState('all');
+  const [selectedQuestionType, setSelectedQuestionType] = useState('all');
+  const printRef = useRef<HTMLDivElement>(null);
 
-  // Fetch survey metadata (title, questions) - integration point
-  const { data: surveyResp, isLoading, isError } = useSurvey(surveyId, true);
-  const survey = surveyResp?.result;
-
-  // Placeholder sample metrics (replace with real data)
-  const [metrics, setMetrics] = useState({
-    totalResponses: 1245,
-    uniqueRespondents: 1100, // Added unique respondents
-    completionRate: 0.75,
-    avgTimeMins: 6.4,
-    minTimeMins: 2.5, // Added for response time breakdown
-    maxTimeMins: 15.0, // Added for response time breakdown
-    medianTimeMins: 6.0, // Added for response time breakdown
-    dropOff: [
-      { step: 'Q1', rate: 0.02 },
-      { step: 'Q2', rate: 0.06 },
-      { step: 'Q3', rate: 0.17 },
-    ],
-  });
-
-  useEffect(() => {
-    // TODO: Load analytics for surveyId (API) and setMetrics(...)
-    // Kept as placeholders for design
-  }, [surveyId]);
-
-  // Sample series/options for line / bar charts
-  const trendsSeries = useMemo(() => [
-    { name: 'Responses', data: [10, 45, 120, 300, 420, 580, 1245] },
-  ], []);
+  const trendsSeries = useMemo(() => {
+    if (!analytics?.result?.trends) return [];
+    const cumulativeData = analytics.result.trends.reduce((acc: number[], trend: any, index: number) => {
+      const prevTotal = index > 0 ? acc[index - 1] : 0;
+      acc.push(prevTotal + trend.count);
+      return acc;
+    }, []);
+    return [{ name: 'Cumulative Responses', data: cumulativeData }];
+  }, [analytics?.result?.trends]);
 
   const trendsOptions = useMemo(() => ({
     chart: { toolbar: { show: false }, zoom: { enabled: false } },
-    xaxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'] },
+    xaxis: { 
+      categories: analytics?.result?.trends?.map((trend: any) => 
+        new Date(trend.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      ) || []
+    },
     stroke: { curve: 'smooth' as const },
     colors: ['#0ea5a4'],
     tooltip: { theme: 'light' as const },
-  }), []);
+  }), [analytics?.result?.trends]);
 
-  const deviceSeries = useMemo(() => [
-    { name: 'Desktop', data: [60] },
-    { name: 'Mobile', data: [35] },
-    { name: 'Tablet', data: [5] },
-  ], []);
+  const getQuestionChartData = (questionAnalytics: any) => {
+    if (!questionAnalytics.answerDistribution) return { series: [], options: {} };
+    
+    if (questionAnalytics.type === 'single_choice' || questionAnalytics.type === 'multiple_choice') {
+      const distribution = questionAnalytics.answerDistribution;
+      const categories = Object.keys(distribution);
+      const data = Object.values(distribution) as number[];
+      
+      return {
+        series: [{ name: 'Responses', data }],
+        options: {
+          chart: { toolbar: { show: false } },
+          xaxis: { categories },
+          colors: ['#1c89ba'],
+          plotOptions: {
+            bar: {
+              horizontal: categories.some((cat: string) => cat.length > 15)
+            }
+          }
+        }
+      };
+    }
+    
+    if (questionAnalytics.type === 'rating' || questionAnalytics.type === 'linear_scale') {
+      const values = questionAnalytics.answerDistribution.values || [];
+      const histogram: { [key: string]: number } = {};
+      values.forEach((val: number) => {
+        histogram[val.toString()] = (histogram[val.toString()] || 0) + 1;
+      });
+      
+      const categories = Object.keys(histogram).sort((a, b) => Number(a) - Number(b));
+      const data = categories.map(cat => histogram[cat]);
+      
+      return {
+        series: [{ name: 'Responses', data }],
+        options: {
+          chart: { toolbar: { show: false } },
+          xaxis: { categories },
+          colors: ['#16a34a'],
+        }
+      };
+    }
+    
+    return { series: [], options: {} };
+  };
 
-  const deviceOptions = useMemo(() => ({
-    chart: { type: 'donut' as const },
-    labels: ['Desktop', 'Mobile', 'Tablet'],
-    legend: { position: 'bottom' as const },
-    colors: ['#2563eb', '#14b8a6', '#f59e0b'],
-  }), []);
-
-  const sampleQuestionBarSeries = useMemo(() => ([{ name: 'Responses', data: [120, 300, 80, 200] }]), []);
-  const sampleQuestionBarOptions = useMemo(() => ({
-    chart: { toolbar: { show: false } },
-    xaxis: { categories: ['Option A', 'Option B', 'Option C', 'Option D'] },
-    colors: ['#1c89ba'],
-  }), []);
-
-  // Dynamically import react-apexcharts on client only
   const [ChartComponent, setChartComponent] = useState<any | null>(null);
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -103,15 +123,55 @@ const AnalyticsPage: React.FC = () => {
     return () => { mounted = false; };
   }, []);
 
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `${survey?.result?.title || 'Survey'} - Analytics Report`,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 20mm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .print-break {
+          page-break-before: always;
+        }
+      }
+    `,
+  });
+
+  const handleExport = () => {
+    if (printRef.current) {
+      handlePrint();
+    } else {
+      toast.error('Unable to generate report. Please try again.');
+    }
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Analytics URL copied to clipboard');
+  };
+
   if (!surveyId) {
-    return <div className="p-6 text-red-600">Invalid survey - no id provided</div>;
+    return (
+      <div className="p-6">
+        <div className="text-red-600">Invalid survey - no id provided</div>
+      </div>
+    );
   }
 
   return (
     <div className="pb-10">
       <Breadcrumb
         items={['Community', 'Surveys', 'Analytics']}
-        title={`Analytics${survey?.title ? ` — ${survey.title}` : ''}`}
+        title={`Analytics${survey?.result?.title ? ` — ${survey.result.title}` : ''}`}
         className="absolute top-0 left-0 w-full px-6"
       />
 
@@ -120,156 +180,179 @@ const AnalyticsPage: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Survey Analytics</h1>
-            <p className="text-sm text-gray-600 mt-1">Overview and detailed metrics for this survey.</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {analytics?.result ? `Analysis for "${analytics.result.surveyTitle}"` : 'Overview and detailed metrics for this survey.'}
+            </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm" onClick={() => { /* TODO: export summary */ }}>
-              <FaDownload /> Export
+            <button 
+              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50" 
+              onClick={handleExport}
+            >
+              <FaPrint /> Export PDF
             </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md text-sm" onClick={() => { /* TODO: share */ }}>
+            <button 
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md text-sm hover:bg-primary-dark" 
+              onClick={handleShare}
+            >
               <FaShareAlt /> Share
             </button>
           </div>
         </div>
 
-        {/* Response Overview KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <KPICard title="Total Responses" value={String(metrics.totalResponses)} hint="Submitted responses" />
-          <KPICard title="Unique Respondents" value={String(metrics.uniqueRespondents)} hint="Distinct users" />
-          <KPICard title="Completion Rate" value={formatPct(metrics.completionRate)} hint="Share of starters who finished" />
-          <KPICard title="Average Time" value={`${metrics.avgTimeMins.toFixed(1)} min`} hint="Average completion time" />
-        </div>
+        {/* Printable Content */}
+        <div ref={printRef} className="print-content">
+          {/* Print Header - Only visible when printing */}
+          <div className="hidden print:block mb-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {survey?.result?.title || 'Survey'} - Analytics Report
+            </h1>
+            <p className="text-gray-600 mb-4">
+              Generated on {new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+            <div className="border-b border-gray-300 mb-6"></div>
+          </div>
 
-        {/* Response Time Breakdown */}
-        <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm mb-6">
-          <h3 className="font-semibold text-gray-800 mb-3">Response Time Breakdown</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="p-3 border border-gray-300 rounded">
-              <div className="text-xs text-gray-500">Minimum Time</div>
-              <div className="text-lg font-semibold">{metrics.minTimeMins.toFixed(1)} min</div>
-            </div>
-            <div className="p-3 border border-gray-300 rounded">
-              <div className="text-xs text-gray-500">Median Time</div>
-              <div className="text-lg font-semibold">{metrics.medianTimeMins.toFixed(1)} min</div>
-            </div>
-            <div className="p-3 border border-gray-300 rounded">
-              <div className="text-xs text-gray-500">Maximum Time</div>
-              <div className="text-lg font-semibold">{metrics.maxTimeMins.toFixed(1)} min</div>
+          {/* Response Overview KPIs */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 print:text-xl">Response Overview</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <KPICard 
+                title="Total Responses" 
+                value={analytics?.result?.totalResponses || 0} 
+                hint="Submitted responses" 
+                icon={<FaChartBar />}
+                isLoading={isLoading}
+              />
+              <KPICard 
+                title="Unique Respondents" 
+                value={analytics?.result?.uniqueRespondents || 0} 
+                hint="Distinct users" 
+                icon={<FaUsers />}
+                isLoading={isLoading}
+              />
+              <KPICard 
+                title="Completion Rate" 
+                value={analytics?.result ? formatPct(analytics.result.completionRate) : '0%'} 
+                hint="Share of starters who finished" 
+                icon={<FaCheckCircle />}
+                isLoading={isLoading}
+              />
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Trends & Response Overview */}
-          <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-800">Response Trends</h3>
-              <div className="text-sm text-gray-500">Daily / Weekly submissions</div>
-            </div>
-            <div>
-              {ChartComponent ? (
-                // @ts-ignore - ChartComponent is dynamically imported
-                <ChartComponent options={trendsOptions} series={trendsSeries as any} type="area" height={280} />
-              ) : (
-                <div className="h-[280px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded">Loading chart...</div>
-              )}
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="p-3 border border-gray-300 rounded">
-                <div className="text-xs text-gray-500">Completion Over Time</div>
-                <div className="text-lg font-semibold">75%</div>
+          <div className="gap-6">
+            {/* Trends & Response Overview */}
+            <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-gray-800">Response Trends</h3>
+                <div className="text-sm text-gray-500">Daily / Weekly submissions</div>
               </div>
-              <div className="p-3 border border-gray-300 rounded">
-                <div className="text-xs text-gray-500">Avg Time (mins)</div>
-                <div className="text-lg font-semibold">{metrics.avgTimeMins.toFixed(1)}</div>
+              <div>
+                {ChartComponent ? (
+                  // @ts-ignore - ChartComponent is dynamically imported
+                  <ChartComponent options={trendsOptions} series={trendsSeries as any} type="area" height={280} />
+                ) : (
+                  <div className="h-[280px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded">Loading chart...</div>
+                )}
               </div>
-              <div className="p-3 border border-gray-300 rounded">
-                <div className="text-xs text-gray-500">Peak Hour</div>
-                <div className="text-lg font-semibold">14:00 - 15:00</div>
-              </div>
             </div>
           </div>
 
-          {/* Demographics / Devices */}
-          <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-800">Engagement & Demographics</h3>
-              <div className="text-sm text-gray-500">Devices & Sources</div>
-            </div>
+          {/* Question-by-Question Analysis */}
+          <div className="print-break">
+            <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 print:text-xl">Question Analysis</h2>
 
-            <div className="mb-4">
-              {ChartComponent ? (
-                // @ts-ignore
-                <ChartComponent options={deviceOptions} series={[44, 33, 23]} type="donut" height={220} />
-              ) : (
-                <div className="h-[220px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded">Loading chart...</div>
-              )}
-            </div>
+              {/* Response Count Table */}
+              <div className="mb-6">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Response Counts per Question</h4>
+                {analytics?.result?.questionAnalytics?.map((q: any, idx: number) => (
+                  <div key={q.questionId} className="mb-6 p-4 border border-gray-200 rounded-lg">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-gray-900 mb-1">
+                          {idx + 1}. {q.title}
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span className="px-2 py-1 bg-gray-100 rounded">{q.type}</span>
+                          {q.required && <span className="text-red-500">Required</span>}
+                        </div>
+                      </div>
+                      <div className="text-right text-xs text-gray-400">
+                        <div>Responses: {q.responseCount.toLocaleString()}</div>
+                        <div>Skip Rate: {formatPct(q.skipRate)}</div>
+                      </div>
+                    </div>
 
-            <div className="text-sm text-gray-600">
-              <div className="mb-2"><strong>Top Sources:</strong> Link (56%), Email (30%), App (14%)</div>
-              <div><strong>Peak Day:</strong> Wednesday</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Per-Question Analytics */}
-        <div className="mt-6 bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
-          <h3 className="font-semibold text-gray-800 mb-3">Per-Question Analytics</h3>
-
-          {/* Response Count Table */}
-          <div className="mb-6">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Response Counts per Question</h4>
-            <table className="w-full text-sm text-gray-600">
-              <thead>
-                <tr className="border-b border-gray-300">
-                  <th className="text-left py-2">Question</th>
-                  <th className="text-right py-2">Responses</th>
-                  <th className="text-right py-2">Skip Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(survey?.questionItems || []).map((q: any, idx: number) => (
-                  <tr key={q.id} className="border-b border-gray-200">
-                    <td className="py-2">{idx + 1}. {q.title}</td>
-                    <td className="text-right py-2">1,234</td>
-                    <td className="text-right py-2">{formatPct(0.12)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* For each question - design placeholder */}
-          {(survey?.questionItems ?? []).length === 0 ? (
-            <div className="text-sm text-gray-500">No question items available (design placeholder).</div>
-          ) : (
-            (survey!.questionItems || []).map((q: any, idx: number) => (
-              <div key={q.id} className="mb-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{idx + 1}. {q.title}</div>
-                    <div className="text-xs text-gray-500">{q.type}</div>
+                    <div className="mt-3">
+                      {q.type === 'single_choice' || q.type === 'multiple_choice' ? (
+                        getQuestionChartData(q).series.length > 0 ? (
+                          ChartComponent ? (
+                            // @ts-ignore
+                            <ChartComponent 
+                              options={getQuestionChartData(q).options} 
+                              series={getQuestionChartData(q).series} 
+                              type={getQuestionChartData(q).options.plotOptions?.bar?.horizontal ? 'bar' : 'bar'} 
+                              height={Math.max(200, (getQuestionChartData(q).options.xaxis?.categories?.length || 4) * 25)}
+                            />
+                          ) : (
+                            <div className="h-[200px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded">Loading chart...</div>
+                          )
+                        ) : (
+                          <div className="text-sm text-gray-500 p-4 bg-gray-50 rounded">No responses recorded for this question.</div>
+                        )
+                      ) : q.type === 'rating' || q.type === 'linear_scale' ? (
+                        q.answerDistribution?.values?.length > 0 ? (
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div className="p-2 bg-blue-50 rounded">
+                                <div className="text-blue-600 font-medium">Average</div>
+                                <div className="text-xl font-semibold">{q.answerDistribution.average.toFixed(1)}</div>
+                              </div>
+                              <div className="p-2 bg-green-50 rounded">
+                                <div className="text-green-600 font-medium">Min</div>
+                                <div className="text-xl font-semibold">{q.answerDistribution.min}</div>
+                              </div>
+                              <div className="p-2 bg-red-50 rounded">
+                                <div className="text-red-600 font-medium">Max</div>
+                                <div className="text-xl font-semibold">{q.answerDistribution.max}</div>
+                              </div>
+                              <div className="p-2 bg-gray-50 rounded">
+                                <div className="text-gray-600 font-medium">Count</div>
+                                <div className="text-xl font-semibold">{q.answerDistribution.values.length}</div>
+                              </div>
+                            </div>
+                            {getQuestionChartData(q).series.length > 0 && ChartComponent && (
+                              // @ts-ignore
+                              <ChartComponent 
+                                options={getQuestionChartData(q).options} 
+                                series={getQuestionChartData(q).series} 
+                                type="bar" 
+                                height={200}
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-500 p-4 bg-gray-50 rounded">No numerical responses recorded for this question.</div>
+                        )
+                      ) : (
+                        <div className="text-sm text-gray-500 p-4 bg-gray-50 rounded">
+                          Text responses ({q.answerDistribution?.textResponses || 0} total) - available in detailed export.
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400">Respondents: 1,234</div>
-                </div>
-
-                <div className="mt-3">
-                  {q.type === 'single_choice' || q.type === 'multiple_choice' ? (
-                    ChartComponent ? (
-                      // @ts-ignore
-                      <ChartComponent options={sampleQuestionBarOptions} series={sampleQuestionBarSeries as any} type="bar" height={200} />
-                    ) : (
-                      <div className="h-[200px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded">Loading chart...</div>
-                    )
-                  ) : (
-                    <div className="text-sm text-gray-500">Text responses not visualized (raw data available on export).</div>
-                  )}
-                </div>
+                ))}
               </div>
-            ))
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

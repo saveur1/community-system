@@ -23,9 +23,13 @@ export type ProjectEntity = {
   name: string;
   status: ProjectStatus;
   targetGroup: string | null;
+  projectDuration: string | null;
+  geographicArea: string | null;
   createdAt?: string;
   updatedAt?: string;
+  documents?: any[];
   stakeholders?: any[];
+  donors?: any[];
 };
 
 export type ProjectsListParams = {
@@ -40,7 +44,10 @@ export type ProjectCreateRequest = {
   name: string;
   status?: ProjectStatus;
   targetGroup?: string | null;
+  projectDuration?: string | null;
+  geographicArea?: string | null;
   stakeholderIds?: string[];
+  donorIds?: string[];
   documents?: Array<Omit<DocumentCreateRequest, 'projectId'>>;
 };
 

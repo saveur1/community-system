@@ -539,7 +539,7 @@
 					"description": {
 						"type": "string"
 					},
-					"project": {
+					"projectId": {
 						"type": "string"
 					},
 					"surveyType": {
@@ -843,7 +843,7 @@
 				"required": [
 					"title",
 					"description",
-					"project",
+					"projectId",
 					"startAt",
 					"endAt",
 					"estimatedTime",
@@ -861,7 +861,7 @@
 					"description": {
 						"type": "string"
 					},
-					"project": {
+					"projectId": {
 						"type": "string"
 					},
 					"surveyType": {
@@ -1274,7 +1274,21 @@
 						"type": "string",
 						"nullable": true
 					},
+					"projectDuration": {
+						"type": "string",
+						"nullable": true
+					},
+					"geographicArea": {
+						"type": "string",
+						"nullable": true
+					},
 					"stakeholderIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"donorIds": {
 						"items": {
 							"type": "string"
 						},
@@ -1348,7 +1362,19 @@
 					"targetGroup": {
 						"type": "string"
 					},
+					"projectDuration": {
+						"type": "string"
+					},
+					"geographicArea": {
+						"type": "string"
+					},
 					"stakeholderIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"donorIds": {
 						"items": {
 							"type": "string"
 						},
@@ -2676,6 +2702,63 @@
 				}
 			}
 		},
+		"/api/surveys/{surveyId}/responses": {
+			"get": {
+				"operationId": "GetSurveyResponses",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
 		"/api/surveys/{surveyId}": {
 			"get": {
 				"operationId": "GetSurveyById",
@@ -2847,17 +2930,32 @@
 									"answers": {
 										"items": {
 											"properties": {
-												"answerOptions": {
-													"items": {
-														"type": "string"
+												"metadata": {},
+												"fileInfo": {
+													"properties": {
+														"filePath": {
+															"type": "string"
+														},
+														"fileSize": {
+															"type": "number",
+															"format": "double"
+														},
+														"fileType": {
+															"type": "string"
+														},
+														"fileName": {
+															"type": "string"
+														}
 													},
-													"type": "array",
-													"nullable": true
+													"required": [
+														"filePath",
+														"fileSize",
+														"fileType",
+														"fileName"
+													],
+													"type": "object"
 												},
-												"answerText": {
-													"type": "string",
-													"nullable": true
-												},
+												"value": {},
 												"questionId": {
 													"type": "string"
 												}
@@ -2882,6 +2980,88 @@
 						}
 					}
 				}
+			}
+		},
+		"/api/surveys/{surveyId}/analytics": {
+			"get": {
+				"operationId": "GetSurveyAnalytics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/surveys/{surveyId}/analytics/question/{questionId}": {
+			"get": {
+				"operationId": "GetQuestionAnalytics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "questionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/api/statistics/overview": {

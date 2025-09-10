@@ -72,7 +72,7 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
   }
 
   if (checkPermissions(user, 'report:create')) {
-    navigationItems.push({ name: "Reporting", icon: FaUserFriends, active: false, link: `/${path}/reporting` })
+    navigationItems.push({ name: "Data Collection", icon: FaUserFriends, active: false, link: `/${path}/reporting` })
   }
 
   if (checkPermissions(user, "community_session:read")) {

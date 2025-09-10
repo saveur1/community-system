@@ -4,11 +4,12 @@ import { FaPoll } from 'react-icons/fa';
 import { useTranslation } from "react-i18next";
 // import SurveyAnswerForm from "@/components/survey/SurveyAnswerForm";
 import { useSurveysList } from '@/hooks/useSurveys';
+import { useAuth } from '@/hooks/useAuth';
 
 const SurveyComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-
+    const { user } = useAuth();
     // Fetch active surveys from API
     const { data: completedSurveysResponse } = useSurveysList({ surveyType: "general", responded: true });
     const { data: activeSurveysResponse, isLoading: isLoadingActive, isError: isErrorActive } = useSurveysList({ status: 'active', surveyType: "general" });
@@ -84,7 +85,7 @@ const SurveyComponent = () => {
                                 <tr key={survey.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 text-sm text-gray-700">{survey.title}</td>
                                     <td className="px-6 py-4 text-sm text-gray-700">
-                                        {new Date(survey.responses?.[0]?.createdAt || '').toLocaleDateString()}
+                                        {new Date(survey.responses?.find((response)=> response.userId==user?.id)?.createdAt || '').toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-700">
                                         {survey.questionItems?.length || 0}

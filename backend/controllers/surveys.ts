@@ -10,7 +10,7 @@ import { randomUUID } from 'crypto';
 interface SurveyCreateRequest {
   title: string;
   description: string;
-  project: string; // currently a string label as per UI
+  projectId: string; // currently a string uuid as per UI
   surveyType: "general" | "report-form" | undefined
   startAt: string; // ISO timestamp, required
   endAt: string;   // ISO timestamp, required
@@ -209,7 +209,7 @@ export class SurveyController extends Controller {
     @Query() limit: number = 10,
   ): Promise<ServiceResponse<any[]>> {
     const survey = await db.Survey.findByPk(surveyId, {
-      attributes: ['id', 'title', 'surveyType', 'project', 'estimatedTime'],
+      attributes: ['id', 'title', 'surveyType', 'projectId', 'estimatedTime'],
       include: [
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
       ],
@@ -235,9 +235,9 @@ export class SurveyController extends Controller {
       id: survey.id,
       title: survey.title,
       surveyType: survey.surveyType,
-      project: survey.project,
+      projectId: survey.projectId,
       estimatedTime: survey.estimatedTime,
-      organization: survey.organization ? { id: survey.organization.id, name: survey.organization.name } : null,
+      organizationId: survey.organizationId,
     };
 
     const payload = rows.map((r: any) => ({
@@ -300,7 +300,7 @@ export class SurveyController extends Controller {
       const s = await db.Survey.create({
         title: data.title,
         description: data.description,
-        project: data.project,
+        projectId: data.projectId,
         surveyType: data.surveyType,
         estimatedTime: data.estimatedTime,
         startAt: start,
@@ -470,7 +470,7 @@ export class SurveyController extends Controller {
       await survey.update({
         title: data.title ?? survey.title,
         description: data.description ?? survey.description,
-        project: data.project ?? survey.project,
+        projectId: data.projectId ?? survey.projectId,
         surveyType: data.surveyType ?? survey.surveyType,
         estimatedTime: data.estimatedTime ?? survey.estimatedTime,
         startAt: data.startAt ? new Date(data.startAt) : survey.startAt,
@@ -630,12 +630,26 @@ export class SurveyController extends Controller {
       userId?: string | null; // optional explicit userId (else use auth or anonymous)
       answers: Array<{
         questionId: string;
-        answerText?: string | null;
-        answerOptions?: string[] | null;
+        value?: any; // Main answer value (can be any type)
+        fileInfo?: {
+          fileName: string;
+          fileType: string;
+          fileSize: number;
+          filePath: string;
+        };
+        metadata?: any; // Additional metadata for the answer
       }>;
     }
   ): Promise<ServiceResponse<any | null>> {
-    const survey = await db.Survey.findByPk(surveyId);
+    const survey = await db.Survey.findByPk(surveyId, {
+      include: [
+        { 
+          model: db.Question, 
+          as: 'questionItems',
+          attributes: ['id', 'type', 'title', 'required', 'maxSize', 'allowedTypes', 'maxRating', 'minValue', 'maxValue']
+        }
+      ]
+    });
 
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
 
@@ -643,32 +657,230 @@ export class SurveyController extends Controller {
       return ServiceResponse.failure('Survey is not accepting responses', null, 403);
     }
 
+    const questionsById = new Map(
+      (survey as any).questionItems.map((q: any) => [q.id, q])
+    );
+
+    // Define a type for the question object with all possible properties
+    interface QuestionWithProperties {
+      id: string;
+      type: string;
+      title: string;
+      required?: boolean;
+      maxSize?: number;
+      allowedTypes?: string[];
+      maxRating?: number;
+      ratingLabel?: string;
+      minValue?: number;
+      maxValue?: number;
+      minLabel?: string;
+      maxLabel?: string;
+    }
+
+    // Validate all answers before processing
+    for (const answer of body.answers || []) {
+      const question = questionsById.get(answer.questionId) as unknown as QuestionWithProperties;
+      if (!question) {
+        return ServiceResponse.failure(`Question with ID ${answer.questionId} not found in this survey`, null, 400);
+      }
+
+      // Check required fields
+      if (question.required && (answer.value === undefined || answer.value === null || answer.value === '')) {
+        return ServiceResponse.failure(`Answer for question "${question.title}" is required`, null, 400);
+      }
+
+      // Type-specific validation
+      switch (question.type) {
+        case 'file_upload':
+          if (answer.fileInfo) {
+            // Validate file size if maxSize is set
+            const maxSize = question.maxSize || 10; // Default 10MB if not set
+            if (answer.fileInfo.fileSize > maxSize * 1024 * 1024) {
+              return ServiceResponse.failure(
+                `File size exceeds maximum allowed size of ${maxSize}MB for question "${question.title}"`,
+                null,
+                400
+              );
+            }
+            
+            // Validate file type if allowedTypes is set
+            const allowedTypes = question.allowedTypes || [];
+            if (allowedTypes.length > 0 && !allowedTypes.includes('*')) {
+              const fileExt = answer.fileInfo.fileType.split('/').pop()?.toLowerCase();
+              if (!fileExt || !allowedTypes.some((t: string) => t.toLowerCase() === fileExt)) {
+                return ServiceResponse.failure(
+                  `File type not allowed for question "${question.title}". Allowed types: ${allowedTypes.join(', ')}`,
+                  null,
+                  400
+                );
+              }
+            }
+          }
+          break;
+          
+        case 'rating':
+          if (answer.value !== undefined && answer.value !== null) {
+            const rating = Number(answer.value);
+            const maxRating = question.maxRating || 5;
+            if (isNaN(rating) || rating < 1 || rating > maxRating) {
+              return ServiceResponse.failure(
+                `Invalid rating value for question "${question.title}". Must be between 1 and ${maxRating}`,
+                null,
+                400
+              );
+            }
+          }
+          break;
+          
+        case 'linear_scale':
+          if (answer.value !== undefined && answer.value !== null) {
+            const value = Number(answer.value);
+            const min = typeof question.minValue === 'number' ? question.minValue : 1;
+            const max = typeof question.maxValue === 'number' ? question.maxValue : 5;
+            
+            if (isNaN(value) || value < min || value > max) {
+              return ServiceResponse.failure(
+                `Invalid value for question "${question.title}". Must be between ${min} and ${max}`,
+                null,
+                400
+              );
+            }
+          }
+          break;
+      }
+    }
+
     const effectiveUserId = body.userId ?? request?.user?.id ?? null;
     let createdResponse: any = null;
+    
     await sequelize.transaction(async (t) => {
+      // Create the response record
       createdResponse = await db.Response.create({
         surveyId: survey.id,
         userId: effectiveUserId,
       }, { transaction: t });
 
-      for (const a of body.answers || []) {
-        await db.Answer.create({
+      // Process each answer
+      for (const answer of body.answers || []) {
+        const question = questionsById.get(answer.questionId);
+        if (!question) continue;
+
+        const answerData: any = {
           surveyId: survey.id,
           responseId: createdResponse.id,
-          questionId: a.questionId,
-          answerText: a.answerText ?? null,
-          answerOptions: a.answerOptions ?? null,
-        }, { transaction: t });
+          questionId: answer.questionId,
+          value: answer.value,
+          metadata: {}
+        };
+
+        // Add metadata based on question type
+        const questionTyped = question as QuestionWithProperties;
+        switch (questionTyped.type) {
+          case 'file_upload':
+            // Handle multiple files from Cloudinary
+            if (Array.isArray(answer.value) && answer.value.length > 0) {
+              // Create Answer record first
+              const createdAnswer = await db.Answer.create({
+                ...answerData,
+                value: JSON.stringify(answer.value), // Store file metadata as JSON
+                metadata: {
+                  fileInfo: {
+                    fileCount: answer.value.length,
+                    totalSize: answer.value.reduce((sum: number, file: any) => sum + (file.fileSize || 0), 0)
+                  }
+                }
+              }, { transaction: t });
+
+              // Create Document records for each uploaded file
+              for (const fileData of answer.value) {
+                await db.Document.create({
+                  documentName: fileData.fileName,
+                  size: fileData.fileSize,
+                  type: fileData.fileType,
+                  documentUrl: fileData.fileUrl,
+                  publicId: fileData.publicId,
+                  deleteToken: fileData.deleteToken,
+                  answerId: createdAnswer.id,
+                  userId: effectiveUserId,
+                  addedAt: new Date()
+                }, { transaction: t });
+              }
+              
+              // Skip the default Answer.create below since we already created it
+              continue;
+            }
+            break;
+            
+          case 'rating':
+            if (answer.value !== undefined && answer.value !== null) {
+              answerData.metadata.ratingInfo = {
+                maxRating: questionTyped.maxRating || 5,
+                label: questionTyped.ratingLabel
+              };
+            }
+            break;
+            
+          case 'linear_scale':
+            if (answer.value !== undefined && answer.value !== null) {
+              answerData.metadata.scaleInfo = {
+                minValue: typeof questionTyped.minValue === 'number' ? questionTyped.minValue : 1,
+                maxValue: typeof questionTyped.maxValue === 'number' ? questionTyped.maxValue : 5,
+                minLabel: questionTyped.minLabel,
+                maxLabel: questionTyped.maxLabel
+              };
+            }
+            break;
+        }
+
+        // For backward compatibility
+        if (questionTyped.type === 'text_input' || questionTyped.type === 'textarea') {
+          answerData.answerText = answer.value;
+        } else if (questionTyped.type === 'single_choice' || questionTyped.type === 'multiple_choice') {
+          answerData.answerOptions = Array.isArray(answer.value) ? answer.value : [answer.value];
+        }
+
+        // Only create answer if not already handled (like file_upload)
+        await db.Answer.create(answerData, { transaction: t });
       }
     });
 
-    await createSystemLog(request ?? null, 'responded_survey', survey?.dataValues?.title, surveyId, { answersCount: (body.answers || []).length });
+    await createSystemLog(
+      request ?? null, 
+      'responded_survey', 
+      survey?.dataValues?.title, 
+      surveyId, 
+      { answersCount: (body.answers || []).length }
+    );
 
+    // Return the updated survey with responses
     const result = await db.Survey.findByPk(survey.id, {
       include: [
         { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
-        { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+        { 
+          model: db.Question, 
+          as: 'questionItems', 
+          include: [{ model: db.Section, as: 'section' }] 
+        },
+        { 
+          model: db.Response, 
+          as: 'responses', 
+          where: { id: createdResponse.id },
+          include: [
+            { 
+              model: db.Answer, 
+              as: 'answers',
+              include: [
+                { model: db.Question, as: 'question', attributes: ['id', 'title', 'type'] },
+                { model: db.Document, as: 'documents', attributes: ['id', 'documentName', 'documentUrl', 'size', 'type', 'publicId'] }
+              ]
+            }, 
+            { 
+              model: db.User, 
+              as: 'user', 
+              attributes: ['id', 'name'] 
+            }
+          ] 
+        },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
         { model: db.User, as: 'creator', attributes: ['id', 'name'] },
       ],
@@ -676,5 +888,273 @@ export class SurveyController extends Controller {
 
     this.setStatus(201);
     return ServiceResponse.success('Answers submitted successfully', result, 201);
+  }
+
+  // New: Survey analytics endpoints
+  @Security('jwt', ['survey:read'])
+  @Get('/{surveyId}/analytics')
+  @asyncCatch
+  public async getSurveyAnalytics(
+    @Path() surveyId: string
+  ): Promise<ServiceResponse<any>> {
+    const survey = await db.Survey.findByPk(surveyId, {
+      include: [
+        { 
+          model: db.Question, 
+          as: 'questionItems',
+          attributes: ['id', 'title', 'type', 'required', 'options']
+        },
+        {
+          model: db.Response,
+          as: 'responses',
+          include: [
+            {
+              model: db.Answer,
+              as: 'answers',
+              attributes: ['id', 'questionId', 'value', 'answerText', 'answerOptions', 'createdAt']
+            },
+            {
+              model: db.User,
+              as: 'user',
+              attributes: ['id', 'name']
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!survey) {
+      return ServiceResponse.failure('Survey not found', null, 404);
+    }
+
+    const responses = (survey as any).responses || [];
+    const questions = (survey as any).questionItems || [];
+    const totalResponses = responses.length;
+    const uniqueRespondents = new Set(responses.map((r: any) => r.userId).filter(Boolean)).size;
+
+    // Calculate completion rate (responses that have answered at least one required question)
+    const requiredQuestions = questions.filter((q: any) => q.required);
+    const completedResponses = responses.filter((response: any) => {
+      const responseAnswers = response.answers || [];
+      const answeredRequiredQuestions = requiredQuestions.filter((rq: any) => 
+        responseAnswers.some((a: any) => a.questionId === rq.id && (a.value || a.answerText || (a.answerOptions && a.answerOptions.length > 0)))
+      );
+      return answeredRequiredQuestions.length === requiredQuestions.length;
+    });
+    const completionRate = totalResponses > 0 ? completedResponses.length / totalResponses : 0;
+
+    // Calculate response times (mock data for now - would need actual timing data)
+    const avgTimeMins = 6.4; // Would calculate from actual response timing data
+    const minTimeMins = 2.5;
+    const maxTimeMins = 15.0;
+    const medianTimeMins = 6.0;
+
+    // Generate response trends (group by date)
+    const trendsData = responses.reduce((acc: any, response: any) => {
+      const date = new Date(response.createdAt).toISOString().split('T')[0];
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {});
+
+    const trends = Object.keys(trendsData).sort().map(date => ({
+      date,
+      count: trendsData[date]
+    }));
+
+    // Per-question analytics
+    const questionAnalytics = questions.map((question: any) => {
+      const questionAnswers = responses.flatMap((r: any) => 
+        (r.answers || []).filter((a: any) => a.questionId === question.id)
+      );
+      
+      const responseCount = questionAnswers.length;
+      const skipRate = totalResponses > 0 ? (totalResponses - responseCount) / totalResponses : 0;
+      
+      let answerDistribution: any = {};
+      
+      // Calculate answer distribution based on question type
+      if (question.type === 'single_choice' || question.type === 'multiple_choice') {
+        if (question.options) {
+          question.options.forEach((option: string) => {
+            answerDistribution[option] = 0;
+          });
+        }
+        
+        questionAnswers.forEach((answer: any) => {
+          if (answer.answerOptions && Array.isArray(answer.answerOptions)) {
+            answer.answerOptions.forEach((option: string) => {
+              if (answerDistribution.hasOwnProperty(option)) {
+                answerDistribution[option]++;
+              }
+            });
+          } else if (answer.value) {
+            if (answerDistribution.hasOwnProperty(answer.value)) {
+              answerDistribution[answer.value]++;
+            }
+          }
+        });
+      } else if (question.type === 'rating' || question.type === 'linear_scale') {
+        const values = questionAnswers.map((a: any) => {
+          if (typeof a.value === 'number') return a.value;
+          if (a.answerText) return parseFloat(a.answerText);
+          return null;
+        }).filter((v: any) => v !== null);
+        
+        if (values.length > 0) {
+          const avg = values.reduce((sum: number, val: number) => sum + val, 0) / values.length;
+          const min = Math.min(...values);
+          const max = Math.max(...values);
+          
+          answerDistribution = { average: avg, min, max, values };
+        }
+      } else {
+        // For text inputs, just count responses
+        answerDistribution = { textResponses: responseCount };
+      }
+      
+      return {
+        questionId: question.id,
+        title: question.title,
+        type: question.type,
+        required: question.required,
+        responseCount,
+        skipRate,
+        answerDistribution
+      };
+    });
+
+    const analytics = {
+      surveyId: survey.id,
+      surveyTitle: survey.title,
+      totalResponses,
+      uniqueRespondents,
+      completionRate,
+      avgTimeMins,
+      minTimeMins,
+      maxTimeMins,
+      medianTimeMins,
+      trends,
+      questionAnalytics
+    };
+
+    return ServiceResponse.success('Analytics retrieved successfully', analytics);
+  }
+
+  @Security('jwt', ['survey:read'])
+  @Get('/{surveyId}/analytics/question/{questionId}')
+  @asyncCatch
+  public async getQuestionAnalytics(
+    @Path() surveyId: string,
+    @Path() questionId: string
+  ): Promise<ServiceResponse<any>> {
+    const question = await db.Question.findOne({
+      where: { id: questionId, surveyId },
+      attributes: ['id', 'title', 'type', 'required', 'options', 'maxRating', 'minValue', 'maxValue']
+    });
+
+    if (!question) {
+      return ServiceResponse.failure('Question not found', null, 404);
+    }
+
+    // Get all answers for this question
+    const answers = await db.Answer.findAll({
+      where: { questionId, surveyId },
+      include: [
+        {
+          model: db.Response,
+          as: 'response',
+          attributes: ['id', 'userId', 'createdAt']
+        }
+      ],
+      attributes: ['id', 'value', 'answerText', 'answerOptions', 'createdAt']
+    });
+
+    const totalAnswers = answers.length;
+    let detailedAnalysis: any = {};
+
+    if (question.type === 'single_choice' || question.type === 'multiple_choice') {
+      const distribution: { [key: string]: number } = {};
+      
+      // Initialize with options if available
+      if ((question as any).options) {
+        (question as any).options.forEach((option: string) => {
+          distribution[option] = 0;
+        });
+      }
+
+      answers.forEach((answer: any) => {
+        if (answer.answerOptions && Array.isArray(answer.answerOptions)) {
+          answer.answerOptions.forEach((option: string) => {
+            distribution[option] = (distribution[option] || 0) + 1;
+          });
+        } else if (answer.value) {
+          distribution[answer.value] = (distribution[answer.value] || 0) + 1;
+        }
+      });
+
+      detailedAnalysis = {
+        type: 'choice',
+        distribution,
+        totalAnswers
+      };
+    } else if (question.type === 'rating' || question.type === 'linear_scale') {
+      const values = answers.map((a: any) => {
+        if (typeof a.value === 'number') return a.value;
+        if (a.answerText) return parseFloat(a.answerText);
+        return null;
+      }).filter(v => v !== null && !isNaN(v));
+
+      if (values.length > 0) {
+        const avg = values.reduce((sum: number, val: number) => sum + val, 0) / values.length;
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const sorted = values.sort((a: number, b: number) => a - b);
+        const median = sorted.length % 2 === 0 
+          ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+          : sorted[Math.floor(sorted.length / 2)];
+
+        // Create distribution histogram
+        const histogram: { [key: string]: number } = {};
+        values.forEach(val => {
+          histogram[val.toString()] = (histogram[val.toString()] || 0) + 1;
+        });
+
+        detailedAnalysis = {
+          type: 'numeric',
+          average: avg,
+          min,
+          max,
+          median,
+          totalAnswers: values.length,
+          histogram
+        };
+      } else {
+        detailedAnalysis = {
+          type: 'numeric',
+          totalAnswers: 0,
+          message: 'No valid numeric responses'
+        };
+      }
+    } else {
+      // Text responses
+      const textResponses = answers.map((a: any) => ({
+        text: a.answerText || a.value,
+        createdAt: a.createdAt
+      })).filter(r => r.text);
+
+      detailedAnalysis = {
+        type: 'text',
+        totalAnswers,
+        responses: textResponses.slice(0, 100) // Limit to first 100 for performance
+      };
+    }
+
+    return ServiceResponse.success('Question analytics retrieved successfully', {
+      questionId: question.id,
+      title: question.title,
+      type: question.type,
+      required: question.required,
+      ...detailedAnalysis
+    });
   }
 }

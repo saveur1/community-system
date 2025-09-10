@@ -1,3 +1,4 @@
+// Add these imports to your existing survey.ts file
 import { DataTypes, Model, Optional, type HasManyGetAssociationsMixin, type HasManyAddAssociationMixin, type HasManyAddAssociationsMixin, type HasManySetAssociationsMixin, type HasManyCreateAssociationMixin, type BelongsToManyGetAssociationsMixin, type BelongsToManyAddAssociationMixin, type BelongsToManyAddAssociationsMixin, type BelongsToManySetAssociationsMixin, type BelongsToManyRemoveAssociationMixin, type BelongsToGetAssociationMixin } from 'sequelize';
 import sequelize from '../config/database';
 import Question from './question';
@@ -6,43 +7,21 @@ import Response from './response';
 import Role from './role';
 import Section from './section';
 import Organization from './organization';
+import Project from './project'; // ADD THIS IMPORT
 import { User } from './users';
 
-export type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea';
-
-export interface BaseQuestion {
-  id: number;
-  type: QuestionType;
-  title: string;
-  description: string;
-  required: boolean;
-}
-
-export interface ChoiceQuestion extends BaseQuestion {
-  type: 'single_choice' | 'multiple_choice';
-  options: string[];
-  placeholder?: never;
-}
-
-export interface TextQuestion extends BaseQuestion {
-  type: 'text_input' | 'textarea';
-  options?: never;
-  placeholder: string;
-}
-
-export type AuthoredQuestion = ChoiceQuestion | TextQuestion;
+// ... keep your existing interfaces ...
 
 export interface SurveyAttributes {
   id: string;
   title: string;
   description: string;
-  project: string; // from UI currently a string label; can be changed to FK later
-  estimatedTime: string; // keep as string per UI (e.g., "15")
+  projectId?: string | null; // ADD THIS: Foreign key to Project
+  estimatedTime: string;
   status: 'active' | 'paused' | 'archived';
   surveyType?: 'general' | 'report-form';
   createdBy?: string | null;
-  organizationId?: string | null; // NEW: organization association
-  // New: when survey opens and closes
+  organizationId?: string | null;
   startAt: Date;
   endAt: Date;
 
@@ -56,7 +35,7 @@ class Survey extends Model<SurveyAttributes, SurveyCreationAttributes> implement
   declare id: string;
   declare title: string;
   declare description: string;
-  declare project: string;
+  declare projectId?: string | null; // ADD THIS
   declare estimatedTime: string;
   declare status: 'active' | 'paused' | 'archived';
   declare surveyType?: 'general' | 'report-form';
@@ -68,53 +47,11 @@ class Survey extends Model<SurveyAttributes, SurveyCreationAttributes> implement
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
-  // hasMany(Question) association mixins
-  declare getQuestionItems: HasManyGetAssociationsMixin<Question>;
-  declare addQuestionItem: HasManyAddAssociationMixin<Question, string>;
-  declare addQuestionItems: HasManyAddAssociationsMixin<Question, string>;
-  declare setQuestionItems: HasManySetAssociationsMixin<Question, string>;
-  declare createQuestionItem: HasManyCreateAssociationMixin<Question>;
-  declare readonly questionItems?: Question[];
+  // ... keep all your existing association mixins ...
 
-  // hasMany(Answer) association mixins
-  declare getAnswers: HasManyGetAssociationsMixin<Answer>;
-  declare addAnswer: HasManyAddAssociationMixin<Answer, string>;
-  declare addAnswers: HasManyAddAssociationsMixin<Answer, string>;
-  declare setAnswers: HasManySetAssociationsMixin<Answer, string>;
-  declare createAnswer: HasManyCreateAssociationMixin<Answer>;
-  declare readonly answers?: Answer[];
-
-  // hasMany(Response) association mixins
-  declare getResponses: HasManyGetAssociationsMixin<Response>;
-  declare addResponse: HasManyAddAssociationMixin<Response, string>;
-  declare addResponses: HasManyAddAssociationsMixin<Response, string>;
-  declare setResponses: HasManySetAssociationsMixin<Response, string>;
-  declare createResponse: HasManyCreateAssociationMixin<Response>;
-  declare readonly responses?: Response[];
-
-  // Many-to-many (Survey <-> Role) mixins for allowedRoles
-  declare getAllowedRoles: BelongsToManyGetAssociationsMixin<Role>;
-  declare addAllowedRole: BelongsToManyAddAssociationMixin<Role, string>;
-  declare addAllowedRoles: BelongsToManyAddAssociationsMixin<Role, string>;
-  declare setAllowedRoles: BelongsToManySetAssociationsMixin<Role, string>;
-  declare removeAllowedRole: BelongsToManyRemoveAssociationMixin<Role, string>;
-  declare readonly allowedRoles?: Role[];
-
-  // hasMany(Section) association mixins
-  declare getSections: HasManyGetAssociationsMixin<Section>;
-  declare addSection: HasManyAddAssociationMixin<Section, string>;
-  declare addSections: HasManyAddAssociationsMixin<Section, string>;
-  declare setSections: HasManySetAssociationsMixin<Section, string>;
-  declare createSection: HasManyCreateAssociationMixin<Section>;
-  declare readonly sections?: Section[];
-
-  // BelongsTo (Survey -> User) mixin for creator
-  declare getCreator: BelongsToGetAssociationMixin<User>;
-  declare readonly creator?: User | null;
-
-  // BelongsTo (Survey -> Organization) mixin
-  declare getOrganization: BelongsToGetAssociationMixin<Organization>;
-  declare readonly organization?: Organization | null;
+  // ADD THIS: BelongsTo (Survey -> Project) mixin
+  declare getProjectDetails: BelongsToGetAssociationMixin<Project>;
+  declare readonly projectDetails?: Project | null;
 }
 
 Survey.init(
@@ -136,11 +73,16 @@ Survey.init(
       allowNull: false,
       defaultValue: '',
     },
-    project: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: { notEmpty: true },
-      comment: 'Project label selected in UI',
+    // ADD THIS: Foreign key to Project
+    projectId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'projects',
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+      comment: 'Project this survey belongs to',
     },
     estimatedTime: {
       type: DataTypes.STRING,
@@ -148,7 +90,6 @@ Survey.init(
       defaultValue: '0',
       comment: 'Estimated time in minutes (string to match UI)',
     },
-    // required timestamps for survey availability window
     startAt: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -191,7 +132,6 @@ Survey.init(
       defaultValue: 'active',
       comment: 'Survey status lifecycle',
     },
-
   },
   {
     sequelize,

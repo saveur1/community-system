@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaArrowRight, FaArrowLeft, FaCheck, FaSpinner } from 'react-icons/fa';
+import { FaArrowRight, FaArrowLeft, FaCheck, FaSpinner, FaStar, FaUpload, FaTimes } from 'react-icons/fa';
 import { useSubmitSurveyAnswers } from '@/hooks/useSurveys';
 import { SubmitAnswersRequest } from '@/api/surveys';
 import useAuth from '@/hooks/useAuth';
 import { toast } from 'react-toastify';
+import { uploadToCloudinary } from '@/utility/logicFunctions';
 
 type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea' | 'file_upload' | 'rating' | 'linear_scale';
 
@@ -43,13 +44,33 @@ interface SurveyAnswerFormProps {
 
 interface Answer {
   questionId: string;
-  value: string | string[] | number | File[];
+  value: string | string[] | number | UploadedFile[];
+  fileInfo?: {
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+    filePath: string;
+  };
+  metadata?: any;
+}
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  publicId: string;
+  deleteToken?: string;
+  uploading?: boolean;
+  uploadProgress?: number;
 }
 
 const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const { mutate: submitAnswers } = useSubmitSurveyAnswers(survey.id);
   const { user } = useAuth();
@@ -67,12 +88,134 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
 
   const handleAnswerChange = (
     questionId: string,
-    value: string | string[] | number | File[]
+    value: string | string[] | number | UploadedFile[]
   ) => {
     setAnswers((prev) => ({
       ...prev,
       [questionId]: { questionId, value },
     }));
+  };
+
+  const handleFileUpload = async (questionId: string, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    setUploadingFiles(prev => ({ ...prev, [questionId]: true }));
+    
+    try {
+      const currentFiles = (answers[questionId]?.value as UploadedFile[]) || [];
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const tempId = `temp-${Date.now()}-${Math.random()}`;
+        
+        // Add file with uploading state
+        const uploadingFile: UploadedFile = {
+          id: tempId,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: '',
+          publicId: '',
+          uploading: true,
+          uploadProgress: 0
+        };
+        
+        // Update UI immediately with uploading file
+        setAnswers(prev => ({
+          ...prev,
+          [questionId]: {
+            questionId,
+            value: [...currentFiles, uploadingFile]
+          }
+        }));
+
+        try {
+          const result = await uploadToCloudinary(file, {
+            folder: 'survey-uploads',
+            onProgress: (percent) => {
+              setAnswers(prev => {
+                const currentAnswer = prev[questionId];
+                if (currentAnswer && Array.isArray(currentAnswer.value)) {
+                  const updatedFiles = (currentAnswer.value as UploadedFile[]).map(f => 
+                    f.id === tempId ? { ...f, uploadProgress: percent } : f
+                  );
+                  return {
+                    ...prev,
+                    [questionId]: { ...currentAnswer, value: updatedFiles }
+                  };
+                }
+                return prev;
+              });
+            }
+          });
+
+          const uploadedFile: UploadedFile = {
+            id: result.publicId,
+            name: result.originalFilename || file.name,
+            size: result.bytes,
+            type: result.format || file.type,
+            url: result.secureUrl,
+            publicId: result.publicId,
+            deleteToken: result.deleteToken,
+            uploading: false
+          };
+
+          // Replace uploading file with uploaded file
+          setAnswers(prev => {
+            const currentAnswer = prev[questionId];
+            if (currentAnswer && Array.isArray(currentAnswer.value)) {
+              const updatedFiles = (currentAnswer.value as UploadedFile[]).map(f => 
+                f.id === tempId ? uploadedFile : f
+              );
+              return {
+                ...prev,
+                [questionId]: { ...currentAnswer, value: updatedFiles }
+              };
+            }
+            return prev;
+          });
+
+          return uploadedFile;
+        } catch (error) {
+          console.error('Upload failed:', error);
+          toast.error(`Failed to upload ${file.name}`);
+          
+          // Remove failed upload from UI
+          setAnswers(prev => {
+            const currentAnswer = prev[questionId];
+            if (currentAnswer && Array.isArray(currentAnswer.value)) {
+              const updatedFiles = (currentAnswer.value as UploadedFile[]).filter(f => f.id !== tempId);
+              return {
+                ...prev,
+                [questionId]: { ...currentAnswer, value: updatedFiles }
+              };
+            }
+            return prev;
+          });
+          
+          throw error;
+        }
+      });
+
+      await Promise.allSettled(uploadPromises);
+      toast.success(`Successfully uploaded ${files.length} file(s)`);
+    } catch (error) {
+      console.error('File upload error:', error);
+    } finally {
+      setUploadingFiles(prev => ({ ...prev, [questionId]: false }));
+    }
+  };
+
+  const removeFile = (questionId: string, fileId: string) => {
+    setAnswers(prev => {
+      const currentAnswer = prev[questionId];
+      if (currentAnswer && Array.isArray(currentAnswer.value)) {
+        const updatedFiles = (currentAnswer.value as UploadedFile[]).filter(f => f.id !== fileId);
+        return {
+          ...prev,
+          [questionId]: { ...currentAnswer, value: updatedFiles }
+        };
+      }
+      return prev;
+    });
   };
 
   const handleNext = () => {
@@ -84,7 +227,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
         return Array.isArray(answer) && (answer as any[]).length > 0;
       }
       if (q.type === 'file_upload') {
-        return Array.isArray(answer) && (answer as File[]).length > 0;
+        return Array.isArray(answer) && (answer as UploadedFile[]).length > 0;
       }
       if (q.type === 'rating' || q.type === 'linear_scale') {
         return typeof answer === 'number' && !Number.isNaN(answer);
@@ -117,44 +260,69 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
     // Format answers for the API
     const formattedAnswers: SubmitAnswersRequest = {
       userId: user?.id ?? null,
-      answers: (Object.entries(answers).map(([questionId, answer]) => {
+      answers: Object.entries(answers).map(([questionId, answer]) => {
         const q = survey.questionItems.find((qq) => qq.id === questionId) as QuestionItem | undefined;
         const val = answer.value;
+        
         if (!q) {
-          return { questionId, answerText: String(val ?? ''), answerOptions: undefined };
+          return { questionId, value: String(val ?? '') };
         }
+
+        const baseAnswer = {
+          questionId,
+          value: val,
+          ...(answer.fileInfo && { fileInfo: answer.fileInfo }),
+          ...(answer.metadata && { metadata: answer.metadata })
+        };
+
         switch (q.type) {
           case 'single_choice': {
+            // For single choice, send the selected option as a string
             const choice = typeof val === 'string' ? val : Array.isArray(val) ? (val[0] ?? '') : String(val ?? '');
-            return { questionId, answerText: null, answerOptions: choice ? [choice] : [] };
+            return { ...baseAnswer, value: choice };
           }
           case 'multiple_choice': {
+            // For multiple choice, send array of selected options
             const arr: string[] = Array.isArray(val)
               ? (val as any[]).map((v) => String(v))
               : val
               ? [String(val)]
               : [];
-            return { questionId, answerText: null, answerOptions: arr };
+            return { ...baseAnswer, value: arr };
           }
           case 'text_input':
           case 'textarea': {
-            return { questionId, answerText: String(val ?? ''), answerOptions: undefined };
+            // For text inputs, send as string
+            return { ...baseAnswer, value: String(val ?? '') };
           }
           case 'rating':
           case 'linear_scale': {
+            // For numeric inputs, send as number
             const num = typeof val === 'number' ? val : Number(val);
-            return { questionId, answerText: Number.isNaN(num) ? null : String(num), answerOptions: undefined };
+            return { ...baseAnswer, value: Number.isNaN(num) ? null : num };
           }
           case 'file_upload': {
-            const files = Array.isArray(val) ? (val as File[]) : [];
-            // Send filenames as options; real file upload is out of scope for this endpoint
-            const names: string[] = files.map((f) => String(f.name));
-            return { questionId, answerText: null, answerOptions: names };
+            const files = val as UploadedFile[];
+            if (files && files.length > 0) {
+              // For multiple files, we'll store them as an array in the backend
+              return {
+                ...baseAnswer,
+                value: files.map(file => ({
+                  fileName: file.name,
+                  fileType: file.type,
+                  fileSize: file.size,
+                  fileUrl: file.url,
+                  publicId: file.publicId,
+                  deleteToken: file.deleteToken
+                }))
+              };
+            }
+            return { ...baseAnswer, value: null };
           }
           default:
-            return { questionId, answerText: String(val ?? ''), answerOptions: undefined };
+            return { ...baseAnswer, value: String(val ?? '') };
         }
-      }) as { questionId: string; answerText?: string | null; answerOptions?: string[] | null }[])
+      })
     };
 
     submitAnswers(formattedAnswers, {
@@ -224,7 +392,6 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
         );
 
       case 'text_input':
-      case 'textarea':
         return (
           <input
             type="text"
@@ -235,26 +402,45 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           />
         );
 
+      case 'textarea':
+        return (
+          <textarea
+            value={answer as string}
+            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+            placeholder={question.placeholder || 'Type your answer here...'}
+            rows={4}
+            className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
+          />
+        );
+
       case 'rating': {
         const max = question.maxRating ?? 5;
         const current = typeof answer === 'number' ? answer : 0;
         return (
-          <div className="flex items-center gap-3 flex-wrap">
-            {Array.from({ length: max }).map((_, i: number) => {
-              const val = i + 1;
-              return (
-                <label key={val} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`question-${question.id}`}
-                    checked={current === val}
-                    onChange={() => handleAnswerChange(question.id, Number(val))}
-                    className="h-4 w-4 text-primary focus:ring-primary"
-                  />
-                  <span className="text-gray-700">{question.ratingLabel ? `${val} ${question.ratingLabel}` : val}</span>
-                </label>
-              );
-            })}
+          <div className="space-y-3">
+            <div className="flex items-center gap-1">
+              {Array.from({ length: max }).map((_, i: number) => {
+                const val = i + 1;
+                const isActive = val <= current;
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => handleAnswerChange(question.id, Number(val))}
+                    className={`p-1 transition-colors ${
+                      isActive ? 'text-primary' : 'text-gray-300 hover:text-gray-400'
+                    }`}
+                  >
+                    <FaStar className="w-6 h-6" />
+                  </button>
+                );
+              })}
+            </div>
+            {current > 0 && (
+              <div className="text-sm text-gray-600">
+                {question.ratingLabel ? `${current} ${question.ratingLabel}` : `${current} out of ${max} stars`}
+              </div>
+            )}
           </div>
         );
       }
@@ -285,22 +471,80 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
 
       case 'file_upload': {
         const accept = (question.allowedTypes ?? []).join(',');
-        const files: File[] = Array.isArray(answer) ? (answer as File[]) : [];
+        const files: UploadedFile[] = Array.isArray(answer) ? (answer as UploadedFile[]) : [];
+        const isUploading = uploadingFiles[question.id] || false;
+        
         return (
           <div className="space-y-3">
-            <input
-              type="file"
-              multiple
-              accept={accept || undefined}
-              onChange={(e) => handleAnswerChange(question.id, e.target.files ? (Array.from(e.target.files) as File[]) : ([] as File[]))}
-              className="block w-full text-sm text-gray-700"
-            />
+            <div className="flex items-center justify-center w-full">
+              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <div className="flex flex-col items-center justify-center pt-3 pb-3">
+                  {isUploading ? (
+                    <FaSpinner className="w-6 h-6 mb-2 text-gray-500 animate-spin" />
+                  ) : (
+                    <FaUpload className="w-6 h-6 mb-2 text-gray-500" />
+                  )}
+                  <p className="mb-1 text-sm text-gray-500">
+                    <span className="font-semibold">
+                      {isUploading ? 'Uploading...' : 'Click to upload'}
+                    </span>
+                    {!isUploading && ' or drag and drop'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {question.allowedTypes?.length ? question.allowedTypes.join(', ').toUpperCase() : 'Any file type'}
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  accept={accept || undefined}
+                  onChange={(e) => handleFileUpload(question.id, e.target.files)}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+              </label>
+            </div>
             {files.length > 0 && (
-              <ul className="text-sm text-gray-600 list-disc pl-5">
-                {files.map((f) => (
-                  <li key={f.name}>{f.name}</li>
-                ))}
-              </ul>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">Uploaded files:</p>
+                <ul className="space-y-2">
+                  {files.map((file) => (
+                    <li key={file.id} className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{file.name}</span>
+                          {file.uploading && (
+                            <FaSpinner className="w-3 h-3 animate-spin text-primary" />
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {(file.size / 1024).toFixed(1)} KB
+                          {file.uploading && file.uploadProgress !== undefined && (
+                            <span className="ml-2">({file.uploadProgress}%)</span>
+                          )}
+                        </div>
+                        {file.uploading && file.uploadProgress !== undefined && (
+                          <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                            <div 
+                              className="bg-primary h-1 rounded-full transition-all duration-300" 
+                              style={{ width: `${file.uploadProgress}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      {!file.uploading && (
+                        <button
+                          type="button"
+                          onClick={() => removeFile(question.id, file.id)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                        >
+                          <FaTimes className="w-3 h-3" />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         );
@@ -323,14 +567,31 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
             <h3 className="text-lg font-medium text-gray-700">{steps[currentStep].section.title}</h3>
           </div>
         )}
-        <div className="mt-2 text-sm text-gray-500">
-          Step {currentStep + 1} of {totalSteps}
+        {/* Steps Indicator with Badge Numbers */}
+        <div className="mt-4 flex justify-center items-center space-x-4">
+          {Array.from({ length: totalSteps }).map((_, index) => (
+            <div key={index} className="flex items-center">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                  index <= currentStep
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                {index + 1}
+              </div>
+              {index < totalSteps - 1 && (
+                <div
+                  className={`w-8 h-0.5 mx-2 ${
+                    index < currentStep ? 'bg-primary' : 'bg-gray-200'
+                  }`}
+                />
+              )}
+            </div>
+          ))}
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-          <div
-            className="bg-primary h-2.5 rounded-full"
-            style={{ width: `${totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0}%` }}
-          />
+        <div className="mt-2 text-sm text-gray-500 text-center">
+          Step {currentStep + 1} of {totalSteps}
         </div>
       </div>
 
