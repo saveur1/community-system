@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { surveysApi, type SurveysListParams, type SurveysListResponse, type SurveyResponse, type SurveyCreateRequest, type SurveyUpdateRequest, type SubmitAnswersRequest } from '../api/surveys';
+import { surveysApi, type SurveysListParams, type SurveysListResponse, type SurveyResponse, type SurveyCreateRequest, type SurveyUpdateRequest, type SubmitAnswersRequest, type SurveyResponsesList } from '../api/surveys';
 import { toast } from 'react-toastify';
 
 // Query keys for surveys
@@ -16,8 +16,7 @@ export const surveysKeys = {
     params?.responded ?? null,
   ] as const,
   detail: (id: string) => [...surveysKeys.all, 'detail', id] as const,
-  // New key for user answers
-  userAnswers: () => [...surveysKeys.all, 'user_answers'] as const,
+  responses: (id: string, page: number, limit: number) => [...surveysKeys.all, 'responses', id, page, limit] as const,
 };
 
 // List surveys
@@ -38,12 +37,13 @@ export function useSurvey(surveyId: string, enabled: boolean = true) {
   });
 }
 
-// New: fetch surveys the current user has answered
-export function useUserSurveyAnswers(enabled: boolean = true) {
-  return useQuery<SurveysListResponse>({
-    queryKey: surveysKeys.userAnswers(),
-    queryFn: () => surveysApi.userAnswers(),
-    enabled,
+// List responses for a given survey id
+export function useSurveyResponses(surveyId: string, page: number = 1, limit: number = 10, enabled: boolean = true) {
+  return useQuery<SurveyResponsesList>({
+    queryKey: surveysKeys.responses(surveyId, page, limit),
+    queryFn: () => surveysApi.responses(surveyId, page, limit),
+    enabled: !!surveyId && enabled,
+    placeholderData: keepPreviousData,
   });
 }
 

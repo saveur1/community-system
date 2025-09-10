@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react';
 import { useGetFeedback, useDeleteFeedback, useUpdateFeedback } from '@/hooks/useFeedback';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { FaEye, FaTrash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaEye, FaTrash, FaCheckCircle, FaTimesCircle, FaPlus } from 'react-icons/fa';
 import DeleteFeedbackModal from '@/components/features/feedbacks/delete-feedback-modal';
 import { FeedbackAction } from '@/utility/types';
 import { FeedbackTable } from '@/components/features/feedbacks/feedbacks-table';
 import { FeedbackGrid } from '@/components/features/feedbacks/feedbacks-grid-view';
-import { FeedbackToolbar } from '@/components/features/feedbacks/feedback-toolbar';
+import MainToolbar from '@/components/common/main-toolbar';
 import { FeedbackPagination } from '@/components/features/feedbacks/feedback-pagination';
 import { FeedbackDetailsDrawer } from '@/components/features/feedbacks/feedback-details-drawer';
 import { FeedbackEntity, FeedbackListParams } from '@/api/feedback';
@@ -126,12 +126,15 @@ const FeedbacksPage = () => {
       <Breadcrumb items={["Community", "Feedbacks"]} title="Feedbacks" className='absolute top-0 left-0 px-6 w-full' />
 
       <div className="pt-14">
-        <FeedbackToolbar
+        <MainToolbar
+          title="Feedbacks"
           viewMode={viewMode}
           setViewMode={setViewMode}
           search={search}
           setSearch={(value) => { setSearch(value); setPage(1); }}
           filteredCount={meta?.total ?? 0}
+          showCreate={true}
+          createButton={{ to: '/dashboard/feedback/add-new', label: 'Make Feedback', icon: <FaPlus /> }}
         />
       </div>
 

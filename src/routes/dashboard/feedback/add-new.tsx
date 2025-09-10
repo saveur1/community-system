@@ -1,16 +1,14 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import React, { useState, useRef, useMemo } from 'react';
-import { FaSave, FaMicrophone, FaVideo, FaStop, FaTrash, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import React, { useState, useMemo } from 'react';
+import { FaSave, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import { useProjectsList } from '@/hooks/useProjects';
 import { useCreateFeedback } from '@/hooks/useFeedback';
 import { DocumentInput } from '@/api/feedback';
 import { VoiceFeedback as VoiceFeedbackType, VideoFeedback as VideoFeedbackType } from '@/types/feedback-types';
 import VoiceFeedback from '@/components/features/landing-page/feedback-form/voice-feedback';
 import VideoFeedback from '@/components/features/landing-page/feedback-form/video-feedback';
-import { useAuth } from '@/hooks/useAuth';
 import { uploadToCloudinary } from '@/utility/logicFunctions';
 import { toast } from 'react-toastify';
 
@@ -71,8 +69,8 @@ const CreateFeedbackComponent: React.FC = () => {
     ): void => {
         setFeedback(prev => ({
             ...prev,
-            [field]: typeof value === 'function' 
-                ? (value as (prevState: FeedbackFormState[K]) => FeedbackFormState[K])(prev[field]) 
+            [field]: typeof value === 'function'
+                ? (value as (prevState: FeedbackFormState[K]) => FeedbackFormState[K])(prev[field])
                 : value
         }));
     };
@@ -94,12 +92,12 @@ const CreateFeedbackComponent: React.FC = () => {
 
     const canProceedToNextStep = () => {
         switch (currentStep) {
-            case 1: 
-                return feedback.projectId && feedback.feedbackMethod && 
-                       (feedback.projectId !== 'other' || feedback.otherFeedbackOn.trim());
-            case 2: 
+            case 1:
+                return feedback.projectId && feedback.feedbackMethod &&
+                    (feedback.projectId !== 'other' || feedback.otherFeedbackOn.trim());
+            case 2:
                 return feedback.feedbackType && (feedback.mainMessage || feedback.voiceFeedback || feedback.videoFeedback);
-            default: 
+            default:
                 return true;
         }
     };
@@ -172,34 +170,66 @@ const CreateFeedbackComponent: React.FC = () => {
     const handleCancel = () => navigate({ to: '/dashboard/feedback' });
 
     const renderStepIndicator = () => (
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-6 sm:mb-8">
             {[1, 2].map((step) => (
                 <div key={step} className="flex items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
-                        step === currentStep ? 'bg-primary text-white' : step < currentStep ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
-                    }`}>
+                    <div
+                        className={`w-8 sm:w-10 h-8 sm:h-10 rounded-full flex items-center justify-center text-sm font-medium ${step === currentStep
+                            ? 'bg-primary text-white'
+                            : step < currentStep
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-200 text-gray-600'
+                            }`}
+                    >
                         {step < currentStep ? '✓' : step}
                     </div>
-                    {step < 2 && <div className={`w-16 h-1 mx-2 ${step < currentStep ? 'bg-green-500' : 'bg-gray-200'}`} />}
+                    {step < 2 && (
+                        <div
+                            className={`w-12 sm:w-16 h-1 mx-1 sm:mx-2 ${step < currentStep ? 'bg-green-500' : 'bg-gray-200'
+                                }`}
+                        />
+                    )}
                 </div>
             ))}
         </div>
     );
 
     const renderStep1 = () => (
-        <motion.div key="step1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }} className="space-y-6">
-            <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-title mb-2">How would you like to share your feedback?</h2>
-                <p className="text-gray-600">Choose your preferred method and select the project</p>
+        <motion.div
+            key="step1"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
+        >
+            <div className="text-center mb-6 sm:mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-title mb-2">
+                    How would you like to share your feedback?
+                </h2>
+                <p className="text-gray-600 text-sm sm:text-base">
+                    Choose your preferred method and select the project
+                </p>
             </div>
             <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700 mb-4">Feedback Method <span className="text-red-500">*</span></label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-4">
+                    Feedback Method <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {feedbackMethods.map((method) => (
-                        <div key={method.value} onClick={() => updateFeedback('feedbackMethod', method.value as any)} className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${feedback.feedbackMethod === method.value ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <div
+                            key={method.value}
+                            onClick={() => updateFeedback('feedbackMethod', method.value as any)}
+                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${feedback.feedbackMethod === method.value
+                                ? 'border-primary bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                        >
                             <div className="text-center">
-                                <div className="text-4xl mb-2">{method.icon}</div>
-                                <h3 className="font-semibold text-gray-900 mb-2">{method.label}</h3>
+                                <div className="text-3xl sm:text-4xl mb-2">{method.icon}</div>
+                                <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">
+                                    {method.label}
+                                </h3>
                                 <p className="text-sm text-gray-600">{method.description}</p>
                             </div>
                         </div>
@@ -207,19 +237,25 @@ const CreateFeedbackComponent: React.FC = () => {
                 </div>
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-4">Share feedback On <span className="text-red-500">*</span></label>
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-4">
+                    Share feedback On <span className="text-red-500">*</span>
+                </label>
                 <div className="space-y-3">
                     {projectsData?.result?.map((project) => (
-                        <label key={project.id} className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer transition-colors">
+                        <label
+                            key={project.id}
+                            className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer transition-colors"
+                        >
                             <input
                                 type="radio"
                                 name="projectId"
                                 value={project.id}
                                 checked={feedback.projectId === project.id}
                                 onChange={(e) => updateFeedback('projectId', e.target.value)}
-                                className="mr-3 text-primary focus:ring-primary"
+                                className="mr-3 text-primary focus:ring-primary scale-125 sm:scale-150"
+                                aria-label={`Select project ${project.name}`}
                             />
-                            <span className="text-gray-900">{project.name}</span>
+                            <span className="text-gray-900 text-sm sm:text-base">{project.name}</span>
                         </label>
                     ))}
                     <label className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer transition-colors">
@@ -229,9 +265,10 @@ const CreateFeedbackComponent: React.FC = () => {
                             value="other"
                             checked={feedback.projectId === 'other'}
                             onChange={(e) => updateFeedback('projectId', e.target.value)}
-                            className="mr-3 text-primary focus:ring-primary"
+                            className="mr-3 text-primary focus:ring-primary scale-125 sm:scale-150"
+                            aria-label="Select other project"
                         />
-                        <span className="text-gray-900">Other</span>
+                        <span className="text-gray-900 text-sm sm:text-base">Other</span>
                     </label>
                     {feedback.projectId === 'other' && (
                         <div className="ml-6">
@@ -240,7 +277,7 @@ const CreateFeedbackComponent: React.FC = () => {
                                 value={feedback.otherFeedbackOn}
                                 onChange={(e) => updateFeedback('otherFeedbackOn', e.target.value)}
                                 placeholder="Please specify..."
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary outline-none focus:border-primary transition-colors"
+                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary outline-none focus:border-primary transition-colors text-sm sm:text-base"
                             />
                         </div>
                     )}
@@ -275,7 +312,7 @@ const CreateFeedbackComponent: React.FC = () => {
                 </div>
             )}
             {feedback.feedbackMethod === 'voice' && (
-                <VoiceFeedback 
+                <VoiceFeedback
                     voiceFeedback={feedback.voiceFeedback}
                     setVoiceFeedback={(value) => updateFeedback('voiceFeedback', value)}
                 />
@@ -301,28 +338,54 @@ const CreateFeedbackComponent: React.FC = () => {
 
     return (
         <div className="w-full">
-            <Breadcrumb items={['dashboard', 'Feedback', 'Add New']} title="Add New Feedback" className='absolute top-0 px-6 left-0 w-full' />
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+            <Breadcrumb
+                items={['dashboard', 'Feedback', 'Add New']}
+                title="Add New Feedback"
+                className="absolute w-full left-0 top-0 px-4 sm:px-6 pt-4"
+            />
+            <div className="max-w-4xl mx-auto sm:px-4 max-sm:px-2 lg:px-8 pt-20 pb-8 sm:pb-12 w-full">
                 <div className="bg-white rounded-lg shadow-lg drop-shadow-2xl border border-gray-200">
-                    <div className="p-8">
+                    <div className="p-6 sm:p-8 max-sm:px-3">
                         {renderStepIndicator()}
                         <AnimatePresence mode="wait">
                             {currentStep === 1 && renderStep1()}
                             {currentStep === 2 && renderStep2()}
                         </AnimatePresence>
-                        <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-                            <button type="button" onClick={currentStep === 1 ? handleCancel : prevStep} className="flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">
+                        <div className="flex justify-between items-center mt-6 sm:mt-8 pt-6 border-t border-gray-200">
+                            <button
+                                type="button"
+                                onClick={currentStep === 1 ? handleCancel : prevStep}
+                                className="flex items-center px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors text-sm sm:text-base"
+                            >
                                 <FaChevronLeft className="mr-2" />
                                 {currentStep === 1 ? 'Cancel' : 'Back'}
                             </button>
-                            <div className="text-sm text-gray-500">Step {currentStep} of {totalSteps}</div>
+                            <div className="text-sm text-gray-500">
+                                Step {currentStep} of {totalSteps}
+                            </div>
                             {currentStep < totalSteps ? (
-                                <button type="button" onClick={nextStep} disabled={!canProceedToNextStep()} className="flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <button
+                                    type="button"
+                                    onClick={nextStep}
+                                    disabled={!canProceedToNextStep()}
+                                    className="flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                                >
                                     Next <FaChevronRight className="ml-2" />
                                 </button>
                             ) : (
-                                <button type="button" onClick={handleSubmit} disabled={createFeedback.isPending} className="flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium transition-colors disabled:opacity-50">
-                                    {createFeedback.isPending ? 'Submitting...' : <><FaSave className="mr-2" /> Submit Feedback</>}
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    disabled={createFeedback.isPending}
+                                    className="flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium transition-colors disabled:opacity-50 text-sm sm:text-base"
+                                >
+                                    {createFeedback.isPending ? (
+                                        'Submitting...'
+                                    ) : (
+                                        <>
+                                            <FaSave className="mr-2" /> Submit Feedback
+                                        </>
+                                    )}
                                 </button>
                             )}
                         </div>

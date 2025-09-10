@@ -44,12 +44,25 @@ export async function expressAuthentication(
               },
             ],
           },
+          // include organizations the user belongs to (many-to-many)
+          {
+            model: db.Organization,
+            as: 'organizations',
+            through: { attributes: [] },
+            attributes: ['id', 'name', 'ownerId'],
+          },
         ],
       });
 
       if (!user) {
         throw new Error('User not found');
       }
+
+      // Attach organization summary for easy access
+      const orgs = (user as any).organizations ?? [];
+      (user as any).organizationIds = Array.isArray(orgs) ? orgs.map((o: any) => o.id) : [];
+      (user as any).primaryOrganizationId = (user as any).organizationIds?.[0] ?? null;
+
 
       if (scopes && scopes.length > 0) {
         const userPermissions = user.roles?.flatMap((role: RoleWithPermissions) => role.permissions?.map(p => p.name) || []) || [];
@@ -76,7 +89,7 @@ export const checkAuth = async (
 ) => {
   try {
     const user = await expressAuthentication(req, 'jwt');
-    req.user = user;
+    (req as any).user = user;
     next();
   } catch (error: any) {
     return res.status(401).json(ServiceResponse.failure(error.message, null, 401));

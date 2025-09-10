@@ -296,7 +296,7 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold flex-shrink-0">
-                            {feedback ? getInitials(feedback.mainMessage || feedback.feedbackMethod || '') : ''}
+                            {feedback ? getInitials(feedback.feedbackMethod || '') : ''}
                         </div>
                         <div className="min-w-0">
                             <div className="text-gray-900 truncate">

@@ -24,6 +24,7 @@ const FeedbackActionsDropdown:FC<ActionsProps> = ({ handleAction, fb }) => {
                 </button>
             }
             position="bottom-right"
+            portal={true}
             dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-48"
         >
             {canManage && (

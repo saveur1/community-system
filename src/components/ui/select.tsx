@@ -34,7 +34,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
   disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const selectedOption = options.find(option => option.value === value);
+  const selectedOption = options?.find(option => option.value === value);
 
   const selectOption = (option: SelectDropdownOption) => {
     onChange(option.value);
@@ -73,7 +73,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
         dropdownClassName={cn("w-full max-h-56 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 sm:text-sm", dropdownClassName)}
         position="bottom-right"
       >
-        {options.map((option) => (
+        {options?.map((option) => (
           <div
             key={option.value}
             onClick={() => selectOption(option)}

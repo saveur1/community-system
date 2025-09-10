@@ -20,6 +20,8 @@ const SurveyComponent = () => {
       !completedSurveyIds.has(survey.id)
     );
 
+    console.log("completedSurveysResponse", completedSurveysResponse);
+
     // Independent answer page will handle showing the form; this list only links to it.
 
     // Otherwise, show the list of available surveys
@@ -82,7 +84,7 @@ const SurveyComponent = () => {
                                 <tr key={survey.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 text-sm text-gray-700">{survey.title}</td>
                                     <td className="px-6 py-4 text-sm text-gray-700">
-                                        {new Date(survey.answers?.[0]?.createdAt || '').toLocaleDateString()}
+                                        {new Date(survey.responses?.[0]?.createdAt || '').toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-700">
                                         {survey.questionItems?.length || 0}

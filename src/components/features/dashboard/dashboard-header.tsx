@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
     HiMenuAlt3,
-    HiBell,
     HiSearch,
     HiSun,
     HiMoon,
@@ -22,6 +21,14 @@ type ProfileProps = {
     user: User | null;
 };
 
+// Helper to get role abbreviation
+const getRoleDisplay = (role: string) => {
+    if (!role) return "User";
+    const words = role.split(" ");
+    if (words.length === 1) return words[0]; // Admin -> Admin
+    return words.map(w => w.charAt(0).toUpperCase()).join(""); // Secretarial General -> SG
+};
+
 const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
     if (!user) {
         return (
@@ -33,6 +40,9 @@ const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
         ? user.name
         : (user?.name?.split(" ")?.[0]?.charAt(0) || 'U') + "." + (user?.name?.split(" ")?.[1] || '');
 
+    const role = user?.roles?.[0]?.name || "User";
+    const fullRole = spacer(role);       // e.g. "Generation Population"
+    const shortRole = getRoleDisplay(fullRole); // e.g. "GP"
     return (
         <div className="flex items-center min-w-24 gap-2 px-2 py-1 bg-gray-100 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg cursor-pointer transition-colors">
             <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -42,8 +52,13 @@ const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
                 <div className="flex items-center gap-1">
                     <div className="text-left">
                         <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{displayName}</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 block truncate capitalize" title={user?.email}>
-                            {spacer(user?.roles?.[0]?.name || 'User')}
+                        {/* Role: full text on larger screens, acronym on small screens */}
+                        <span
+                            className="text-xs text-gray-500 dark:text-gray-400 block truncate capitalize"
+                            title={role}
+                        >
+                            <span className="hidden sm:inline">{fullRole}</span>
+                            <span className="sm:hidden">{shortRole}</span>
                         </span>
                     </div>
                 </div>
@@ -131,8 +146,8 @@ const Header: React.FC<HeaderProps> = ({
                 >
                     <div className="py-2">
                         <DropdownItem onClick={() => console.log('Profile')}>Profile</DropdownItem>
-                        <DropdownItem onClick={() => router.navigate({to: "/dashboard/settings"})}>Settings</DropdownItem>
-                        <DropdownItem onClick={() => router.navigate({to: "/dashboard/notifications"})}>Notifications</DropdownItem>
+                        <DropdownItem onClick={() => router.navigate({ to: "/dashboard/settings" })}>Settings</DropdownItem>
+                        <DropdownItem onClick={() => router.navigate({ to: "/dashboard/notifications" })}>Notifications</DropdownItem>
                         <DropdownItem onClick={() => console.log('Help & Support')}>Help & Support</DropdownItem>
                         <div className="my-1 h-px bg-gray-200 dark:bg-gray-700" />
                         <DropdownItem destructive onClick={() => logout()}>Logout</DropdownItem>

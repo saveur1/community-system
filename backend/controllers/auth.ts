@@ -217,6 +217,17 @@ export class AuthController extends Controller {
       // Assign role to user
       await (user as any).addRole(role, { transaction: t });
 
+      // Associate created user with the system_owner organization if it exists
+      try {
+        const systemOrg = await db.Organization.findOne({ where: { type: 'system_owner' }, transaction: t });
+        if (systemOrg) {
+          await (systemOrg as any).addUser(user, { transaction: t });
+        }
+      } catch (e) {
+        // non-fatal: log and continue
+        console.warn('Failed to associate user with system_owner organization', e);
+      }
+
       //save user
       await user.save({ transaction: t });
 

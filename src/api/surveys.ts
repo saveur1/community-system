@@ -16,7 +16,7 @@ export type ServiceResponse<T> = {
 };
 
 // Types aligned with backend controllers/models
-export type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea';
+export type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea' | 'file_upload' | 'rating' | 'linear_scale';
 
 export type AuthoredChoiceQuestion = {
   id: number;
@@ -24,6 +24,8 @@ export type AuthoredChoiceQuestion = {
   title: string;
   description: string;
   required: boolean;
+  sectionId: string;
+  questionNumber?: number;
   options: string[];
 };
 
@@ -33,20 +35,76 @@ export type AuthoredTextQuestion = {
   title: string;
   description: string;
   required: boolean;
+  sectionId: string;
+  questionNumber?: number;
   placeholder: string;
 };
 
-export type AuthoredQuestion = AuthoredChoiceQuestion | AuthoredTextQuestion;
+export type AuthoredFileUploadQuestion = {
+  id: number;
+  type: 'file_upload';
+  title: string;
+  description: string;
+  required: boolean;
+  sectionId: string;
+  questionNumber?: number;
+  allowedTypes: string[];
+  maxSize: number;
+};
+
+export type AuthoredRatingQuestion = {
+  id: number;
+  type: 'rating';
+  title: string;
+  description: string;
+  required: boolean;
+  sectionId: string;
+  questionNumber?: number;
+  maxRating: number;
+  ratingLabel?: string;
+};
+
+export type AuthoredLinearScaleQuestion = {
+  id: number;
+  type: 'linear_scale';
+  title: string;
+  description: string;
+  required: boolean;
+  sectionId: string;
+  questionNumber?: number;
+  minValue: number;
+  maxValue: number;
+  minLabel?: string;
+  maxLabel?: string;
+};
+
+export type AuthoredQuestion = AuthoredChoiceQuestion | AuthoredTextQuestion | AuthoredFileUploadQuestion | AuthoredRatingQuestion | AuthoredLinearScaleQuestion;
+
+export type Section = {
+  id: string;
+  title: string;
+  description?: string;
+};
 
 export type QuestionItem = {
   id: string;
   surveyId: string;
+  sectionId?: string | null;
+  questionNumber?: number | null;
   type: QuestionType;
   title: string;
   description: string;
   required: boolean;
   options: string[] | null;
   placeholder: string | null;
+  allowedTypes: string[] | null;
+  maxSize: number | null;
+  maxRating: number | null;
+  ratingLabel: string | null;
+  minValue: number | null;
+  maxValue: number | null;
+  minLabel: string | null;
+  maxLabel: string | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -61,6 +119,48 @@ export type AnswerItem = {
   updatedAt?: string;
 };
 
+export type ResponseItem = {
+  id: string;
+  surveyId: string;
+  userId?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  answers?: AnswerItem[];
+};
+
+export type SurveyMini = {
+  id: string;
+  title: string;
+  surveyType?: 'general' | 'report-form';
+  project?: string;
+  estimatedTime?: string;
+  organization?: { id: string; name: string } | null;
+};
+
+export type SurveyResponseRow = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  survey: SurveyMini;
+  user: {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    roles: { id: string; name: string; category?: string }[];
+  } | null;
+  answers: Array<{
+    id: string;
+    questionId: string;
+    answerText: string | null;
+    answerOptions: string[] | null;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
+export type SurveyResponsesList = ServiceResponse<SurveyResponseRow[]>;
+
 export type SurveyEntity = {
   id: string;
   title: string;
@@ -69,13 +169,26 @@ export type SurveyEntity = {
   estimatedTime: string;
   status: 'active' | 'paused' | 'archived';
   surveyType?: 'general' | 'report-form';
+  organizationId?: string | null;
+  createdBy?: string | null;
+  startAt: string;
+  endAt: string;
   questions: AuthoredQuestion[]; // JSON array as authored in UI
   createdAt?: string;
   updatedAt?: string;
   // included relations
+  sections?: Section[];
   questionItems?: QuestionItem[];
-  answers?: AnswerItem[];
+  responses?: ResponseItem[];
   allowedRoles?: RoleEntity[];
+  organization?: {
+    id: string;
+    name: string;
+  };
+  creator?: {
+    id: string;
+    name: string;
+  };
 };
 
 export type SurveysListParams = { 
@@ -98,17 +211,22 @@ export type SurveyCreateRequest = {
   description: string;
   project: string;
   estimatedTime: string;
+  surveyType?: 'general' | 'report-form';
+  startAt: string;
+  endAt: string;
+  sections: Section[];
   questions: AuthoredQuestion[];
+  allowedRoles?: string[];
 };
 
 export type SurveyUpdateRequest = Partial<SurveyCreateRequest>;
 
 export type SubmitAnswersRequest = {
+  userId?: string | null; // optional; if omitted, backend uses auth user or anonymous
   answers: Array<{
     questionId: string;
     answerText?: string | null;
     answerOptions?: string[] | null;
-    userId?: string | null;
   }>;
 };
 
@@ -144,9 +262,10 @@ export const surveysApi = {
     return data;
   },
 
-  // New: fetch surveys (with answers) completed by current user
-  userAnswers: async (): Promise<SurveysListResponse> => {
-    const { data } = await client.get(`/surveys/user-answers`);
+  // New: list responses for a survey
+  responses: async (surveyId: string, page: number = 1, limit: number = 10): Promise<SurveyResponsesList> => {
+    const { data } = await client.get(`/surveys/${surveyId}/responses`, { params: { page, limit } });
     return data;
   },
+
 };

@@ -1,5 +1,6 @@
 import { cn } from '@/utility/utility';
-import React, { useState, useRef, useEffect,type ReactNode,type MouseEvent,type KeyboardEvent } from 'react';
+import React, { useState, useRef, useEffect, type ReactNode, type MouseEvent, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 
 type Position =
   | 'top-left'
@@ -20,6 +21,8 @@ interface CustomDropdownProps {
   disabled?: boolean;
   closeOnClick?: boolean;
   closeOnClickOutside?: boolean;
+  portal?: boolean; // New prop to enable portal rendering
+  portalContainer?: Element; // Optional custom portal container
 }
 
 export const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -32,10 +35,14 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   dropdownClassName = "",
   disabled = false,
   closeOnClick = true,
-  closeOnClickOutside = true
+  closeOnClickOutside = true,
+  portal = false,
+  portalContainer
 }) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   // Use controlled state if provided, otherwise use internal state
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
@@ -64,17 +71,90 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
     }
   };
 
+  // Calculate dropdown position for portal rendering
+  const updateDropdownPosition = () => {
+    if (!triggerRef.current || !portal) return;
+
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const { top, left, width, height } = triggerRect;
+    
+    let newTop = top;
+    let newLeft = left;
+
+    // Adjust position based on the position prop
+    switch (position) {
+      case 'top-left':
+        newTop = top - 4; // 4px gap (mb-1)
+        newLeft = left;
+        break;
+      case 'top-right':
+        newTop = top - 4;
+        newLeft = left + width;
+        break;
+      case 'bottom-left':
+        newTop = top + height + 4; // 4px gap (mt-1)
+        newLeft = left;
+        break;
+      case 'bottom-right':
+        newTop = top + height + 4;
+        newLeft = left + width;
+        break;
+      case 'left':
+        newTop = top;
+        newLeft = left - 4;
+        break;
+      case 'right':
+        newTop = top;
+        newLeft = left + width + 4;
+        break;
+      default:
+        newTop = top + height + 4;
+        newLeft = left;
+    }
+
+    setDropdownPosition({
+      top: newTop + window.scrollY,
+      left: newLeft + window.scrollX,
+      width: width
+    });
+  };
+
+  // Update position when dropdown opens or window resizes/scrolls
+  useEffect(() => {
+    if (isOpen && portal) {
+      updateDropdownPosition();
+
+      const handleResize = () => updateDropdownPosition();
+      const handleScroll = () => updateDropdownPosition();
+
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('scroll', handleScroll, true);
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('scroll', handleScroll, true);
+      };
+    }
+  }, [isOpen, portal, position]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     if (!closeOnClickOutside) return;
 
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
+      const target = event.target as Node;
+      
+      // Check if click is outside trigger
+      if (triggerRef.current && triggerRef.current.contains(target)) {
+        return;
       }
+
+      // Check if click is outside dropdown
+      if (dropdownRef.current && dropdownRef.current.contains(target)) {
+        return;
+      }
+
+      setIsOpen(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside as EventListener);
@@ -82,6 +162,8 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   }, [closeOnClickOutside, setIsOpen]);
 
   const getPositionClasses = () => {
+    if (portal) return ''; // No position classes needed for portal
+
     switch (position) {
       case 'top-left':
         return 'bottom-full mb-1 left-0';
@@ -100,6 +182,44 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
     }
   };
 
+  const getPortalPositionStyles = () => {
+    if (!portal) return {};
+
+    let transform = '';
+    
+    switch (position) {
+      case 'top-left':
+        transform = 'translateY(-100%)';
+        break;
+      case 'top-right':
+        transform = 'translateY(-100%) translateX(-100%)';
+        break;
+      case 'bottom-left':
+        transform = '';
+        break;
+      case 'bottom-right':
+        transform = 'translateX(-100%)';
+        break;
+      case 'left':
+        transform = 'translateX(-100%)';
+        break;
+      case 'right':
+        transform = '';
+        break;
+      default:
+        transform = '';
+    }
+
+    return {
+      position: 'fixed' as const,
+      top: dropdownPosition.top,
+      left: dropdownPosition.left,
+      transform,
+      zIndex: 9999,
+      minWidth: position.includes('right') ? 'auto' : dropdownPosition.width
+    };
+  };
+
   const handleDropdownClick = (e?: React.MouseEvent) => {
     // prevent clicks inside dropdown from bubbling to parents (e.g., table rows/cards)
     if (e) e.stopPropagation();
@@ -108,9 +228,21 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
     }
   };
 
+  const dropdownContent = isOpen && (
+    <div
+      ref={dropdownRef}
+      className={`${portal ? '' : 'absolute'} z-[9999] ${getPositionClasses()} ${dropdownClassName}`}
+      style={portal ? getPortalPositionStyles() : undefined}
+      onClick={handleDropdownClick}
+    >
+      {children}
+    </div>
+  );
+
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <div className={`relative ${className}`}>
       <div
+        ref={triggerRef}
         onClick={(e) => { e.stopPropagation(); toggleDropdown(); }}
         onKeyDown={handleKeyDown}
         tabIndex={disabled ? -1 : 0}
@@ -120,19 +252,14 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
         {trigger}
       </div>
 
-      {isOpen && (
-        <div
-          className={`absolute z-[9999] ${getPositionClasses()} ${dropdownClassName}`}
-          onClick={handleDropdownClick}
-        >
-          {children}
-        </div>
-      )}
+      {portal && dropdownContent
+        ? createPortal(dropdownContent, portalContainer || document.body)
+        : dropdownContent}
     </div>
   );
 };
 
-// Dropdown Menu Item Component
+// Dropdown Menu Item Component (unchanged)
 export interface DropdownItemProps {
   children: ReactNode;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;

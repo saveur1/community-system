@@ -9,6 +9,7 @@ import { User } from '@/models/users';
 import Project from '@/models/project';
 import Role from '@/models/role';
 import { createSystemLog } from '../utils/systemLog';
+import Organization from '@/models/organization';
 
 interface DocumentInput {
   documentName: string;
@@ -49,18 +50,33 @@ export class FeedbackController extends Controller {
     @Query() feedbackType?: 'positive' | 'negative' | 'suggestion' | 'concern',
     @Query() projectId?: string,
     @Query() owner?: 'me' | 'other',
+    @Query() org?: 'mine' | 'others' | 'all',
     @Query() startDate?: string,
     @Query() endDate?: string
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
     const where: any = {};
-    
+
     if (status) where.status = status;
     if (feedbackType) where.feedbackType = feedbackType;
     if (projectId) where.projectId = projectId;
     if (owner) {
       where.userId = owner === 'me' ? req.user.id : { [Op.ne]: req.user.id };
     }
+
+    // Organization filtering: 'mine' => only current user's primary org
+    // 'others' => organizations different from user's primary org
+    // 'all' or undefined => no org filter
+    if (org && req.user) {
+      const userPrimaryOrg = (req.user as any).primaryOrganizationId ?? null;
+      if (org === 'mine') {
+        where.organizationId = userPrimaryOrg;
+      } else if (org === 'others') {
+        // include only feedbacks not from user's org
+        where.organizationId = { [Op.ne]: userPrimaryOrg };
+      }
+    }
+
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) where.createdAt[Op.gte] = new Date(startDate);
@@ -104,65 +120,6 @@ export class FeedbackController extends Controller {
     );
   }
 
-  @Security('jwt', ['feedback:personal:read'])
-  @Get('/user')
-  @asyncCatch
-  public async getUserFeedback(
-    @Request() req: { user: IUserAttributes },
-    @Query() page: number = 1,
-    @Query() limit: number = 10,
-    @Query() status?: 'submitted' | 'Acknowledged' | 'Resolved' | 'Rejected',
-    @Query() startDate?: string,
-    @Query() endDate?: string
-  ): Promise<ServiceResponse<any[]>> {
-    const userId = req.user.id;
-    const offset = (page - 1) * limit;
-    const where: any = { userId };
-    
-    if (status) where.status = status;
-    if (startDate || endDate) {
-      where.createdAt = {};
-      if (startDate) where.createdAt[Op.gte] = new Date(startDate);
-      if (endDate) where.createdAt[Op.lte] = new Date(endDate);
-    }
-
-    const { count, rows } = await Feedback.findAndCountAll({
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']],
-      where,
-      include: [
-        {
-          model: Document,
-          as: 'documents',
-          attributes: ['id', 'documentName', 'documentUrl', 'type', 'size', 'publicId', 'deleteToken'],
-          required: false,
-        },
-        { 
-          model: User, 
-          as: 'user',
-          attributes: ['id', 'name', 'email'],
-          include: [
-            { model: Role, as: 'roles', attributes: ['id', 'name'] }
-          ]
-        },
-        { 
-          model: Project, 
-          as: 'project', 
-          attributes: ['id', 'name', 'status'] 
-        },
-      ],
-      distinct: true,
-    });
-
-    return ServiceResponse.success(
-      'User feedback retrieved successfully',
-      rows,
-      200,
-      { total: count, page, totalPages: Math.ceil(count / limit) }
-    );
-  }
-
   @Security('jwt', ['feedback:read'])
   @Get('/{feedbackId}')
   @asyncCatch
@@ -188,6 +145,15 @@ export class FeedbackController extends Controller {
     @Request() req: { user: IUserAttributes },
     @Body() data: FeedbackCreateRequest
   ): Promise<ServiceResponse<any | null>> {
+    // determine organization for this feedback
+    let orgId: string | null = null;
+    if (req?.user && (req.user as any).primaryOrganizationId) {
+      orgId = (req.user as any).primaryOrganizationId;
+    } else {
+      const sys = await Organization.findOne({ where: { type: 'system_owner' } });
+      orgId = sys?.id ?? null;
+    }
+
     const feedback = await Feedback.create({
       projectId: data.projectId || null,
       mainMessage: data.mainMessage || null,
@@ -196,6 +162,7 @@ export class FeedbackController extends Controller {
       suggestions: data.suggestions || null,
       followUpNeeded: data.followUpNeeded || false,
       userId: req.user?.id || null,
+      organizationId: orgId,
       status: 'submitted',
       responderName: data.responderName || null,
       otherFeedbackOn: data.otherFeedbackOn || null,
@@ -238,6 +205,15 @@ export class FeedbackController extends Controller {
     const feedback = await Feedback.findByPk(feedbackId);
     if (!feedback) return ServiceResponse.failure('Feedback not found', null, 404);
 
+    // determine organization for update (preserve existing or set by user org)
+    let orgId = (feedback as any).organizationId ?? null;
+    if (req?.user && (req.user as any).primaryOrganizationId) {
+      orgId = (req.user as any).primaryOrganizationId;
+    } else if (!orgId) {
+      const sys = await Organization.findOne({ where: { type: 'system_owner' } });
+      orgId = sys?.id ?? null;
+    }
+
     await feedback.update({
       projectId: data.projectId ?? feedback.projectId,
       mainMessage: data.mainMessage ?? feedback.mainMessage,
@@ -248,7 +224,8 @@ export class FeedbackController extends Controller {
       status: data.status ?? feedback.status,
       responderName: data.responderName ?? feedback.responderName,
       otherFeedbackOn: data.otherFeedbackOn ?? feedback.otherFeedbackOn,
-    });
+      organizationId: orgId,
+    } as any);
 
     if (data.documents) {
       const existingDocuments = await feedback.getDocuments();

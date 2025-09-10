@@ -13,11 +13,12 @@ export interface FeedbackAttributes {
   responderName: string | null;
   userId: string | null;
   otherFeedbackOn: string | null; // New field for "Other feedback on"
+  organizationId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export type FeedbackCreationAttributes = Optional<FeedbackAttributes, 'id' | 'mainMessage' | 'suggestions' | 'followUpNeeded' | 'status' | 'feedbackType' | 'projectId' | 'userId' | 'createdAt' | 'updatedAt'>;
+export type FeedbackCreationAttributes = Optional<FeedbackAttributes, 'id' | 'mainMessage' | 'suggestions' | 'followUpNeeded' | 'status' | 'feedbackType' | 'projectId' | 'userId' | 'createdAt' | 'updatedAt' | 'organizationId'>;
 
 class Feedback extends Model<FeedbackAttributes, FeedbackCreationAttributes> implements FeedbackAttributes {
   declare id: string;
@@ -31,6 +32,7 @@ class Feedback extends Model<FeedbackAttributes, FeedbackCreationAttributes> imp
   declare projectId: string | null;
   declare userId: string | null;
   declare otherFeedbackOn: string | null;
+  declare organizationId?: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -90,6 +92,14 @@ Feedback.init({
     type: DataTypes.UUID,
     allowNull: true, // Not all feedback is project-specific
     field: 'project_id',
+  },
+  organizationId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'organization_id',
+    references: { model: 'organizations', key: 'id' },
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
   },
   status: {
     type: DataTypes.ENUM('submitted', 'Acknowledged', 'Resolved', 'Rejected'),

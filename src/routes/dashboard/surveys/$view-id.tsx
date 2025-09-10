@@ -3,7 +3,7 @@ import { createFileRoute, useParams } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { FaClock, FaListOl, FaUsers, FaAsterisk, FaChevronLeft, FaChevronRight, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
-import { useSurvey, useSurveysList } from '@/hooks/useSurveys';
+import { useSurvey, useSurveyResponses } from '@/hooks/useSurveys';
 import type { SurveysListParams } from '@/api/surveys';
 import { timeAgo } from '@/utility/logicFunctions';
 
@@ -143,7 +143,7 @@ const SurveyDetail = () => {
   const { data, isLoading } = useSurvey(viewId, true);
   const survey = data?.result;
   const questions = useMemo(() => survey?.questionItems ?? [], [survey]);
-  const answersCount = survey?.answers?.length ?? 0;
+  const answersCount = (survey as any)?.responses?.length ?? 0;
   const [activeTab, setActiveTab] = useState<'questions' | 'responses'>('questions');
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'time' | 'respondentName' | 'surveyTitle'>('time');
@@ -157,9 +157,10 @@ const SurveyDetail = () => {
     return { page, limit: pageSize, responded: true, owner: 'me' };
   }, [page, pageSize]);
 
-  const { data: userAnsweredSurveysResp, isLoading: isLoadingUserResponses } = useSurveysList(params);
+  // Use new endpoint to get this survey's responses
+  const { data: surveyResponses, isLoading: isLoadingResponses } = useSurveyResponses(viewId, page, pageSize, true);
 
-  // Flatten surveys -> answers into rows used by the table
+  // Adapt rows for table
   const fetchedResponses = useMemo(() => {
     const rows: Array<{
       id: string;
@@ -169,32 +170,27 @@ const SurveyDetail = () => {
       surveyTitle: string;
       surveyStatus?: string;
     }> = [];
-
-    const surveys = userAnsweredSurveysResp?.result ?? [];
-    for (const s of surveys) {
-      const answers = s.answers ?? [];
-      for (const a of answers) {
-        const respondentName = (a as any).user?.name ?? (a as any).userId ?? 'Unknown';
-        const respondentRole = (a as any).user?.roles?.[0]?.name ?? '';
-        const time = (a as any).createdAt ?? (a as any).updatedAt ?? s.updatedAt ?? null;
-        rows.push({
-          id: String((a as any).id ?? `${s.id}:${rows.length}`),
-          respondentName,
-          respondentRole,
-          time,
-          surveyTitle: s.title ?? 'Untitled',
-          surveyStatus: s.status ?? 'unknown',
-        });
-      }
+    const list = surveyResponses?.result ?? [];
+    for (const r of list as any[]) {
+      const respondentName = r.user?.name ?? 'Anonymous';
+      const respondentRole = r.user?.roles?.[0]?.name ?? '';
+      const time = r.createdAt ?? r.updatedAt ?? null;
+      rows.push({
+        id: String(r.id),
+        respondentName,
+        respondentRole,
+        time,
+        surveyTitle: r.survey?.title ?? 'Untitled',
+        surveyStatus: (survey as any)?.status ?? 'unknown',
+      });
     }
-    // sort newest first by time by default
     rows.sort((x, y) => {
       const tx = x.time ? new Date(x.time).getTime() : 0;
       const ty = y.time ? new Date(y.time).getTime() : 0;
       return ty - tx;
     });
     return rows;
-  }, [userAnsweredSurveysResp]);
+  }, [surveyResponses, survey]);
 
 
 
@@ -340,7 +336,7 @@ const SurveyDetail = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {(isLoadingUserResponses || isLoading) ? (
+                  {(isLoadingResponses || isLoading) ? (
                     <tr><td colSpan={4} className="py-8 text-center text-gray-500">Loading responses...</td></tr>
                   ) : pageData.length === 0 ? (
                     <tr><td colSpan={4} className="py-8 text-center text-gray-500">No responses found.</td></tr>

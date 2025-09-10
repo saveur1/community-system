@@ -52,6 +52,7 @@ function SurveyAnswerPage() {
             description: survey.description,
             estimatedTime: survey.estimatedTime,
             questionItems: survey.questionItems || [],
+            sections: (survey.sections || []).map((s: any) => ({ id: s.id, title: s.title, order: s.order }))
           }}
           onComplete={() => navigate({ to: '/dashboard/surveys/thank-you' })}
         />

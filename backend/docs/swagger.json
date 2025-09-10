@@ -558,6 +558,27 @@
 					"estimatedTime": {
 						"type": "string"
 					},
+					"sections": {
+						"items": {
+							"properties": {
+								"description": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"title",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
 					"questions": {
 						"items": {
 							"anyOf": [
@@ -568,6 +589,13 @@
 												"type": "string"
 											},
 											"type": "array"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
+											"type": "string"
 										},
 										"required": {
 											"type": "boolean"
@@ -592,6 +620,7 @@
 									},
 									"required": [
 										"options",
+										"sectionId",
 										"required",
 										"description",
 										"title",
@@ -603,6 +632,13 @@
 								{
 									"properties": {
 										"placeholder": {
+											"type": "string"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
 											"type": "string"
 										},
 										"required": {
@@ -628,6 +664,163 @@
 									},
 									"required": [
 										"placeholder",
+										"sectionId",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								},
+								{
+									"properties": {
+										"maxSize": {
+											"type": "number",
+											"format": "double"
+										},
+										"allowedTypes": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
+											"type": "string"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"file_upload"
+											],
+											"nullable": false
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"maxSize",
+										"allowedTypes",
+										"sectionId",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								},
+								{
+									"properties": {
+										"ratingLabel": {
+											"type": "string"
+										},
+										"maxRating": {
+											"type": "number",
+											"format": "double"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
+											"type": "string"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"rating"
+											],
+											"nullable": false
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"maxRating",
+										"sectionId",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								},
+								{
+									"properties": {
+										"maxLabel": {
+											"type": "string"
+										},
+										"minLabel": {
+											"type": "string"
+										},
+										"maxValue": {
+											"type": "number",
+											"format": "double"
+										},
+										"minValue": {
+											"type": "number",
+											"format": "double"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
+											"type": "string"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"linear_scale"
+											],
+											"nullable": false
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"maxValue",
+										"minValue",
+										"sectionId",
 										"required",
 										"description",
 										"title",
@@ -654,6 +847,7 @@
 					"startAt",
 					"endAt",
 					"estimatedTime",
+					"sections",
 					"questions"
 				],
 				"type": "object",
@@ -686,6 +880,27 @@
 					"estimatedTime": {
 						"type": "string"
 					},
+					"sections": {
+						"items": {
+							"properties": {
+								"description": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"title",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
 					"questions": {
 						"items": {
 							"anyOf": [
@@ -696,6 +911,13 @@
 												"type": "string"
 											},
 											"type": "array"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
+											"type": "string"
 										},
 										"required": {
 											"type": "boolean"
@@ -720,6 +942,7 @@
 									},
 									"required": [
 										"options",
+										"sectionId",
 										"required",
 										"description",
 										"title",
@@ -731,6 +954,13 @@
 								{
 									"properties": {
 										"placeholder": {
+											"type": "string"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
 											"type": "string"
 										},
 										"required": {
@@ -756,6 +986,163 @@
 									},
 									"required": [
 										"placeholder",
+										"sectionId",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								},
+								{
+									"properties": {
+										"maxSize": {
+											"type": "number",
+											"format": "double"
+										},
+										"allowedTypes": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
+											"type": "string"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"file_upload"
+											],
+											"nullable": false
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"maxSize",
+										"allowedTypes",
+										"sectionId",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								},
+								{
+									"properties": {
+										"ratingLabel": {
+											"type": "string"
+										},
+										"maxRating": {
+											"type": "number",
+											"format": "double"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
+											"type": "string"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"rating"
+											],
+											"nullable": false
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"maxRating",
+										"sectionId",
+										"required",
+										"description",
+										"title",
+										"type",
+										"id"
+									],
+									"type": "object"
+								},
+								{
+									"properties": {
+										"maxLabel": {
+											"type": "string"
+										},
+										"minLabel": {
+											"type": "string"
+										},
+										"maxValue": {
+											"type": "number",
+											"format": "double"
+										},
+										"minValue": {
+											"type": "number",
+											"format": "double"
+										},
+										"questionNumber": {
+											"type": "number",
+											"format": "double"
+										},
+										"sectionId": {
+											"type": "string"
+										},
+										"required": {
+											"type": "boolean"
+										},
+										"description": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string",
+											"enum": [
+												"linear_scale"
+											],
+											"nullable": false
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"maxValue",
+										"minValue",
+										"sectionId",
 										"required",
 										"description",
 										"title",
@@ -2471,10 +2858,6 @@
 													"type": "string",
 													"nullable": true
 												},
-												"userId": {
-													"type": "string",
-													"nullable": true
-												},
 												"questionId": {
 													"type": "string"
 												}
@@ -2485,6 +2868,10 @@
 											"type": "object"
 										},
 										"type": "array"
+									},
+									"userId": {
+										"type": "string",
+										"nullable": true
 									}
 								},
 								"required": [
@@ -3836,6 +4223,19 @@
 					},
 					{
 						"in": "query",
+						"name": "org",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"mine",
+								"others",
+								"all"
+							]
+						}
+					},
+					{
+						"in": "query",
 						"name": "startDate",
 						"required": false,
 						"schema": {
@@ -3887,85 +4287,6 @@
 						}
 					}
 				}
-			}
-		},
-		"/api/feedback/user": {
-			"get": {
-				"operationId": "GetUserFeedback",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Feedback"
-				],
-				"security": [
-					{
-						"jwt": [
-							"feedback:personal:read"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"default": 1,
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "limit",
-						"required": false,
-						"schema": {
-							"default": 10,
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "status",
-						"required": false,
-						"schema": {
-							"type": "string",
-							"enum": [
-								"submitted",
-								"Acknowledged",
-								"Resolved",
-								"Rejected"
-							]
-						}
-					},
-					{
-						"in": "query",
-						"name": "startDate",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "endDate",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
 			}
 		},
 		"/api/feedback/{feedbackId}": {

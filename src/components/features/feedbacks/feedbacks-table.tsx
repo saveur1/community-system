@@ -34,14 +34,14 @@ export const FeedbackTable = ({
 
   return (
     <div className="bg-white w-full rounded-lg shadow-sm border border-gray-200 overflow-x-auto"> {/* Added overflow-x-auto for responsiveness */}
-      <table className="min-w-full table-auto"> {/* table-auto helps with column sizing */}
+      <table className="min-w-full table-auto">
         <thead className="border-b border-gray-200">
           <tr>
-            <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm">Feedback</th> {/* Adjusted padding/text for mobile */}
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm">Feedback</th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">Project</th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">User</th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm">Status</th>
-            <th className="hidden sm:table-cell px-6 py-4 text-left text-sm font-medium text-gray-900">Follow-up</th> {/* Hide on mobile */}
+            <th className="hidden sm:table-cell px-6 py-4 text-left text-sm font-medium text-gray-900">Follow-up</th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-900 sm:px-6 sm:py-4 sm:text-sm">Actions</th>
           </tr>
         </thead>

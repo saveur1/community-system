@@ -37,6 +37,7 @@ import { Route as DashboardDocsIndexRouteImport } from './routes/dashboard/docs/
 import { Route as DashboardCommunitySessionsIndexRouteImport } from './routes/dashboard/community-sessions/index'
 import { Route as DashboardAnnouncementsIndexRouteImport } from './routes/dashboard/announcements/index'
 import { Route as DashboardAccountsIndexRouteImport } from './routes/dashboard/accounts/index'
+import { Route as AnswersSurveyIdIndexRouteImport } from './routes/answers.$survey-id/index'
 import { Route as DashboardSurveysThankYouRouteImport } from './routes/dashboard/surveys/thank-you'
 import { Route as DashboardSurveysTakeSurveyRouteImport } from './routes/dashboard/surveys/take-survey'
 import { Route as DashboardSurveysReviewSurveyRouteImport } from './routes/dashboard/surveys/review-survey'
@@ -63,6 +64,7 @@ import { Route as DashboardAccountsRichMembersRouteImport } from './routes/dashb
 import { Route as DashboardAccountsHealthServiceProvidersRouteImport } from './routes/dashboard/accounts/health-service-providers'
 import { Route as DashboardAccountsCommunityMembersRouteImport } from './routes/dashboard/accounts/community-members'
 import { Route as DashboardAccountsAddNewRouteImport } from './routes/dashboard/accounts/add-new'
+import { Route as AnswersSurveyIdThankYouRouteImport } from './routes/answers.$survey-id/thank-you'
 import { Route as DashboardSurveysTakeSurveyAnswerRouteImport } from './routes/dashboard/surveys/take.$survey-answer'
 import { Route as DashboardSurveysEditEditIdRouteImport } from './routes/dashboard/surveys/edit.$edit-id'
 import { Route as DashboardSurveysAnswerSurveyAnswerRouteImport } from './routes/dashboard/surveys/answer.$survey-answer'
@@ -215,6 +217,11 @@ const DashboardAccountsIndexRoute = DashboardAccountsIndexRouteImport.update({
   path: '/accounts/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const AnswersSurveyIdIndexRoute = AnswersSurveyIdIndexRouteImport.update({
+  id: '/answers/$survey-id/',
+  path: '/answers/$survey-id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardSurveysThankYouRoute =
   DashboardSurveysThankYouRouteImport.update({
     id: '/surveys/thank-you',
@@ -365,6 +372,11 @@ const DashboardAccountsAddNewRoute = DashboardAccountsAddNewRouteImport.update({
   path: '/accounts/add-new',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const AnswersSurveyIdThankYouRoute = AnswersSurveyIdThankYouRouteImport.update({
+  id: '/answers/$survey-id/thank-you',
+  path: '/answers/$survey-id/thank-you',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardSurveysTakeSurveyAnswerRoute =
   DashboardSurveysTakeSurveyAnswerRouteImport.update({
     id: '/surveys/take/$survey-answer',
@@ -418,6 +430,7 @@ export interface FileRoutesByFullPath {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/answers/$survey-id/thank-you': typeof AnswersSurveyIdThankYouRoute
   '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
@@ -444,6 +457,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
+  '/answers/$survey-id': typeof AnswersSurveyIdIndexRoute
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions': typeof DashboardCommunitySessionsIndexRoute
@@ -478,6 +492,7 @@ export interface FileRoutesByTo {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard': typeof DashboardIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/answers/$survey-id/thank-you': typeof AnswersSurveyIdThankYouRoute
   '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
@@ -504,6 +519,7 @@ export interface FileRoutesByTo {
   '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
+  '/answers/$survey-id': typeof AnswersSurveyIdIndexRoute
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions': typeof DashboardCommunitySessionsIndexRoute
@@ -541,6 +557,7 @@ export interface FileRoutesById {
   '/posts/$postId': typeof PostsPostIdRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/answers/$survey-id/thank-you': typeof AnswersSurveyIdThankYouRoute
   '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
   '/dashboard/accounts/health-service-providers': typeof DashboardAccountsHealthServiceProvidersRoute
@@ -567,6 +584,7 @@ export interface FileRoutesById {
   '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
+  '/answers/$survey-id/': typeof AnswersSurveyIdIndexRoute
   '/dashboard/accounts/': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements/': typeof DashboardAnnouncementsIndexRoute
   '/dashboard/community-sessions/': typeof DashboardCommunitySessionsIndexRoute
@@ -605,6 +623,7 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard/'
     | '/posts/'
+    | '/answers/$survey-id/thank-you'
     | '/dashboard/accounts/add-new'
     | '/dashboard/accounts/community-members'
     | '/dashboard/accounts/health-service-providers'
@@ -631,6 +650,7 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
+    | '/answers/$survey-id'
     | '/dashboard/accounts'
     | '/dashboard/announcements'
     | '/dashboard/community-sessions'
@@ -665,6 +685,7 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard'
     | '/posts'
+    | '/answers/$survey-id/thank-you'
     | '/dashboard/accounts/add-new'
     | '/dashboard/accounts/community-members'
     | '/dashboard/accounts/health-service-providers'
@@ -691,6 +712,7 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
+    | '/answers/$survey-id'
     | '/dashboard/accounts'
     | '/dashboard/announcements'
     | '/dashboard/community-sessions'
@@ -727,6 +749,7 @@ export interface FileRouteTypes {
     | '/posts/$postId'
     | '/dashboard/'
     | '/posts/'
+    | '/answers/$survey-id/thank-you'
     | '/dashboard/accounts/add-new'
     | '/dashboard/accounts/community-members'
     | '/dashboard/accounts/health-service-providers'
@@ -753,6 +776,7 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/take-survey'
     | '/dashboard/surveys/thank-you'
+    | '/answers/$survey-id/'
     | '/dashboard/accounts/'
     | '/dashboard/announcements/'
     | '/dashboard/community-sessions/'
@@ -783,6 +807,8 @@ export interface RootRouteChildren {
   ErrorRoute: typeof ErrorRoute
   VerifyOrganizationRoute: typeof VerifyOrganizationRoute
   FeedbackProgrammeRoute: typeof FeedbackProgrammeRoute
+  AnswersSurveyIdThankYouRoute: typeof AnswersSurveyIdThankYouRoute
+  AnswersSurveyIdIndexRoute: typeof AnswersSurveyIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -983,6 +1009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/answers/$survey-id/': {
+      id: '/answers/$survey-id/'
+      path: '/answers/$survey-id'
+      fullPath: '/answers/$survey-id'
+      preLoaderRoute: typeof AnswersSurveyIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/surveys/thank-you': {
       id: '/dashboard/surveys/thank-you'
       path: '/surveys/thank-you'
@@ -1164,6 +1197,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/accounts/add-new'
       preLoaderRoute: typeof DashboardAccountsAddNewRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/answers/$survey-id/thank-you': {
+      id: '/answers/$survey-id/thank-you'
+      path: '/answers/$survey-id/thank-you'
+      fullPath: '/answers/$survey-id/thank-you'
+      preLoaderRoute: typeof AnswersSurveyIdThankYouRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/dashboard/surveys/take/$survey-answer': {
       id: '/dashboard/surveys/take/$survey-answer'
@@ -1358,6 +1398,8 @@ const rootRouteChildren: RootRouteChildren = {
   ErrorRoute: ErrorRoute,
   VerifyOrganizationRoute: VerifyOrganizationRoute,
   FeedbackProgrammeRoute: FeedbackProgrammeRoute,
+  AnswersSurveyIdThankYouRoute: AnswersSurveyIdThankYouRoute,
+  AnswersSurveyIdIndexRoute: AnswersSurveyIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

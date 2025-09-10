@@ -1,14 +1,11 @@
 import { Controller, Get, Post, Put, Delete, Route, Tags, Response, SuccessResponse, Body, Path, Query, Security, Request } from 'tsoa';
 import { ServiceResponse } from '../utils/serviceResponse';
-import Survey from '../models/survey';
-import Role from '../models/role';
 import { asyncCatch } from '../middlewares/errorHandler';
-import Question from '../models/question';
-import Answer from '../models/answer';
 import sequelize from '../config/database';
 import { Op } from 'sequelize';
 import db from '@/models';
 import { createSystemLog } from '../utils/systemLog';
+import { randomUUID } from 'crypto';
 
 interface SurveyCreateRequest {
   title: string;
@@ -18,6 +15,11 @@ interface SurveyCreateRequest {
   startAt: string; // ISO timestamp, required
   endAt: string;   // ISO timestamp, required
   estimatedTime: string; // string to match UI
+  sections: Array<{
+    id: string;
+    title: string;
+    description?: string;
+  }>;
   questions: Array<
     | {
         id: number;
@@ -25,6 +27,8 @@ interface SurveyCreateRequest {
         title: string;
         description: string;
         required: boolean;
+        sectionId: string;
+        questionNumber?: number;
         options: string[];
       }
     | {
@@ -33,7 +37,44 @@ interface SurveyCreateRequest {
         title: string;
         description: string;
         required: boolean;
+        sectionId: string;
+        questionNumber?: number;
         placeholder: string;
+      }
+    | {
+        id: number;
+        type: 'file_upload';
+        title: string;
+        description: string;
+        required: boolean;
+        sectionId: string;
+        questionNumber?: number;
+        allowedTypes: string[];
+        maxSize: number;
+      }
+    | {
+        id: number;
+        type: 'rating';
+        title: string;
+        description: string;
+        required: boolean;
+        sectionId: string;
+        questionNumber?: number;
+        maxRating: number;
+        ratingLabel?: string;
+      }
+    | {
+        id: number;
+        type: 'linear_scale';
+        title: string;
+        description: string;
+        required: boolean;
+        sectionId: string;
+        questionNumber?: number;
+        minValue: number;
+        maxValue: number;
+        minLabel?: string;
+        maxLabel?: string;
       }
   >;
   allowedRoles?: string[]; // NEW: array of Role IDs allowed to view/answer
@@ -65,10 +106,16 @@ export class SurveyController extends Controller {
     const where: any = {};
     // base includes; we'll adjust allowedRoles include below if `allowed` is true
     const includeArr: any[] = [
-      { model: Question, as: 'questionItems' },
-      // include answers (non-required by default)
-      { model: Answer, as: 'answers', include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] },
-      { model: Role, as: 'allowedRoles', through: { attributes: [] }, required: false },
+      { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
+      { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+      // Include responses with nested answers
+      { model: db.Response, as: 'responses', include: [
+        { model: db.Answer, as: 'answers', include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+        { model: db.User, as: 'user', attributes: ['id', 'name'] }
+      ] },
+      { model: db.Role, as: 'allowedRoles', through: { attributes: [] }, required: false },
+      { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
+      { model: db.User, as: 'creator', attributes: ['id', 'name'] },
     ];
     // DATE RANGE FILTER
     if (startDate || endDate) {
@@ -103,7 +150,10 @@ export class SurveyController extends Controller {
         return ServiceResponse.failure('Authentication required to filter by responded', [], 401);
       }
       // require at least one answer by this user (inner join)
-      includeArr[1] = { model: Answer, as: 'answers', required: true, where: { userId }, include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] };
+      includeArr[2] = { model: db.Response, as: 'responses', required: true, where: { userId }, include: [
+        { model: db.Answer, as: 'answers', include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+        { model: db.User, as: 'user', attributes: ['id', 'name'] }
+      ] };
     }
 
     // ALLOWED FILTERING: only surveys that allow any of the current user's roles
@@ -123,8 +173,8 @@ export class SurveyController extends Controller {
       }
 
       // replace allowedRoles include to be required and filter by user's role ids (inner join)
-      includeArr[2] = {
-        model: Role,
+      includeArr[3] = {
+        model: db.Role,
         as: 'allowedRoles',
         through: { attributes: [] },
         required: true,
@@ -132,7 +182,7 @@ export class SurveyController extends Controller {
       };
     }
 
-    const { count, rows } = await Survey.findAndCountAll({
+    const { count, rows } = await db.Survey.findAndCountAll({
       limit,
       offset,
       order: [['createdAt', 'DESC']],
@@ -149,16 +199,85 @@ export class SurveyController extends Controller {
     );
   }
 
+  // New: list responses for a survey with compact survey and user info
+  @Security('jwt', ['survey:read'])
+  @Get('/{surveyId}/responses')
+  @asyncCatch
+  public async getSurveyResponses(
+    @Path() surveyId: string,
+    @Query() page: number = 1,
+    @Query() limit: number = 10,
+  ): Promise<ServiceResponse<any[]>> {
+    const survey = await db.Survey.findByPk(surveyId, {
+      attributes: ['id', 'title', 'surveyType', 'project', 'estimatedTime'],
+      include: [
+        { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
+      ],
+    });
+    if (!survey) return ServiceResponse.failure('Survey not found', [], 404);
+
+    const offset = (page - 1) * limit;
+    const { count, rows } = await db.Response.findAndCountAll({
+      where: { surveyId },
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: db.Answer, as: 'answers' },
+        { model: db.User, as: 'user', attributes: ['id', 'name', 'email', 'phone'], include: [
+          { model: db.Role, as: 'roles', through: { attributes: [] } },
+        ] },
+      ],
+      distinct: true,
+    });
+
+    const compactSurvey = {
+      id: survey.id,
+      title: survey.title,
+      surveyType: survey.surveyType,
+      project: survey.project,
+      estimatedTime: survey.estimatedTime,
+      organization: survey.organization ? { id: survey.organization.id, name: survey.organization.name } : null,
+    };
+
+    const payload = rows.map((r: any) => ({
+      id: r.id,
+      survey: compactSurvey,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      user: r.user ? {
+        id: r.user.id,
+        name: r.user.name,
+        email: r.user.email,
+        phone: r.user.phone,
+        roles: Array.isArray(r.user.roles) ? r.user.roles.map((role: any) => ({ id: role.id, name: role.name, category: role.category })) : [],
+      } : null,
+      answers: (r.answers || []).map((a: any) => ({
+        id: a.id,
+        questionId: a.questionId,
+        answerText: a.answerText,
+        answerOptions: a.answerOptions,
+        createdAt: a.createdAt,
+        updatedAt: a.updatedAt,
+      })),
+    }));
+
+    return ServiceResponse.success('Survey responses retrieved successfully', payload, 200, { total: count, page, totalPages: Math.ceil(count / limit) });
+  }
+
   @Security('jwt', ['survey:read'])
   @Get('/{surveyId}')
   @asyncCatch
   @Response<ServiceResponse<null>>(404, 'Survey not found')
   public async getSurveyById(@Path() surveyId: string): Promise<ServiceResponse<any | null>> {
-    const survey = await Survey.findByPk(surveyId, {
+    const survey = await db.Survey.findByPk(surveyId, {
       include: [
-        { model: Question, as: 'questionItems' },
-        { model: Answer, as: 'answers' },
-        { model: Role, as: 'allowedRoles', through: { attributes: [] } },
+        { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+        { model: db.Role, as: 'allowedRoles', through: { attributes: [] } },
+        { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
+        { model: db.User, as: 'creator', attributes: ['id', 'name'] },
       ],
     });
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
@@ -170,6 +289,7 @@ export class SurveyController extends Controller {
   @asyncCatch
   public async createSurvey(@Request() request: any, @Body() data: SurveyCreateRequest): Promise<ServiceResponse<any | null>> {
     const userId = request?.user?.id ?? null;
+    const organizationId = request?.user?.primaryOrganizationId ?? null;
     const start = new Date(data.startAt);
     const end = new Date(data.endAt);
     if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
@@ -177,7 +297,7 @@ export class SurveyController extends Controller {
     }
 
     const created = await sequelize.transaction(async (t) => {
-      const s = await Survey.create({
+      const s = await db.Survey.create({
         title: data.title,
         description: data.description,
         project: data.project,
@@ -187,23 +307,120 @@ export class SurveyController extends Controller {
         endAt: end,
         status: 'active',
         createdBy: userId,
+        organizationId: organizationId,
       }, { transaction: t });
 
+      // Create sections with backend-generated IDs and build a mapping
+      const sectionIdMap = new Map<string, string>();
+      if (data.sections && data.sections.length > 0) {
+        const sectionsToCreate = data.sections.map((section, index) => {
+          const newId = randomUUID();
+          sectionIdMap.set(section.id, newId);
+          return {
+            id: newId,
+            surveyId: s.id,
+            title: section.title,
+            description: section.description || null,
+            order: index + 1,
+          };
+        });
+        await db.Section.bulkCreate(sectionsToCreate, { transaction: t });
+      }
+
+      // Create questions (remap sectionId using generated IDs)
       if (data.questions && data.questions.length > 0) {
         const questionsToCreate = data.questions.map(q => {
           const { id, ...questionData } = q;
-          return {
+          const baseQuestion = {
             ...questionData,
             surveyId: s.id,
-            options: (q as any).options ?? null,
-            placeholder: (q as any).placeholder ?? null,
+            sectionId: questionData.sectionId ? (sectionIdMap.get(questionData.sectionId) ?? null) : null,
+            questionNumber: questionData.questionNumber || null,
           };
+
+          // Handle different question types
+          switch (q.type) {
+            case 'single_choice':
+            case 'multiple_choice':
+              return {
+                ...baseQuestion,
+                options: (q as any).options ?? null,
+                placeholder: null,
+                allowedTypes: null,
+                maxSize: null,
+                maxRating: null,
+                ratingLabel: null,
+                minValue: null,
+                maxValue: null,
+                minLabel: null,
+                maxLabel: null,
+              };
+            case 'text_input':
+            case 'textarea':
+              return {
+                ...baseQuestion,
+                options: null,
+                placeholder: (q as any).placeholder ?? null,
+                allowedTypes: null,
+                maxSize: null,
+                maxRating: null,
+                ratingLabel: null,
+                minValue: null,
+                maxValue: null,
+                minLabel: null,
+                maxLabel: null,
+              };
+            case 'file_upload':
+              return {
+                ...baseQuestion,
+                options: null,
+                placeholder: null,
+                allowedTypes: (q as any).allowedTypes ?? null,
+                maxSize: (q as any).maxSize ?? null,
+                maxRating: null,
+                ratingLabel: null,
+                minValue: null,
+                maxValue: null,
+                minLabel: null,
+                maxLabel: null,
+              };
+            case 'rating':
+              return {
+                ...baseQuestion,
+                options: null,
+                placeholder: null,
+                allowedTypes: null,
+                maxSize: null,
+                maxRating: (q as any).maxRating ?? null,
+                ratingLabel: (q as any).ratingLabel ?? null,
+                minValue: null,
+                maxValue: null,
+                minLabel: null,
+                maxLabel: null,
+              };
+            case 'linear_scale':
+              return {
+                ...baseQuestion,
+                options: null,
+                placeholder: null,
+                allowedTypes: null,
+                maxSize: null,
+                maxRating: null,
+                ratingLabel: null,
+                minValue: (q as any).minValue ?? null,
+                maxValue: (q as any).maxValue ?? null,
+                minLabel: (q as any).minLabel ?? null,
+                maxLabel: (q as any).maxLabel ?? null,
+              };
+            default:
+              return baseQuestion;
+          }
         });
-        await Question.bulkCreate(questionsToCreate as any, { transaction: t });
+        await db.Question.bulkCreate(questionsToCreate as any, { transaction: t });
       }
 
       if (data.allowedRoles && data.allowedRoles.length > 0) {
-        const roles = await Role.findAll({ where: { id: data.allowedRoles }, transaction: t });
+        const roles = await db.Role.findAll({ where: { id: data.allowedRoles }, transaction: t });
         if (roles.length) {
           await (s as any).setAllowedRoles(roles, { transaction: t });
         }
@@ -213,11 +430,14 @@ export class SurveyController extends Controller {
     });
 
     this.setStatus(201);
-    const result = await Survey.findByPk(created.id, {
+    const result = await db.Survey.findByPk(created.id, {
       include: [
-        { model: Question, as: 'questionItems' },
-        { model: Answer, as: 'answers' },
-        { model: Role, as: 'allowedRoles', through: { attributes: [] } },
+        { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+        { model: db.Role, as: 'allowedRoles', through: { attributes: [] } },
+        { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
+        { model: db.User, as: 'creator', attributes: ['id', 'name'] },
       ],
     });
 
@@ -235,7 +455,7 @@ export class SurveyController extends Controller {
     @Request() request: any,
     @Body() data: SurveyUpdateRequest
   ): Promise<ServiceResponse<any | null>> {
-    const survey = await Survey.findByPk(surveyId);
+    const survey = await db.Survey.findByPk(surveyId);
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
 
     await sequelize.transaction(async (t) => {
@@ -258,31 +478,124 @@ export class SurveyController extends Controller {
         status: data.status ?? survey.status ?? 'active',
       }, { transaction: t });
 
+      if (data.sections) {
+        await db.Section.destroy({ where: { surveyId: survey.id }, transaction: t });
+        const sectionsToCreate = data.sections.map((section, index) => ({
+          id: section.id,
+          surveyId: survey.id,
+          title: section.title,
+          description: section.description || null,
+          order: index + 1,
+        }));
+        await db.Section.bulkCreate(sectionsToCreate, { transaction: t });
+      }
+
       if (data.questions) {
-        await Question.destroy({ where: { surveyId: survey.id }, transaction: t });
+        await db.Question.destroy({ where: { surveyId: survey.id }, transaction: t });
         const questionsToCreate = data.questions.map(q => {
           const { id, ...questionData } = q;
-          return {
+          const baseQuestion = {
             ...questionData,
             surveyId: survey.id,
-            options: (q as any).options ?? null,
-            placeholder: (q as any).placeholder ?? null,
+            sectionId: questionData.sectionId,
+            questionNumber: questionData.questionNumber || null,
           };
+
+          // Handle different question types
+          switch (q.type) {
+            case 'single_choice':
+            case 'multiple_choice':
+              return {
+                ...baseQuestion,
+                options: (q as any).options ?? null,
+                placeholder: null,
+                allowedTypes: null,
+                maxSize: null,
+                maxRating: null,
+                ratingLabel: null,
+                minValue: null,
+                maxValue: null,
+                minLabel: null,
+                maxLabel: null,
+              };
+            case 'text_input':
+            case 'textarea':
+              return {
+                ...baseQuestion,
+                options: null,
+                placeholder: (q as any).placeholder ?? null,
+                allowedTypes: null,
+                maxSize: null,
+                maxRating: null,
+                ratingLabel: null,
+                minValue: null,
+                maxValue: null,
+                minLabel: null,
+                maxLabel: null,
+              };
+            case 'file_upload':
+              return {
+                ...baseQuestion,
+                options: null,
+                placeholder: null,
+                allowedTypes: (q as any).allowedTypes ?? null,
+                maxSize: (q as any).maxSize ?? null,
+                maxRating: null,
+                ratingLabel: null,
+                minValue: null,
+                maxValue: null,
+                minLabel: null,
+                maxLabel: null,
+              };
+            case 'rating':
+              return {
+                ...baseQuestion,
+                options: null,
+                placeholder: null,
+                allowedTypes: null,
+                maxSize: null,
+                maxRating: (q as any).maxRating ?? null,
+                ratingLabel: (q as any).ratingLabel ?? null,
+                minValue: null,
+                maxValue: null,
+                minLabel: null,
+                maxLabel: null,
+              };
+            case 'linear_scale':
+              return {
+                ...baseQuestion,
+                options: null,
+                placeholder: null,
+                allowedTypes: null,
+                maxSize: null,
+                maxRating: null,
+                ratingLabel: null,
+                minValue: (q as any).minValue ?? null,
+                maxValue: (q as any).maxValue ?? null,
+                minLabel: (q as any).minLabel ?? null,
+                maxLabel: (q as any).maxLabel ?? null,
+              };
+            default:
+              return baseQuestion;
+          }
         });
-        await Question.bulkCreate(questionsToCreate as any, { transaction: t });
+        await db.Question.bulkCreate(questionsToCreate as any, { transaction: t });
       }
 
       if (data.allowedRoles) {
-        const roles = await Role.findAll({ where: { id: data.allowedRoles }, transaction: t });
+        const roles = await db.Role.findAll({ where: { id: data.allowedRoles }, transaction: t });
         await (survey as any).setAllowedRoles(roles, { transaction: t });
       }
     });
 
-    const result = await Survey.findByPk(survey.id, {
+    const result = await db.Survey.findByPk(survey.id, {
       include: [
-        { model: Question, as: 'questionItems' },
-        { model: Answer, as: 'answers' },
-        { model: Role, as: 'allowedRoles', through: { attributes: [] } },
+        { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+        { model: db.Role, as: 'allowedRoles', through: { attributes: [] } },
+        { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
+        { model: db.User, as: 'creator', attributes: ['id', 'name'] },
       ],
     });
 
@@ -296,7 +609,7 @@ export class SurveyController extends Controller {
   @SuccessResponse(204, 'No Content')
   @asyncCatch
   public async deleteSurvey(@Path() surveyId: string, @Request() request?: any): Promise<ServiceResponse<null>> {
-    const survey = await Survey.findByPk(surveyId);
+    const survey = await db.Survey.findByPk(surveyId);
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
 
     await survey.destroy();
@@ -314,15 +627,15 @@ export class SurveyController extends Controller {
     @Request() request: any,
     @Body()
     body: {
+      userId?: string | null; // optional explicit userId (else use auth or anonymous)
       answers: Array<{
         questionId: string;
-        userId?: string | null;
         answerText?: string | null;
         answerOptions?: string[] | null;
       }>;
     }
   ): Promise<ServiceResponse<any | null>> {
-    const survey = await Survey.findByPk(surveyId);
+    const survey = await db.Survey.findByPk(surveyId);
 
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
 
@@ -330,26 +643,34 @@ export class SurveyController extends Controller {
       return ServiceResponse.failure('Survey is not accepting responses', null, 403);
     }
 
-    const createdAnswers: any[] = [];
+    const effectiveUserId = body.userId ?? request?.user?.id ?? null;
+    let createdResponse: any = null;
     await sequelize.transaction(async (t) => {
+      createdResponse = await db.Response.create({
+        surveyId: survey.id,
+        userId: effectiveUserId,
+      }, { transaction: t });
+
       for (const a of body.answers || []) {
-        const created = await (survey as any).createAnswer({
-          userId: a.userId ?? request?.user?.id ?? null,
+        await db.Answer.create({
           surveyId: survey.id,
+          responseId: createdResponse.id,
           questionId: a.questionId,
           answerText: a.answerText ?? null,
           answerOptions: a.answerOptions ?? null,
         }, { transaction: t });
-        createdAnswers.push(created);
       }
     });
 
     await createSystemLog(request ?? null, 'responded_survey', survey?.dataValues?.title, surveyId, { answersCount: (body.answers || []).length });
 
-    const result = await Survey.findByPk(survey.id, {
+    const result = await db.Survey.findByPk(survey.id, {
       include: [
-        { model: Question, as: 'questionItems' },
-        { model: Answer, as: 'answers' },
+        { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+        { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
+        { model: db.User, as: 'creator', attributes: ['id', 'name'] },
       ],
     });
 

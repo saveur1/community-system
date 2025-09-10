@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import db from '../models/index';
 import sequelize, { initializeDatabase } from './database';
+import { hash } from 'bcrypt';
 
 dotenv.config();
 
@@ -1029,6 +1030,62 @@ const setupSystem = async () => {
     }
     console.log(`${createdRoles.length} roles created with permissions.`);
 
+    // Create super admin user and RICH organization
+    try {
+      const superEmail = 'bikorimanaxavier@gmail.com';
+      const superPlain = 'xavier';
+      let superUser = await db.User.findOne({ where: { email: superEmail } });
+      if (!superUser) {
+        const hashed = await hash(superPlain, 10);
+        superUser = await db.User.create({
+          name: 'Bikorimana Saveur',
+          email: superEmail,
+          password: hashed,
+          phone: '+250000000000',
+          status: 'active',
+          emailVerified: true,
+        });
+        console.log('✅ Created super admin user');
+      } else {
+        console.log('ℹ️ Super admin user already exists');
+      }
+
+      let richOrg = await db.Organization.findOne({ where: { name: 'RICH' } });
+      if (!richOrg) {
+        richOrg = await db.Organization.create({
+          name: 'RICH',
+          description: 'RICH organization created by system setup',
+          type: 'system_owner',
+          status: 'active',
+          ownerId: superUser.id,
+        } as any);
+        console.log('✅ Created RICH organization');
+      } else {
+        console.log('ℹ️ RICH organization already exists');
+      }
+
+      // ensure association
+      try {
+        await (richOrg as any).addUser(superUser);
+      } catch (e) {
+        // ignore if already associated
+      }
+
+      const superRole = await db.Role.findOne({ where: { name: 'super_admin' } });
+      if (superRole) {
+        try {
+          await (superUser as any).addRole(superRole);
+        } catch (e) {
+          // ignore if already assigned
+        }
+      }
+
+      console.log('🔐 Super admin setup complete');
+    } catch (err) {
+      console.error('❌ Failed to create super admin or RICH org:', err);
+      throw err;
+    }
+
     console.log('✅ System setup completed successfully!');
     return {
       roles: createdRoles.length,
@@ -1124,6 +1181,62 @@ const setupSystemPreserveData = async () => {
       }
     }
     console.log(`${createdRoles.length} roles processed with permissions.`);
+
+    // Ensure super admin user and RICH org exist (preserve flow)
+    try {
+      const superEmail = 'bikorimanaxavier@gmail.com';
+      const superPlain = 'xavier';
+      let superUser = await db.User.findOne({ where: { email: superEmail } });
+      if (!superUser) {
+        const hashed = await hash(superPlain, 10);
+        superUser = await db.User.create({
+          name: 'Super Admin',
+          email: superEmail,
+          password: hashed,
+          phone: '+250000000000',
+          status: 'active',
+          emailVerified: true,
+        } as any);
+        console.log('✅ Created super admin user');
+      } else {
+        console.log('ℹ️ Super admin user already exists');
+      }
+
+      let richOrg = await db.Organization.findOne({ where: { name: 'RICH' } });
+      if (!richOrg) {
+        richOrg = await db.Organization.create({
+          name: 'RICH',
+          description: 'RICH organization created by system setup',
+          type: 'system_owner',
+          status: 'active',
+          ownerId: superUser.id,
+        } as any);
+        console.log('✅ Created RICH organization');
+      } else {
+        console.log('ℹ️ RICH organization already exists');
+      }
+
+      // ensure association
+      try {
+        await (richOrg as any).addUser(superUser);
+      } catch (e) {
+        // ignore if already associated
+      }
+
+      const superRole = await db.Role.findOne({ where: { name: 'super_admin' } });
+      if (superRole) {
+        try {
+          await (superUser as any).addRole(superRole);
+        } catch (e) {
+          // ignore if already assigned
+        }
+      }
+
+      console.log('🔐 Super admin setup complete (preserve)');
+    } catch (err) {
+      console.error('❌ Failed to ensure super admin or RICH org in preserve flow:', err);
+      throw err;
+    }
 
     console.log('✅ System setup completed successfully!');
     return {

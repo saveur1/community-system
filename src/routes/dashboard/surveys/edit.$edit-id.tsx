@@ -5,10 +5,10 @@ import { useSurvey, useUpdateSurvey } from '@/hooks/useSurveys';
 import { useProjectsList } from '@/hooks/useProjects';
 import { useRolesList } from '@/hooks/useRoles';
 import SurveyInfoForm from '@/components/features/surveys/SurveyInfoForm';
-import QuestionsSection from '@/components/features/surveys/QuestionsSection';
-import SidebarQuestionPicker from '@/components/features/surveys/SidebarQuestionPicker';
+import QuestionsSection from '@/components/features/surveys/add-survey/QuestionsSection';
+import SidebarQuestionPicker from '@/components/features/surveys/add-survey/SidebarQuestionPicker';
 import SurveyFooterActions from '@/components/features/surveys/SurveyFooterActions';
-import { Question, SurveyDraft, ChoiceQuestion, TextQuestion } from '@/components/features/surveys/types';
+import { Question, SurveyDraft, Section } from '@/components/features/surveys/types';
 import { toast } from 'react-toastify';
 import Modal, { ModalFooter, ModalButton } from '@/components/ui/modal';
 import { FaX } from 'react-icons/fa6';
@@ -21,29 +21,46 @@ const LOCAL_STORAGE_KEY_PREFIX = 'edit-survey-';
 
 function mapFromServerToDraft(entity: any): SurveyDraft {
   const questions: Question[] = (entity?.questionItems || []).map((qi: any) => {
-    if (qi.type === 'single_choice' || qi.type === 'multiple_choice') {
-      return {
-        id: Date.now() + Math.random(),
-        type: qi.type,
-        title: qi.title,
-        description: qi.description,
-        required: qi.required,
-        options: qi.options ?? [],
-      } as ChoiceQuestion;
-    }
-    return {
+    const base: any = {
       id: Date.now() + Math.random(),
       type: qi.type,
       title: qi.title,
       description: qi.description,
       required: qi.required,
-      placeholder: qi.placeholder ?? '',
-    } as TextQuestion;
+      sectionId: qi.sectionId ?? undefined,
+      questionNumber: qi.questionNumber ?? undefined,
+    };
+    if (qi.type === 'single_choice' || qi.type === 'multiple_choice') {
+      return { ...base, options: qi.options ?? [] } as Question;
+    }
+    if (qi.type === 'text_input' || qi.type === 'textarea') {
+      return { ...base, placeholder: qi.placeholder ?? '' } as Question;
+    }
+    if (qi.type === 'file_upload') {
+      return { ...base, allowedTypes: qi.allowedTypes ?? [], maxSize: qi.maxSize ?? 10 } as Question;
+    }
+    if (qi.type === 'rating') {
+      return { ...base, maxRating: qi.maxRating ?? 5, ratingLabel: qi.ratingLabel ?? '' } as Question;
+    }
+    if (qi.type === 'linear_scale') {
+      return {
+        ...base,
+        minValue: qi.minValue ?? 1,
+        maxValue: qi.maxValue ?? 5,
+        minLabel: qi.minLabel ?? '',
+        maxLabel: qi.maxLabel ?? '',
+      } as Question;
+    }
+    return base as Question;
   });
 
   return {
     title: entity?.title ?? '',
-    status: entity?.status ?? undefined,
+    sections: (entity?.sections ?? []).map((s: any) => ({
+      id: s.id,
+      title: s.title,
+      description: s.description ?? '',
+    })),
     description: entity?.description ?? '',
     project: entity?.project ?? '',
     estimatedTime: entity?.estimatedTime ?? '',
@@ -57,28 +74,43 @@ function mapDraftToUpdatePayload(draft: SurveyDraft) {
     description: draft.description,
     project: draft.project,
     estimatedTime: draft.estimatedTime,
-    status: draft.status,
-    questions: draft.questions.map(q => {
-      if (q.type === 'single_choice' || q.type === 'multiple_choice') {
-        const c = q as ChoiceQuestion;
-        return {
-          id: 0,
-          type: c.type,
-          title: c.title,
-          description: c.description,
-          required: c.required,
-          options: c.options,
-        };
-      }
-      const t = q as TextQuestion;
-      return {
+    sections: (draft.sections ?? []).map((s: any) => ({ id: s.id, title: s.title, description: s.description ?? '' })),
+    questions: draft.questions.map((q: any) => {
+      const common = {
         id: 0,
-        type: t.type,
-        title: t.title,
-        description: t.description,
-        required: t.required,
-        placeholder: t.placeholder,
+        type: q.type,
+        title: q.title,
+        description: q.description ?? '',
+        required: !!q.required,
+        sectionId: q.sectionId,
+        questionNumber: q.questionNumber ?? null,
       };
+      switch (q.type) {
+        case 'single_choice':
+        case 'multiple_choice':
+          return { ...common, options: (q.options ?? []).map((o: any) => String(o)) };
+        case 'text_input':
+        case 'textarea':
+          return { ...common, placeholder: q.placeholder ?? '' };
+        case 'file_upload':
+          return {
+            ...common,
+            allowedTypes: Array.isArray(q.allowedTypes) ? q.allowedTypes.map((t: any) => String(t)) : [],
+            maxSize: typeof q.maxSize === 'number' ? q.maxSize : 10,
+          };
+        case 'rating':
+          return { ...common, maxRating: typeof q.maxRating === 'number' ? q.maxRating : 5, ratingLabel: q.ratingLabel ?? '' };
+        case 'linear_scale':
+          return {
+            ...common,
+            minValue: typeof q.minValue === 'number' ? q.minValue : 1,
+            maxValue: typeof q.maxValue === 'number' ? q.maxValue : 5,
+            minLabel: q.minLabel ?? '',
+            maxLabel: q.maxLabel ?? '',
+          };
+        default:
+          return common;
+      }
     }),
   };
 }
@@ -144,9 +176,13 @@ function EditSurveyComponent(): JSX.Element {
     description: '',
     project: '',
     estimatedTime: '',
-    status: undefined,
+    sections: [],
     questions: [],
   });
+
+  // sections state (mirrors create page)
+  const [sections, setSections] = useState<Section[]>([]);
+  const [currentSectionId, setCurrentSectionId] = useState<string>('');
 
   // hydrate from server
   useEffect(() => {
@@ -155,7 +191,10 @@ function EditSurveyComponent(): JSX.Element {
       const saved = localStorage.getItem(key);
       if (saved) {
         try {
-          setSurvey(JSON.parse(saved));
+          const savedDraft: SurveyDraft = JSON.parse(saved);
+          setSurvey(savedDraft);
+          setSections(savedDraft.sections ?? []);
+          if ((savedDraft.sections ?? []).length > 0) setCurrentSectionId(savedDraft.sections[0].id);
           // attempt to prefill allowed roles from server if present
           const serverAllowed = (data.result as any)?.allowedRoles;
           if (Array.isArray(serverAllowed) && serverAllowed.length > 0) {
@@ -164,7 +203,11 @@ function EditSurveyComponent(): JSX.Element {
           return;
         } catch {}
       }
-      setSurvey(mapFromServerToDraft(data.result));
+      const draft = mapFromServerToDraft(data.result);
+      setSurvey(draft);
+      const serverSections: Section[] = (data.result.sections ?? []).map((s: any) => ({ id: s.id, title: s.title }));
+      setSections(serverSections);
+      if (serverSections.length > 0) setCurrentSectionId(serverSections[0].id);
       // also prefill allowedRoles if present on server result
       const serverAllowed = (data.result as any)?.allowedRoles;
       if (Array.isArray(serverAllowed) && serverAllowed.length > 0) {
@@ -181,24 +224,70 @@ function EditSurveyComponent(): JSX.Element {
     }
   }, [survey, surveyId]);
 
+  // keep survey.sections in sync with sections state
+  useEffect(() => {
+    setSurvey(prev => ({ ...prev, sections }));
+  }, [sections]);
+
   // question handlers (same as create)
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const addQuestion = (type: Question['type']): void => {
-    const newQuestion: Question = {
+    let base: any = {
       id: Date.now(),
       type,
       title: '',
       description: '',
       required: false,
-      ...(type === 'single_choice' || type === 'multiple_choice' ? { options: ['', ''] } : { placeholder: '' }),
-    } as any;
+      sectionId: currentSectionId,
+      questionNumber: 1,
+    };
+    switch (type) {
+      case 'single_choice':
+      case 'multiple_choice':
+        base = { ...base, options: ['', ''] };
+        break;
+      case 'text_input':
+      case 'textarea':
+        base = { ...base, placeholder: '' };
+        break;
+      case 'file_upload':
+        base = { ...base, allowedTypes: [], maxSize: 10 };
+        break;
+      case 'rating':
+        base = { ...base, maxRating: 5, ratingLabel: '' };
+        break;
+      case 'linear_scale':
+        base = { ...base, minValue: 1, maxValue: 5, minLabel: '', maxLabel: '' };
+        break;
+      default:
+        break;
+    }
+    const newQuestion: Question = base as any;
     setSurvey(prev => ({ ...prev, questions: [...prev.questions, newQuestion] }));
   };
 
-  const updateQuestion = <K extends keyof Question>(questionId: number, field: K, value: Question[K]): void => {
+  // Section handlers
+  const addSection = (): void => {
+    const newSectionNumber = sections.length + 1;
+    const newSection: Section = { id: String(Date.now()), title: `Section ${newSectionNumber}` };
+    setSections(prev => [...prev, newSection]);
+    setCurrentSectionId(newSection.id);
+  };
+  const updateSectionTitle = (sectionId: string, title: string): void => {
+    setSections(prev => prev.map(s => (s.id === sectionId ? { ...s, title } : s)));
+  };
+  const deleteSection = (sectionId: string): void => {
+    if (sections.length <= 1) return;
+    setSurvey(prev => ({ ...prev, questions: prev.questions.filter(q => q.sectionId !== sectionId) }));
+    const remaining = sections.filter(s => s.id !== sectionId);
+    setSections(remaining);
+    if (remaining[0]) setCurrentSectionId(remaining[0].id);
+  };
+
+  const updateQuestion = (questionId: number, field: string, value: any): void => {
     setSurvey(prev => ({
       ...prev,
-      questions: prev.questions.map(q => (q.id === questionId ? { ...q, [field]: value } : q)),
+      questions: prev.questions.map(q => (q.id === questionId ? ({ ...(q as any), [field]: value } as any) : q)),
     }));
   };
 
@@ -218,7 +307,8 @@ function EditSurveyComponent(): JSX.Element {
       ...prev,
       questions: prev.questions.map(q => {
         if (q.id === questionId && (q.type === 'single_choice' || q.type === 'multiple_choice')) {
-          return { ...(q as ChoiceQuestion), options: ([...(q as ChoiceQuestion).options, '']) } as Question;
+          const options = Array.isArray((q as any).options) ? ([...((q as any).options), '']) : [''];
+          return { ...(q as any), options } as Question;
         }
         return q;
       }),
@@ -230,8 +320,8 @@ function EditSurveyComponent(): JSX.Element {
       ...prev,
       questions: prev.questions.map(q => {
         if (q.id === questionId && (q.type === 'single_choice' || q.type === 'multiple_choice')) {
-          const options = (q as ChoiceQuestion).options.map((opt, idx) => (idx === optionIndex ? value : opt));
-          return { ...(q as ChoiceQuestion), options } as Question;
+          const options = (Array.isArray((q as any).options) ? (q as any).options : []).map((opt: string, idx: number) => (idx === optionIndex ? value : opt));
+          return { ...(q as any), options } as Question;
         }
         return q;
       }),
@@ -243,8 +333,8 @@ function EditSurveyComponent(): JSX.Element {
       ...prev,
       questions: prev.questions.map(q => {
         if (q.id === questionId && (q.type === 'single_choice' || q.type === 'multiple_choice')) {
-          const options = (q as ChoiceQuestion).options.filter((_, idx) => idx !== optionIndex);
-          return { ...(q as ChoiceQuestion), options } as Question;
+          const options = (Array.isArray((q as any).options) ? (q as any).options : []).filter((_: string, idx: number) => idx !== optionIndex);
+          return { ...(q as any), options } as Question;
         }
         return q;
       }),
@@ -273,7 +363,7 @@ function EditSurveyComponent(): JSX.Element {
     if (survey.questions.length === 0) { toast.error('Please add at least one question.'); return; }
     const hasEmptyTitle = survey.questions.some(q => !q.title.trim());
     if (hasEmptyTitle) { toast.error('All questions must have a title.'); return; }
-    const hasEmptyOption = survey.questions.some(q => (q.type === 'single_choice' || q.type === 'multiple_choice') && (q as ChoiceQuestion).options.some(opt => !opt.trim()));
+    const hasEmptyOption = survey.questions.some(q => (q.type === 'single_choice' || q.type === 'multiple_choice') && (Array.isArray((q as any).options) ? (q as any).options : []).some((opt: string) => !String(opt).trim()));
     if (hasEmptyOption) { toast.error('All options in choice questions must have a value.'); return; }
 
     const payload = mapDraftToUpdatePayload(survey);
@@ -307,6 +397,18 @@ function EditSurveyComponent(): JSX.Element {
             onChange={(fields) => setSurvey(prev => ({ ...prev, ...fields }))}
             visibleProjects={visibleProjects}
             moreProjects={moreProjects}
+            startDate={null}
+            endDate={null}
+            startHour={"00"}
+            startMinute={"00"}
+            endHour={"00"}
+            endMinute={"00"}
+            selectedRoles={selectedRoles}
+            onStartPickerOpen={() => {}}
+            onEndPickerOpen={() => {}}
+            onRolesModalOpen={() => setRolesModalOpen(true)}
+            onRemoveRole={(id: string) => setSelectedRoles(prev => prev.filter(r => r !== id))}
+            roleLabelById={(id: string) => roleLabelById(id)}
           />
 
           {/* Roles input (click to open modal) */}
@@ -340,6 +442,9 @@ function EditSurveyComponent(): JSX.Element {
 
           <QuestionsSection
             questions={survey.questions}
+            sections={sections}
+            currentSectionId={currentSectionId}
+            onUpdateSection={updateSectionTitle}
             onUpdate={updateQuestion}
             onDelete={deleteQuestion}
             onDuplicate={duplicateQuestion}
@@ -415,13 +520,11 @@ function EditSurveyComponent(): JSX.Element {
         <div className="w-80 flex-shrink-0">
           <div className="sticky top-20">
             <SidebarQuestionPicker
-              types={[
-                { id: 'single_choice', label: 'Single Choice', icon: '◉' },
-                { id: 'multiple_choice', label: 'Multiple Choice', icon: '☑' },
-                { id: 'text_input', label: 'Text Input', icon: '📝' },
-                { id: 'textarea', label: 'Long Text', icon: '📄' }
-              ]}
               onAdd={addQuestion}
+              sections={sections}
+              currentSectionId={currentSectionId}
+              onSectionChange={setCurrentSectionId}
+              onAddSection={addSection}
             />
           </div>
         </div>

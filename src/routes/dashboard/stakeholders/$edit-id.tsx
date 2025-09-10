@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import React, { useEffect, useState, useMemo } from 'react';
-import { FaSave, FaUpload, FaTrash } from 'react-icons/fa';
+import { FaUpload, FaTrash } from 'react-icons/fa';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { useUpdateOrganization, useOrganization } from '@/hooks/useOrganizations';
 import { uploadToCloudinary } from '@/utility/logicFunctions';

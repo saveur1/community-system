@@ -216,7 +216,8 @@ const models: TsoaRoute.Models = {
             "startAt": {"dataType":"string","required":true},
             "endAt": {"dataType":"string","required":true},
             "estimatedTime": {"dataType":"string","required":true},
-            "questions": {"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"options":{"dataType":"array","array":{"dataType":"string"},"required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["single_choice"]},{"dataType":"enum","enums":["multiple_choice"]}],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"placeholder":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text_input"]},{"dataType":"enum","enums":["textarea"]}],"required":true},"id":{"dataType":"double","required":true}}}]},"required":true},
+            "sections": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"description":{"dataType":"string"},"title":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"required":true},
+            "questions": {"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"options":{"dataType":"array","array":{"dataType":"string"},"required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["single_choice"]},{"dataType":"enum","enums":["multiple_choice"]}],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"placeholder":{"dataType":"string","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text_input"]},{"dataType":"enum","enums":["textarea"]}],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"maxSize":{"dataType":"double","required":true},"allowedTypes":{"dataType":"array","array":{"dataType":"string"},"required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["file_upload"],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"ratingLabel":{"dataType":"string"},"maxRating":{"dataType":"double","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["rating"],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"maxLabel":{"dataType":"string"},"minLabel":{"dataType":"string"},"maxValue":{"dataType":"double","required":true},"minValue":{"dataType":"double","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["linear_scale"],"required":true},"id":{"dataType":"double","required":true}}}]},"required":true},
             "allowedRoles": {"dataType":"array","array":{"dataType":"string"}},
         },
         "additionalProperties": false,
@@ -232,7 +233,8 @@ const models: TsoaRoute.Models = {
             "startAt": {"dataType":"string"},
             "endAt": {"dataType":"string"},
             "estimatedTime": {"dataType":"string"},
-            "questions": {"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"options":{"dataType":"array","array":{"dataType":"string"},"required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["single_choice"]},{"dataType":"enum","enums":["multiple_choice"]}],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"placeholder":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text_input"]},{"dataType":"enum","enums":["textarea"]}],"required":true},"id":{"dataType":"double","required":true}}}]}},
+            "sections": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"description":{"dataType":"string"},"title":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}}},
+            "questions": {"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"options":{"dataType":"array","array":{"dataType":"string"},"required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["single_choice"]},{"dataType":"enum","enums":["multiple_choice"]}],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"placeholder":{"dataType":"string","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text_input"]},{"dataType":"enum","enums":["textarea"]}],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"maxSize":{"dataType":"double","required":true},"allowedTypes":{"dataType":"array","array":{"dataType":"string"},"required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["file_upload"],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"ratingLabel":{"dataType":"string"},"maxRating":{"dataType":"double","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["rating"],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"maxLabel":{"dataType":"string"},"minLabel":{"dataType":"string"},"maxValue":{"dataType":"double","required":true},"minValue":{"dataType":"double","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["linear_scale"],"required":true},"id":{"dataType":"double","required":true}}}]}},
             "allowedRoles": {"dataType":"array","array":{"dataType":"string"}},
             "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["paused"]},{"dataType":"enum","enums":["archived"]}]},
         },
@@ -991,7 +993,7 @@ export function RegisterRoutes(app: Router) {
         const argsSurveyController_submitAnswers: Record<string, TsoaRoute.ParameterSchema> = {
                 surveyId: {"in":"path","name":"surveyId","required":true,"dataType":"string"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"answers":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"answerOptions":{"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}]},"answerText":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"userId":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"questionId":{"dataType":"string","required":true}}},"required":true}}},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"answers":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"answerOptions":{"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}]},"answerText":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"questionId":{"dataType":"string","required":true}}},"required":true},"userId":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]}}},
         };
         app.post('/api/surveys/:surveyId/answers',
             authenticateMiddleware([{"jwt":["survey:respond"]}]),
@@ -1854,6 +1856,7 @@ export function RegisterRoutes(app: Router) {
                 feedbackType: {"in":"query","name":"feedbackType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["positive"]},{"dataType":"enum","enums":["negative"]},{"dataType":"enum","enums":["suggestion"]},{"dataType":"enum","enums":["concern"]}]},
                 projectId: {"in":"query","name":"projectId","dataType":"string"},
                 owner: {"in":"query","name":"owner","dataType":"union","subSchemas":[{"dataType":"enum","enums":["me"]},{"dataType":"enum","enums":["other"]}]},
+                org: {"in":"query","name":"org","dataType":"union","subSchemas":[{"dataType":"enum","enums":["mine"]},{"dataType":"enum","enums":["others"]},{"dataType":"enum","enums":["all"]}]},
                 startDate: {"in":"query","name":"startDate","dataType":"string"},
                 endDate: {"in":"query","name":"endDate","dataType":"string"},
         };
@@ -1874,42 +1877,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getFeedback',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsFeedbackController_getUserFeedback: Record<string, TsoaRoute.ParameterSchema> = {
-                req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                page: {"default":1,"in":"query","name":"page","dataType":"double"},
-                limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
-                status: {"in":"query","name":"status","dataType":"union","subSchemas":[{"dataType":"enum","enums":["submitted"]},{"dataType":"enum","enums":["Acknowledged"]},{"dataType":"enum","enums":["Resolved"]},{"dataType":"enum","enums":["Rejected"]}]},
-                startDate: {"in":"query","name":"startDate","dataType":"string"},
-                endDate: {"in":"query","name":"endDate","dataType":"string"},
-        };
-        app.get('/api/feedback/user',
-            authenticateMiddleware([{"jwt":["feedback:personal:read"]}]),
-            ...(fetchMiddlewares<RequestHandler>(FeedbackController)),
-            ...(fetchMiddlewares<RequestHandler>(FeedbackController.prototype.getUserFeedback)),
-
-            async function FeedbackController_getUserFeedback(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsFeedbackController_getUserFeedback, request, response });
-
-                const controller = new FeedbackController();
-
-              await templateService.apiHandler({
-                methodName: 'getUserFeedback',
                 controller,
                 response,
                 next,

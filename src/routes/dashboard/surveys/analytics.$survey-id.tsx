@@ -2,14 +2,16 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { useSurvey } from '@/hooks/useSurveys';
-// removed top-level import of ReactApexChart to avoid SSR error
-import { FaDownload, FaShareAlt, FaChartLine } from 'react-icons/fa';
+import { FaDownload, FaShareAlt } from 'react-icons/fa';
 
 /*
-  Survey Analytics Page (design-only)
+  Survey Analytics Page (design-only, AI features removed)
   - Uses useSurvey to show survey title
   - Contains placeholders and sample charts using react-apexcharts
   - Replace sampleSeries / sampleOptions with real data when available
+  - Removed AI-dependent features (sentiment, word cloud, auto-summary)
+  - Removed Quality & Insights column
+  - Added non-AI metrics: unique respondents, response count table, response time breakdown
 */
 
 const KPICard: React.FC<{ title: string; value: string; hint?: string }> = ({ title, value, hint }) => (
@@ -27,17 +29,20 @@ function formatPct(n: number) {
 const AnalyticsPage: React.FC = () => {
   const params = Route.useParams();
   const surveyId = String(params['survey-id'] ?? '');
-  const navigate = useNavigate();
 
-  // fetch survey metadata (title, questions) - integration point
+  // Fetch survey metadata (title, questions) - integration point
   const { data: surveyResp, isLoading, isError } = useSurvey(surveyId, true);
   const survey = surveyResp?.result;
 
   // Placeholder sample metrics (replace with real data)
   const [metrics, setMetrics] = useState({
     totalResponses: 1245,
+    uniqueRespondents: 1100, // Added unique respondents
     completionRate: 0.75,
     avgTimeMins: 6.4,
+    minTimeMins: 2.5, // Added for response time breakdown
+    maxTimeMins: 15.0, // Added for response time breakdown
+    medianTimeMins: 6.0, // Added for response time breakdown
     dropOff: [
       { step: 'Q1', rate: 0.02 },
       { step: 'Q2', rate: 0.06 },
@@ -46,8 +51,8 @@ const AnalyticsPage: React.FC = () => {
   });
 
   useEffect(() => {
-    // TODO: load analytics for surveyId (API) and setMetrics(...)
-    // kept as placeholders for design
+    // TODO: Load analytics for surveyId (API) and setMetrics(...)
+    // Kept as placeholders for design
   }, [surveyId]);
 
   // Sample series/options for line / bar charts
@@ -83,15 +88,6 @@ const AnalyticsPage: React.FC = () => {
     colors: ['#1c89ba'],
   }), []);
 
-  // Word cloud placeholder (simple list)
-  const sampleWords = useMemo(() => [
-    { word: 'access', count: 42 },
-    { word: 'support', count: 36 },
-    { word: 'cost', count: 28 },
-    { word: 'quality', count: 21 },
-    { word: 'delay', count: 18 },
-  ], []);
-
   // Dynamically import react-apexcharts on client only
   const [ChartComponent, setChartComponent] = useState<any | null>(null);
   useEffect(() => {
@@ -102,7 +98,7 @@ const AnalyticsPage: React.FC = () => {
         if (mounted) setChartComponent(() => mod.default);
       })
       .catch(() => {
-        // ignore; charts will render placeholders
+        // Ignore; charts will render placeholders
       });
     return () => { mounted = false; };
   }, []);
@@ -123,8 +119,8 @@ const AnalyticsPage: React.FC = () => {
         {/* Header actions */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Survey analytics</h1>
-            <p className="text-sm text-gray-600 mt-1">Overview and detailed insights for this survey. (Design-only page)</p>
+            <h1 className="text-2xl font-bold text-gray-900">Survey Analytics</h1>
+            <p className="text-sm text-gray-600 mt-1">Overview and detailed metrics for this survey.</p>
           </div>
           <div className="flex items-center gap-3">
             <button className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm" onClick={() => { /* TODO: export summary */ }}>
@@ -138,17 +134,36 @@ const AnalyticsPage: React.FC = () => {
 
         {/* Response Overview KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <KPICard title="Total responses" value={String(metrics.totalResponses)} hint="Submitted responses" />
-          <KPICard title="Completion rate" value={formatPct(metrics.completionRate)} hint="Share of starters who finished" />
-          <KPICard title="Average time" value={`${metrics.avgTimeMins.toFixed(1)} min`} hint="Average completion time" />
-          <KPICard title="Drop-off (largest step)" value={`${Math.max(...metrics.dropOff.map(d => d.rate)) * 100}%`} hint="Where most participants left" />
+          <KPICard title="Total Responses" value={String(metrics.totalResponses)} hint="Submitted responses" />
+          <KPICard title="Unique Respondents" value={String(metrics.uniqueRespondents)} hint="Distinct users" />
+          <KPICard title="Completion Rate" value={formatPct(metrics.completionRate)} hint="Share of starters who finished" />
+          <KPICard title="Average Time" value={`${metrics.avgTimeMins.toFixed(1)} min`} hint="Average completion time" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Trends & response overview */}
-          <div className="col-span-2 bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
+        {/* Response Time Breakdown */}
+        <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm mb-6">
+          <h3 className="font-semibold text-gray-800 mb-3">Response Time Breakdown</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="p-3 border border-gray-300 rounded">
+              <div className="text-xs text-gray-500">Minimum Time</div>
+              <div className="text-lg font-semibold">{metrics.minTimeMins.toFixed(1)} min</div>
+            </div>
+            <div className="p-3 border border-gray-300 rounded">
+              <div className="text-xs text-gray-500">Median Time</div>
+              <div className="text-lg font-semibold">{metrics.medianTimeMins.toFixed(1)} min</div>
+            </div>
+            <div className="p-3 border border-gray-300 rounded">
+              <div className="text-xs text-gray-500">Maximum Time</div>
+              <div className="text-lg font-semibold">{metrics.maxTimeMins.toFixed(1)} min</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Trends & Response Overview */}
+          <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-800">Response trends</h3>
+              <h3 className="font-semibold text-gray-800">Response Trends</h3>
               <div className="text-sm text-gray-500">Daily / Weekly submissions</div>
             </div>
             <div>
@@ -162,15 +177,15 @@ const AnalyticsPage: React.FC = () => {
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="p-3 border border-gray-300 rounded">
-                <div className="text-xs text-gray-500">Completion over time</div>
+                <div className="text-xs text-gray-500">Completion Over Time</div>
                 <div className="text-lg font-semibold">75%</div>
               </div>
               <div className="p-3 border border-gray-300 rounded">
-                <div className="text-xs text-gray-500">Avg time (mins)</div>
+                <div className="text-xs text-gray-500">Avg Time (mins)</div>
                 <div className="text-lg font-semibold">{metrics.avgTimeMins.toFixed(1)}</div>
               </div>
               <div className="p-3 border border-gray-300 rounded">
-                <div className="text-xs text-gray-500">Peak hour</div>
+                <div className="text-xs text-gray-500">Peak Hour</div>
                 <div className="text-lg font-semibold">14:00 - 15:00</div>
               </div>
             </div>
@@ -180,7 +195,7 @@ const AnalyticsPage: React.FC = () => {
           <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-gray-800">Engagement & Demographics</h3>
-              <div className="text-sm text-gray-500">Devices & sources</div>
+              <div className="text-sm text-gray-500">Devices & Sources</div>
             </div>
 
             <div className="mb-4">
@@ -193,93 +208,68 @@ const AnalyticsPage: React.FC = () => {
             </div>
 
             <div className="text-sm text-gray-600">
-              <div className="mb-2"><strong>Top sources:</strong> Link (56%), Email (30%), App (14%)</div>
-              <div><strong>Peak day:</strong> Wednesday</div>
+              <div className="mb-2"><strong>Top Sources:</strong> Link (56%), Email (30%), App (14%)</div>
+              <div><strong>Peak Day:</strong> Wednesday</div>
             </div>
           </div>
         </div>
 
-        {/* Per-question analytics */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="col-span-2 bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
-            <h3 className="font-semibold text-gray-800 mb-3">Per-question analytics</h3>
+        {/* Per-Question Analytics */}
+        <div className="mt-6 bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
+          <h3 className="font-semibold text-gray-800 mb-3">Per-Question Analytics</h3>
 
-            {/* For each question - design placeholder */}
-            {(survey?.questionItems ?? []).length === 0 ? (
-              <div className="text-sm text-gray-500">No question items available (design placeholder).</div>
-            ) : (
-              (survey!.questionItems || []).map((q: any, idx: number) => (
-                <div key={q.id} className="mb-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{idx + 1}. {q.title}</div>
-                      <div className="text-xs text-gray-500">{q.type}</div>
-                    </div>
-                    <div className="text-xs text-gray-400">Respondents: 1,234</div>
-                  </div>
+          {/* Response Count Table */}
+          <div className="mb-6">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Response Counts per Question</h4>
+            <table className="w-full text-sm text-gray-600">
+              <thead>
+                <tr className="border-b border-gray-300">
+                  <th className="text-left py-2">Question</th>
+                  <th className="text-right py-2">Responses</th>
+                  <th className="text-right py-2">Skip Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(survey?.questionItems || []).map((q: any, idx: number) => (
+                  <tr key={q.id} className="border-b border-gray-200">
+                    <td className="py-2">{idx + 1}. {q.title}</td>
+                    <td className="text-right py-2">1,234</td>
+                    <td className="text-right py-2">{formatPct(0.12)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-                  <div className="mt-3">
-                    {q.type === 'single_choice' || q.type === 'multiple_choice' ? (
-                      ChartComponent ? (
-                        // @ts-ignore
-                        <ChartComponent options={sampleQuestionBarOptions} series={sampleQuestionBarSeries as any} type="bar" height={200} />
-                      ) : (
-                        <div className="h-[200px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded">Loading chart...</div>
-                      )
-                    ) : q.type === 'text_input' || q.type === 'textarea' ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="border border-gray-300 rounded p-4">
-                          <div className="text-sm text-gray-600 mb-2">Word cloud (placeholder)</div>
-                          <div className="flex flex-wrap gap-2">
-                            {sampleWords.map(w => (
-                              <span key={w.word} className="text-xs bg-gray-100 px-2 py-1 rounded">{w.word} ({w.count})</span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="border border-gray-300 rounded p-4">
-                          <div className="text-sm text-gray-600 mb-2">Sentiment (placeholder)</div>
-                          <div className="text-lg font-semibold">Positive: 62% • Neutral: 24% • Negative: 14%</div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-500">Question type not visualized yet.</div>
-                    )}
+          {/* For each question - design placeholder */}
+          {(survey?.questionItems ?? []).length === 0 ? (
+            <div className="text-sm text-gray-500">No question items available (design placeholder).</div>
+          ) : (
+            (survey!.questionItems || []).map((q: any, idx: number) => (
+              <div key={q.id} className="mb-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{idx + 1}. {q.title}</div>
+                    <div className="text-xs text-gray-500">{q.type}</div>
                   </div>
+                  <div className="text-xs text-gray-400">Respondents: 1,234</div>
                 </div>
-              ))
-            )}
-          </div>
 
-          {/* Quality & Insights column */}
-          <div className="bg-white border border-gray-300 rounded-lg h-fit p-4 shadow-sm">
-            <h3 className="font-semibold text-gray-800 mb-3">Quality & Insights</h3>
-
-            <div className="mb-4">
-              <div className="text-sm text-gray-500">Skipped questions</div>
-              <div className="text-lg font-semibold mt-2">12% skipped at least one question</div>
-            </div>
-
-            <div className="mb-4">
-              <div className="text-sm text-gray-500">Drop-off highlights</div>
-              <ul className="text-sm mt-2 space-y-1">
-                {metrics.dropOff.map(d => <li key={d.step} className="text-gray-700">{d.step}: {(d.rate * 100).toFixed(1)}% drop-off</li>)}
-              </ul>
-            </div>
-
-            <div className="mb-4">
-              <div className="text-sm text-gray-500">Auto-generated summary</div>
-              <div className="mt-2 text-sm text-gray-700">
-                Most respondents completed the survey and rated the new feature positively. Common concerns: cost and accessibility in rural locations.
-                {/* TODO: replace with server-side or client-side summary generator */}
+                <div className="mt-3">
+                  {q.type === 'single_choice' || q.type === 'multiple_choice' ? (
+                    ChartComponent ? (
+                      // @ts-ignore
+                      <ChartComponent options={sampleQuestionBarOptions} series={sampleQuestionBarSeries as any} type="bar" height={200} />
+                    ) : (
+                      <div className="h-[200px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded">Loading chart...</div>
+                    )
+                  ) : (
+                    <div className="text-sm text-gray-500">Text responses not visualized (raw data available on export).</div>
+                  )}
+                </div>
               </div>
-            </div>
-
-            <div className="mt-4">
-              <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-md">
-                <FaChartLine /> Download full analytics
-              </button>
-            </div>
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>

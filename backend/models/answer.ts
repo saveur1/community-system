@@ -3,11 +3,11 @@ import sequelize from '../config/database';
 
 export interface AnswerAttributes {
   id: string;
-  surveyId: string;
+  surveyId: string; // kept for easier querying, but can be nullable later
+  responseId: string; // FK to Response.id
   questionId: string; // FK to Question.id
   answerText: string | null; // for text/textarea
   answerOptions: string[] | null; // for choice types
-  userId?: string; // Optional FK to User.id
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -20,10 +20,10 @@ export type AnswerCreationAttributes = Optional<
 class Answer extends Model<AnswerAttributes, AnswerCreationAttributes> implements AnswerAttributes {
   declare id: string;
   declare surveyId: string;
+  declare responseId: string;
   declare questionId: string;
   declare answerText: string | null;
   declare answerOptions: string[] | null;
-  declare userId?: string;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -40,13 +40,13 @@ Answer.init(
       type: DataTypes.UUID,
       allowNull: false,
     },
-    questionId: {
+    responseId: {
       type: DataTypes.UUID,
       allowNull: false,
     },
-    userId: {
+    questionId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
     },
     answerText: {
       type: DataTypes.TEXT,

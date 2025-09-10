@@ -22,7 +22,7 @@ export default function SurveyFooterActions({ questionsCount, estimatedTime, isS
           </button>
           <button
             onClick={onSave}
-            className="px-6 py-2 bg-primary text-white rounded-md hover:bg-blue-600 font-medium flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark font-medium flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
             disabled={isSaving}
           >
             {isSaving ? (

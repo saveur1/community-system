@@ -78,6 +78,7 @@ const NotificationsDropdown = () => {
                 </button>
             }
             position="bottom-right"
+            className="max-sm:hidden"
             dropdownClassName="w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black/10 overflow-hidden"
             closeOnClick={false}
         >

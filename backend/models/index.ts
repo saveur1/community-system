@@ -9,11 +9,13 @@ import Organization from './organization';
 import Survey from './survey';
 import Question from './question';
 import Answer from './answer';
+import Section from './section';
 import Feedback from './feedback';
 import CommunitySession from './community-session';
 import Comment from './comment';
 import SystemLog from './systemLog';
 import Announcement from './announcement';
+import Response from './response';
 
 // Centralized associations to avoid circular imports
 User.belongsToMany(Role, {
@@ -91,6 +93,17 @@ User.hasMany(Organization, {
 });
 
 // Survey associations (new)
+Survey.hasMany(Section, {
+  as: 'sections',
+  foreignKey: 'surveyId',
+  onDelete: 'CASCADE',
+  hooks: true,
+});
+Section.belongsTo(Survey, {
+  as: 'survey',
+  foreignKey: 'surveyId',
+});
+
 Survey.hasMany(Question, {
   as: 'questionItems',
   foreignKey: 'surveyId',
@@ -102,15 +115,50 @@ Question.belongsTo(Survey, {
   foreignKey: 'surveyId',
 });
 
-Survey.hasMany(Answer, {
-  as: 'answers',
+// Section-Question associations
+Section.hasMany(Question, {
+  as: 'questions',
+  foreignKey: 'sectionId',
+  onDelete: 'CASCADE',
+  hooks: true,
+});
+Question.belongsTo(Section, {
+  as: 'section',
+  foreignKey: 'sectionId',
+});
+
+// Responses: one response per submission
+Survey.hasMany(Response, {
+  as: 'responses',
   foreignKey: 'surveyId',
   onDelete: 'CASCADE',
   hooks: true,
 });
-Answer.belongsTo(Survey, {
+Response.belongsTo(Survey, {
   as: 'survey',
   foreignKey: 'surveyId',
+});
+
+// Response belongs to a User (optional)
+Response.belongsTo(User, {
+  as: 'user',
+  foreignKey: 'userId',
+});
+User.hasMany(Response, {
+  as: 'responses',
+  foreignKey: 'userId',
+});
+
+// Answers now belong to a Response and a Question
+Response.hasMany(Answer, {
+  as: 'answers',
+  foreignKey: 'responseId',
+  onDelete: 'CASCADE',
+  hooks: true,
+});
+Answer.belongsTo(Response, {
+  as: 'response',
+  foreignKey: 'responseId',
 });
 
 // Survey <-> Role many-to-many for allowed roles
@@ -127,7 +175,7 @@ Role.belongsToMany(Survey, {
   otherKey: 'surveyId',
 });
 
-// Survey -> User (creator) association
+//SURVEY ASSOCIATIONS
 Survey.belongsTo(User, {
   as: 'creator',
   foreignKey: 'createdBy',
@@ -137,7 +185,7 @@ User.hasMany(Survey, {
   foreignKey: 'createdBy',
 });
 
-// Feedback associations
+//FEEDBACK ASSOCIATIONS
 Feedback.belongsToMany(Document, {
   through: 'feedback_documents',
   as: 'documents',
@@ -151,7 +199,7 @@ Document.belongsToMany(Feedback, {
   otherKey: 'feedbackId',
 });
 
-// User-Feedback Association
+//USER FEEDBACK ASSOCIATIONS
 User.hasMany(Feedback, {
   as: 'feedback',
   foreignKey: 'userId',
@@ -161,7 +209,7 @@ Feedback.belongsTo(User, {
   foreignKey: 'userId',
 });
 
-// Project-Feedback Association
+//PROJECT FEEDBACK ASSOCIATIONS
 Project.hasMany(Feedback, {
   as: 'feedback',
   foreignKey: 'projectId',
@@ -201,7 +249,7 @@ Comment.belongsTo(CommunitySession, {
   foreignKey: 'communitySessionId',
 });
 
-// CommunitySession <-> Role many-to-many association for access control
+//COMMUNITY SESSION ASSOCIATIONS
 CommunitySession.belongsToMany(Role, {
   through: 'community_session_roles',
   as: 'roles',
@@ -224,7 +272,7 @@ User.hasMany(Comment, {
   foreignKey: 'userId',
 });
 
-// New: SystemLog associations
+//SYSTEM LOG ASSOCIATIONS
 User.hasMany(SystemLog, {
   as: 'systemLogs',
   foreignKey: 'userId',
@@ -244,7 +292,7 @@ User.hasMany(Answer, {
   foreignKey: 'userId',
 });
 
-// New: Announcement associations
+//ANNOUNCEMENT ASSOCIATIONS
 Announcement.belongsToMany(Role, {
   through: 'announcement_roles',
   as: 'allowedRoles',
@@ -267,15 +315,21 @@ User.hasMany(Announcement, {
   foreignKey: 'createdBy',
 });
 
-// Associate Organization with other models for tracking
+//ORGANIZATION ASSOCIATIONS
 Organization.hasMany(Project, { as: 'organizationProjects', foreignKey: 'organizationId' });
 Project.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
 
 Organization.hasMany(Document, { as: 'organizationDocuments', foreignKey: 'organizationId' });
 Document.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
 
-Organization.hasMany(Survey, { as: 'organizationSurveys', foreignKey: 'organizationId' });
-Survey.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
+Survey.belongsTo(Organization, {
+  as: 'organization',
+  foreignKey: 'organizationId',
+});
+Organization.hasMany(Survey, {
+  as: 'organizationSurveys',
+  foreignKey: 'organizationId',
+});
 
 Organization.hasMany(Question, { as: 'organizationQuestions', foreignKey: 'organizationId' });
 Question.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
@@ -298,6 +352,6 @@ Announcement.belongsTo(Organization, { as: 'organization', foreignKey: 'organiza
 Role.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
 Organization.hasMany(Role, { as: 'organizationRoles', foreignKey: 'organizationId' });
 
-const db = { sequelize, User, Role, UserRole, Permission, Project, Document, Organization, Survey, Question, Answer, Feedback, CommunitySession, Comment, SystemLog, Announcement };
+const db = { sequelize, User, Role, UserRole, Permission, Project, Document, Organization, Survey, Question, Answer, Section, Feedback, CommunitySession, Comment, SystemLog, Announcement, Response };
 
 export default db;

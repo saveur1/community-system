@@ -2,7 +2,10 @@ import { DataTypes, Model, Optional, type HasManyGetAssociationsMixin, type HasM
 import sequelize from '../config/database';
 import Question from './question';
 import Answer from './answer';
+import Response from './response';
 import Role from './role';
+import Section from './section';
+import Organization from './organization';
 import { User } from './users';
 
 export type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea';
@@ -38,6 +41,7 @@ export interface SurveyAttributes {
   status: 'active' | 'paused' | 'archived';
   surveyType?: 'general' | 'report-form';
   createdBy?: string | null;
+  organizationId?: string | null; // NEW: organization association
   // New: when survey opens and closes
   startAt: Date;
   endAt: Date;
@@ -57,6 +61,7 @@ class Survey extends Model<SurveyAttributes, SurveyCreationAttributes> implement
   declare status: 'active' | 'paused' | 'archived';
   declare surveyType?: 'general' | 'report-form';
   declare createdBy?: string | null;
+  declare organizationId?: string | null;
   declare startAt: Date;
   declare endAt: Date;
 
@@ -79,6 +84,14 @@ class Survey extends Model<SurveyAttributes, SurveyCreationAttributes> implement
   declare createAnswer: HasManyCreateAssociationMixin<Answer>;
   declare readonly answers?: Answer[];
 
+  // hasMany(Response) association mixins
+  declare getResponses: HasManyGetAssociationsMixin<Response>;
+  declare addResponse: HasManyAddAssociationMixin<Response, string>;
+  declare addResponses: HasManyAddAssociationsMixin<Response, string>;
+  declare setResponses: HasManySetAssociationsMixin<Response, string>;
+  declare createResponse: HasManyCreateAssociationMixin<Response>;
+  declare readonly responses?: Response[];
+
   // Many-to-many (Survey <-> Role) mixins for allowedRoles
   declare getAllowedRoles: BelongsToManyGetAssociationsMixin<Role>;
   declare addAllowedRole: BelongsToManyAddAssociationMixin<Role, string>;
@@ -87,9 +100,21 @@ class Survey extends Model<SurveyAttributes, SurveyCreationAttributes> implement
   declare removeAllowedRole: BelongsToManyRemoveAssociationMixin<Role, string>;
   declare readonly allowedRoles?: Role[];
 
+  // hasMany(Section) association mixins
+  declare getSections: HasManyGetAssociationsMixin<Section>;
+  declare addSection: HasManyAddAssociationMixin<Section, string>;
+  declare addSections: HasManyAddAssociationsMixin<Section, string>;
+  declare setSections: HasManySetAssociationsMixin<Section, string>;
+  declare createSection: HasManyCreateAssociationMixin<Section>;
+  declare readonly sections?: Section[];
+
   // BelongsTo (Survey -> User) mixin for creator
   declare getCreator: BelongsToGetAssociationMixin<User>;
   declare readonly creator?: User | null;
+
+  // BelongsTo (Survey -> Organization) mixin
+  declare getOrganization: BelongsToGetAssociationMixin<Organization>;
+  declare readonly organization?: Organization | null;
 }
 
 Survey.init(
@@ -149,6 +174,16 @@ Survey.init(
       },
       onDelete: 'SET NULL',
       comment: 'User who created this survey',
+    },
+    organizationId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'organizations',
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+      comment: 'Organization this survey belongs to',
     },
     status: {
       type: DataTypes.ENUM('active', 'paused', 'archived'),

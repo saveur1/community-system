@@ -5,8 +5,9 @@ import { FaArrowRight, FaArrowLeft, FaCheck, FaSpinner } from 'react-icons/fa';
 import { useSubmitSurveyAnswers } from '@/hooks/useSurveys';
 import { SubmitAnswersRequest } from '@/api/surveys';
 import useAuth from '@/hooks/useAuth';
+import { toast } from 'react-toastify';
 
-type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea';
+type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea' | 'file_upload' | 'rating' | 'linear_scale';
 
 interface QuestionItem {
   id: string;
@@ -16,6 +17,16 @@ interface QuestionItem {
   required: boolean;
   options: string[] | null;
   placeholder: string | null;
+  // extras for specific types
+  allowedTypes?: string[] | null;
+  maxSize?: number | null;
+  maxRating?: number | null;
+  ratingLabel?: string | null;
+  minValue?: number | null;
+  maxValue?: number | null;
+  minLabel?: string | null;
+  maxLabel?: string | null;
+  sectionId?: string | null;
 }
 
 interface SurveyAnswerFormProps {
@@ -26,12 +37,13 @@ interface SurveyAnswerFormProps {
     description: string;
     estimatedTime: string;
     questionItems: QuestionItem[];
+    sections?: { id: string; title: string; order?: number | null }[];
   };
 }
 
 interface Answer {
   questionId: string;
-  value: string | string[];
+  value: string | string[] | number | File[];
 }
 
 const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey }) => {
@@ -42,17 +54,21 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
   const { mutate: submitAnswers } = useSubmitSurveyAnswers(survey.id);
   const { user } = useAuth();
 
-  // Group questions into steps (5 questions per step)
-  const steps = [];
-  for (let i = 0; i < survey.questionItems.length; i += 5) {
-    steps.push(survey.questionItems.slice(i, i + 5));
-  }
+  // Group questions by sections (each step == one section)
+  const orderedSections = (survey.sections ?? []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const steps = orderedSections.map((section) => ({
+    section,
+    questions: survey.questionItems.filter((q) => q.sectionId === section.id),
+  })).filter((s) => s.questions.length > 0);
 
-  const currentQuestions = steps[currentStep] || [];
+  const currentQuestions = steps[currentStep]?.questions || [];
   const totalSteps = steps.length;
   const isLastStep = currentStep === totalSteps - 1;
 
-  const handleAnswerChange = (questionId: string, value: string | string[]) => {
+  const handleAnswerChange = (
+    questionId: string,
+    value: string | string[] | number | File[]
+  ) => {
     setAnswers((prev) => ({
       ...prev,
       [questionId]: { questionId, value },
@@ -64,8 +80,17 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
     const currentRequired = currentQuestions.filter((q) => q.required);
     const allRequiredAnswered = currentRequired.every((q) => {
       const answer = answers[q.id]?.value;
-      if (Array.isArray(answer)) return answer.length > 0;
-      return answer !== undefined && answer !== '';
+      if (q.type === 'multiple_choice') {
+        return Array.isArray(answer) && (answer as any[]).length > 0;
+      }
+      if (q.type === 'file_upload') {
+        return Array.isArray(answer) && (answer as File[]).length > 0;
+      }
+      if (q.type === 'rating' || q.type === 'linear_scale') {
+        return typeof answer === 'number' && !Number.isNaN(answer);
+      }
+      if (Array.isArray(answer)) return (answer as any[]).length > 0;
+      return answer !== undefined && String(answer) !== '';
     });
 
     if (!allRequiredAnswered) {
@@ -91,22 +116,55 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
     
     // Format answers for the API
     const formattedAnswers: SubmitAnswersRequest = {
-      answers: Object.entries(answers).map(([questionId, answer]) => ({
-        questionId,
-        answerText: Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value),
-        answerOptions: Array.isArray(answer.value) ? answer.value : undefined,
-        userId: user?.id
-      }))
+      userId: user?.id ?? null,
+      answers: (Object.entries(answers).map(([questionId, answer]) => {
+        const q = survey.questionItems.find((qq) => qq.id === questionId) as QuestionItem | undefined;
+        const val = answer.value;
+        if (!q) {
+          return { questionId, answerText: String(val ?? ''), answerOptions: undefined };
+        }
+        switch (q.type) {
+          case 'single_choice': {
+            const choice = typeof val === 'string' ? val : Array.isArray(val) ? (val[0] ?? '') : String(val ?? '');
+            return { questionId, answerText: null, answerOptions: choice ? [choice] : [] };
+          }
+          case 'multiple_choice': {
+            const arr: string[] = Array.isArray(val)
+              ? (val as any[]).map((v) => String(v))
+              : val
+              ? [String(val)]
+              : [];
+            return { questionId, answerText: null, answerOptions: arr };
+          }
+          case 'text_input':
+          case 'textarea': {
+            return { questionId, answerText: String(val ?? ''), answerOptions: undefined };
+          }
+          case 'rating':
+          case 'linear_scale': {
+            const num = typeof val === 'number' ? val : Number(val);
+            return { questionId, answerText: Number.isNaN(num) ? null : String(num), answerOptions: undefined };
+          }
+          case 'file_upload': {
+            const files = Array.isArray(val) ? (val as File[]) : [];
+            // Send filenames as options; real file upload is out of scope for this endpoint
+            const names: string[] = files.map((f) => String(f.name));
+            return { questionId, answerText: null, answerOptions: names };
+          }
+          default:
+            return { questionId, answerText: String(val ?? ''), answerOptions: undefined };
+        }
+      }) as { questionId: string; answerText?: string | null; answerOptions?: string[] | null }[])
     };
 
     submitAnswers(formattedAnswers, {
       onSuccess: () => {
         if (onComplete) onComplete();
-        navigate({ to: '/dashboard/surveys/thank-you' });
       },
       onError: (error) => {
         console.error('Failed to submit answers:', error);
         // Error toast will be shown by the hook
+        toast.error('Failed to submit answers');
       },
       onSettled: () => {
         setIsSubmitting(false);
@@ -115,7 +173,11 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
   };
 
   const renderQuestion = (question: QuestionItem) => {
-    const answer = answers[question.id]?.value || (question.type === 'multiple_choice' ? [] : '');
+    const defaultValue: any =
+      question.type === 'multiple_choice' ? [] :
+      question.type === 'rating' || question.type === 'linear_scale' ? undefined :
+      question.type === 'file_upload' ? [] : '';
+    const answer = (answers[question.id]?.value as any) ?? defaultValue;
 
     switch (question.type) {
       case 'single_choice':
@@ -173,6 +235,77 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           />
         );
 
+      case 'rating': {
+        const max = question.maxRating ?? 5;
+        const current = typeof answer === 'number' ? answer : 0;
+        return (
+          <div className="flex items-center gap-3 flex-wrap">
+            {Array.from({ length: max }).map((_, i: number) => {
+              const val = i + 1;
+              return (
+                <label key={val} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`question-${question.id}`}
+                    checked={current === val}
+                    onChange={() => handleAnswerChange(question.id, Number(val))}
+                    className="h-4 w-4 text-primary focus:ring-primary"
+                  />
+                  <span className="text-gray-700">{question.ratingLabel ? `${val} ${question.ratingLabel}` : val}</span>
+                </label>
+              );
+            })}
+          </div>
+        );
+      }
+
+      case 'linear_scale': {
+        const min = question.minValue ?? 1;
+        const max = question.maxValue ?? 5;
+        const current = typeof answer === 'number' ? answer : min;
+        return (
+          <div>
+            <input
+              type="range"
+              min={min}
+              max={max}
+              step={1}
+              value={current}
+              onChange={(e) => handleAnswerChange(question.id, Number(e.target.value))}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-gray-600 mt-1">
+              <span>{question.minLabel ?? String(min)}</span>
+              <span>{current}</span>
+              <span>{question.maxLabel ?? String(max)}</span>
+            </div>
+          </div>
+        );
+      }
+
+      case 'file_upload': {
+        const accept = (question.allowedTypes ?? []).join(',');
+        const files: File[] = Array.isArray(answer) ? (answer as File[]) : [];
+        return (
+          <div className="space-y-3">
+            <input
+              type="file"
+              multiple
+              accept={accept || undefined}
+              onChange={(e) => handleAnswerChange(question.id, e.target.files ? (Array.from(e.target.files) as File[]) : ([] as File[]))}
+              className="block w-full text-sm text-gray-700"
+            />
+            {files.length > 0 && (
+              <ul className="text-sm text-gray-600 list-disc pl-5">
+                {files.map((f) => (
+                  <li key={f.name}>{f.name}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      }
+
       default:
         return null;
     }
@@ -185,13 +318,18 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           {survey.title}
         </h2>
         <p className="text-gray-600">{survey.description}</p>
+        {steps[currentStep]?.section && (
+          <div className="mt-3">
+            <h3 className="text-lg font-medium text-gray-700">{steps[currentStep].section.title}</h3>
+          </div>
+        )}
         <div className="mt-2 text-sm text-gray-500">
           Step {currentStep + 1} of {totalSteps}
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
           <div
             className="bg-primary h-2.5 rounded-full"
-            style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+            style={{ width: `${totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0}%` }}
           />
         </div>
       </div>
