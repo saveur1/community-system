@@ -349,9 +349,10 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
 
     switch (question.type) {
       case 'single_choice':
+        const singleOptions = Array.isArray(question.options) ? question.options : [];
         return (
           <div className="space-y-2">
-            {(question.options || []).map((option: string) => (
+            {singleOptions.map((option: string) => (
               <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer">
                 <input
                   type="radio"
@@ -367,9 +368,10 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
         );
 
       case 'multiple_choice':
+        const multipleOptions = Array.isArray(question.options) ? question.options : [];
         return (
           <div className="space-y-2">
-            {(question?.options || []).map((option: string) => {
+            {multipleOptions.map((option: string) => {
               const isChecked = Array.isArray(answer) && answer.includes(option);
               return (
                 <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer">
