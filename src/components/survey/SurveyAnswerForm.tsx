@@ -284,7 +284,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           case 'multiple_choice': {
             // For multiple choice, send array of selected options
             const arr: string[] = Array.isArray(val)
-              ? (val as any[]).map((v) => String(v))
+              ? (val as any[])?.map((v) => String(v))
               : val
               ? [String(val)]
               : [];
