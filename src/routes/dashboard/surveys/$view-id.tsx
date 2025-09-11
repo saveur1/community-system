@@ -24,9 +24,20 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
   const renderQuestionInput = () => {
     switch (question.type) {
       case 'single_choice':
+        let singleOptions: string[] = [];
+        try {
+          if (typeof question.options === 'string') {
+            singleOptions = JSON.parse(question.options);
+          } else if (Array.isArray(question.options)) {
+            singleOptions = question.options;
+          }
+        } catch (e) {
+          console.warn('Failed to parse options for question:', question.id, e);
+          singleOptions = [];
+        }
         return (
           <div className="space-y-3">
-            {(question.options || []).map((option: string, idx: number) => (
+            {singleOptions.map((option: string, idx: number) => (
               <label key={idx} className="flex items-center space-x-3 cursor-not-allowed opacity-70">
                 <input type="radio" disabled className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                 <span className="text-gray-700">{option}</span>
@@ -35,9 +46,20 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
           </div>
         );
       case 'multiple_choice':
+        let multipleOptions: string[] = [];
+        try {
+          if (typeof question.options === 'string') {
+            multipleOptions = JSON.parse(question.options);
+          } else if (Array.isArray(question.options)) {
+            multipleOptions = question.options;
+          }
+        } catch (e) {
+          console.warn('Failed to parse options for question:', question.id, e);
+          multipleOptions = [];
+        }
         return (
           <div className="space-y-3">
-            {(question.options || []).map((option: string, idx: number) => (
+            {multipleOptions.map((option: string, idx: number) => (
               <label key={idx} className="flex items-center space-x-3 cursor-not-allowed opacity-70">
                 <input type="checkbox" disabled className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
                 <span className="text-gray-700">{option}</span>

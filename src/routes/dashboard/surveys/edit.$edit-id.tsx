@@ -33,7 +33,18 @@ function mapFromServerToDraft(entity: any): SurveyDraft {
       questionNumber: qi.questionNumber ?? undefined,
     };
     if (qi.type === 'single_choice' || qi.type === 'multiple_choice') {
-      return { ...base, options: qi.options ?? [] } as Question;
+      let options: string[] = [];
+      try {
+        if (typeof qi.options === 'string') {
+          options = JSON.parse(qi.options);
+        } else if (Array.isArray(qi.options)) {
+          options = qi.options;
+        }
+      } catch (e) {
+        console.warn('Failed to parse options for question:', qi.id, e);
+        options = [];
+      }
+      return { ...base, options } as Question;
     }
     if (qi.type === 'text_input' || qi.type === 'textarea') {
       return { ...base, placeholder: qi.placeholder ?? '' } as Question;
