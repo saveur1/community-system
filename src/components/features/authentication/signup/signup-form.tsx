@@ -347,7 +347,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
       {/* Basic Information */}
       <div>
         <h2 className="text-lg font-semibold mb-4">{t('signup.basic_information')}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.full_name_label')} *</label>
             <div className="relative">
@@ -357,7 +357,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="fullName"
                 value={form.fullName}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
+                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
                 placeholder={t('signup.full_name_placeholder')}
               />
             </div>
@@ -371,7 +371,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
+                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
                 placeholder={t('signup.phone_placeholder')}
               />
             </div>
@@ -385,7 +385,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
+                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
                 placeholder={t('signup.email_placeholder')}
               />
             </div>
@@ -399,7 +399,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="password"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-primary/30 rounded-lg outline-primary/50"
+                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
                 placeholder={t('signup.password_placeholder')}
               />
             </div>
@@ -420,7 +420,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 {/* Category Header */}
                 <div
                   onClick={() => handleCategoryToggle(group.title)}
-                  className={`flex items-center justify-between cursor-pointer p-4 hover:bg-gray-50 transition-colors duration-200 ${expandedCategory === group.title ? 'bg-primary/5 border-primary/30' : 'hover:border-primary/30'
+                  className={`flex items-center justify-between cursor-pointer p-3 sm:p-4 hover:bg-gray-50 transition-colors duration-200 ${expandedCategory === group.title ? 'bg-primary/5 border-primary/30' : 'hover:border-primary/30'
                     }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -433,8 +433,8 @@ function SignupForm({ className = "" }: SignupFormProps) {
                       )}
                     </div>
                     <div>
-                      <span className="text-gray-900 font-medium text-base">{group.title}</span>
-                      <p className="text-gray-600 text-sm mt-1">
+                      <span className="text-gray-900 font-medium text-sm sm:text-base">{group.title}</span>
+                      <p className="text-gray-600 text-xs sm:text-sm mt-1">
                         {group.options.length} options available
                       </p>
                     </div>
@@ -456,10 +456,10 @@ function SignupForm({ className = "" }: SignupFormProps) {
                     transition={{ duration: 0.2 }}
                     className="border-t pl-10 border-gray-200 bg-gray-50/50"
                   >
-                    <div className="p-3 space-y-2">
+                    <div className="p-1">
                       {group.options.map((option) => (
                         <div key={option.value}>
-                          <label className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-white border border-transparent hover:border-primary/20 transition-colors duration-200">
+                          <label className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-white border border-transparent hover:border-primary/20 transition-colors duration-200 min-h-[30px]">
                             <input
                               type="radio"
                               name="userType"
@@ -468,7 +468,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                               onChange={handleRadioChange}
                               className="h-4 w-4 text-primary focus:ring-primary"
                             />
-                            <span className="text-gray-700 text-sm">{option.label}</span>
+                            <span className="text-gray-700 text-sm sm:text-base">{option.label}</span>
                           </label>
                         </div>
                       ))}
@@ -520,9 +520,9 @@ function SignupForm({ className = "" }: SignupFormProps) {
         transition={springTransition}
         className="space-y-4"
       >
-        <h2 className="text-xl font-semibold mb-4">{t('signup.location_details')}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('signup.location_details')}</h2>
 
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-6">
           {/* District with SelectSearch */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">{t('signup.district_label')} *</label>
@@ -635,7 +635,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
             name="nearByHealthCenter"
             value={form.nearByHealthCenter || ''}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+            className="w-full border border-gray-300 rounded-lg p-3 sm:p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-base sm:text-sm"
             placeholder={t('signup.nearby_health_center_placeholder')}
             required
           />
@@ -734,7 +734,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
       transition={springTransition}
       className="space-y-4"
     >
-      <h2 className="text-xl font-semibold mb-4">{t('signup.additional_details')}</h2>
+      <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('signup.additional_details')}</h2>
       {renderAdditionalDetailsContent()}
     </motion.div>
   );
@@ -782,24 +782,24 @@ function SignupForm({ className = "" }: SignupFormProps) {
 
   return (
     <div className={`col-span-3 bg-white rounded-xl lg:rounded-r-xl lg:rounded-l-none ${className}`}>
-      <div className={`${currentStep >= 2 ? "max-w-2xl" : "max-w-xl"} mx-auto sm:p-8`}>
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FiUserPlus className="w-8 h-8 text-primary" />
+      <div className={`${currentStep >= 2 ? "max-w-2xl" : "max-w-xl"} mx-auto p-4 sm:p-6 lg:p-8`}>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FiUserPlus className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold mb-2">{t('signup.create_title')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-2">{t('signup.create_title')}</h1>
           {actualTotalSteps > 1 && (
             <div className="flex justify-center mb-4">
               {Array.from({ length: actualTotalSteps }, (_, i) => i + 1).map((step) => (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= step ? "bg-primary text-white" : "bg-gray-100 text-gray-400"
+                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm ${currentStep >= step ? "bg-primary text-white" : "bg-gray-100 text-gray-400"
                       }`}
                   >
                     {step}
                   </div>
                   {step < actualTotalSteps && (
-                    <div className={`w-8 h-1 ${currentStep > step ? "bg-primary" : "bg-gray-200"}`} />
+                    <div className={`w-6 sm:w-8 h-1 ${currentStep > step ? "bg-primary" : "bg-gray-200"}`} />
                   )}
                 </div>
               ))}
@@ -818,7 +818,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
             </AnimatePresence>
           </div>
 
-          <div className="flex justify-between mt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mt-8">
             {currentStep > 1 ? (
               <button
                 type="button"
@@ -835,7 +835,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               <button
                 type="button"
                 onClick={nextStep}
-                className="flex cursor-pointer items-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+                className="flex cursor-pointer items-center bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors w-full sm:w-auto justify-center min-h-[44px]"
               >
                 {t('signup.next')} <FiChevronRight className="ml-1" />
               </button>
@@ -843,7 +843,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex cursor-pointer items-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex cursor-pointer items-center bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto justify-center min-h-[44px]"
               >
                 {isLoading ? t('signup.creating') : t('signup.create_account')}
               </button>

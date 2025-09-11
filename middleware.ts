@@ -2,19 +2,6 @@ import db from '@/models';
 import { verifyToken } from '@/utils/jwt';
 import { Request, Response, NextFunction } from 'express';
 
-// Extend the Express Request type to include user
-declare global {
-    namespace Express {
-        interface Request {
-            user?: {
-                id: string;
-                email: string;
-                roles?: string[];
-            };
-        }
-    }
-}
-
 // Public routes that don't require authentication
 const publicPaths = [
     '/',
@@ -65,15 +52,12 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
             return res.redirect('/auth/login?error=user-not-found');
         }
 
-        req.user = {
-            id: user.id,
-            email: user.email || '',
-            roles: [] // Will be populated by subsequent role fetching if needed
-        };
+        req.user = user;
 
         if (path.startsWith('/auth')) {
             return res.redirect('/dashboard');
         }
+
 
         next();
     } catch (error) {

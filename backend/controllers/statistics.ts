@@ -131,12 +131,12 @@ export class StatisticsController extends Controller {
             else start = new Date(end.getFullYear(), end.getMonth() - 11, 1);
         }
 
-        // fetch answers in date range (optionally for a single survey)
-        const answersWhere: any = { createdAt: { [Op.gte]: start, [Op.lte]: end } };
-        if (surveyId) answersWhere.surveyId = surveyId;
+        // fetch responses in date range (optionally for a single survey)
+        const responsesWhere: any = { createdAt: { [Op.gte]: start, [Op.lte]: end } };
+        if (surveyId) responsesWhere.surveyId = surveyId;
 
-        const answers = await db.Answer.findAll({
-            where: answersWhere,
+        const responses = await db.Response.findAll({
+            where: responsesWhere,
             attributes: ['id', 'createdAt', 'surveyId'],
             order: [['createdAt', 'ASC']],
             raw: true,
@@ -158,8 +158,8 @@ export class StatisticsController extends Controller {
                 buckets[label] = 0;
                 cursor.setDate(cursor.getDate() + 1);
             }
-            for (const a of answers) {
-                const label = new Date(a.createdAt).toISOString().slice(0, 10);
+            for (const r of responses) {
+                const label = new Date(r.createdAt).toISOString().slice(0, 10);
                 if (label in buckets) buckets[label] += 1;
             }
         } else if (group === 'weekly') {
@@ -178,8 +178,8 @@ export class StatisticsController extends Controller {
                 buckets[label] = 0;
                 cursor.setDate(cursor.getDate() + 7);
             }
-            for (const a of answers) {
-                const d = new Date(a.createdAt);
+            for (const r of responses) {
+                const d = new Date(r.createdAt);
                 // find Monday of that week
                 const day = d.getDay();
                 const diff = (day + 6) % 7;
@@ -197,8 +197,8 @@ export class StatisticsController extends Controller {
                 buckets[label] = 0;
                 cursor.setMonth(cursor.getMonth() + 1);
             }
-            for (const a of answers) {
-                const d = new Date(a.createdAt);
+            for (const r of responses) {
+                const d = new Date(r.createdAt);
                 const label = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
                 if (label in buckets) buckets[label] += 1;
             }

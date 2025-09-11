@@ -19,14 +19,13 @@ export async function expressAuthentication(
   scopes?: string[]
 ): Promise<any> {
   if (securityName === 'jwt') {
-    const token = request.cookies.token;
-    if (!token) {
-      return Promise.resolve(null);
-    }
-
     try {
+      const token = request.cookies.token;
+      if (!token) {
+        throw new Error('no token provided');
+      }
       const decoded = await verifyToken(token);
-      
+
       if (!decoded || !decoded.userId) {
         throw new Error('Invalid token');
       }
@@ -89,7 +88,7 @@ export const checkAuth = async (
 ) => {
   try {
     const user = await expressAuthentication(req, 'jwt');
-    (req as any).user = user;
+    req.user = user;
     next();
   } catch (error: any) {
     return res.status(401).json(ServiceResponse.failure(error.message, null, 401));

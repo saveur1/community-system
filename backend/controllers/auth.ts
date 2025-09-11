@@ -8,7 +8,7 @@ import { getGoogleAuthURL, getGoogleUser } from '../utils/googleOAuth';
 import config from '../config/config';
 import { sendPasswordResetEmail } from '../utils/emailService';
 import { IUserResponse } from '../types/user-controller-types';
-import { User } from '../models/users';
+
 import {
   LoginRequest,
   SignupRequest,
@@ -20,16 +20,13 @@ import { asyncCatch } from '@/middlewares/errorHandler';
 import db from '@/models';
 import { IUserAttributes } from '../types/user-types';
 import { verifyInviteToken } from '../utils/tokenService';
+import type { User } from '@/models/users';
 
 // Extend the Express Request type to include the user property
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        id: string;
-        email: string;
-        roles?: string[];
-      };
+      user?: User
     }
   }
 }
@@ -100,15 +97,7 @@ export class AuthController extends Controller {
     }
 
     const token = await this.generateToken(data!);
-    const isProduction = process.env.NODE_ENV === 'production';
-    const cookieOptions = {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site cookies
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      path: '/',
-      domain: isProduction ? 'community-tool.onrender.com' : 'localhost',
-    };
+    const cookieOptions = await this.getCookieString(token);
 
     // Convert cookie options to string
     const cookieString = `token=${token}; ${Object.entries(cookieOptions)
@@ -554,8 +543,8 @@ export class AuthController extends Controller {
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day
-      path: '/',
-      domain: isProduction ? 'community-tool.onrender.com' : 'localhost',
+      path: '/'
+      // domain: isProduction ? 'community-tool.onrender.com' : 'localhost',
     };
 
     return `token=${token}; ${Object.entries(cookieOptions)
