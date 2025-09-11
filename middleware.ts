@@ -25,7 +25,8 @@ const publicPaths = [
     '/auth/google/callback',
     '/auth/forgot-password',
     '/auth/reset-password',
-    /^\/feedback\/.*$/ // Matches /feedback/any-characters-here
+    /^\/feedback\/.*$/, // Matches /feedback/any-characters-here
+    /^\/answers\/.*$/,
 ];
 
 // Check if the current path is public
