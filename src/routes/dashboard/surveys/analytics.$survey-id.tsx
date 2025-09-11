@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { useReactToPrint } from 'react-to-print';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { useSurvey, useSurveyAnalytics } from '@/hooks/useSurveys';
 import { FaDownload, FaShareAlt, FaChartBar, FaUsers, FaClock, FaCheckCircle, FaPrint } from 'react-icons/fa';
@@ -123,32 +122,53 @@ const AnalyticsPage: React.FC = () => {
     return () => { mounted = false; };
   }, []);
 
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: `${survey?.result?.title || 'Survey'} - Analytics Report`,
-    pageStyle: `
-      @page {
-        size: A4;
-        margin: 20mm;
-      }
-      @media print {
-        body {
-          -webkit-print-color-adjust: exact;
-          color-adjust: exact;
+  const [printFunction, setPrintFunction] = useState<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    let mounted = true;
+    import('react-to-print')
+      .then(({ useReactToPrint }) => {
+        if (mounted && printRef.current) {
+          const handlePrint = useReactToPrint({
+            contentRef: printRef,
+            documentTitle: `${survey?.result?.title || 'Survey'} - Analytics Report`,
+            pageStyle: `
+              @page {
+                size: A4;
+                margin: 20mm;
+              }
+              @media print {
+                body {
+                  -webkit-print-color-adjust: exact;
+                  color-adjust: exact;
+                }
+                .no-print {
+                  display: none !important;
+                }
+                .print-break {
+                  page-break-before: always;
+                }
+              }
+            `,
+          });
+          setPrintFunction(() => handlePrint);
         }
-        .no-print {
-          display: none !important;
+      })
+      .catch(() => {
+        // Fallback to browser print
+        if (mounted) {
+          setPrintFunction(() => () => window.print());
         }
-        .print-break {
-          page-break-before: always;
-        }
-      }
-    `,
-  });
+      });
+    
+    return () => { mounted = false; };
+  }, [survey?.result?.title]);
 
   const handleExport = () => {
-    if (printRef.current) {
-      handlePrint();
+    if (printFunction) {
+      printFunction();
     } else {
       toast.error('Unable to generate report. Please try again.');
     }
