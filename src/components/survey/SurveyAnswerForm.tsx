@@ -284,7 +284,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           case 'multiple_choice': {
             // For multiple choice, send array of selected options
             const arr: string[] = Array.isArray(val)
-              ? (val as any[])?.map((v) => String(v))
+              ? (val as any[]).map((v) => String(v)) || []
               : val
               ? [String(val)]
               : [];
@@ -351,7 +351,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
       case 'single_choice':
         return (
           <div className="space-y-2">
-            {question.options?.map((option: string) => (
+            {(question.options || []).map((option: string) => (
               <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer">
                 <input
                   type="radio"
@@ -369,7 +369,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
       case 'multiple_choice':
         return (
           <div className="space-y-2">
-            {question.options?.map((option: string) => {
+            {(question?.options || []).map((option: string) => {
               const isChecked = Array.isArray(answer) && answer.includes(option);
               return (
                 <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -379,7 +379,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
                     onChange={() => {
                       const newValue = isChecked
                         ? (answer as string[]).filter((v) => v !== option)
-                        : [...(answer as string[]), option];
+                        : [...(Array.isArray(answer) ? answer : []), option];
                       handleAnswerChange(question.id, newValue);
                     }}
                     className="h-4 w-4 text-primary outline-none focus:ring-primary"
