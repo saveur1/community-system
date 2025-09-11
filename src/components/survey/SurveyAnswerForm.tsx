@@ -349,7 +349,17 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
 
     switch (question.type) {
       case 'single_choice':
-        const singleOptions = Array.isArray(question.options) ? question.options : [];
+        let singleOptions: string[] = [];
+        try {
+          if (typeof (question as any).options === 'string') {
+            singleOptions = JSON.parse((question as any).options);
+          } else if (Array.isArray((question as any).options)) {
+            singleOptions = (question as any).options;
+          }
+        } catch (e) {
+          console.warn('Failed to parse options for question:', question.id, e);
+          singleOptions = [];
+        }
         return (
           <div className="space-y-2">
             {singleOptions.map((option: string) => (
@@ -368,7 +378,17 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
         );
 
       case 'multiple_choice':
-        const multipleOptions = Array.isArray(question.options) ? question.options : [];
+        let multipleOptions: string[] = [];
+        try {
+          if (typeof (question as any).options === 'string') {
+            multipleOptions = JSON.parse((question as any).options);
+          } else if (Array.isArray((question as any).options)) {
+            multipleOptions = (question as any).options;
+          }
+        } catch (e) {
+          console.warn('Failed to parse options for question:', question.id, e);
+          multipleOptions = [];
+        }
         return (
           <div className="space-y-2">
             {multipleOptions.map((option: string) => {
