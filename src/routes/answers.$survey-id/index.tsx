@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import Breadcrumb from '@/components/ui/breadcrum'
 import SurveyAnswerForm from '@/components/survey/SurveyAnswerForm'
-import { useSurvey } from '@/hooks/useSurveys'
+import { usePublicSurvey } from '@/hooks/useSurveys'
 import { useEffect } from 'react'
 import MainHeader from '@/components/layouts/main-header'
 import Footer from '@/components/layouts/main-footer/main-footer'
@@ -15,7 +15,7 @@ function PublicSurveyAnswerPage() {
   const surveyId = String(params['survey-id'] ?? '')
   const navigate = useNavigate()
 
-  const { data, isLoading, isError } = useSurvey(surveyId, true)
+  const { data, isLoading, isError } = usePublicSurvey(surveyId, true)
   const survey = data?.result
 
   useEffect(() => {

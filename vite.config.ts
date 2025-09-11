@@ -64,7 +64,10 @@ export default defineConfig((configEnv) => {
     },
     plugins: [
       tanstackRouter({ target: 'react', autoCodeSplitting: true }),
-      react(),
+      react({
+        jsxRuntime: 'automatic',
+        jsxImportSource: 'react'
+      }),
       tailwindcss()
     ],
     build: isSsrBuild ? ssrBuildConfig : clientBuildConfig,

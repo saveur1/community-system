@@ -16,6 +16,7 @@ export const surveysKeys = {
     params?.responded ?? null,
   ] as const,
   detail: (id: string) => [...surveysKeys.all, 'detail', id] as const,
+  publicDetail: (id: string) => [...surveysKeys.all, 'public-detail', id] as const,
   responses: (id: string, page: number, limit: number) => [...surveysKeys.all, 'responses', id, page, limit] as const,
   analytics: (id: string) => [...surveysKeys.all, 'analytics', id] as const,
   questionAnalytics: (surveyId: string, questionId: string) => [...surveysKeys.all, 'question-analytics', surveyId, questionId] as const,
@@ -150,5 +151,14 @@ export function useQuestionAnalytics(surveyId: string, questionId: string, enabl
     queryFn: () => surveysApi.questionAnalytics(surveyId, questionId),
     enabled: !!surveyId && !!questionId && enabled,
     placeholderData: keepPreviousData,
+  });
+}
+
+// Get public survey by id (no authentication required)
+export function usePublicSurvey(surveyId: string, enabled: boolean = true) {
+  return useQuery<SurveyResponse>({
+    queryKey: surveysKeys.publicDetail(surveyId),
+    queryFn: () => surveysApi.getPublicById(surveyId),
+    enabled: !!surveyId && enabled,
   });
 }

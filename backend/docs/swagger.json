@@ -2886,6 +2886,47 @@
 				]
 			}
 		},
+		"/api/surveys/public/{surveyId}": {
+			"get": {
+				"operationId": "GetPublicSurveyById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Survey not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/api/surveys/{surveyId}/answers": {
 			"post": {
 				"operationId": "SubmitAnswers",
@@ -2904,13 +2945,7 @@
 				"tags": [
 					"Surveys"
 				],
-				"security": [
-					{
-						"jwt": [
-							"survey:respond"
-						]
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",

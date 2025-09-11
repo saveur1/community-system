@@ -11,13 +11,13 @@ const sequelizeOptions: any = {
   logging: config.database.logging,
 };
 
-// if(!config.isDev){
-//     sequelizeOptions.dialectOptions = {
-//         ssl: {
-//             rejectUnauthorized: true,
-//         },
-//     };
-// }
+if(!config.isDev){
+    sequelizeOptions.dialectOptions = {
+        ssl: {
+            rejectUnauthorized: true,
+        },
+    };
+}
 
 const sequelize = new Sequelize(config.database.databaseName, config.database.user, config.database.password, sequelizeOptions);
 

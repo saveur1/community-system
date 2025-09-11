@@ -97,17 +97,14 @@ export class AuthController extends Controller {
     }
 
     const token = await this.generateToken(data!);
-    const cookieOptions = await this.getCookieString(token);
-
-    // Convert cookie options to string
-    const cookieString = `token=${token}; ${Object.entries(cookieOptions)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('; ')}`;
+    const cookieString = await this.getCookieString(token);
 
     const userResponse = await this._buildUserResponse(data!);
-    res(200, ServiceResponse.success('Login successful', { user: userResponse }), {
+
+    return res(200, ServiceResponse.success('Login successful', { user: userResponse }), {
       'Set-Cookie': cookieString,
     });
+    
   }
 
   @Post('/signup')
@@ -543,8 +540,8 @@ export class AuthController extends Controller {
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day
-      path: '/'
-      // domain: isProduction ? 'community-tool.onrender.com' : 'localhost',
+      path: '/',
+      domain: process.env.APP_DOMAIN || "community-tool.onrender.com",
     };
 
     return `token=${token}; ${Object.entries(cookieOptions)

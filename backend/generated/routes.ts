@@ -932,6 +932,36 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSurveyController_getPublicSurveyById: Record<string, TsoaRoute.ParameterSchema> = {
+                surveyId: {"in":"path","name":"surveyId","required":true,"dataType":"string"},
+        };
+        app.get('/api/surveys/public/:surveyId',
+            ...(fetchMiddlewares<RequestHandler>(SurveyController)),
+            ...(fetchMiddlewares<RequestHandler>(SurveyController.prototype.getPublicSurveyById)),
+
+            async function SurveyController_getPublicSurveyById(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSurveyController_getPublicSurveyById, request, response });
+
+                const controller = new SurveyController();
+
+              await templateService.apiHandler({
+                methodName: 'getPublicSurveyById',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsSurveyController_createSurvey: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 data: {"in":"body","name":"data","required":true,"ref":"SurveyCreateRequest"},
@@ -1035,7 +1065,6 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"answers":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"metadata":{"dataType":"any"},"fileInfo":{"dataType":"nestedObjectLiteral","nestedProperties":{"filePath":{"dataType":"string","required":true},"fileSize":{"dataType":"double","required":true},"fileType":{"dataType":"string","required":true},"fileName":{"dataType":"string","required":true}}},"value":{"dataType":"any"},"questionId":{"dataType":"string","required":true}}},"required":true},"userId":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]}}},
         };
         app.post('/api/surveys/:surveyId/answers',
-            authenticateMiddleware([{"jwt":["survey:respond"]}]),
             ...(fetchMiddlewares<RequestHandler>(SurveyController)),
             ...(fetchMiddlewares<RequestHandler>(SurveyController.prototype.submitAnswers)),
 

@@ -22,60 +22,60 @@ interface SurveyCreateRequest {
   }>;
   questions: Array<
     | {
-        id: number;
-        type: 'single_choice' | 'multiple_choice';
-        title: string;
-        description: string;
-        required: boolean;
-        sectionId: string;
-        questionNumber?: number;
-        options: string[];
-      }
+      id: number;
+      type: 'single_choice' | 'multiple_choice';
+      title: string;
+      description: string;
+      required: boolean;
+      sectionId: string;
+      questionNumber?: number;
+      options: string[];
+    }
     | {
-        id: number;
-        type: 'text_input' | 'textarea';
-        title: string;
-        description: string;
-        required: boolean;
-        sectionId: string;
-        questionNumber?: number;
-        placeholder: string;
-      }
+      id: number;
+      type: 'text_input' | 'textarea';
+      title: string;
+      description: string;
+      required: boolean;
+      sectionId: string;
+      questionNumber?: number;
+      placeholder: string;
+    }
     | {
-        id: number;
-        type: 'file_upload';
-        title: string;
-        description: string;
-        required: boolean;
-        sectionId: string;
-        questionNumber?: number;
-        allowedTypes: string[];
-        maxSize: number;
-      }
+      id: number;
+      type: 'file_upload';
+      title: string;
+      description: string;
+      required: boolean;
+      sectionId: string;
+      questionNumber?: number;
+      allowedTypes: string[];
+      maxSize: number;
+    }
     | {
-        id: number;
-        type: 'rating';
-        title: string;
-        description: string;
-        required: boolean;
-        sectionId: string;
-        questionNumber?: number;
-        maxRating: number;
-        ratingLabel?: string;
-      }
+      id: number;
+      type: 'rating';
+      title: string;
+      description: string;
+      required: boolean;
+      sectionId: string;
+      questionNumber?: number;
+      maxRating: number;
+      ratingLabel?: string;
+    }
     | {
-        id: number;
-        type: 'linear_scale';
-        title: string;
-        description: string;
-        required: boolean;
-        sectionId: string;
-        questionNumber?: number;
-        minValue: number;
-        maxValue: number;
-        minLabel?: string;
-        maxLabel?: string;
-      }
+      id: number;
+      type: 'linear_scale';
+      title: string;
+      description: string;
+      required: boolean;
+      sectionId: string;
+      questionNumber?: number;
+      minValue: number;
+      maxValue: number;
+      minLabel?: string;
+      maxLabel?: string;
+    }
   >;
   allowedRoles?: string[]; // NEW: array of Role IDs allowed to view/answer
 }
@@ -109,10 +109,12 @@ export class SurveyController extends Controller {
       { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
       { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
       // Include responses with nested answers
-      { model: db.Response, as: 'responses', include: [
-        { model: db.Answer, as: 'answers', include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] },
-        { model: db.User, as: 'user', attributes: ['id', 'name'] }
-      ] },
+      {
+        model: db.Response, as: 'responses', include: [
+          { model: db.Answer, as: 'answers', include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+          { model: db.User, as: 'user', attributes: ['id', 'name'] }
+        ]
+      },
       { model: db.Role, as: 'allowedRoles', through: { attributes: [] }, required: false },
       { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
       { model: db.User, as: 'creator', attributes: ['id', 'name'] },
@@ -150,10 +152,12 @@ export class SurveyController extends Controller {
         return ServiceResponse.failure('Authentication required to filter by responded', [], 401);
       }
       // require at least one answer by this user (inner join)
-      includeArr[2] = { model: db.Response, as: 'responses', required: true, where: { userId }, include: [
-        { model: db.Answer, as: 'answers', include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] },
-        { model: db.User, as: 'user', attributes: ['id', 'name'] }
-      ] };
+      includeArr[2] = {
+        model: db.Response, as: 'responses', required: true, where: { userId }, include: [
+          { model: db.Answer, as: 'answers', include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+          { model: db.User, as: 'user', attributes: ['id', 'name'] }
+        ]
+      };
     }
 
     // ALLOWED FILTERING: only surveys that allow any of the current user's roles
@@ -165,7 +169,7 @@ export class SurveyController extends Controller {
       const user = await db.User.findByPk(userId, {
         include: [{ model: db.Role, as: 'roles', through: { attributes: [] } }],
       });
-      
+
       const roleIds = (user?.roles ?? []).map((r: any) => r.id).filter(Boolean);
       if (!roleIds.length) {
         // user has no roles -> no surveys allowed
@@ -224,9 +228,11 @@ export class SurveyController extends Controller {
       order: [['createdAt', 'DESC']],
       include: [
         { model: db.Answer, as: 'answers' },
-        { model: db.User, as: 'user', attributes: ['id', 'name', 'email', 'phone'], include: [
-          { model: db.Role, as: 'roles', through: { attributes: [] } },
-        ] },
+        {
+          model: db.User, as: 'user', attributes: ['id', 'name', 'email', 'phone'], include: [
+            { model: db.Role, as: 'roles', through: { attributes: [] } },
+          ]
+        },
       ],
       distinct: true,
     });
@@ -283,6 +289,49 @@ export class SurveyController extends Controller {
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
     return ServiceResponse.success('Survey retrieved successfully', survey);
   }
+
+  // 1. Create a new public endpoint for getting survey by ID (no authentication required)
+  @Get('/public/{surveyId}')
+  @asyncCatch
+  @Response<ServiceResponse<null>>(404, 'Survey not found')
+  public async getPublicSurveyById(@Path() surveyId: string): Promise<ServiceResponse<any | null>> {
+    const survey = await db.Survey.findByPk(surveyId, {
+      include: [
+        { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        // Don't include responses for public access (privacy)
+        { model: db.Role, as: 'allowedRoles', through: { attributes: [] } },
+        { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
+        { model: db.User, as: 'creator', attributes: ['id', 'name'] },
+      ],
+    });
+
+    if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
+
+    // Check if survey is active and within date range
+    const now = new Date();
+    if (survey.status !== 'active') {
+      return ServiceResponse.failure('Survey is not currently accepting responses', null, 403);
+    }
+
+    if (survey.startAt && now < new Date(survey.startAt)) {
+      return ServiceResponse.failure('Survey has not started yet', null, 403);
+    }
+
+    if (survey.endAt && now > new Date(survey.endAt)) {
+      return ServiceResponse.failure('Survey has ended', null, 403);
+    }
+
+    // Remove sensitive data for public access
+    const publicSurvey = {
+      ...survey.toJSON(),
+      responses: undefined, // Don't expose existing responses
+      creator: survey?.createdBy ? { name: (survey as any)?.creator?.name } : null, // Only show creator name
+    };
+
+    return ServiceResponse.success('Survey retrieved successfully', publicSurvey);
+  }
+
 
   @Security('jwt', ['survey:create'])
   @Post('/')
@@ -619,7 +668,6 @@ export class SurveyController extends Controller {
   }
 
   // New: submit answers for a survey
-  @Security('jwt', ['survey:respond'])
   @Post('/{surveyId}/answers')
   @asyncCatch
   public async submitAnswers(
@@ -643,8 +691,8 @@ export class SurveyController extends Controller {
   ): Promise<ServiceResponse<any | null>> {
     const survey = await db.Survey.findByPk(surveyId, {
       include: [
-        { 
-          model: db.Question, 
+        {
+          model: db.Question,
           as: 'questionItems',
           attributes: ['id', 'type', 'title', 'required', 'maxSize', 'allowedTypes', 'maxRating', 'minValue', 'maxValue']
         }
@@ -702,7 +750,7 @@ export class SurveyController extends Controller {
                 400
               );
             }
-            
+
             // Validate file type if allowedTypes is set
             const allowedTypes = question.allowedTypes || [];
             if (allowedTypes.length > 0 && !allowedTypes.includes('*')) {
@@ -717,7 +765,7 @@ export class SurveyController extends Controller {
             }
           }
           break;
-          
+
         case 'rating':
           if (answer.value !== undefined && answer.value !== null) {
             const rating = Number(answer.value);
@@ -731,13 +779,13 @@ export class SurveyController extends Controller {
             }
           }
           break;
-          
+
         case 'linear_scale':
           if (answer.value !== undefined && answer.value !== null) {
             const value = Number(answer.value);
             const min = typeof question.minValue === 'number' ? question.minValue : 1;
             const max = typeof question.maxValue === 'number' ? question.maxValue : 5;
-            
+
             if (isNaN(value) || value < min || value > max) {
               return ServiceResponse.failure(
                 `Invalid value for question "${question.title}". Must be between ${min} and ${max}`,
@@ -752,7 +800,7 @@ export class SurveyController extends Controller {
 
     const effectiveUserId = body.userId ?? request?.user?.id ?? null;
     let createdResponse: any = null;
-    
+
     await sequelize.transaction(async (t) => {
       // Create the response record
       createdResponse = await db.Response.create({
@@ -805,12 +853,12 @@ export class SurveyController extends Controller {
                   addedAt: new Date()
                 }, { transaction: t });
               }
-              
+
               // Skip the default Answer.create below since we already created it
               continue;
             }
             break;
-            
+
           case 'rating':
             if (answer.value !== undefined && answer.value !== null) {
               answerData.metadata.ratingInfo = {
@@ -819,7 +867,7 @@ export class SurveyController extends Controller {
               };
             }
             break;
-            
+
           case 'linear_scale':
             if (answer.value !== undefined && answer.value !== null) {
               answerData.metadata.scaleInfo = {
@@ -845,10 +893,10 @@ export class SurveyController extends Controller {
     });
 
     await createSystemLog(
-      request ?? null, 
-      'responded_survey', 
-      survey?.dataValues?.title, 
-      surveyId, 
+      request ?? null,
+      'responded_survey',
+      survey?.dataValues?.title,
+      surveyId,
       { answersCount: (body.answers || []).length }
     );
 
@@ -856,30 +904,30 @@ export class SurveyController extends Controller {
     const result = await db.Survey.findByPk(survey.id, {
       include: [
         { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-        { 
-          model: db.Question, 
-          as: 'questionItems', 
-          include: [{ model: db.Section, as: 'section' }] 
+        {
+          model: db.Question,
+          as: 'questionItems',
+          include: [{ model: db.Section, as: 'section' }]
         },
-        { 
-          model: db.Response, 
-          as: 'responses', 
+        {
+          model: db.Response,
+          as: 'responses',
           where: { id: createdResponse.id },
           include: [
-            { 
-              model: db.Answer, 
+            {
+              model: db.Answer,
               as: 'answers',
               include: [
                 { model: db.Question, as: 'question', attributes: ['id', 'title', 'type'] },
                 { model: db.Document, as: 'documents', attributes: ['id', 'documentName', 'documentUrl', 'size', 'type', 'publicId'] }
               ]
-            }, 
-            { 
-              model: db.User, 
-              as: 'user', 
-              attributes: ['id', 'name'] 
+            },
+            {
+              model: db.User,
+              as: 'user',
+              attributes: ['id', 'name']
             }
-          ] 
+          ]
         },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
         { model: db.User, as: 'creator', attributes: ['id', 'name'] },
@@ -899,8 +947,8 @@ export class SurveyController extends Controller {
   ): Promise<ServiceResponse<any>> {
     const survey = await db.Survey.findByPk(surveyId, {
       include: [
-        { 
-          model: db.Question, 
+        {
+          model: db.Question,
           as: 'questionItems',
           attributes: ['id', 'title', 'type', 'required', 'options']
         },
@@ -936,7 +984,7 @@ export class SurveyController extends Controller {
     const requiredQuestions = questions.filter((q: any) => q.required);
     const completedResponses = responses.filter((response: any) => {
       const responseAnswers = response.answers || [];
-      const answeredRequiredQuestions = requiredQuestions.filter((rq: any) => 
+      const answeredRequiredQuestions = requiredQuestions.filter((rq: any) =>
         responseAnswers.some((a: any) => a.questionId === rq.id && (a.value || a.answerText || (a.answerOptions && a.answerOptions.length > 0)))
       );
       return answeredRequiredQuestions.length === requiredQuestions.length;
@@ -963,15 +1011,15 @@ export class SurveyController extends Controller {
 
     // Per-question analytics
     const questionAnalytics = questions.map((question: any) => {
-      const questionAnswers = responses.flatMap((r: any) => 
+      const questionAnswers = responses.flatMap((r: any) =>
         (r.answers || []).filter((a: any) => a.questionId === question.id)
       );
-      
+
       const responseCount = questionAnswers.length;
       const skipRate = totalResponses > 0 ? (totalResponses - responseCount) / totalResponses : 0;
-      
+
       let answerDistribution: any = {};
-      
+
       // Calculate answer distribution based on question type
       if (question.type === 'single_choice' || question.type === 'multiple_choice') {
         if (question.options) {
@@ -979,7 +1027,7 @@ export class SurveyController extends Controller {
             answerDistribution[option] = 0;
           });
         }
-        
+
         questionAnswers.forEach((answer: any) => {
           if (answer.answerOptions && Array.isArray(answer.answerOptions)) {
             answer.answerOptions.forEach((option: string) => {
@@ -999,19 +1047,19 @@ export class SurveyController extends Controller {
           if (a.answerText) return parseFloat(a.answerText);
           return null;
         }).filter((v: any) => v !== null);
-        
+
         if (values.length > 0) {
           const avg = values.reduce((sum: number, val: number) => sum + val, 0) / values.length;
           const min = Math.min(...values);
           const max = Math.max(...values);
-          
+
           answerDistribution = { average: avg, min, max, values };
         }
       } else {
         // For text inputs, just count responses
         answerDistribution = { textResponses: responseCount };
       }
-      
+
       return {
         questionId: question.id,
         title: question.title,
@@ -1074,7 +1122,7 @@ export class SurveyController extends Controller {
 
     if (question.type === 'single_choice' || question.type === 'multiple_choice') {
       const distribution: { [key: string]: number } = {};
-      
+
       // Initialize with options if available
       if ((question as any).options) {
         (question as any).options.forEach((option: string) => {
@@ -1109,7 +1157,7 @@ export class SurveyController extends Controller {
         const min = Math.min(...values);
         const max = Math.max(...values);
         const sorted = values.sort((a: number, b: number) => a - b);
-        const median = sorted.length % 2 === 0 
+        const median = sorted.length % 2 === 0
           ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
           : sorted[Math.floor(sorted.length / 2)];
 

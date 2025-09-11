@@ -8,6 +8,7 @@ import { initializeDatabase } from "./config/database";
 import "./models/index";
 import cookie from "cookie";
 import cors from "cors";
+import morgan from "morgan";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(morgan('combined'));
 
 // Custom cookie middleware
 app.use((req: Request, res: Response, next: NextFunction) => {

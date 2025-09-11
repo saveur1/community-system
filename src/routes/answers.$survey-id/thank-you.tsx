@@ -1,5 +1,7 @@
+import MainHeader from '@/components/layouts/main-header';
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { FaCheckCircle } from 'react-icons/fa';
+import Footer from '@/components/layouts/main-footer/main-footer';
 
 export const Route = createFileRoute('/answers/$survey-id/thank-you')({
   component: SurveyThankYou,
@@ -7,6 +9,8 @@ export const Route = createFileRoute('/answers/$survey-id/thank-you')({
 
 function SurveyThankYou() {
     return (
+      <>
+      <MainHeader />
       <div className="min-h-[calc(100vh-200px)] bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-xl drop-shadow-lg shadow-lg p-8 text-center">
           <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
@@ -24,5 +28,7 @@ function SurveyThankYou() {
           </Link>
         </div>
       </div>
+      <Footer />
+      </>
     );
   }

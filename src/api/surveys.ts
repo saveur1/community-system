@@ -301,6 +301,11 @@ export const surveysApi = {
     return data;
   },
 
+  getPublicById: async (surveyId: string): Promise<SurveyResponse> => {
+    const { data } = await client.get(`/surveys/public/${surveyId}`);
+    return data;
+  },
+
   create: async (payload: SurveyCreateRequest): Promise<SurveyResponse> => {
     const { data } = await client.post(`/surveys`, payload);
     return data;
