@@ -63,7 +63,7 @@ export class StatisticsController extends Controller {
                     surveyType: "general",
                     status: 'active'
                 },
-                include: [{ model: db.Answer, as: 'answers', required: true, where: { userId }, include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] }]
+                include: [{ model: db.Response, as: 'responses', required: true, where: { userId }, include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] }]
             }),
         ]);
 
