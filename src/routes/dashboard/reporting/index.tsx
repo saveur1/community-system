@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { FaList, FaTh } from 'react-icons/fa';
-import { SurveyToolbar } from '@/components/features/surveys/survey-toolbar';
+import { FaList, FaTh, FaPlus } from 'react-icons/fa';
+import MainToolbar from '@/components/common/main-toolbar';
 import { SurveyPagination } from '@/components/features/surveys/survey-pagination';
 import { useSurveysList } from '@/hooks/useSurveys';
 
@@ -59,32 +59,32 @@ const ReportingList = () => {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report</th>
+              <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {paginated.map((r) => (
               <tr key={r.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-700">{r.title}</div>
-                  <div className="text-xs text-gray-500">{r.description}</div>
+                <td className="px-3 lg:px-6 py-4">
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-gray-700">{r.title}</div>
+                    <div className="text-xs text-gray-500">{r.description}</div>
+                    <div className="flex flex-wrap items-center gap-2 lg:gap-4">
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(r.status)}`}>
+                        {r.status}
+                      </span>
+                      <span className="text-xs text-gray-500">{r.questionCount} questions</span>
+                      <span className="text-xs text-gray-500">{r.estimatedTime}Min</span>
+                      <span className="text-xs text-gray-500">{r.project}</span>
+                    </div>
+                  </div>
                 </td>
-                <td className="px-6 py-4">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(r.status)}`}>{r.status}</span>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-700">{r.questionCount}</td>
-                <td className="px-6 py-4 text-sm text-gray-700">{r.estimatedTime}Min</td>
-                <td className="px-6 py-4 text-sm text-gray-700">{r.project}</td>
-                <td className="px-6 py-4">
+                <td className="px-3 lg:px-6 py-4">
                   <Link
                     to="/dashboard/reporting/review-report"
                     search={{ reportId: r.id }}
-                    className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-md hover:bg-primary hover:text-white"
+                    className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-md hover:bg-primary hover:text-white text-sm"
                   >
                     Review
                   </Link>
@@ -93,7 +93,7 @@ const ReportingList = () => {
             ))}
             {paginated.length === 0 && (
               <tr>
-                <td className="px-6 py-4 text-center text-sm text-gray-500" colSpan={7}>
+                <td className="px-3 lg:px-6 py-4 text-center text-sm text-gray-500" colSpan={2}>
                   {isLoadingReports ? 'Loading report forms...' : isErrorReports ? 'Failed to load report forms.' : 'No report submissions available.'}
                 </td>
               </tr>
@@ -136,15 +136,20 @@ const ReportingList = () => {
     <div className="pb-10">
       <Breadcrumb items={["Dashboard", "Reporting"]} title="Reporting" className='absolute top-0 left-0 w-full px-6' />
 
-      <div className="pt-14">
-        <SurveyToolbar
-          viewMode={viewMode}
-          setViewMode={setViewMode}
+      <div className="pt-12 lg:pt-14">
+        <MainToolbar
+          title="Reports"
+          filteredCount={filteredCount}
           search={search}
           setSearch={setSearch}
-          filteredCount={filteredCount}
-          title="Reports"
-          createButtonLink="/dashboard/reporting/make-report"
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          showCreate={true}
+          createButton={{
+            to: "/dashboard/reporting/make-report",
+            label: "Make Report",
+            icon: <FaPlus />
+          }}
         />
       </div>
 

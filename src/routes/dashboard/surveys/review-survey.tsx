@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useSurvey, useSurveyResponses } from '@/hooks/useSurveys';
 import { FaArrowLeft } from 'react-icons/fa';
-import type { QuestionItem } from '@/api/surveys';
 import useAuth from '@/hooks/useAuth';
 import SurveyAnswerReview from '@/components/survey/SurveyAnswerReview';
 

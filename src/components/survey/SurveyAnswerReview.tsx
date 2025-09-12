@@ -21,7 +21,7 @@ const SurveyAnswerReview: React.FC<SurveyAnswerReviewProps> = ({
   // Create a map of questionId to answer for easy lookup
   const answerMap = answers.reduce<Record<string, { answerText: string | null; answerOptions: string[] | null }>>((acc: any, answer: any) => {
     if (answer.questionId) {
-      acc[answer.questionId] = { answerText: answer.answerText ?? null, answerOptions: answer.answerOptions ?? null };
+      acc[answer.questionId] = { answerText: answer.answerText ?? null, answerOptions: parseOptions(answer.answerOptions) ?? null };
     }
     return acc;
   }, {});
@@ -43,7 +43,7 @@ const SurveyAnswerReview: React.FC<SurveyAnswerReviewProps> = ({
     <div className={`divide-y divide-gray-200 ${className}`}>
       {questions.map((question: QuestionItem, index: number) => {
         const answer = answerMap[question.id];
-        const answerValue = answer?.answerText || (answer?.answerOptions || []).join(', ');
+        const answerValue = answer?.answerText || (parseOptions(answer?.answerOptions) || []).join(', ');
         const parsedOptions = parseOptions(question.options);
 
         return (

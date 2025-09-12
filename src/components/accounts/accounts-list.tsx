@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link } from '@tanstack/react-router';
-import { FaSearch, FaListUl, FaTh, FaSort, FaSortUp, FaSortDown, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaChevronLeft, FaChevronRight, FaEye, FaTrash, FaPlus, FaEllipsisV } from 'react-icons/fa';
+import {  FaSort, FaSortUp, FaSortDown, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaChevronLeft, FaChevronRight, FaEye, FaTrash, FaPlus, FaEllipsisV } from 'react-icons/fa';
 import { Account, AccountFilters } from '@/types/account';
 import { SelectDropdown } from '@/components/ui/select';
 import Drawer from '@/components/ui/drawer';
