@@ -578,23 +578,19 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 border border-gray-300 bg-white rounded-xl shadow-md">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">
+    <div className="max-w-4xl mx-auto p-6 border border-gray-200 bg-white rounded-xl shadow-lg">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">
           {survey.title}
         </h2>
-        <p className="text-gray-600">{survey.description}</p>
-        {steps[currentStep]?.section && (
-          <div className="mt-3">
-            <h3 className="text-lg font-medium text-gray-700">{steps[currentStep].section.title}</h3>
-          </div>
-        )}
+        <p className="text-gray-600 text-lg mb-6">{survey.description}</p>
+        
         {/* Steps Indicator with Badge Numbers */}
-        <div className="mt-4 flex justify-center items-center space-x-4">
+        <div className="flex justify-center items-center space-x-4 mb-4">
           {Array.from({ length: totalSteps }).map((_, index) => (
             <div key={index} className="flex items-center">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${
                   index <= currentStep
                     ? 'bg-primary text-white'
                     : 'bg-gray-200 text-gray-500'
@@ -604,7 +600,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
               </div>
               {index < totalSteps - 1 && (
                 <div
-                  className={`w-8 h-0.5 mx-2 ${
+                  className={`w-12 h-1 mx-2 rounded-full ${
                     index < currentStep ? 'bg-primary' : 'bg-gray-200'
                   }`}
                 />
@@ -612,9 +608,18 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
             </div>
           ))}
         </div>
-        <div className="mt-2 text-sm text-gray-500 text-center">
+        <div className="text-sm text-gray-500 text-center mb-4">
           Step {currentStep + 1} of {totalSteps}
         </div>
+        
+        {/* Section Title Below Steps Indicator */}
+        {steps[currentStep]?.section && (
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-gray-800 bg-gray-100 py-3 px-6 rounded-lg border border-gray-300">
+              {steps[currentStep].section.title}
+            </h3>
+          </div>
+        )}
       </div>
 
       <AnimatePresence mode="wait">
@@ -626,30 +631,50 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           transition={{ duration: 0.3 }}
           className="space-y-8"
         >
-          {currentQuestions.map((question) => (
-            <div key={question.id} className="space-y-2">
-              <h3 className="text-lg font-medium text-gray-800">
-                {question.title}
-                {question.required && <span className="text-red-500 ml-1">*</span>}
-              </h3>
-              {question.description && (
-                <p className="text-sm text-gray-500 mb-3">{question.description}</p>
-              )}
-              {renderQuestion(question)}
-            </div>
-          ))}
+          {currentQuestions.map((question, questionIndex) => {
+            // Calculate global question number across all steps
+            let globalQuestionNumber = 1;
+            for (let i = 0; i < currentStep; i++) {
+              globalQuestionNumber += steps[i]?.questions.length || 0;
+            }
+            globalQuestionNumber += questionIndex;
+            
+            return (
+              <div key={question.id} className="bg-gray-50 rounded-xl p-6 border border-gray-200 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">
+                      {globalQuestionNumber}
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {question.title}
+                      {question.required && <span className="text-red-500 ml-1">*</span>}
+                    </h3>
+                    {question.description && (
+                      <p className="text-sm text-gray-600">{question.description}</p>
+                    )}
+                    <div className="pt-2">
+                      {renderQuestion(question)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </motion.div>
       </AnimatePresence>
 
-      <div className="mt-10 pt-6 border-t border-gray-200 flex justify-between">
+      <div className="mt-12 pt-8 border-t border-gray-200 flex justify-between">
         <button
           type="button"
           onClick={handlePrevious}
           disabled={currentStep === 0}
-          className={`flex items-center px-6 py-2.5 rounded-lg border ${
+          className={`flex items-center px-8 py-3 rounded-lg border font-medium transition-all duration-200 ${
             currentStep === 0
-              ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-              : 'border-primary text-primary hover:bg-primary/5'
+              ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
+              : 'border-primary text-primary hover:bg-primary/10 hover:shadow-md'
           }`}
         >
           <FaArrowLeft className="mr-2" /> Previous
@@ -659,7 +684,8 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex items-center px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            disabled={isSubmitting}
+            className="flex items-center px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>
@@ -676,7 +702,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           <button
             type="button"
             onClick={handleNext}
-            className="flex items-center px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            className="flex items-center px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
           >
             Next <FaArrowRight className="ml-2" />
           </button>

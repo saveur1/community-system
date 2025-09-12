@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { FaList, FaTh, FaPlus } from 'react-icons/fa';
+import {  FaPlus } from 'react-icons/fa';
 import MainToolbar from '@/components/common/main-toolbar';
 import { SurveyPagination } from '@/components/features/surveys/survey-pagination';
 import { useSurveysList } from '@/hooks/useSurveys';
@@ -60,6 +60,10 @@ const ReportingList = () => {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report</th>
+              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
+              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
               <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -67,10 +71,11 @@ const ReportingList = () => {
             {paginated.map((r) => (
               <tr key={r.id} className="hover:bg-gray-50">
                 <td className="px-3 lg:px-6 py-4">
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium text-gray-700">{r.title}</div>
-                    <div className="text-xs text-gray-500">{r.description}</div>
-                    <div className="flex flex-wrap items-center gap-2 lg:gap-4">
+                  <div className="text-sm font-medium text-gray-700">{r.title}</div>
+                  <div className="text-xs text-gray-500">{r.description}</div>
+                  {/* Show additional info on mobile only */}
+                  <div className="lg:hidden mt-2 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(r.status)}`}>
                         {r.status}
                       </span>
@@ -80,6 +85,14 @@ const ReportingList = () => {
                     </div>
                   </div>
                 </td>
+                <td className="hidden lg:table-cell px-6 py-4">
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(r.status)}`}>
+                    {r.status}
+                  </span>
+                </td>
+                <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-700">{r.questionCount}</td>
+                <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-700">{r.estimatedTime}Min</td>
+                <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-700">{r.project}</td>
                 <td className="px-3 lg:px-6 py-4">
                   <Link
                     to="/dashboard/reporting/review-report"
@@ -93,7 +106,7 @@ const ReportingList = () => {
             ))}
             {paginated.length === 0 && (
               <tr>
-                <td className="px-3 lg:px-6 py-4 text-center text-sm text-gray-500" colSpan={2}>
+                <td className="px-3 lg:px-6 py-4 text-center text-sm text-gray-500" colSpan={6}>
                   {isLoadingReports ? 'Loading report forms...' : isErrorReports ? 'Failed to load report forms.' : 'No report submissions available.'}
                 </td>
               </tr>
