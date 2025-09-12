@@ -208,30 +208,30 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.05 }}
-      className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+      className="bg-white border border-gray-200 rounded-lg p-3 lg:p-6 shadow-sm hover:shadow-md transition-shadow"
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3 lg:gap-4 mb-4">
         <div className="flex-1">
           <div className="flex items-start gap-3">
-            <span className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">
+            <span className="flex-shrink-0 w-6 h-6 lg:w-8 lg:h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs lg:text-sm font-semibold">
               {index + 1}
             </span>
-            <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base lg:text-lg font-medium text-gray-900 mb-2 break-words">
                 {question.title}
                 {question.required && (
                   <FaAsterisk className="inline-block ml-2 text-red-500 text-xs" />
                 )}
               </h3>
               {question.description && (
-                <p className="text-sm text-gray-600 mb-3">{question.description}</p>
+                <p className="text-sm text-gray-600 mb-3 break-words">{question.description}</p>
               )}
-              <div className="flex items-center gap-3 mb-4">
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getQuestionTypeColor()}`}>
+              <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-4">
+                <span className={`inline-flex items-center px-2 lg:px-2.5 py-1 rounded-full text-xs font-medium ${getQuestionTypeColor()}`}>
                   {getQuestionTypeLabel()}
                 </span>
                 {question.required && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  <span className="inline-flex items-center px-2 lg:px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                     Required
                   </span>
                 )}
@@ -239,13 +239,13 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
             </div>
           </div>
         </div>
-        <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">
+        <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded self-start lg:self-auto">
           ID: {question.id}
         </div>
       </div>
 
-      <div className="ml-11">
-        <div className="border-l-2 border-gray-100 pl-4">
+      <div className="lg:ml-11">
+        <div className="lg:border-l-2 lg:border-gray-100 lg:pl-4">
           {renderQuestionInput()}
         </div>
       </div>
@@ -367,37 +367,37 @@ const SurveyDetail = () => {
   };
 
   return (
-    <div className="pb-10">
+    <div className="pb-6 lg:pb-10 px-2 lg:px-0">
       <Breadcrumb
         items={["Community", "Surveys", survey?.title || '—']}
         title="Survey Details"
-        className='absolute top-0 left-0 w-full px-6'
+        className='absolute top-0 left-0 w-full px-4 lg:px-6'
       />
 
-      <div className="pt-20 space-y-6">
+      <div className="pt-16 lg:pt-20 space-y-4 lg:space-y-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 bg-title/5 w-full overflow-hidden pb-0">
-            <div className="flex items-start gap-4">
+          <div className="p-3 lg:p-6 bg-title/5 w-full overflow-hidden pb-0">
+            <div className="flex flex-col lg:flex-row lg:items-start gap-3 lg:gap-4">
               <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-gray-800">{survey?.title || (isLoading ? 'Loading…' : 'Survey')}</h1>
-                <div className="mt-2 flex items-center gap-6 text-sm text-gray-600">
+                <h1 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-3">{survey?.title || (isLoading ? 'Loading…' : 'Survey')}</h1>
+                <div className="grid grid-cols-2 lg:flex lg:items-center gap-2 lg:gap-6 text-xs lg:text-sm text-gray-600">
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus((survey as any)?.status)}`}>{(survey as any)?.status ?? '—'}</span>
-                  <span className="inline-flex items-center gap-2"><FaClock /> Estimated: {survey?.estimatedTime ?? '—'}Min</span>
-                  <span className="inline-flex items-center gap-2"><FaListOl /> Questions: {questions.length}</span>
-                  <span className="inline-flex items-center gap-2"><FaUsers /> Respondents: {answersCount}</span>
+                  <span className="inline-flex items-center gap-1 lg:gap-2"><FaClock className="w-3 h-3 lg:w-4 lg:h-4" /> <span className="hidden sm:inline">Estimated:</span> {survey?.estimatedTime ?? '—'}Min</span>
+                  <span className="inline-flex items-center gap-1 lg:gap-2"><FaListOl className="w-3 h-3 lg:w-4 lg:h-4" /> <span className="hidden sm:inline">Questions:</span> {questions.length}</span>
+                  <span className="inline-flex items-center gap-1 lg:gap-2"><FaUsers className="w-3 h-3 lg:w-4 lg:h-4" /> <span className="hidden sm:inline">Respondents:</span> {answersCount}</span>
                 </div>
               </div>
             </div>
-            <div className="mt-10 border-b border-gray-200">
-              <nav className="-mb-px flex gap-6" aria-label="Tabs">
+            <div className="mt-6 lg:mt-10 border-b border-gray-200">
+              <nav className="-mb-px flex flex-wrap gap-4 lg:gap-6" aria-label="Tabs">
                 <button
-                  className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'questions' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                  className={`pb-2 border-b-4 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'questions' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                   onClick={() => setActiveTab('questions')}
                 >
                   Questions ({questions.length})
                 </button>
                 <button
-                  className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === 'responses' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                  className={`pb-2 border-b-4 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'responses' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                   onClick={() => setActiveTab('responses')}
                 >
                   Responses ({sorted.length})
@@ -407,15 +407,15 @@ const SurveyDetail = () => {
           </div>
         </div>
         {activeTab === 'questions' ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">Survey Questions</h2>
-              <div className="text-sm text-gray-500">
+          <div className="space-y-3 lg:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 lg:mb-6">
+              <h2 className="text-lg lg:text-xl font-semibold text-gray-800">Survey Questions</h2>
+              <div className="text-xs lg:text-sm text-gray-500">
                 {questions.filter((q: any) => q.required).length} required • {questions.filter((q: any) => !q.required).length} optional
               </div>
             </div>
             {isLoading ? (
-              <div className="text-sm text-gray-500">Loading questions…</div>
+              <div className="text-sm text-gray-500 text-center py-8">Loading questions…</div>
             ) : (
               questions.map((question: any, index: number) => (
                 <QuestionPreview key={question.id} question={question} index={index} />
@@ -424,19 +424,19 @@ const SurveyDetail = () => {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-4 flex items-center gap-3 border-b border-gray-200">
+            <div className="p-3 lg:p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border-b border-gray-200">
               <input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 placeholder="Search by name, id, status..."
                 className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-600">Rows:</label>
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <label className="text-xs lg:text-sm text-gray-600 whitespace-nowrap">Rows:</label>
                 <select
                   value={pageSize}
                   onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                  className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                  className="border border-gray-300 rounded-md px-2 py-1 text-xs lg:text-sm"
                 >
                   {[5, 10, 20].map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
@@ -444,38 +444,50 @@ const SurveyDetail = () => {
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full">
-                <thead className="border-b border-gray-200">
+                <thead className="border-b border-gray-200 bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('respondentName')}>Responder {sortIcon('respondentName')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('time')}>Time {sortIcon('time')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('surveyTitle')}>Survey Title {sortIcon('surveyTitle')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Survey Status</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Actions</th>
+                    <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('respondentName')}>Responder {sortIcon('respondentName')}</th>
+                    <th className="hidden sm:table-cell px-3 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('time')}>Time {sortIcon('time')}</th>
+                    <th className="hidden md:table-cell px-3 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('surveyTitle')}>Survey Title {sortIcon('surveyTitle')}</th>
+                    <th className="hidden lg:table-cell px-3 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-medium text-gray-900">Survey Status</th>
+                    <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-medium text-gray-900">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {(isLoadingResponses || isLoading) ? (
-                    <tr><td colSpan={4} className="py-8 text-center text-gray-500">Loading responses...</td></tr>
+                    <tr><td colSpan={5} className="py-8 text-center text-gray-500 text-sm">Loading responses...</td></tr>
                   ) : pageData.length === 0 ? (
-                    <tr><td colSpan={4} className="py-8 text-center text-gray-500">No responses found.</td></tr>
+                    <tr><td colSpan={5} className="py-8 text-center text-gray-500 text-sm">No responses found.</td></tr>
                   ) : pageData.map((r) => (
                     <tr key={r.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-3 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-700">
                         <div className="font-medium">{r.respondentName}</div>
                         <div className="text-xs text-gray-500 capitalize">{r.respondentRole ? r.respondentRole.replace('_', ' ') : ''}</div>
+                        {/* Show additional info on mobile */}
+                        <div className="sm:hidden mt-1 space-y-1">
+                          <div className="text-xs text-gray-500">{timeAgo(r.time)}</div>
+                          <div className="md:hidden text-xs text-gray-500 truncate">{r.surveyTitle}</div>
+                          <div className="lg:hidden">
+                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus(r.surveyStatus as any)}`}>
+                              {r.surveyStatus}
+                            </span>
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{timeAgo(r.time)}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{r.surveyTitle}</td>
-                      <td className="px-6 py-4">
+                      <td className="hidden sm:table-cell px-3 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-700">{timeAgo(r.time)}</td>
+                      <td className="hidden md:table-cell px-3 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-700">
+                        <div className="truncate max-w-xs">{r.surveyTitle}</div>
+                      </td>
+                      <td className="hidden lg:table-cell px-3 lg:px-6 py-3 lg:py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus(r.surveyStatus as any)}`}>
                           {r.surveyStatus}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 lg:px-6 py-3 lg:py-4">
                         <Link
                           to="/dashboard/surveys/review-survey"
                           search={{ surveyId: r.surveyId }}
-                          className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-md hover:bg-primary hover:text-white"
+                          className="inline-flex items-center gap-1 lg:gap-2 bg-primary/10 text-primary px-2 lg:px-3 py-1 rounded-md hover:bg-primary hover:text-white text-xs lg:text-sm transition-colors"
                         >
                           Review
                         </Link>
@@ -485,24 +497,25 @@ const SurveyDetail = () => {
                 </tbody>
               </table>
             </div>
-            <div className="flex items-center justify-between p-4 border-t border-gray-200 text-sm text-gray-600">
-              <div>
+            <div className="flex flex-col sm:flex-row items-center justify-between p-3 lg:p-4 border-t border-gray-200 text-xs lg:text-sm text-gray-600 gap-3">
+              <div className="order-2 sm:order-1">
                 Page {page} of {totalPages} • {sorted.length} total
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 order-1 sm:order-2">
                 <button
-                  className="px-3 py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  className="px-2 lg:px-3 py-1 lg:py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
                 >
-                  <FaChevronLeft />
+                  <FaChevronLeft className="w-3 h-3 lg:w-4 lg:h-4" />
                 </button>
+                <span className="px-2 text-xs lg:text-sm">{page} / {totalPages}</span>
                 <button
-                  className="px-3 py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  className="px-2 lg:px-3 py-1 lg:py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
                 >
-                  <FaChevronRight />
+                  <FaChevronRight className="w-3 h-3 lg:w-4 lg:h-4" />
                 </button>
               </div>
             </div>
@@ -515,4 +528,4 @@ const SurveyDetail = () => {
 
 export const Route = createFileRoute('/dashboard/surveys/$view-id')({
   component: SurveyDetail,
-})
+});

@@ -231,7 +231,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   const dropdownContent = isOpen && (
     <div
       ref={dropdownRef}
-      className={`${portal ? '' : 'absolute'} z-[9999] ${getPositionClasses()} ${dropdownClassName}`}
+      className={cn(`${portal ? '' : 'absolute'} z-[9999] ${getPositionClasses()} ${dropdownClassName}`)}
       style={portal ? getPortalPositionStyles() : undefined}
       onClick={handleDropdownClick}
     >

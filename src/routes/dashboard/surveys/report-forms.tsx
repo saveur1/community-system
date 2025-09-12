@@ -217,7 +217,8 @@ const SurveyReportForms = () => {
                                                 </button>
                                             }
                                             position="bottom-right"
-                                            dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-48"
+                                            dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-40"
+                                            portal={true}
                                         >
                                             {getSurveyActions(survey, user).map((action) => (
                                                 <DropdownItem
