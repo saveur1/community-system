@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useMemo, useState, type DragEvent, type FC, type JSX } from 'react';
+import { useEffect, useMemo, useState, useRef, type DragEvent, type FC, type JSX } from 'react';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { useSurvey, useUpdateSurvey } from '@/hooks/useSurveys';
 import { useProjectsList } from '@/hooks/useProjects';
@@ -13,7 +13,7 @@ import { toast } from 'react-toastify';
 import Modal, { ModalBody, ModalFooter, ModalButton } from '@/components/ui/modal';
 import CustomCalendar from '@/components/ui/calendar';
 import { SelectDropdown } from '@/components/ui/select';
-import { FaX } from 'react-icons/fa6';
+import { FaX as FaTimes, FaPlus } from 'react-icons/fa6';
 
 export const Route = createFileRoute('/dashboard/surveys/edit/$edit-id')({
   component: EditSurveyComponent,
@@ -155,6 +155,22 @@ function EditSurveyComponent(): JSX.Element {
   const [endHour, setEndHour] = useState<string>(String(now.getHours()).padStart(2, "0"));
   const [endMinute, setEndMinute] = useState<string>(String(now.getMinutes()).padStart(2, "0"));
   const [endPickerOpen, setEndPickerOpen] = useState(false);
+  const [mobileQuestionPickerOpen, setMobileQuestionPickerOpen] = useState(false);
+  const mobileFloatingRef = useRef<HTMLDivElement>(null);
+
+  // Click outside handler for mobile floating panel
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileFloatingRef.current && !mobileFloatingRef.current.contains(event.target as Node)) {
+        setMobileQuestionPickerOpen(false);
+      }
+    };
+
+    if (mobileQuestionPickerOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [mobileQuestionPickerOpen]);
 
   const roleGroups = useMemo(() => {
     const list = rolesData?.result ?? [];
@@ -469,7 +485,7 @@ function EditSurveyComponent(): JSX.Element {
       />
 
       <div className="flex gap-6 pt-20">
-        <div className="flex-1 max-w-3xl">
+        <div className="flex-1 lg:max-w-3xl">
           <SurveyInfoForm
             title={survey.title}
             description={survey.description}
@@ -664,8 +680,8 @@ function EditSurveyComponent(): JSX.Element {
           />
         </div>
 
-        {/* Fixed Right Sidebar */}
-        <div className="w-80 flex-shrink-0">
+        {/* Fixed Right Sidebar - Hidden on mobile */}
+        <div className="hidden lg:block w-80 flex-shrink-0">
           <div className="sticky top-20">
             <SidebarQuestionPicker
               onAdd={addQuestion}
@@ -697,6 +713,66 @@ function EditSurveyComponent(): JSX.Element {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Mobile Floating Button - Only visible on mobile */}
+      <div className="lg:hidden fixed bottom-6 right-6 z-50" ref={mobileFloatingRef}>
+        {/* Floating Button */}
+        <button
+          onClick={() => setMobileQuestionPickerOpen(!mobileQuestionPickerOpen)}
+          className="w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:bg-primary/90 transition-all duration-200 flex items-center justify-center"
+          aria-label={mobileQuestionPickerOpen ? "Close question picker" : "Open question picker"}
+        >
+          {mobileQuestionPickerOpen ? (
+            <FaTimes className="w-5 h-5" />
+          ) : (
+            <FaPlus className="w-5 h-5" />
+          )}
+        </button>
+
+        {/* Floating Panel */}
+        {mobileQuestionPickerOpen && (
+          <div className="absolute bottom-16 right-0 w-80 max-w-[90vw] bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+            <div className="p-4">
+              <div className="mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Add Questions</h3>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto">
+                <SidebarQuestionPicker
+                  onAdd={(type) => {
+                    addQuestion(type);
+                    setMobileQuestionPickerOpen(false);
+                  }}
+                  sections={sections}
+                  currentSectionId={currentSectionId}
+                  onSectionChange={setCurrentSectionId}
+                  onAddSection={addSection}
+                />
+              </div>
+              
+              {/* Mobile Survey Summary */}
+              {survey.questions.length > 0 && (
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">Survey Summary</h4>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Questions:</span>
+                      <span className="font-medium">{survey.questions.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Estimated Time:</span>
+                      <span className="font-medium">{survey.estimatedTime || "0"} min</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Required Questions:</span>
+                      <span className="font-medium">{survey.questions.filter((q) => q.required).length}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

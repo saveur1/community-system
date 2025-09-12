@@ -56,14 +56,14 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
       <div
-        className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 hover:rounded-xl"
+        className="flex items-center justify-between p-4 sm:p-6 cursor-pointer hover:bg-gray-50 hover:rounded-xl"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-x-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <FaFileAlt className="w-5 h-5 text-primary" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <FaFileAlt className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900">Survey Information</h2>
+          <h2 className="text-lg sm:text-2xl font-semibold text-gray-900">Survey Information</h2>
         </div>
         {isExpanded ? (
           <FaChevronUp className="w-5 h-5 text-gray-500" />
@@ -73,7 +73,7 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
       </div>
 
       {isExpanded && (
-        <div className="px-6 pb-6 space-y-4">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-4">
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
               <FaBullseye className="w-4 h-4" />
@@ -124,7 +124,7 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                 onChange={(e) => onChange({ estimatedTime: e.target.value })}
                 min="1"
                 max="120"
-                className="w-24 border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-20 sm:w-24 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
               <span className="text-sm text-gray-600">minutes</span>
             </div>
@@ -136,7 +136,7 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
               {t("feedback.project")} <span className="text-red-500">*</span>
             </label>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6">
               {visibleProjects.length === 0 && moreProjects.length === 0 ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
@@ -152,7 +152,7 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                     <label
                       key={p.id}
                       htmlFor={`project-${p.id}`}
-                      className="flex items-center p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 cursor-pointer transition-all duration-200"
+                      className="flex items-center p-2 sm:p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 cursor-pointer transition-all duration-200"
                     >
                       <input
                         type="radio"
@@ -187,19 +187,19 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Availability window</label>
-            <div className="flex gap-3 items-center w-full">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full">
               <button
                 type="button"
                 onClick={onStartPickerOpen}
-                className="px-4 py-2 border border-gray-300 rounded-md w-52 bg-white hover:bg-gray-50"
+                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md w-full sm:w-52 bg-white hover:bg-gray-50 text-left"
               >
                 {startDate ? `${startDate.toLocaleDateString()} ${startHour}:${startMinute}` : `Set start time`}
               </button>
-              <span className="text-sm text-gray-500">to</span>
+              <span className="text-sm text-gray-500 self-center">to</span>
               <button
                 type="button"
                 onClick={onEndPickerOpen}
-                className="px-4 py-2 border border-gray-300 rounded-md w-52 bg-white hover:bg-gray-50"
+                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md w-full sm:w-52 bg-white hover:bg-gray-50 text-left"
               >
                 {endDate ? `${endDate.toLocaleDateString()} ${endHour}:${endMinute}` : `Set end time`}
               </button>
@@ -213,7 +213,7 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
               onClick={onRolesModalOpen}
               role="button"
               tabIndex={0}
-              className="min-h-[44px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 flex items-center gap-2 flex-wrap cursor-pointer"
+              className="min-h-[44px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 flex items-center gap-2 flex-wrap cursor-pointer touch-manipulation"
             >
               {selectedRoles?.length === 0 ? (
                 <span className="text-sm text-gray-400">Click to select roles...</span>
@@ -221,16 +221,16 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                 selectedRoles?.map((id) => (
                   <span
                     key={id}
-                    className="inline-flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full text-xs mr-2 mb-2"
+                    className="inline-flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full text-xs mr-1 sm:mr-2 mb-2"
                   >
-                    <span className="mr-2 capitalize">{roleLabelById(id)}</span>
+                    <span className="mr-1 sm:mr-2 capitalize">{roleLabelById(id)}</span>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
                         onRemoveRole(id)
                       }}
-                      className="text-primary/80 hover:text-primary text-sm leading-none"
+                      className="text-primary/80 hover:text-primary text-sm leading-none p-0.5 touch-manipulation"
                       aria-label={`Remove ${id}`}
                     >
                       <FaX className="w-2.5 h-2.5" />

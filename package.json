@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "install": "npm install --include=dev",
     "dev": "npx tsoa routes && npx tsoa spec && tsx watch server.ts",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",

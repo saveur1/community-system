@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { FaEye, FaShare, FaEdit, FaTrash, FaPause, FaPlay, FaStop, FaChartBar, FaDownload, FaList, FaTh, FaEllipsisV } from 'react-icons/fa';
+import { FaEye, FaShare, FaEdit, FaTrash, FaPause, FaPlay, FaStop, FaChartBar, FaDownload, FaList, FaTh, FaEllipsisV, FaPlus } from 'react-icons/fa';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import DeleteSurveyModal from '@/components/features/surveys/delete-survey-modal';
-import { SurveyToolbar } from '@/components/features/surveys/survey-toolbar';
+import MainToolbar from '@/components/common/main-toolbar';
 import { SurveyPagination } from '@/components/features/surveys/survey-pagination';
 import useAuth from '@/hooks/useAuth';
 import { User } from '@/api/auth';
@@ -22,6 +22,7 @@ const SurveyReportForms = () => {
     const { data, isLoading } = useSurveysList({ page, limit: pageSize, surveyType: "report-form" });
     const deleteSurvey = useDeleteSurvey();
     const updateStatus = useUpdateSurveyStatus();
+    const router = useRouter();
 
     const surveys = useMemo(() => data?.result ?? [], [data]);
 
@@ -67,7 +68,7 @@ const SurveyReportForms = () => {
                 alert(`Stopping survey: ${surveyName}`);
                 break;
             case 'analytics':
-                alert(`Viewing analytics for: ${surveyName}`);
+                router.navigate({ to: `/dashboard/surveys/analytics/${surveyId}` });
                 break;
             case 'export':
                 alert(`Exporting data for: ${surveyName}`);
@@ -79,6 +80,14 @@ const SurveyReportForms = () => {
             default:
                 break;
         }
+    };
+
+    const handleActionClick = (actionKey: string, survey: any) => {
+        if (actionKey === 'pause') updateStatus.mutate({ surveyId: String(survey.id), status: 'paused' });
+        else if (actionKey === 'activate') updateStatus.mutate({ surveyId: String(survey.id), status: 'active' });
+        else if (actionKey === 'archive') updateStatus.mutate({ surveyId: String(survey.id), status: 'archived' });
+        else if (actionKey === 'delete') { setToDelete({ id: survey.id, name: survey.title }); setDeleteModalOpen(true); }
+        else handleSurveyAction(actionKey, survey.id, survey.title);
     };
 
     // Search and pagination logic
@@ -142,47 +151,46 @@ const SurveyReportForms = () => {
     };
 
     const renderTableView = () => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="overflow-x-visible">
-                <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Survey Title</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target User</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                    <tr>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Survey Title</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Status</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Target User</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Questions</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Time</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Project</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Actions</th>
+                    </tr>
+                </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {isLoading ? (
                             <tr>
-                                <td className="px-6 py-4 text-sm text-gray-500" colSpan={7}>Loading surveys...</td>
+                                <td className="px-3 py-2 text-xs text-gray-500 sm:px-6 sm:py-4 sm:text-sm" colSpan={7}>Loading surveys...</td>
                             </tr>
                         ) : paginated?.map((survey) => (
                             <tr key={survey.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4">
+                                <td className="px-3 py-2 sm:px-6 sm:py-4">
                                     <div className="flex items-center">
                                         <div>
-                                            <div className="text-sm font-medium text-gray-700">{survey.title}</div>
+                                            <div className="text-xs font-medium text-gray-700 sm:text-sm">{survey.title}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-3 py-2 sm:px-6 sm:py-4 max-sm:hidden">
                                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full capitalize ${getStatusColor(survey.status)}`}>
                                         {survey.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-700 flex gap-2">{
-                                        survey?.allowedRoles?.slice(0, 4).map(role => 
-                                            <p className="bg-gray-300 capitalize text-gray-800 rounded-lg p-1">{role.name}</p>
+                                <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm flex gap-1 sm:gap-2">{
+                                        survey?.allowedRoles?.slice(0, 4).map((role, index) => 
+                                            <p key={index} className="bg-gray-300 capitalize text-gray-800 rounded-lg p-1 text-xs">{role.name}</p>
                                 )}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{survey.questionItems?.length ?? 0}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{survey.estimatedTime}Min</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{survey.project}</td>
-                                <td className="px-6 py-4">
+                                <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.questionItems?.length ?? 0}</td>
+                                <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.estimatedTime}Min</td>
+                                <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.project}</td>
+                                <td className="px-3 py-2 sm:px-6 sm:py-4">
                                     <div className="flex items-center space-x-4">
                                         <Link
                                             to="/dashboard/surveys/edit/$edit-id"
@@ -216,12 +224,7 @@ const SurveyReportForms = () => {
                                                     key={action.key}
                                                     icon={action.icon}
                                                     destructive={action.destructive}
-                                                    onClick={() => {
-                                                        if (action.key === 'pause') updateStatus.mutate({ surveyId: String(survey.id), status: 'paused' });
-                                                        else if (action.key === 'activate') updateStatus.mutate({ surveyId: String(survey.id), status: 'active' });
-                                                        else if (action.key === 'archive') updateStatus.mutate({ surveyId: String(survey.id), status: 'archived' });
-                                                        else handleSurveyAction(action.key, survey.id, survey.title);
-                                                    }}
+                                                    onClick={() => handleActionClick(action.key, survey)}
                                                 >
                                                     {action.label}
                                                 </DropdownItem>
@@ -234,13 +237,12 @@ const SurveyReportForms = () => {
 
                         {paginated?.length === 0 && (
                             <tr>
-                                <td className="px-6 py-4 text-center text-sm text-gray-500" colSpan={7}>No report forms found.</td>
+                                <td className="px-3 py-2 text-center text-xs text-gray-500 sm:px-6 sm:py-4 sm:text-sm" colSpan={7}>No report forms found.</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
-        </div>
     );
 
     const renderGridView = () => (
@@ -284,7 +286,7 @@ const SurveyReportForms = () => {
                                 <FaEdit className="w-4 h-4" />
                             </Link>
                             <button
-                                onClick={() => handleSurveyAction('delete', survey.id, survey.title)}
+                                onClick={() => handleActionClick('delete', survey)}
                                 className="text-red-500 hover:text-red-700"
                                 title="Delete Survey"
                             >
@@ -307,7 +309,7 @@ const SurveyReportForms = () => {
                                         icon={action.icon}
                                         destructive={action.destructive}
                                         className='min-w-52'
-                                        onClick={() => handleSurveyAction(action.key, survey.id, survey.title)}
+                                        onClick={() => handleActionClick(action.key, survey)}
                                     >
                                         {action.label}
                                     </DropdownItem>
@@ -330,15 +332,16 @@ const SurveyReportForms = () => {
 
             {/* Header with view controls */}
             <div className="pt-14">
-                {/* Survey Toolbar */}
-                <SurveyToolbar
+                {/* Main Toolbar */}
+                <MainToolbar
+                    title="Report Forms"
                     viewMode={viewMode}
                     setViewMode={setViewMode}
                     search={search}
-                    setSearch={setSearch}
+                    setSearch={(value) => { setSearch(value); setPage(1); }}
                     filteredCount={filtered.length}
-                    title="Report Forms"
-                    createButtonLink='/dashboard/surveys/add-new?type=report'
+                    showCreate={true}
+                    createButton={{ to: '/dashboard/surveys/add-new?type=report', label: 'New Report Form', icon: <FaPlus /> }}
                 />
             </div>
 

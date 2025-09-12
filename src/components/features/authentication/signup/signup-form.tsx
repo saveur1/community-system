@@ -780,6 +780,9 @@ function SignupForm({ className = "" }: SignupFormProps) {
     return 400;
   };
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640; // Tailwind sm breakpoint
+  const dynamicHeight = getDynamicHeight() * (isMobile ? 1.2 : 1); // 30% taller on mobile
+
   return (
     <div className={`col-span-3 bg-white rounded-xl lg:rounded-r-xl lg:rounded-l-none ${className}`}>
       <div className={`${currentStep >= 2 ? "max-w-2xl" : "max-w-xl"} mx-auto p-4 sm:p-6 lg:p-8`}>
@@ -810,7 +813,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
         <form onSubmit={handleSubmit}>
           <div
             className={`relative`}
-            style={{ minHeight: `${getDynamicHeight()}px` }}
+            style={{ minHeight: `${dynamicHeight}px` }}
           >
             <AnimatePresence mode="wait">
               {currentStep === 1 && renderStep1()}

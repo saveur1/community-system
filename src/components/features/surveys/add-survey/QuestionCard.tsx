@@ -165,14 +165,14 @@ const QuestionCard: FC<QuestionCardProps> = ({
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
               <div className="text-sm text-gray-500">File upload area</div>
             </div>
-            <div className="flex gap-4">
-              <div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-auto">
                 <label className="block text-xs text-gray-600 mb-1">Max file size (MB)</label>
                 <input
                   type="number"
                   value={question.maxSize}
                   onChange={(e) => onUpdate(question.id, "maxSize", Number.parseInt(e.target.value) || 10)}
-                  className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                  className="w-full sm:w-20 border border-gray-300 rounded px-2 py-1 text-sm"
                 />
               </div>
             </div>
@@ -187,8 +187,8 @@ const QuestionCard: FC<QuestionCardProps> = ({
                 <FaRegStar key={index} className="w-6 h-6 text-gray-300" />
               ))}
             </div>
-            <div className="flex gap-4">
-              <div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-auto">
                 <label className="block text-xs text-gray-600 mb-1">Max rating</label>
                 <input
                   type="number"
@@ -196,17 +196,17 @@ const QuestionCard: FC<QuestionCardProps> = ({
                   max="10"
                   value={question.maxRating}
                   onChange={(e) => onUpdate(question.id, "maxRating", Number.parseInt(e.target.value) || 5)}
-                  className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                  className="w-full sm:w-20 border border-gray-300 rounded px-2 py-1 text-sm"
                 />
               </div>
-              <div>
+              <div className="flex-1">
                 <label className="block text-xs text-gray-600 mb-1">Rating label</label>
                 <input
                   type="text"
                   value={question.ratingLabel || ""}
                   onChange={(e) => onUpdate(question.id, "ratingLabel", e.target.value)}
                   placeholder="e.g., Satisfaction"
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                 />
               </div>
             </div>
@@ -216,21 +216,21 @@ const QuestionCard: FC<QuestionCardProps> = ({
       case "linear_scale":
         return (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">{question.minValue}</span>
-              <div className="flex gap-2">
+            <div className="flex items-center justify-between overflow-x-auto pb-2">
+              <span className="text-sm text-gray-600 flex-shrink-0">{question.minValue}</span>
+              <div className="flex gap-1 sm:gap-2 mx-2">
                 {Array.from({ length: question.maxValue - question.minValue + 1 }).map((_, index) => (
                   <div
                     key={index}
-                    className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-sm"
+                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs sm:text-sm flex-shrink-0"
                   >
                     {question.minValue + index}
                   </div>
                 ))}
               </div>
-              <span className="text-sm text-gray-600">{question.maxValue}</span>
+              <span className="text-sm text-gray-600 flex-shrink-0">{question.maxValue}</span>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Min value</label>
                 <input
@@ -280,19 +280,19 @@ const QuestionCard: FC<QuestionCardProps> = ({
 
   return (
     <div
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4 hover:shadow-md transition-shadow relative"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 hover:shadow-md transition-shadow relative"
       draggable
       onDragStart={(e) => onDragStart(e, question.id)}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, question.id)}
     >
-      <div className="absolute -top-2 -left-2 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium shadow-md">
+      <div className="absolute -top-2 -left-2 w-7 h-7 sm:w-8 sm:h-8 bg-primary text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-medium shadow-md">
         {questionNumber}
       </div>
 
       {/* Question Header */}
-      <div className="flex items-start gap-4 mb-4">
-        <div className="flex-shrink-0 mt-2 cursor-grab">
+      <div className="flex flex-col lg:flex-row lg:items-start gap-4 mb-4">
+        <div className="hidden lg:flex flex-shrink-0 mt-2 cursor-grab">
           <FaGripVertical className="w-4 h-4 text-gray-400" />
         </div>
         <div className="flex-1 space-y-3">
@@ -301,7 +301,7 @@ const QuestionCard: FC<QuestionCardProps> = ({
             value={question.title}
             onChange={(e) => onUpdate(question.id, "title", e.target.value)}
             placeholder="Question title"
-            className="w-full text-lg font-medium border border-gray-300 rounded px-3 py-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full text-base lg:text-lg font-medium border border-gray-300 rounded px-3 py-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
           <input
             type="text"
@@ -311,7 +311,7 @@ const QuestionCard: FC<QuestionCardProps> = ({
             className="w-full text-sm text-gray-600 border border-gray-300 rounded px-3 py-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
-        <div className="flex-shrink-0 w-48">
+        <div className="flex-shrink-0 w-full lg:w-48">
           <SelectDropdown
             value={question.type}
             onChange={handleTypeChange}
@@ -325,7 +325,7 @@ const QuestionCard: FC<QuestionCardProps> = ({
       <div className="mb-6">{renderQuestionContent()}</div>
 
       {/* Question Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -335,7 +335,7 @@ const QuestionCard: FC<QuestionCardProps> = ({
           />
           <span className="text-sm text-gray-700">Required</span>
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           <button
             onClick={() => onDuplicate(question.id)}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"

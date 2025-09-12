@@ -69,28 +69,28 @@ const SurveyComponent = () => {
 
             {/* Completed Surveys Section */}
             <h1 className="text-lg font-bold text-title mb-4">Completed Surveys</h1>
-            <div className="bg-white rounded-lg shadow-md drop-shadow overflow-hidden">
+            <div className="bg-white rounded-lg shadow-md drop-shadow overflow-hidden overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead>
                             <tr>
-                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800">Survey Title</th>
-                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800">Completed On</th>
-                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800">No. of Questions</th>
-                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800">Actions</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-800 sm:px-6 sm:py-3 sm:text-sm">Survey Title</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-800 sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Completed On</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-800 sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">No. of Questions</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-800 sm:px-6 sm:py-3 sm:text-sm">Actions</th>
                             </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {completedSurveys.length > 0 ? (
                             completedSurveys.map((survey) => (
                                 <tr key={survey.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 text-sm text-gray-700">{survey.title}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                    <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm">{survey.title}</td>
+                                    <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">
                                         {new Date(survey.responses?.find((response)=> response.userId==user?.id)?.createdAt || '').toLocaleDateString()}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                    <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">
                                         {survey.questionItems?.length || 0}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                    <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm">
                                         <button 
                                             onClick={() => navigate({ 
                                                 to: '/dashboard/surveys/review-survey', 
