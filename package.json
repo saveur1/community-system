@@ -3,7 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "install": "npm install --include=dev",
     "dev": "npx tsoa routes && npx tsoa spec && tsx watch server.ts",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
@@ -56,7 +55,15 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
     "tsoa": "^6.6.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    
+    
+    "cross-env": "^10.0.0",
+    "https-proxy-agent": "^7.0.6",
+    "tsx": "^4.20.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.3.5",
+    "@vitejs/plugin-react": "^4.3.4"
   },
   "devDependencies": {
     "@tanstack/react-router-devtools": "^1.130.13",
@@ -66,12 +73,6 @@
     "@types/morgan": "^1.9.10",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.1",
-    "@types/swagger-ui-express": "^4.1.8",
-    "@vitejs/plugin-react": "^4.3.4",
-    "cross-env": "^10.0.0",
-    "https-proxy-agent": "^7.0.6",
-    "tsx": "^4.20.4",
-    "typescript": "^5.7.2",
-    "vite": "^6.3.5"
+    "@types/swagger-ui-express": "^4.1.8"
   }
 }
