@@ -65,7 +65,10 @@ import { Route as DashboardAccountsHealthServiceProvidersRouteImport } from './r
 import { Route as DashboardAccountsCommunityMembersRouteImport } from './routes/dashboard/accounts/community-members'
 import { Route as DashboardAccountsAddNewRouteImport } from './routes/dashboard/accounts/add-new'
 import { Route as AnswersSurveyIdThankYouRouteImport } from './routes/answers.$survey-id/thank-you'
+import { Route as DashboardSurveysRapidEnquiryIndexRouteImport } from './routes/dashboard/surveys/rapid-enquiry/index'
 import { Route as DashboardSurveysTakeSurveyAnswerRouteImport } from './routes/dashboard/surveys/take.$survey-answer'
+import { Route as DashboardSurveysRapidEnquiryAddNewRouteImport } from './routes/dashboard/surveys/rapid-enquiry/add-new'
+import { Route as DashboardSurveysRapidEnquiryEditIdRouteImport } from './routes/dashboard/surveys/rapid-enquiry/$edit-id'
 import { Route as DashboardSurveysEditEditIdRouteImport } from './routes/dashboard/surveys/edit.$edit-id'
 import { Route as DashboardSurveysAnswerSurveyAnswerRouteImport } from './routes/dashboard/surveys/answer.$survey-answer'
 import { Route as DashboardSurveysAnalyticsSurveyIdRouteImport } from './routes/dashboard/surveys/analytics.$survey-id'
@@ -378,10 +381,28 @@ const AnswersSurveyIdThankYouRoute = AnswersSurveyIdThankYouRouteImport.update({
   path: '/answers/$survey-id/thank-you',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardSurveysRapidEnquiryIndexRoute =
+  DashboardSurveysRapidEnquiryIndexRouteImport.update({
+    id: '/surveys/rapid-enquiry/',
+    path: '/surveys/rapid-enquiry/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardSurveysTakeSurveyAnswerRoute =
   DashboardSurveysTakeSurveyAnswerRouteImport.update({
     id: '/surveys/take/$survey-answer',
     path: '/surveys/take/$survey-answer',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardSurveysRapidEnquiryAddNewRoute =
+  DashboardSurveysRapidEnquiryAddNewRouteImport.update({
+    id: '/surveys/rapid-enquiry/add-new',
+    path: '/surveys/rapid-enquiry/add-new',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardSurveysRapidEnquiryEditIdRoute =
+  DashboardSurveysRapidEnquiryEditIdRouteImport.update({
+    id: '/surveys/rapid-enquiry/$edit-id',
+    path: '/surveys/rapid-enquiry/$edit-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardSurveysEditEditIdRoute =
@@ -484,7 +505,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/surveys/analytics/$survey-id': typeof DashboardSurveysAnalyticsSurveyIdRoute
   '/dashboard/surveys/answer/$survey-answer': typeof DashboardSurveysAnswerSurveyAnswerRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
+  '/dashboard/surveys/rapid-enquiry/$edit-id': typeof DashboardSurveysRapidEnquiryEditIdRoute
+  '/dashboard/surveys/rapid-enquiry/add-new': typeof DashboardSurveysRapidEnquiryAddNewRoute
   '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
+  '/dashboard/surveys/rapid-enquiry': typeof DashboardSurveysRapidEnquiryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -547,7 +571,10 @@ export interface FileRoutesByTo {
   '/dashboard/surveys/analytics/$survey-id': typeof DashboardSurveysAnalyticsSurveyIdRoute
   '/dashboard/surveys/answer/$survey-answer': typeof DashboardSurveysAnswerSurveyAnswerRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
+  '/dashboard/surveys/rapid-enquiry/$edit-id': typeof DashboardSurveysRapidEnquiryEditIdRoute
+  '/dashboard/surveys/rapid-enquiry/add-new': typeof DashboardSurveysRapidEnquiryAddNewRoute
   '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
+  '/dashboard/surveys/rapid-enquiry': typeof DashboardSurveysRapidEnquiryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -613,7 +640,10 @@ export interface FileRoutesById {
   '/dashboard/surveys/analytics/$survey-id': typeof DashboardSurveysAnalyticsSurveyIdRoute
   '/dashboard/surveys/answer/$survey-answer': typeof DashboardSurveysAnswerSurveyAnswerRoute
   '/dashboard/surveys/edit/$edit-id': typeof DashboardSurveysEditEditIdRoute
+  '/dashboard/surveys/rapid-enquiry/$edit-id': typeof DashboardSurveysRapidEnquiryEditIdRoute
+  '/dashboard/surveys/rapid-enquiry/add-new': typeof DashboardSurveysRapidEnquiryAddNewRoute
   '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
+  '/dashboard/surveys/rapid-enquiry/': typeof DashboardSurveysRapidEnquiryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -680,7 +710,10 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/analytics/$survey-id'
     | '/dashboard/surveys/answer/$survey-answer'
     | '/dashboard/surveys/edit/$edit-id'
+    | '/dashboard/surveys/rapid-enquiry/$edit-id'
+    | '/dashboard/surveys/rapid-enquiry/add-new'
     | '/dashboard/surveys/take/$survey-answer'
+    | '/dashboard/surveys/rapid-enquiry'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -743,7 +776,10 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/analytics/$survey-id'
     | '/dashboard/surveys/answer/$survey-answer'
     | '/dashboard/surveys/edit/$edit-id'
+    | '/dashboard/surveys/rapid-enquiry/$edit-id'
+    | '/dashboard/surveys/rapid-enquiry/add-new'
     | '/dashboard/surveys/take/$survey-answer'
+    | '/dashboard/surveys/rapid-enquiry'
   id:
     | '__root__'
     | '/'
@@ -808,7 +844,10 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/analytics/$survey-id'
     | '/dashboard/surveys/answer/$survey-answer'
     | '/dashboard/surveys/edit/$edit-id'
+    | '/dashboard/surveys/rapid-enquiry/$edit-id'
+    | '/dashboard/surveys/rapid-enquiry/add-new'
     | '/dashboard/surveys/take/$survey-answer'
+    | '/dashboard/surveys/rapid-enquiry/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1218,11 +1257,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnswersSurveyIdThankYouRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/surveys/rapid-enquiry/': {
+      id: '/dashboard/surveys/rapid-enquiry/'
+      path: '/surveys/rapid-enquiry'
+      fullPath: '/dashboard/surveys/rapid-enquiry'
+      preLoaderRoute: typeof DashboardSurveysRapidEnquiryIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/surveys/take/$survey-answer': {
       id: '/dashboard/surveys/take/$survey-answer'
       path: '/surveys/take/$survey-answer'
       fullPath: '/dashboard/surveys/take/$survey-answer'
       preLoaderRoute: typeof DashboardSurveysTakeSurveyAnswerRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/surveys/rapid-enquiry/add-new': {
+      id: '/dashboard/surveys/rapid-enquiry/add-new'
+      path: '/surveys/rapid-enquiry/add-new'
+      fullPath: '/dashboard/surveys/rapid-enquiry/add-new'
+      preLoaderRoute: typeof DashboardSurveysRapidEnquiryAddNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/surveys/rapid-enquiry/$edit-id': {
+      id: '/dashboard/surveys/rapid-enquiry/$edit-id'
+      path: '/surveys/rapid-enquiry/$edit-id'
+      fullPath: '/dashboard/surveys/rapid-enquiry/$edit-id'
+      preLoaderRoute: typeof DashboardSurveysRapidEnquiryEditIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/surveys/edit/$edit-id': {
@@ -1335,7 +1395,10 @@ interface DashboardRouteRouteChildren {
   DashboardSurveysAnalyticsSurveyIdRoute: typeof DashboardSurveysAnalyticsSurveyIdRoute
   DashboardSurveysAnswerSurveyAnswerRoute: typeof DashboardSurveysAnswerSurveyAnswerRoute
   DashboardSurveysEditEditIdRoute: typeof DashboardSurveysEditEditIdRoute
+  DashboardSurveysRapidEnquiryEditIdRoute: typeof DashboardSurveysRapidEnquiryEditIdRoute
+  DashboardSurveysRapidEnquiryAddNewRoute: typeof DashboardSurveysRapidEnquiryAddNewRoute
   DashboardSurveysTakeSurveyAnswerRoute: typeof DashboardSurveysTakeSurveyAnswerRoute
+  DashboardSurveysRapidEnquiryIndexRoute: typeof DashboardSurveysRapidEnquiryIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
@@ -1390,7 +1453,13 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardSurveysAnswerSurveyAnswerRoute:
     DashboardSurveysAnswerSurveyAnswerRoute,
   DashboardSurveysEditEditIdRoute: DashboardSurveysEditEditIdRoute,
+  DashboardSurveysRapidEnquiryEditIdRoute:
+    DashboardSurveysRapidEnquiryEditIdRoute,
+  DashboardSurveysRapidEnquiryAddNewRoute:
+    DashboardSurveysRapidEnquiryAddNewRoute,
   DashboardSurveysTakeSurveyAnswerRoute: DashboardSurveysTakeSurveyAnswerRoute,
+  DashboardSurveysRapidEnquiryIndexRoute:
+    DashboardSurveysRapidEnquiryIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

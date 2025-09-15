@@ -10,7 +10,7 @@ interface Props {
 
 export default function SurveyFooterActions({ questionsCount, estimatedTime, isSaving, onSave, onCancel }: Props): JSX.Element {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6 p-6">
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-500">
           {questionsCount} question{questionsCount !== 1 ? 's' : ''} •

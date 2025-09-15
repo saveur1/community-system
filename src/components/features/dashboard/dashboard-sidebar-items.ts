@@ -32,6 +32,10 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
     if(checkPermissions(user, 'survey:forms')) {
       surveyItem.children.push({ name: "Report Forms", active: false, link: `/${path}/surveys/report-forms`, icon: HiClipboardList });
     }
+
+    if(checkPermissions(user, 'rapid_enquiry:create')) {
+      surveyItem.children.push({ name: "Rapid Enquiry", active: false, link: `/${path}/surveys/rapid-enquiry`, icon: FaQuestionCircle });
+    }
     
     navigationItems.push(surveyItem)
   }
@@ -81,10 +85,6 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
 
   if (checkPermissions(user, "announcement:create")) {
     navigationItems.push({ name: "Announcements", icon: PiSpeakerSimpleHighBold, active: false, link: `/${path}/announcements` })
-  }
-
-  if (checkPermissions(user, 'rapid_enquiry:create')) {
-    navigationItems.push({ name: "Rapid Enquiry", icon: FaQuestionCircle, active: false, link: `/${path}/rapid-enquiry` })
   }
 
   if (checkPermissions(user, 'stakeholder:create')) {

@@ -1451,6 +1451,165 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ServiceResponse__count-number__": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"properties": {
+							"count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"count"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NotificationCreateRequest": {
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"survey",
+							"feedback",
+							"community_session",
+							"system"
+						]
+					},
+					"title": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"icon": {
+						"type": "string"
+					},
+					"link": {
+						"type": "string"
+					},
+					"entityId": {
+						"type": "string"
+					},
+					"entityType": {
+						"type": "string"
+					},
+					"userIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"type",
+					"title",
+					"message",
+					"userIds"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NotificationUpdateRequest": {
+				"properties": {
+					"isRead": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse__updated-number__": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"properties": {
+							"updated": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"updated"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponse__deleted-number__": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"properties": {
+							"deleted": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"deleted"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"DocumentInput": {
 				"properties": {
 					"documentName": {
@@ -2886,47 +3045,6 @@
 				]
 			}
 		},
-		"/api/surveys/public/{surveyId}": {
-			"get": {
-				"operationId": "GetPublicSurveyById",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Survey not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ServiceResponse_null_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Surveys"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "surveyId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
 		"/api/surveys/{surveyId}/answers": {
 			"post": {
 				"operationId": "SubmitAnswers",
@@ -2945,7 +3063,13 @@
 				"tags": [
 					"Surveys"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": [
+							"survey:respond"
+						]
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2965,32 +3089,17 @@
 									"answers": {
 										"items": {
 											"properties": {
-												"metadata": {},
-												"fileInfo": {
-													"properties": {
-														"filePath": {
-															"type": "string"
-														},
-														"fileSize": {
-															"type": "number",
-															"format": "double"
-														},
-														"fileType": {
-															"type": "string"
-														},
-														"fileName": {
-															"type": "string"
-														}
+												"answerOptions": {
+													"items": {
+														"type": "string"
 													},
-													"required": [
-														"filePath",
-														"fileSize",
-														"fileType",
-														"fileName"
-													],
-													"type": "object"
+													"type": "array",
+													"nullable": true
 												},
-												"value": {},
+												"answerText": {
+													"type": "string",
+													"nullable": true
+												},
 												"questionId": {
 													"type": "string"
 												}
@@ -3015,88 +3124,6 @@
 						}
 					}
 				}
-			}
-		},
-		"/api/surveys/{surveyId}/analytics": {
-			"get": {
-				"operationId": "GetSurveyAnalytics",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ServiceResponse_any_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Surveys"
-				],
-				"security": [
-					{
-						"jwt": [
-							"survey:read"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "surveyId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/api/surveys/{surveyId}/analytics/question/{questionId}": {
-			"get": {
-				"operationId": "GetQuestionAnalytics",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ServiceResponse_any_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Surveys"
-				],
-				"security": [
-					{
-						"jwt": [
-							"survey:read"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "surveyId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "questionId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
 			}
 		},
 		"/api/statistics/overview": {
@@ -4340,6 +4367,324 @@
 						}
 					}
 				}
+			}
+		},
+		"/api/notifications": {
+			"get": {
+				"operationId": "GetNotifications",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "type",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"survey",
+								"feedback",
+								"community_session",
+								"system"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "isRead",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"in": "query",
+						"name": "startDate",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "endDate",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateNotification",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NotificationCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/notifications/unread-count": {
+			"get": {
+				"operationId": "GetUnreadCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__count-number__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/notifications/{notificationId}": {
+			"get": {
+				"operationId": "GetNotificationById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Notification not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "notificationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateNotification",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any-or-null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "notificationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NotificationUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteNotification",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "notificationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/notifications/mark-all-read": {
+			"put": {
+				"operationId": "MarkAllAsRead",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__updated-number__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/notifications/clear-read": {
+			"delete": {
+				"operationId": "ClearReadNotifications",
+				"responses": {
+					"204": {
+						"description": "No Content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse__deleted-number__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Notifications"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/api/feedback": {

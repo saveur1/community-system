@@ -2,7 +2,7 @@ import { useNavigate, createFileRoute } from "@tanstack/react-router"
 import { useCreateSurvey } from "@/hooks/useSurveys"
 import { useProjectsList } from "@/hooks/useProjects"
 import { useRolesList } from "@/hooks/useRoles"
-import { useState, useRef, useEffect, useMemo, type DragEvent, type FC } from "react"
+import { useState, type DragEvent, type FC, useEffect, useMemo } from "react"
 import Breadcrumb from "@/components/ui/breadcrum"
 import { useTranslation } from "react-i18next"
 import { toast } from "react-toastify"
@@ -14,8 +14,6 @@ import type { Question, SurveyDraft, Section } from "@/components/features/surve
 import Modal, { ModalBody, ModalFooter, ModalButton } from "@/components/ui/modal"
 import CustomCalendar from "@/components/ui/calendar"
 import { SelectDropdown } from "@/components/ui/select"
-import { CustomDropdown } from "@/components/ui/dropdown"
-import { FaPlus, FaTimes } from "react-icons/fa"
 
 // moved types to components/features/surveys/types
 
@@ -30,7 +28,6 @@ const CreateSurveyComponent: FC = () => {
   const createSurveyMutation = useCreateSurvey()
   const { data: projectsData } = useProjectsList({ page: 1, limit: 100 })
   const { data: rolesData, isLoading: rolesLoading, isError: rolesError } = useRolesList({ page: 1, limit: 200 })
-  const mobileFloatingRef = useRef<HTMLDivElement>(null)
 
   // Detect "type=report" from search params (client-side)
   const isReport =
@@ -150,21 +147,6 @@ const CreateSurveyComponent: FC = () => {
   const [endHour, setEndHour] = useState<string>(String(now.getHours()).padStart(2, "0"))
   const [endMinute, setEndMinute] = useState<string>(String(now.getMinutes()).padStart(2, "0"))
   const [endPickerOpen, setEndPickerOpen] = useState(false)
-  const [mobileQuestionPickerOpen, setMobileQuestionPickerOpen] = useState(false)
-
-  // Click outside handler for mobile floating panel
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (mobileFloatingRef.current && !mobileFloatingRef.current.contains(event.target as Node)) {
-        setMobileQuestionPickerOpen(false)
-      }
-    }
-
-    if (mobileQuestionPickerOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [mobileQuestionPickerOpen])
 
   // Load survey from local storage on component mount
   useEffect(() => {
@@ -606,7 +588,7 @@ const CreateSurveyComponent: FC = () => {
       {/* Content with Sidebar Layout */}
       <div className="flex gap-6 pt-20">
         {/* Main Content */}
-        <div className="flex-1 lg:max-w-3xl">
+        <div className="flex-1 max-w-3xl">
           <SurveyInfoForm
             title={survey.title}
             description={survey.description}
@@ -830,8 +812,8 @@ const CreateSurveyComponent: FC = () => {
           )}
         </div>
 
-        {/* Desktop Right Sidebar - Hidden on mobile */}
-        <div className="hidden lg:block w-80 flex-shrink-0">
+        {/* Fixed Right Sidebar */}
+        <div className="w-80 flex-shrink-0">
           <div className="sticky top-20">
             <SidebarQuestionPicker
               onAdd={addQuestion}
@@ -863,66 +845,6 @@ const CreateSurveyComponent: FC = () => {
             )}
           </div>
         </div>
-      </div>
-
-      {/* Mobile Floating Button - Only visible on mobile */}
-      <div className="lg:hidden fixed bottom-6 right-6 z-50" ref={mobileFloatingRef}>
-        {/* Floating Button */}
-        <button
-          onClick={() => setMobileQuestionPickerOpen(!mobileQuestionPickerOpen)}
-          className="w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:bg-primary/90 transition-all duration-200 flex items-center justify-center"
-          aria-label={mobileQuestionPickerOpen ? "Close question picker" : "Open question picker"}
-        >
-          {mobileQuestionPickerOpen ? (
-            <FaTimes className="w-5 h-5" />
-          ) : (
-            <FaPlus className="w-5 h-5" />
-          )}
-        </button>
-
-        {/* Floating Panel */}
-        {mobileQuestionPickerOpen && (
-          <div className="absolute bottom-16 right-0 w-80 max-w-[90vw] bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
-            <div className="p-4">
-              <div className="mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Add Questions</h3>
-              </div>
-              <div className="max-h-[60vh] overflow-y-auto">
-                <SidebarQuestionPicker
-                  onAdd={(type) => {
-                    addQuestion(type);
-                    setMobileQuestionPickerOpen(false);
-                  }}
-                  sections={sections}
-                  currentSectionId={currentSectionId}
-                  onSectionChange={setCurrentSectionId}
-                  onAddSection={addSection}
-                />
-              </div>
-              
-              {/* Mobile Survey Summary */}
-              {survey.questions.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Survey Summary</h4>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Questions:</span>
-                      <span className="font-medium">{survey.questions.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Estimated Time:</span>
-                      <span className="font-medium">{survey.estimatedTime || "0"} min</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Required Questions:</span>
-                      <span className="font-medium">{survey.questions.filter((q) => q.required).length}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

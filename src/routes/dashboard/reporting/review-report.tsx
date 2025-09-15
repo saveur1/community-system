@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useSurvey, useSurveysList } from '@/hooks/useSurveys';
 import { FaArrowLeft } from 'react-icons/fa';
-import type { QuestionItem, AnswerItem } from '@/api/surveys';
+import type { AnswerItem } from '@/api/surveys';
 import SurveyAnswerReview from '@/components/survey/SurveyAnswerReview';
 
 export const Route = createFileRoute('/dashboard/reporting/review-report')({
@@ -16,14 +16,16 @@ function RouteComponent() {
   const navigate = useNavigate();
 
   // Fetch user's answered surveys to find user's answers for this survey (report)
-  const { data: userAnswered, isLoading, isError } = useSurveysList({ responded: true, surveyType: undefined });
+  const { data: userAnswered, isLoading, isError } = useSurveysList({ responded: true });
 
   const userAnswersAll = userAnswered?.result || [];
   const survey = userAnswersAll.find(s => s.id === reportId);
   const userSurveyAnswers = survey?.answers || [];
 
   // Build answer list: prefer answers included on survey.result.answers, fallback to userSurveyAnswers
-  const answersList: AnswerItem[] = (survey?.answers ?? userSurveyAnswers) as AnswerItem[];
+  const response = (survey?.responses || []).find(r => r.id === reportId);
+  console.log(survey?.responses);
+  const answersList: AnswerItem[] = (response?.answers ?? userSurveyAnswers) as AnswerItem[];
 
   if (isLoading) {
     return (

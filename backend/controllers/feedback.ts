@@ -10,6 +10,7 @@ import Project from '@/models/project';
 import Role from '@/models/role';
 import { createSystemLog } from '../utils/systemLog';
 import Organization from '@/models/organization';
+import { createNotificationForAdmins } from './notifications';
 
 interface DocumentInput {
   documentName: string;
@@ -190,6 +191,35 @@ export class FeedbackController extends Controller {
     });
     
     await createSystemLog(req ?? null, 'created_feedback', 'Feedback', feedback.id, { feedbackType: data.feedbackType });
+
+    // Create notifications for admins about new feedback
+    try {
+      // Get project name or use otherFeedbackOn for notification message
+      let feedbackSubject = data.otherFeedbackOn || 'Unknown';
+      if (data.projectId) {
+        const project = await Project.findByPk(data.projectId, { attributes: ['name'] });
+        if (project) {
+          feedbackSubject = project.name;
+        }
+      }
+
+      await createNotificationForAdmins(
+        'feedback',
+        'New feedback received',
+        `New feedback has been submitted on ${feedbackSubject}. Please review and take appropriate action.`,
+        {
+          icon: 'HiOutlineChatAlt',
+          link: `/dashboard/feedback/${feedback.id}`,
+          entityId: feedback.id,
+          entityType: 'Feedback',
+          createdBy: req.user?.id,
+          organizationId: orgId || undefined,
+        }
+      );
+    } catch (error) {
+      console.error('Failed to create feedback notifications:', error);
+      // Don't fail the feedback creation if notification fails
+    }
 
     return ServiceResponse.success('Feedback created successfully', result, 201);
   }

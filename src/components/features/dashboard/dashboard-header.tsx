@@ -5,6 +5,8 @@ import {
     HiSun,
     HiMoon,
     HiX,
+    HiDesktopComputer,
+    HiCheck,
 } from "react-icons/hi";
 import { CustomDropdown, DropdownItem } from "@/components/ui/dropdown";
 import useAuth from "@/hooks/useAuth";
@@ -13,7 +15,8 @@ import { spacer } from "@/utility/logicFunctions";
 import NotificationsDropdown from "../notifications/notifications-dropdown";
 import { useRouter } from "@tanstack/react-router";
 
-
+// Theme types
+type ThemeMode = 'system' | 'light' | 'dark';
 
 // Profile component
 type ProfileProps = {
@@ -32,7 +35,7 @@ const getRoleDisplay = (role: string) => {
 const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
     if (!user) {
         return (
-            <div className="flex items-center min-w-24 min-h-12 gap-2 px-2 py-1 bg-gray-100 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg cursor-pointer transition-colors animate-pulse">
+            <div className="flex items-center min-w-24 min-h-12 gap-2 px-2 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg cursor-pointer transition-colors animate-pulse">
             </div>
         );
     }
@@ -44,14 +47,14 @@ const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
     const fullRole = spacer(role);       // e.g. "Generation Population"
     const shortRole = getRoleDisplay(fullRole); // e.g. "GP"
     return (
-        <div className="flex items-center min-w-24 gap-2 px-2 py-1 bg-gray-100 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg cursor-pointer transition-colors">
+        <div className="flex items-center min-w-24 gap-2 px-2 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg cursor-pointer transition-colors">
             <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-200">
                 {user?.name?.charAt(0) || 'U'}
             </div>
             {!collapsed && (
                 <div className="flex items-center gap-1">
                     <div className="text-left">
-                        <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{displayName}</span>
+                        <span className="font-medium text-gray-900 dark:text-white text-sm">{displayName}</span>
                         {/* Role: full text on larger screens, acronym on small screens */}
                         <span
                             className="text-xs text-gray-500 dark:text-gray-400 block truncate capitalize"
@@ -69,13 +72,15 @@ const Profile: React.FC<ProfileProps> = ({ collapsed, user }) => {
 
 interface HeaderProps {
     setMobileMenuOpen: (open: boolean) => void;
-    toggleDarkMode?: () => void,
-    isDarkMode: boolean
+    themeMode?: ThemeMode;
+    setThemeMode?: (mode: ThemeMode) => void;
+    isDarkMode: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
     setMobileMenuOpen,
-    toggleDarkMode,
+    themeMode = 'system',
+    setThemeMode,
     isDarkMode = false,
 }) => {
     const [searchOpen, setSearchOpen] = useState(false);
@@ -84,8 +89,41 @@ const Header: React.FC<HeaderProps> = ({
     const { user, logout } = useAuth();
     const router = useRouter();
 
+    // Theme options
+    const themeOptions = [
+        { 
+            mode: 'system' as ThemeMode, 
+            label: 'System', 
+            icon: <HiDesktopComputer className="w-4 h-4" />,
+            description: 'Use system preference'
+        },
+        { 
+            mode: 'light' as ThemeMode, 
+            label: 'Light', 
+            icon: <HiSun className="w-4 h-4" />,
+            description: 'Light theme'
+        },
+        { 
+            mode: 'dark' as ThemeMode, 
+            label: 'Dark', 
+            icon: <HiMoon className="w-4 h-4" />,
+            description: 'Dark theme'
+        },
+    ];
+
+    const getCurrentThemeIcon = () => {
+        switch (themeMode) {
+            case 'light':
+                return <HiSun className="w-5 h-5 text-gray-600 dark:text-gray-200" />;
+            case 'dark':
+                return <HiMoon className="w-5 h-5 text-gray-600 dark:text-gray-200" />;
+            default:
+                return <HiDesktopComputer className="w-5 h-5 text-gray-600 dark:text-gray-200" />;
+        }
+    };
+
     return (
-        <header className="flex bg-white dark:bg-gray-800 border-b border-gray-200 items-center w-full justify-between px-6 py-4">
+        <header className="flex bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 items-center w-full justify-between px-6 py-4">
             <div className="flex items-center gap-4 w-1/3">
 
                 {/* Mobile menu button */}
@@ -103,19 +141,19 @@ const Header: React.FC<HeaderProps> = ({
                     <input
                         type="text"
                         placeholder="Search surveys..."
-                        className="pl-10 pr-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:border-transparent focus:ring-primary min-w-64 w-full"
+                        className="pl-10 pr-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:border-transparent focus:ring-primary-600 dark:focus:ring-primary-400 min-w-64 w-full placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     />
-                    <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
                 </div>
 
                 {/* Search icon for small screens */}
                 <button
                     onClick={() => setSearchOpen(true)}
-                    className="sm:hidden px-3 bg-gray-100 py-3 mr-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    className="sm:hidden px-3 bg-gray-100 dark:bg-gray-700 py-3 mr-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                     type="button"
                     aria-label="Search"
                 >
-                    <HiSearch className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    <HiSearch className="w-5 h-5 text-gray-600 dark:text-gray-200" />
                 </button>
             </div>
 
@@ -123,34 +161,89 @@ const Header: React.FC<HeaderProps> = ({
                 {/* Notifications Dropdown */}
                 <NotificationsDropdown />
 
-                {/* Theme Toggle */}
-                <button
-                    onClick={toggleDarkMode}
-                    className="py-3 px-3 cursor-pointer rounded-lg bg-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    type="button"
-                    aria-label="Toggle theme"
+                {/* Theme Dropdown */}
+                <CustomDropdown
+                    trigger={
+                        <button
+                            className="p-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+                            type="button"
+                            aria-label="Change theme"
+                        >
+                            {getCurrentThemeIcon()}
+                        </button>
+                    }
+                    position="bottom-right"
+                    dropdownClassName="w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black/10 dark:ring-gray-500/40 overflow-hidden"
+                    closeOnClick={true}
                 >
-                    {isDarkMode ? (
-                        <HiSun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                    ) : (
-                        <HiMoon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                    )}
-                </button>
+                    <div className="py-1">
+                        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-600">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                                Theme
+                            </h3>
+                        </div>
+                        {themeOptions.map((option) => (
+                            <button
+                                key={option.mode}
+                                onClick={() => setThemeMode?.(option.mode)}
+                                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/70 transition-colors flex items-center justify-between"
+                            >
+                                <div className="flex items-center">
+                                    <span className="text-gray-500 dark:text-gray-400 mr-3">
+                                        {option.icon}
+                                    </span>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                            {option.label}
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {option.description}
+                                        </p>
+                                    </div>
+                                </div>
+                                {themeMode === option.mode && (
+                                    <HiCheck className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </CustomDropdown>
 
                 {/* Right Profile with dropdown */}
                 <CustomDropdown
                     trigger={<Profile collapsed={false} user={user} />}
                     position="bottom-right"
-                    dropdownClassName="min-w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg overflow-hidden"
+                    dropdownClassName="min-w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black/10 dark:ring-gray-500/40 overflow-hidden"
                     className=""
                 >
-                    <div className="py-2">
-                        <DropdownItem onClick={() => console.log('Profile')}>Profile</DropdownItem>
-                        <DropdownItem onClick={() => router.navigate({ to: "/dashboard/settings" })}>Settings</DropdownItem>
-                        <DropdownItem onClick={() => router.navigate({ to: "/dashboard/notifications" })}>Notifications</DropdownItem>
-                        <DropdownItem onClick={() => console.log('Help & Support')}>Help & Support</DropdownItem>
-                        <div className="my-1 h-px bg-gray-200 dark:bg-gray-700" />
-                        <DropdownItem destructive onClick={() => logout()}>Logout</DropdownItem>
+                    <div className="py-1">
+                        <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {user?.name || 'User'}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {user?.email || 'user@example.com'}
+                            </p>
+                        </div>
+                        <div className="py-1">
+                            <DropdownItem onClick={() => console.log('Profile')}>
+                                Profile
+                            </DropdownItem>
+                            <DropdownItem onClick={() => router.navigate({ to: "/dashboard/settings" })}>
+                                Settings
+                            </DropdownItem>
+                            <DropdownItem onClick={() => router.navigate({ to: "/dashboard/notifications" })}>
+                                Notifications
+                            </DropdownItem>
+                            <DropdownItem onClick={() => console.log('Help & Support')}>
+                                Help & Support
+                            </DropdownItem>
+                        </div>
+                        <div className="border-t border-gray-200 dark:border-gray-600 py-1">
+                            <DropdownItem destructive onClick={() => logout()}>
+                                Logout
+                            </DropdownItem>
+                        </div>
                     </div>
                 </CustomDropdown>
             </div>
@@ -170,7 +263,7 @@ const Header: React.FC<HeaderProps> = ({
                             type="text"
                             placeholder="Search surveys..."
                             autoFocus
-                            className="w-full pl-3 pr-4 py-2 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:border-transparent focus:ring-primary"
+                            className="w-full pl-3 pr-4 py-2 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:border-transparent focus:ring-primary-600 dark:focus:ring-primary-400 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                         />
                     </div>
                 </div>

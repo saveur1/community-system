@@ -52,6 +52,8 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(true)
   const { t } = useTranslation()
+  console.log("projectId", projectId)
+  console.log("visibleProjects", visibleProjects)
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">

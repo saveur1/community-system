@@ -16,6 +16,7 @@ import Comment from './comment';
 import SystemLog from './systemLog';
 import Announcement from './announcement';
 import Response from './response';
+import Notification from './notification';
 
 // Centralized associations to avoid circular imports
 User.belongsToMany(Role, {
@@ -55,7 +56,16 @@ Document.belongsTo(Project, {
   foreignKey: 'projectId',
 });
 
-// Project stakeholders (existing)
+// Project <-> Survey associations
+Project.hasMany(Survey, {
+  as: 'surveys',
+  foreignKey: 'projectId',
+});
+Survey.belongsTo(Project, {
+  as: 'project',
+  foreignKey: 'projectId',
+});
+
 Project.belongsToMany(Organization, {
   through: 'project_stakeholders',
   as: 'stakeholders',
@@ -69,29 +79,7 @@ Organization.belongsToMany(Project, {
   otherKey: 'projectId',
 });
 
-// Survey belongs to Project (Survey has projectId foreign key)
-Survey.belongsTo(Project, {
-  foreignKey: {
-    name: 'projectId',
-    allowNull: true, // Set to false if you want to make it required
-  },
-  as: 'projectDetails', // Alias to avoid confusion with the existing 'project' string field
-  onDelete: 'SET NULL',
-  onUpdate: 'CASCADE',
-});
-
-// Project has many Surveys
-Project.hasMany(Survey, {
-  foreignKey: {
-    name: 'projectId',
-    allowNull: true,
-  },
-  as: 'surveys',
-  onDelete: 'SET NULL',
-  onUpdate: 'CASCADE',
-});
-
-// Project donors (new)
+// Project donors many-to-many
 Project.belongsToMany(Organization, {
   through: 'project_donors',
   as: 'donors',
@@ -100,7 +88,7 @@ Project.belongsToMany(Organization, {
 });
 Organization.belongsToMany(Project, {
   through: 'project_donors',
-  as: 'donatedProjects',
+  as: 'donorProjects',
   foreignKey: 'organizationId',
   otherKey: 'projectId',
 });
@@ -127,17 +115,6 @@ Organization.belongsTo(User, {
 User.hasMany(Organization, {
   as: 'ownedOrganizations',
   foreignKey: 'ownerId',
-});
-
-// Answer <-> Document association for file uploads
-Answer.hasMany(Document, {
-  as: 'documents',
-  foreignKey: 'answerId',
-  onDelete: 'CASCADE',
-});
-Document.belongsTo(Answer, {
-  as: 'answer',
-  foreignKey: 'answerId',
 });
 
 // Survey associations (new)
@@ -207,18 +184,6 @@ Response.hasMany(Answer, {
 Answer.belongsTo(Response, {
   as: 'response',
   foreignKey: 'responseId',
-});
-
-// Answer ↔ Question associations
-Question.hasMany(Answer, {
-  as: 'answers',
-  foreignKey: 'questionId',
-  onDelete: 'CASCADE',
-  hooks: true,
-});
-Answer.belongsTo(Question, {
-  as: 'question',
-  foreignKey: 'questionId',
 });
 
 // Survey <-> Role many-to-many for allowed roles
@@ -376,8 +341,6 @@ User.hasMany(Announcement, {
 });
 
 //ORGANIZATION ASSOCIATIONS
-Organization.hasMany(Project, { as: 'organizationProjects', foreignKey: 'organizationId' });
-Project.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
 
 Organization.hasMany(Document, { as: 'organizationDocuments', foreignKey: 'organizationId' });
 Document.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
@@ -412,6 +375,34 @@ Announcement.belongsTo(Organization, { as: 'organization', foreignKey: 'organiza
 Role.belongsTo(Organization, { as: 'organization', foreignKey: 'organizationId' });
 Organization.hasMany(Role, { as: 'organizationRoles', foreignKey: 'organizationId' });
 
-const db = { sequelize, User, Role, UserRole, Permission, Project, Document, Organization, Survey, Question, Answer, Section, Feedback, CommunitySession, Comment, SystemLog, Announcement, Response };
+// NOTIFICATION ASSOCIATIONS
+Notification.belongsTo(User, {
+  as: 'user',
+  foreignKey: 'userId',
+});
+User.hasMany(Notification, {
+  as: 'notifications',
+  foreignKey: 'userId',
+});
+
+Notification.belongsTo(User, {
+  as: 'creator',
+  foreignKey: 'createdBy',
+});
+User.hasMany(Notification, {
+  as: 'createdNotifications',
+  foreignKey: 'createdBy',
+});
+
+Notification.belongsTo(Organization, {
+  as: 'organization',
+  foreignKey: 'organizationId',
+});
+Organization.hasMany(Notification, {
+  as: 'organizationNotifications',
+  foreignKey: 'organizationId',
+});
+
+const db = { sequelize, User, Role, UserRole, Permission, Project, Document, Organization, Survey, Question, Answer, Section, Feedback, CommunitySession, Comment, SystemLog, Announcement, Response, Notification };
 
 export default db;

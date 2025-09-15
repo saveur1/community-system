@@ -180,7 +180,6 @@ export type SurveyEntity = {
   sections?: Section[];
   questionItems?: QuestionItem[];
   responses?: ResponseItem[];
-  answers?: AnswerItem[]; // User's answers for this survey
   allowedRoles?: RoleEntity[];
   organization?: {
     id: string;
@@ -207,62 +206,10 @@ export type SurveysListParams = {
 export type SurveysListResponse = ServiceResponse<SurveyEntity[]>;
 export type SurveyResponse = ServiceResponse<SurveyEntity>;
 
-// Analytics types
-export type SurveyAnalytics = {
-  surveyId: string;
-  surveyTitle: string;
-  totalResponses: number;
-  uniqueRespondents: number;
-  completionRate: number;
-  avgTimeMins: number;
-  minTimeMins: number;
-  maxTimeMins: number;
-  medianTimeMins: number;
-  trends: Array<{
-    date: string;
-    count: number;
-  }>;
-  questionAnalytics: Array<{
-    questionId: string;
-    title: string;
-    type: string;
-    required: boolean;
-    responseCount: number;
-    skipRate: number;
-    answerDistribution: any;
-  }>;
-};
-
-export type QuestionAnalytics = {
-  questionId: string;
-  title: string;
-  type: string;
-  required: boolean;
-} & ({
-  type: 'choice';
-  distribution: { [option: string]: number };
-  totalAnswers: number;
-} | {
-  type: 'numeric';
-  average: number;
-  min: number;
-  max: number;
-  median: number;
-  totalAnswers: number;
-  histogram: { [value: string]: number };
-} | {
-  type: 'text';
-  totalAnswers: number;
-  responses: Array<{
-    text: string;
-    createdAt: string;
-  }>;
-});
-
 export type SurveyCreateRequest = {
   title: string;
   description: string;
-  projectId: string;
+  project: string;
   estimatedTime: string;
   surveyType?: 'general' | 'report-form';
   startAt: string;
@@ -278,14 +225,8 @@ export type SubmitAnswersRequest = {
   userId?: string | null; // optional; if omitted, backend uses auth user or anonymous
   answers: Array<{
     questionId: string;
-    value?: any; // Main answer value (can be any type)
-    fileInfo?: {
-      fileName: string;
-      fileType: string;
-      fileSize: number;
-      filePath: string;
-    };
-    metadata?: any; // Additional metadata for the answer
+    answerText?: string | null;
+    answerOptions?: string[] | null;
   }>;
 };
 
@@ -298,11 +239,6 @@ export const surveysApi = {
 
   getById: async (surveyId: string): Promise<SurveyResponse> => {
     const { data } = await client.get(`/surveys/${surveyId}`);
-    return data;
-  },
-
-  getPublicById: async (surveyId: string): Promise<SurveyResponse> => {
-    const { data } = await client.get(`/surveys/public/${surveyId}`);
     return data;
   },
 
@@ -329,17 +265,6 @@ export const surveysApi = {
   // New: list responses for a survey
   responses: async (surveyId: string, page: number = 1, limit: number = 10): Promise<SurveyResponsesList> => {
     const { data } = await client.get(`/surveys/${surveyId}/responses`, { params: { page, limit } });
-    return data;
-  },
-
-  // Analytics endpoints
-  analytics: async (surveyId: string): Promise<ServiceResponse<SurveyAnalytics>> => {
-    const { data } = await client.get(`/surveys/${surveyId}/analytics`);
-    return data;
-  },
-
-  questionAnalytics: async (surveyId: string, questionId: string): Promise<ServiceResponse<QuestionAnalytics>> => {
-    const { data } = await client.get(`/surveys/${surveyId}/analytics/question/${questionId}`);
     return data;
   },
 

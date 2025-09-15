@@ -8,6 +8,7 @@ import { Role } from '../models/role';
 import { asyncCatch } from '../middlewares/errorHandler';
 import { IUserAttributes } from '@/types';
 import { createSystemLog } from '../utils/systemLog';
+import { createNotificationForRoles } from './notifications';
 
 interface CommunitySessionCreateRequest {
   title: string;
@@ -134,6 +135,29 @@ export class CommunitySessionController extends Controller {
     });
 
     await createSystemLog(req ?? null, 'created_community_session', 'CommunitySession', created.id, { type: data.type });
+
+    // Create notifications for allowed roles about new community session
+    if (data.allowedRoles && data.allowedRoles.length > 0) {
+      try {
+        await createNotificationForRoles(
+          'community_session',
+          'New community session',
+          `A new community session "${data.title}" has been created and is now available.`,
+          data.allowedRoles,
+          {
+            icon: 'HiOutlineUsers',
+            link: `/dashboard/community-sessions/${created.id}`,
+            entityId: created.id,
+            entityType: 'CommunitySession',
+            createdBy: req.user.id,
+            organizationId: (req.user as any).primaryOrganizationId,
+          }
+        );
+      } catch (error) {
+        console.error('Failed to create community session notifications:', error);
+        // Don't fail the session creation if notification fails
+      }
+    }
 
     return ServiceResponse.success('Community session created successfully', result, 201);
   }
