@@ -161,14 +161,32 @@ export type SurveyResponseRow = {
 
 export type SurveyResponsesList = ServiceResponse<SurveyResponseRow[]>;
 
+export type SurveyAnalytics = ServiceResponse<{
+  surveyId: string;
+  surveyTitle: string;
+  totalResponses: number;
+  uniqueRespondents: number;
+  completionRate: number; // 0..1
+  trends: Array<{ date: string; count: number }>;
+  questionAnalytics: Array<{
+    questionId: string;
+    title: string;
+    type: QuestionType;
+    required: boolean;
+    responseCount: number;
+    skipRate: number; // 0..1
+    answerDistribution: any;
+  }>;
+}>;
+
 export type SurveyEntity = {
   id: string;
   title: string;
   description: string;
   project: string;
   estimatedTime: string;
-  status: 'active' | 'paused' | 'archived';
-  surveyType?: 'general' | 'report-form';
+  status: 'draft' | 'active' | 'paused' | 'archived';
+  surveyType?: 'general' | 'report-form' | 'rapid-enquiry';
   organizationId?: string | null;
   createdBy?: string | null;
   startAt: string;
@@ -194,8 +212,8 @@ export type SurveyEntity = {
 export type SurveysListParams = { 
   page?: number; 
   limit?: number; 
-  status?: 'active' | 'paused' | 'archived'; 
-  surveyType?: 'general' | 'report-form';
+  status?: 'draft' | 'active' | 'paused' | 'archived'; 
+  surveyType?: 'general' | 'report-form' | 'rapid-enquiry';
   responded?: boolean;
   owner?: 'me' | 'any' | "other" | undefined;
   allowed?: boolean;
@@ -211,7 +229,7 @@ export type SurveyCreateRequest = {
   description: string;
   project: string;
   estimatedTime: string;
-  surveyType?: 'general' | 'report-form';
+  surveyType?: 'general' | 'report-form' | 'rapid-enquiry';
   startAt: string;
   endAt: string;
   sections: Section[];
@@ -265,6 +283,11 @@ export const surveysApi = {
   // New: list responses for a survey
   responses: async (surveyId: string, page: number = 1, limit: number = 10): Promise<SurveyResponsesList> => {
     const { data } = await client.get(`/surveys/${surveyId}/responses`, { params: { page, limit } });
+    return data;
+  },
+
+  getAnalytics: async (surveyId: string, params: { startDate?: string; endDate?: string } = {}): Promise<SurveyAnalytics> => {
+    const { data } = await client.get(`/surveys/${surveyId}/analytics`, { params });
     return data;
   },
 

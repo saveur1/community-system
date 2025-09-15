@@ -531,6 +531,31 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ServiceResponse_any_": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"nullable": true
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"success",
+					"message",
+					"result",
+					"statusCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SurveyCreateRequest": {
 				"properties": {
 					"title": {
@@ -546,7 +571,8 @@
 						"type": "string",
 						"enum": [
 							"general",
-							"report-form"
+							"report-form",
+							"rapid-enquiry"
 						]
 					},
 					"startAt": {
@@ -843,7 +869,6 @@
 				"required": [
 					"title",
 					"description",
-					"projectId",
 					"startAt",
 					"endAt",
 					"estimatedTime",
@@ -868,7 +893,8 @@
 						"type": "string",
 						"enum": [
 							"general",
-							"report-form"
+							"report-form",
+							"rapid-enquiry"
 						]
 					},
 					"startAt": {
@@ -1164,37 +1190,13 @@
 					"status": {
 						"type": "string",
 						"enum": [
+							"draft",
 							"active",
 							"paused",
 							"archived"
 						]
 					}
 				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ServiceResponse_any_": {
-				"properties": {
-					"success": {
-						"type": "boolean"
-					},
-					"message": {
-						"type": "string"
-					},
-					"result": {
-						"nullable": true
-					},
-					"statusCode": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"success",
-					"message",
-					"result",
-					"statusCode"
-				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -2759,6 +2761,7 @@
 						"schema": {
 							"type": "string",
 							"enum": [
+								"draft",
 								"active",
 								"paused",
 								"archived"
@@ -2773,7 +2776,8 @@
 							"type": "string",
 							"enum": [
 								"general",
-								"report-form"
+								"report-form",
+								"rapid-enquiry"
 							]
 						}
 					},
@@ -2859,6 +2863,59 @@
 						}
 					}
 				}
+			}
+		},
+		"/api/surveys/{surveyId}/analytics": {
+			"get": {
+				"operationId": "GetSurveyAnalytics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Surveys"
+				],
+				"security": [
+					{
+						"jwt": [
+							"survey:read"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "surveyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "startDate",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "endDate",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/api/surveys/{surveyId}/responses": {

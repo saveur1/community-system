@@ -208,13 +208,24 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ServiceResponse_any_": {
+        "dataType": "refObject",
+        "properties": {
+            "success": {"dataType":"boolean","required":true},
+            "message": {"dataType":"string","required":true},
+            "result": {"dataType":"union","subSchemas":[{"dataType":"any"},{"dataType":"enum","enums":[null]}],"required":true},
+            "statusCode": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SurveyCreateRequest": {
         "dataType": "refObject",
         "properties": {
             "title": {"dataType":"string","required":true},
             "description": {"dataType":"string","required":true},
-            "projectId": {"dataType":"string","required":true},
-            "surveyType": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["general"]},{"dataType":"enum","enums":["report-form"]},{"dataType":"undefined"}],"required":true},
+            "projectId": {"dataType":"string"},
+            "surveyType": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["general"]},{"dataType":"enum","enums":["report-form"]},{"dataType":"enum","enums":["rapid-enquiry"]},{"dataType":"undefined"}],"required":true},
             "startAt": {"dataType":"string","required":true},
             "endAt": {"dataType":"string","required":true},
             "estimatedTime": {"dataType":"string","required":true},
@@ -231,25 +242,14 @@ const models: TsoaRoute.Models = {
             "title": {"dataType":"string"},
             "description": {"dataType":"string"},
             "projectId": {"dataType":"string"},
-            "surveyType": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["general"]},{"dataType":"enum","enums":["report-form"]}]},
+            "surveyType": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["general"]},{"dataType":"enum","enums":["report-form"]},{"dataType":"enum","enums":["rapid-enquiry"]}]},
             "startAt": {"dataType":"string"},
             "endAt": {"dataType":"string"},
             "estimatedTime": {"dataType":"string"},
             "sections": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"description":{"dataType":"string"},"title":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}}},
             "questions": {"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"options":{"dataType":"array","array":{"dataType":"string"},"required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["single_choice"]},{"dataType":"enum","enums":["multiple_choice"]}],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"placeholder":{"dataType":"string","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["text_input"]},{"dataType":"enum","enums":["textarea"]}],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"maxSize":{"dataType":"double","required":true},"allowedTypes":{"dataType":"array","array":{"dataType":"string"},"required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["file_upload"],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"ratingLabel":{"dataType":"string"},"maxRating":{"dataType":"double","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["rating"],"required":true},"id":{"dataType":"double","required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"maxLabel":{"dataType":"string"},"minLabel":{"dataType":"string"},"maxValue":{"dataType":"double","required":true},"minValue":{"dataType":"double","required":true},"questionNumber":{"dataType":"double"},"sectionId":{"dataType":"string","required":true},"required":{"dataType":"boolean","required":true},"description":{"dataType":"string","required":true},"title":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["linear_scale"],"required":true},"id":{"dataType":"double","required":true}}}]}},
             "allowedRoles": {"dataType":"array","array":{"dataType":"string"}},
-            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["paused"]},{"dataType":"enum","enums":["archived"]}]},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ServiceResponse_any_": {
-        "dataType": "refObject",
-        "properties": {
-            "success": {"dataType":"boolean","required":true},
-            "message": {"dataType":"string","required":true},
-            "result": {"dataType":"union","subSchemas":[{"dataType":"any"},{"dataType":"enum","enums":[null]}],"required":true},
-            "statusCode": {"dataType":"double","required":true},
+            "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["draft"]},{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["paused"]},{"dataType":"enum","enums":["archived"]}]},
         },
         "additionalProperties": false,
     },
@@ -890,8 +890,8 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 page: {"default":1,"in":"query","name":"page","dataType":"double"},
                 limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
-                status: {"in":"query","name":"status","dataType":"union","subSchemas":[{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["paused"]},{"dataType":"enum","enums":["archived"]}]},
-                surveyType: {"in":"query","name":"surveyType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["general"]},{"dataType":"enum","enums":["report-form"]}]},
+                status: {"in":"query","name":"status","dataType":"union","subSchemas":[{"dataType":"enum","enums":["draft"]},{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["paused"]},{"dataType":"enum","enums":["archived"]}]},
+                surveyType: {"in":"query","name":"surveyType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["general"]},{"dataType":"enum","enums":["report-form"]},{"dataType":"enum","enums":["rapid-enquiry"]}]},
                 owner: {"in":"query","name":"owner","dataType":"union","subSchemas":[{"dataType":"enum","enums":["me"]},{"dataType":"enum","enums":["others"]},{"dataType":"enum","enums":["any"]}]},
                 responded: {"in":"query","name":"responded","dataType":"boolean"},
                 allowed: {"in":"query","name":"allowed","dataType":"boolean"},
@@ -915,6 +915,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSurveys',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSurveyController_getSurveyAnalytics: Record<string, TsoaRoute.ParameterSchema> = {
+                surveyId: {"in":"path","name":"surveyId","required":true,"dataType":"string"},
+                startDate: {"in":"query","name":"startDate","dataType":"string"},
+                endDate: {"in":"query","name":"endDate","dataType":"string"},
+        };
+        app.get('/api/surveys/:surveyId/analytics',
+            authenticateMiddleware([{"jwt":["survey:read"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SurveyController)),
+            ...(fetchMiddlewares<RequestHandler>(SurveyController.prototype.getSurveyAnalytics)),
+
+            async function SurveyController_getSurveyAnalytics(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSurveyController_getSurveyAnalytics, request, response });
+
+                const controller = new SurveyController();
+
+              await templateService.apiHandler({
+                methodName: 'getSurveyAnalytics',
                 controller,
                 response,
                 next,

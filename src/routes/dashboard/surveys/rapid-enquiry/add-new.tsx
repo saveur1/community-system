@@ -8,6 +8,7 @@ import QuestionsSection from '@/components/features/surveys/add-survey/Questions
 import SidebarQuestionPicker from '@/components/features/surveys/add-survey/SidebarQuestionPicker'
 import type { Question, Section } from '@/components/features/surveys/types'
 import { FaPlus, FaTimes } from 'react-icons/fa'
+import { useCreateSurvey } from '@/hooks/useSurveys'
 
 const STORAGE_KEY = 'rapid_enquiries'
 const LOCAL_STORAGE_KEY = 'rapid-enquiry-draft'
@@ -25,11 +26,13 @@ function CreateRapidEnquiryComponent() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const mobileFloatingRef = useRef<HTMLDivElement>(null)
+  const createSurveyMutation = useCreateSurvey()
 
   // Form state
   const [title, setTitle] = useState('')
-  const [scheduledAt, setScheduledAt] = useState<Date | null>(null)
-  const [status, setStatus] = useState<'draft' | 'scheduled' | 'active'>('draft')
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
+  const [status, setStatus] = useState<'draft' | 'active'>('draft')
   const [isSaving, setIsSaving] = useState(false)
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false)
 
@@ -49,7 +52,8 @@ function CreateRapidEnquiryComponent() {
       try {
         const data = JSON.parse(saved)
         setTitle(data.title || '')
-        setScheduledAt(data.scheduledAt ? new Date(data.scheduledAt) : null)
+        setStartDate(data.startDate ? new Date(data.startDate) : null)
+        setEndDate(data.endDate ? new Date(data.endDate) : null)
         setStatus(data.status || 'draft')
         setQuestions(data.questions || [])
         toast.info('Restored your draft rapid enquiry')
@@ -62,16 +66,17 @@ function CreateRapidEnquiryComponent() {
 
   // Save to localStorage on change
   useEffect(() => {
-    if (title || scheduledAt || status !== 'draft' || questions.length > 0) {
+    if (title || startDate || endDate || status !== 'draft' || questions.length > 0) {
       const data = {
         title,
-        scheduledAt: scheduledAt?.toISOString(),
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
         status,
         questions
       }
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data))
     }
-  }, [title, scheduledAt, status, questions])
+  }, [title, startDate, endDate, status, questions])
 
   // Click outside handler for mobile floating panels
   useEffect(() => {
@@ -195,38 +200,115 @@ function CreateRapidEnquiryComponent() {
       return
     }
 
+    if (!startDate || !endDate) {
+      toast.error('Please set both start and end times for the rapid enquiry.')
+      return
+    }
+
+    if (questions.length === 0) {
+      toast.error('Please add at least one question.')
+      return
+    }
+
+    // Check for empty question titles
+    const hasEmptyTitle = questions.some((q) => !q.title.trim())
+    if (hasEmptyTitle) {
+      toast.error('All questions must have a title.')
+      return
+    }
+
+    // Check for empty options in choice questions
+    const hasEmptyOption = questions.some(
+      (q) => (q.type === 'single_choice' || q.type === 'multiple_choice') && q.options.some((opt) => !opt.trim()),
+    )
+    if (hasEmptyOption) {
+      toast.error('All options in choice questions must have a value.')
+      return
+    }
+
     setIsSaving(true)
 
-    const item = {
-      id: generateId(),
+    // Normalize questions to match backend TSOA union exactly
+    const normalizedQuestions = questions.map((q: any) => {
+      const common = {
+        id: q.id,
+        type: q.type,
+        title: q.title,
+        description: q.description ?? '',
+        required: !!q.required,
+        sectionId: q.sectionId,
+        questionNumber: q.questionNumber ?? null,
+      }
+      switch (q.type) {
+        case 'single_choice':
+        case 'multiple_choice':
+          return {
+            ...common,
+            options: (q.options ?? []).map((o: any) => String(o)),
+          }
+        case 'text_input':
+        case 'textarea':
+          return {
+            ...common,
+            placeholder: q.placeholder ?? '',
+          }
+        case 'file_upload':
+          return {
+            ...common,
+            allowedTypes: Array.isArray(q.allowedTypes) ? q.allowedTypes.map((t: any) => String(t)) : [],
+            maxSize: typeof q.maxSize === 'number' ? q.maxSize : 10,
+          }
+        case 'rating':
+          return {
+            ...common,
+            maxRating: typeof q.maxRating === 'number' ? q.maxRating : 5,
+            ratingLabel: q.ratingLabel ?? '',
+          }
+        case 'linear_scale':
+          return {
+            ...common,
+            minValue: typeof q.minValue === 'number' ? q.minValue : 1,
+            maxValue: typeof q.maxValue === 'number' ? q.maxValue : 5,
+            minLabel: q.minLabel ?? '',
+            maxLabel: q.maxLabel ?? '',
+          }
+        default:
+          return common
+      }
+    })
+
+    const payload = {
       title: title.trim(),
-      scheduledAt: scheduledAt || null,
-      status,
-      questions,
-      createdAt: new Date().toISOString(),
+      description: '', // Rapid enquiry doesn't have description
+      estimatedTime: '0', // Rapid enquiry doesn't have estimated time
+      surveyType: 'rapid-enquiry' as const,
+      startAt: startDate.toISOString(),
+      endAt: endDate.toISOString(),
+      sections: sections,
+      questions: normalizedQuestions,
+      allowedRoles: [], // Rapid enquiry doesn't have allowed roles
     }
 
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const raw = localStorage.getItem(STORAGE_KEY)
-      const arr = raw ? JSON.parse(raw) as any[] : []
-      arr.unshift(item)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr))
-      localStorage.removeItem(LOCAL_STORAGE_KEY) // Clear draft
-      toast.success('Rapid enquiry created successfully!')
-      navigate({ to: '/dashboard/surveys/rapid-enquiry' })
-    } catch (err) {
-      toast.error('Failed to save rapid enquiry')
-    } finally {
-      setIsSaving(false)
-    }
+    createSurveyMutation.mutate(payload as any, {
+      onSuccess: () => {
+        localStorage.removeItem(LOCAL_STORAGE_KEY) // Clear draft
+        toast.success('Rapid enquiry created successfully!')
+        navigate({ to: '/dashboard/surveys/rapid-enquiry' })
+      },
+      onError: (error: any) => {
+        const msg = error?.response?.data?.message || 'Failed to create rapid enquiry'
+        toast.error(msg)
+      },
+      onSettled: () => {
+        setIsSaving(false)
+      }
+    })
   }
 
   const handleReset = () => {
     setTitle('')
-    setScheduledAt(null)
+    setStartDate(null)
+    setEndDate(null)
     setStatus('draft')
     setQuestions([])
     localStorage.removeItem(LOCAL_STORAGE_KEY)
@@ -260,10 +342,12 @@ function CreateRapidEnquiryComponent() {
         <div className="flex-1 lg:max-w-3xl">
           <RapidEnquiryForm
             title={title}
-            scheduledAt={scheduledAt}
+            startDate={startDate}
+            endDate={endDate}
             status={status}
             onTitleChange={setTitle}
-            onScheduledAtChange={setScheduledAt}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
             onStatusChange={setStatus}
           />
 
@@ -302,10 +386,10 @@ function CreateRapidEnquiryComponent() {
             </div>
             <button
               onClick={handleSave}
-              disabled={isSaving}
+              disabled={isSaving || createSurveyMutation.isPending}
               className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
-              {isSaving ? 'Saving...' : 'Save Rapid Enquiry'}
+              {isSaving || createSurveyMutation.isPending ? 'Saving...' : 'Save Rapid Enquiry'}
             </button>
           </div>
         </div>
@@ -359,17 +443,24 @@ function CreateRapidEnquiryComponent() {
                     <span className="text-gray-600">Status:</span>
                     <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                       status === 'active' ? 'bg-green-100 text-green-800' :
-                      status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                   </div>
-                  {scheduledAt && (
+                  {startDate && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Scheduled:</span>
+                      <span className="text-gray-600">Starts:</span>
                       <span className="font-medium text-right flex-1 ml-2 text-xs">
-                        {scheduledAt.toLocaleDateString()}
+                        {startDate.toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                  {endDate && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Ends:</span>
+                      <span className="font-medium text-right flex-1 ml-2 text-xs">
+                        {endDate.toLocaleDateString()}
                       </span>
                     </div>
                   )}

@@ -6,12 +6,13 @@ import { Op } from 'sequelize';
 import db from '@/models';
 import { createSystemLog } from '../utils/systemLog';
 import { randomUUID } from 'crypto';
+import type { Includeable } from 'sequelize';
 
 interface SurveyCreateRequest {
   title: string;
   description: string;
-  projectId: string;
-  surveyType: "general" | "report-form" | undefined
+  projectId?: string;
+  surveyType: "general" | "report-form" | "rapid-enquiry" | undefined
   startAt: string; // ISO timestamp, required
   endAt: string;   // ISO timestamp, required
   estimatedTime: string; // string to match UI
@@ -81,7 +82,7 @@ interface SurveyCreateRequest {
 }
 
 interface SurveyUpdateRequest extends Partial<SurveyCreateRequest> {
-  status?: "active" | "paused" | "archived";
+  status?: "draft" | "active" | "paused" | "archived";
 }
 
 @Route('api/surveys')
@@ -94,8 +95,8 @@ export class SurveyController extends Controller {
     @Request() request: any,
     @Query() page: number = 1,
     @Query() limit: number = 10,
-    @Query() status?: 'active' | 'paused' | 'archived',
-    @Query() surveyType?: 'general' | 'report-form',
+    @Query() status?: 'draft' | 'active' | 'paused' | 'archived',
+    @Query() surveyType?: 'general' | 'report-form' | 'rapid-enquiry',
     @Query() owner?: 'me' | 'others' | 'any', // owner filter
     @Query() responded?: boolean, // if true, return only surveys the current user has answered
     @Query() allowed?: boolean, // if true, return only surveys that allow any of the current user's roles
@@ -197,6 +198,135 @@ export class SurveyController extends Controller {
       200,
       { total: count, page, totalPages: Math.ceil(count / limit) }
     );
+  }
+
+  @Security('jwt', ['survey:read'])
+  @Get('/{surveyId}/analytics')
+  @asyncCatch
+  public async getSurveyAnalytics(@Path() surveyId: string, @Query() startDate?: string, @Query() endDate?: string): Promise<ServiceResponse<any>> {
+    console.log('getSurveyAnalytics', surveyId, startDate, endDate);
+    const where: any = {};
+    if (startDate) where.createdAt = { [Op.gte]: new Date(startDate) };
+    if (endDate) where.createdAt = { [Op.lte]: new Date(endDate) };
+
+    const survey = await db.Survey.findByPk(surveyId, {
+      attributes: ['id', 'title', 'estimatedTime', 'status', 'surveyType', 'createdAt'],
+      include: [
+        { model: db.Question, as: 'questionItems', attributes: ['id', 'type', 'title', 'required', 'options', 'minValue', 'maxValue', 'maxRating'] } as Includeable,
+      ],
+    });
+    if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
+
+    // Load responses and answers
+    const responses = await db.Response.findAll({
+      where: { surveyId, ...where },
+      attributes: ['id', 'userId', 'createdAt'],
+      order: [['createdAt', 'ASC']],
+      include: [
+        { model: db.Answer, as: 'answers', attributes: ['id', 'questionId', 'answerText', 'answerOptions', 'createdAt'] },
+        { model: db.User, as: 'user', attributes: ['id'] },
+      ],
+    });
+
+    const totalResponses = responses.length;
+    const uniqueRespondents = new Set<string>();
+    const trendsMap: Record<string, number> = {};
+
+    for (const r of responses as any[]) {
+      if (r.user?.id) uniqueRespondents.add(r.user.id);
+      const d = new Date(r.createdAt);
+      const key = d.toISOString().slice(0, 10);
+      trendsMap[key] = (trendsMap[key] ?? 0) + 1;
+    }
+
+    const trends = Object.keys(trendsMap)
+      .sort()
+      .map(date => ({ date, count: trendsMap[date] }));
+
+    // Build question analytics
+    const questionItems = (survey as any).questionItems || [];
+    const questionById: Record<string, any> = {};
+    for (const q of questionItems) questionById[q.id] = q;
+
+    const questionAnalytics: any[] = [];
+    for (const q of questionItems) {
+      const answersForQ: any[] = [];
+      for (const r of responses as any[]) {
+        const found = (r.answers || []).filter((a: any) => a.questionId === q.id);
+        answersForQ.push(...found);
+      }
+
+      const responseCount = answersForQ.length;
+      const required = !!q.required;
+      const skipRate = totalResponses > 0 ? Math.max(0, (totalResponses - responseCount) / totalResponses) : 0;
+
+      let answerDistribution: any = {};
+      if (q.type === 'single_choice' || q.type === 'multiple_choice') {
+        answerDistribution = {} as Record<string, number>;
+        for (const a of answersForQ) {
+          const opts: string[] = Array.isArray(a.answerOptions) ? a.answerOptions : (a.answerOptions ? [a.answerOptions] : []);
+          if (!opts.length && a.answerText) {
+            // fallback when stored as text
+            const k = String(a.answerText);
+            answerDistribution[k] = (answerDistribution[k] ?? 0) + 1;
+          } else {
+            for (const opt of opts) {
+              const k = String(opt);
+              answerDistribution[k] = (answerDistribution[k] ?? 0) + 1;
+            }
+          }
+        }
+      } else if (q.type === 'rating' || q.type === 'linear_scale') {
+        const values: number[] = [];
+        for (const a of answersForQ) {
+          const v = a.answerText != null ? Number(a.answerText) : NaN;
+          if (!Number.isNaN(v)) values.push(v);
+        }
+        const sum = values.reduce((acc, n) => acc + n, 0);
+        const avg = values.length ? sum / values.length : 0;
+        const min = values.length ? Math.min(...values) : 0;
+        const max = values.length ? Math.max(...values) : 0;
+        answerDistribution = { values, average: avg, min, max };
+      } else {
+        // text/textarea/file: report counts
+        const textResponses = answersForQ.filter(a => a.answerText && String(a.answerText).trim().length > 0).length;
+        answerDistribution = { textResponses };
+      }
+
+      questionAnalytics.push({
+        questionId: q.id,
+        title: q.title,
+        type: q.type,
+        required,
+        responseCount,
+        skipRate,
+        answerDistribution,
+      });
+    }
+
+    // Completion rate: percentage of responses that answered all required questions
+    const requiredIds = questionItems.filter((q: any) => q.required).map((q: any) => q.id);
+    let completed = 0;
+    if (requiredIds.length === 0) {
+      completed = totalResponses;
+    } else {
+      for (const r of responses as any[]) {
+        const answeredIds = new Set((r.answers || []).map((a: any) => a.questionId));
+        const all = requiredIds.every((id: string) => answeredIds.has(id));
+        if (all) completed += 1;
+      }
+    }
+    const completionRate = totalResponses > 0 ? completed / totalResponses : 0;
+
+    return ServiceResponse.success('Survey analytics retrieved', {
+      surveyId: survey.id,
+      surveyTitle: (survey as any).title,
+      totalResponses,
+      uniqueRespondents: uniqueRespondents.size,
+      completionRate,
+      trends,
+      questionAnalytics,
+    });
   }
 
   // New: list responses for a survey with compact survey and user info

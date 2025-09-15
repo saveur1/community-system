@@ -36,10 +36,10 @@ export interface SurveyAttributes {
   id: string;
   title: string;
   description: string;
-  projectId: string;
+  projectId?: string;
   estimatedTime: string; // keep as string per UI (e.g., "15")
-  status: 'active' | 'paused' | 'archived';
-  surveyType?: 'general' | 'report-form';
+  status: 'draft' | 'active' | 'paused' | 'archived';
+  surveyType?: 'general' | 'report-form' | 'rapid-enquiry';
   createdBy?: string | null;
   organizationId?: string | null; // NEW: organization association
   // New: when survey opens and closes
@@ -56,10 +56,10 @@ class Survey extends Model<SurveyAttributes, SurveyCreationAttributes> implement
   declare id: string;
   declare title: string;
   declare description: string;
-  declare projectId: string;
+  declare projectId?: string;
   declare estimatedTime: string;
-  declare status: 'active' | 'paused' | 'archived';
-  declare surveyType?: 'general' | 'report-form';
+  declare status: 'draft' | 'active' | 'paused' | 'archived';
+  declare surveyType?: 'general' | 'report-form' | 'rapid-enquiry';
   declare createdBy?: string | null;
   declare organizationId?: string | null;
   declare startAt: Date;
@@ -138,7 +138,7 @@ Survey.init(
     },
     projectId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       comment: 'Project this survey belongs to',
       references: {
         model: 'projects',
@@ -164,7 +164,7 @@ Survey.init(
       comment: 'When survey closes (required)',
     },
     surveyType: {
-      type: DataTypes.ENUM('general', 'report-form'),
+      type: DataTypes.ENUM('general', 'report-form', 'rapid-enquiry'),
       defaultValue: 'general',
       allowNull: false,
       comment: 'Type of survey',
@@ -190,9 +190,9 @@ Survey.init(
       comment: 'Organization this survey belongs to',
     },
     status: {
-      type: DataTypes.ENUM('active', 'paused', 'archived'),
+      type: DataTypes.ENUM('draft', 'active', 'paused', 'archived'),
       allowNull: false,
-      defaultValue: 'active',
+      defaultValue: 'draft',
       comment: 'Survey status lifecycle',
     },
 

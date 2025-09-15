@@ -6,51 +6,84 @@ import DateTimePicker from '../../../ui/date-time'
 
 interface RapidEnquiryFormProps {
   title: string
-  scheduledAt: Date | null
-  status: 'draft' | 'scheduled' | 'active'
+  startDate: Date | null
+  endDate: Date | null
+  status: 'draft' | 'active'
   onTitleChange: (title: string) => void
-  onScheduledAtChange: (date: Date | null) => void
-  onStatusChange: (status: 'draft' | 'scheduled' | 'active') => void
+  onStartDateChange: (date: Date | null) => void
+  onEndDateChange: (date: Date | null) => void
+  onStatusChange: (status: 'draft' | 'active') => void
 }
 
 const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
   title,
-  scheduledAt,
+  startDate,
+  endDate,
   status,
   onTitleChange,
-  onScheduledAtChange,
+  onStartDateChange,
+  onEndDateChange,
   onStatusChange,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true)
   const { t } = useTranslation()
 
-  const [isDateTimeOpen, setIsDateTimeOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<Date | null>(scheduledAt)
-  const [selectedHour, setSelectedHour] = useState<string>(
-    scheduledAt ? String(new Date(scheduledAt).getHours()).padStart(2, '0') : '00'
+  const [isStartDateTimeOpen, setIsStartDateTimeOpen] = useState(false)
+  const [isEndDateTimeOpen, setIsEndDateTimeOpen] = useState(false)
+  
+  const [startSelectedDate, setStartSelectedDate] = useState<Date | null>(startDate)
+  const [startSelectedHour, setStartSelectedHour] = useState<string>(
+    startDate ? String(new Date(startDate).getHours()).padStart(2, '0') : '00'
   )
-  const [selectedMinute, setSelectedMinute] = useState<string>(
-    scheduledAt ? String(new Date(scheduledAt).getMinutes()).padStart(2, '0') : '00'
+  const [startSelectedMinute, setStartSelectedMinute] = useState<string>(
+    startDate ? String(new Date(startDate).getMinutes()).padStart(2, '0') : '00'
   )
 
-  // Keep local state in sync when parent value changes externally
+  const [endSelectedDate, setEndSelectedDate] = useState<Date | null>(endDate)
+  const [endSelectedHour, setEndSelectedHour] = useState<string>(
+    endDate ? String(new Date(endDate).getHours()).padStart(2, '0') : '00'
+  )
+  const [endSelectedMinute, setEndSelectedMinute] = useState<string>(
+    endDate ? String(new Date(endDate).getMinutes()).padStart(2, '0') : '00'
+  )
+
+  // Keep local state in sync when parent values change externally
   useEffect(() => {
-    setSelectedDate(scheduledAt)
-    if (scheduledAt) {
-      const d = new Date(scheduledAt)
-      setSelectedHour(String(d.getHours()).padStart(2, '0'))
-      setSelectedMinute(String(d.getMinutes()).padStart(2, '0'))
+    setStartSelectedDate(startDate)
+    if (startDate) {
+      const d = new Date(startDate)
+      setStartSelectedHour(String(d.getHours()).padStart(2, '0'))
+      setStartSelectedMinute(String(d.getMinutes()).padStart(2, '0'))
     }
-  }, [scheduledAt])
+  }, [startDate])
 
-  const updateScheduledAt = (date: Date | null, hour: string, minute: string) => {
+  useEffect(() => {
+    setEndSelectedDate(endDate)
+    if (endDate) {
+      const d = new Date(endDate)
+      setEndSelectedHour(String(d.getHours()).padStart(2, '0'))
+      setEndSelectedMinute(String(d.getMinutes()).padStart(2, '0'))
+    }
+  }, [endDate])
+
+  const updateStartDate = (date: Date | null, hour: string, minute: string) => {
     if (!date) {
-      onScheduledAtChange(null)
+      onStartDateChange(null)
       return
     }
     const composed = new Date(date)
     composed.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0)
-    onScheduledAtChange(composed)
+    onStartDateChange(composed)
+  }
+
+  const updateEndDate = (date: Date | null, hour: string, minute: string) => {
+    if (!date) {
+      onEndDateChange(null)
+      return
+    }
+    const composed = new Date(date)
+    composed.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0)
+    onEndDateChange(composed)
   }
 
   return (
@@ -96,11 +129,100 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
 
 
           <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+              <FaCalendarAlt className="w-4 h-4" />
+              Start Date & Time
+            </label>
+            <DateTimePicker
+              isOpen={isStartDateTimeOpen}
+              onClose={() => setIsStartDateTimeOpen(false)}
+              title="Pick start date & time"
+              selectedDate={startSelectedDate}
+              selectedHour={startSelectedHour}
+              selectedMinute={startSelectedMinute}
+              onDateChange={(d) => {
+                setStartSelectedDate(d)
+                updateStartDate(d, startSelectedHour, startSelectedMinute)
+              }}
+              onHourChange={(h) => {
+                setStartSelectedHour(h)
+                updateStartDate(startSelectedDate, h, startSelectedMinute)
+              }}
+              onMinuteChange={(m) => {
+                setStartSelectedMinute(m)
+                updateStartDate(startSelectedDate, startSelectedHour, m)
+              }}
+              trigger={
+                <button
+                  type="button"
+                  onClick={() => setIsStartDateTimeOpen(true)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-left text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                >
+                  {startSelectedDate ? (
+                    <span className="text-gray-900">
+                      {startSelectedDate.toLocaleDateString()} {startSelectedHour}:{startSelectedMinute}
+                    </span>
+                  ) : (
+                    <span className="text-gray-500">Select start date and time</span>
+                  )}
+                </button>
+              }
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              When this rapid enquiry becomes available to visitors
+            </p>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+              <FaCalendarAlt className="w-4 h-4" />
+              End Date & Time
+            </label>
+            <DateTimePicker
+              isOpen={isEndDateTimeOpen}
+              onClose={() => setIsEndDateTimeOpen(false)}
+              title="Pick end date & time"
+              selectedDate={endSelectedDate}
+              selectedHour={endSelectedHour}
+              selectedMinute={endSelectedMinute}
+              onDateChange={(d) => {
+                setEndSelectedDate(d)
+                updateEndDate(d, endSelectedHour, endSelectedMinute)
+              }}
+              onHourChange={(h) => {
+                setEndSelectedHour(h)
+                updateEndDate(endSelectedDate, h, endSelectedMinute)
+              }}
+              onMinuteChange={(m) => {
+                setEndSelectedMinute(m)
+                updateEndDate(endSelectedDate, endSelectedHour, m)
+              }}
+              trigger={
+                <button
+                  type="button"
+                  onClick={() => setIsEndDateTimeOpen(true)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-left text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                >
+                  {endSelectedDate ? (
+                    <span className="text-gray-900">
+                      {endSelectedDate.toLocaleDateString()} {endSelectedHour}:{endSelectedMinute}
+                    </span>
+                  ) : (
+                    <span className="text-gray-500">Select end date and time</span>
+                  )}
+                </button>
+              }
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              When this rapid enquiry stops accepting responses
+            </p>
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">Status</label>
             <div className="flex flex-wrap gap-3">
               {[
                 { value: 'draft', label: 'Draft', color: 'bg-gray-100 text-gray-800' },
-                { value: 'scheduled', label: 'Scheduled', color: 'bg-blue-100 text-blue-800' },
                 { value: 'active', label: 'Active', color: 'bg-green-100 text-green-800' },
               ].map((option) => (
                 <label
@@ -112,7 +234,7 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
                     name="status"
                     value={option.value}
                     checked={status === option.value}
-                    onChange={(e) => onStatusChange(e.target.value as 'draft' | 'scheduled' | 'active')}
+                    onChange={(e) => onStatusChange(e.target.value as 'draft' | 'active')}
                     className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                   />
                   <span className="ml-3 text-sm font-medium text-gray-900">{option.label}</span>
@@ -120,56 +242,9 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Draft: Not visible to visitors • Scheduled: Will be published at the scheduled time • Active: Currently visible to visitors
+              Draft: Not visible to visitors • Active: Currently visible to visitors
             </p>
           </div>
-
-          {status === 'scheduled' && (
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                <FaCalendarAlt className="w-4 h-4" />
-                Schedule
-              </label>
-              <DateTimePicker
-                isOpen={isDateTimeOpen}
-                onClose={() => setIsDateTimeOpen(false)}
-                title="Pick schedule date & time"
-                selectedDate={selectedDate}
-                selectedHour={selectedHour}
-                selectedMinute={selectedMinute}
-                onDateChange={(d) => {
-                  setSelectedDate(d)
-                  updateScheduledAt(d, selectedHour, selectedMinute)
-                }}
-                onHourChange={(h) => {
-                  setSelectedHour(h)
-                  updateScheduledAt(selectedDate, h, selectedMinute)
-                }}
-                onMinuteChange={(m) => {
-                  setSelectedMinute(m)
-                  updateScheduledAt(selectedDate, selectedHour, m)
-                }}
-                trigger={
-                  <button
-                    type="button"
-                    onClick={() => setIsDateTimeOpen(true)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-left text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                  >
-                    {selectedDate ? (
-                      <span className="text-gray-900">
-                        {selectedDate.toLocaleDateString()} {selectedHour}:{selectedMinute}
-                      </span>
-                    ) : (
-                      <span className="text-gray-500">Select date and time</span>
-                    )}
-                  </button>
-                }
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Set a future date and time to schedule when this enquiry becomes active
-              </p>
-            </div>
-          )}
         </div>
       )}
     </div>
