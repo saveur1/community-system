@@ -16,7 +16,7 @@ export const surveysKeys = {
     params?.responded ?? null,
   ] as const,
   detail: (id: string) => [...surveysKeys.all, 'detail', id] as const,
-  responses: (id: string, page: number, limit: number) => [...surveysKeys.all, 'responses', id, page, limit] as const,
+  responses: (id?: string, responderId?: string, page?: number, limit?: number, surveyType?: 'report-form' | 'general' | 'rapid-enquiry') => [...surveysKeys.all, 'responses', id, responderId, page, limit, surveyType] as const,
   responseDetail: (id: string) => [...surveysKeys.all, 'responseDetail', id] as const,
   analytics: (id: string) => [...surveysKeys.all, 'analytics', id] as const,
   latestRapidEnquiry: () => [...surveysKeys.all, 'latestRapidEnquiry'] as const,
@@ -49,12 +49,12 @@ export function useResponseById(responseId: string, enabled: boolean = true) {
   });
 }
 
-// List responses for a given survey id
-export function useSurveyResponses(surveyId: string, page: number = 1, limit: number = 10, enabled: boolean = true) {
+// List responses for a given survey id or responder id
+export function useSurveyResponses(surveyId?: string, responderId?: string, page: number = 1, limit: number = 10, surveyType?: 'report-form' | 'general' | 'rapid-enquiry', enabled: boolean = true) {
   return useQuery<SurveyResponsesList>({
-    queryKey: surveysKeys.responses(surveyId, page, limit),
-    queryFn: () => surveysApi.responses(surveyId, page, limit),
-    enabled: !!surveyId && enabled,
+    queryKey: surveysKeys.responses(surveyId, responderId, page, limit, surveyType),
+    queryFn: () => surveysApi.responses(surveyId, responderId, page, limit, surveyType),
+    enabled: (!!surveyId || !!responderId) && enabled,
     placeholderData: keepPreviousData,
   });
 }

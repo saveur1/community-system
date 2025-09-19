@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { FaEdit, FaEye, FaEllipsisV, FaExclamationTriangle, FaChevronRight } from 'react-icons/fa';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
+import { formatDistanceToNow } from 'date-fns';
 
 type Props = {
   paginated: any[];
@@ -10,17 +11,12 @@ type Props = {
   getSurveyActions: (survey: any, user: any) => any[];
   user: any;
   handleActionClick: (actionKey: string, survey: any) => void;
-  // Optional route customization
-  editLinkTo?: string; // e.g. '/dashboard/surveys/edit/$edit-id'
-  editParamName?: string; // e.g. 'edit-id'
-  viewLinkTo?: string; // e.g. '/dashboard/surveys/$view-id'
-  viewParamName?: string; // e.g. 'view-id'
 };
 
-const SurveyListTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor, getSurveyActions, user, handleActionClick, editLinkTo = '/dashboard/surveys/edit/$edit-id', editParamName = 'edit-id', viewLinkTo = '/dashboard/surveys/$view-id', viewParamName = 'view-id' }) => {
+const RapidEnquiryTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor, getSurveyActions, user, handleActionClick }) => {
+  console.log("paginated", paginated)
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      {/* Remove overflow-x-auto from here and add it to inner container */}
       <div className="relative">
         <div className="overflow-x-auto">
           <table className="w-full table-auto">
@@ -29,9 +25,8 @@ const SurveyListTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Survey Title</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6 hidden md:table-cell">Status</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6 hidden lg:table-cell">Responses</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6 hidden lg:table-cell">Questions</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6 hidden lg:table-cell">Time</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6 hidden lg:table-cell">Project</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6 hidden lg:table-cell">Start Date</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6 hidden lg:table-cell">End Date</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Actions</th>
               </tr>
             </thead>
@@ -68,14 +63,17 @@ const SurveyListTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor
                       </span>
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-700 md:px-6 hidden lg:table-cell">{(survey.responses?.length) ?? 0}</td>
-                    <td className="px-4 py-4 text-sm text-gray-700 md:px-6 hidden lg:table-cell">{survey.questionItems?.length ?? 0}</td>
-                    <td className="px-4 py-4 text-sm text-gray-700 md:px-6 hidden lg:table-cell">{survey.estimatedTime}Min</td>
-                    <td className="px-4 py-4 text-sm text-gray-700 md:px-6 hidden lg:table-cell">{survey.project}</td>
+                    <td className="px-4 py-4 text-sm text-gray-700 md:px-6 hidden lg:table-cell">
+                      {survey.startAt ? formatDistanceToNow(new Date(survey.startAt), { addSuffix: true }) : 'N/A'}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-700 md:px-6 hidden lg:table-cell">
+                      {survey.endAt ? formatDistanceToNow(new Date(survey.endAt), { addSuffix: true }) : 'N/A'}
+                    </td>
                     <td className="px-4 py-4 md:px-6">
                       <div className="flex items-center space-x-3 md:space-x-4">
                         <Link
-                          to={editLinkTo}
-                          params={{ [editParamName]: String(survey.id) } as any}
+                          to={'/dashboard/surveys/rapid-enquiry/$edit-id'}
+                          params={{ "edit-id": String(survey.id) } as any}
                           className="text-blue-600 cursor-pointer hover:text-blue-800 transition-colors"
                           title="Edit Survey"
                           aria-label={`Edit survey ${survey.title}`}
@@ -83,15 +81,14 @@ const SurveyListTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor
                           <FaEdit className="w-4 h-4" />
                         </Link>
                         <Link
-                          to={viewLinkTo}
-                          params={{ [viewParamName]: String(survey.id) } as any}
+                          to={'/dashboard/surveys/$view-id'}
+                          params={{ "view-id": String(survey.id) } as any}
                           className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
                           title="View Survey"
                           aria-label={`View survey ${survey.title}`}
                         >
                           <FaEye className="w-4 h-4" />
                         </Link>
-                        {/* Add relative positioning to the dropdown container */}
                         <div className="relative">
                           <CustomDropdown
                             trigger={
@@ -103,7 +100,6 @@ const SurveyListTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor
                               </button>
                             }
                             position="bottom-right"
-                            // Add portal prop to render dropdown outside scrollable container
                             portal={true}
                             dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-48 z-50 overflow-visible"
                           >
@@ -158,4 +154,4 @@ const SurveyListTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor
   );
 };
 
-export default SurveyListTable;
+export default RapidEnquiryTable;

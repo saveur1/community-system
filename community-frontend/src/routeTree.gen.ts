@@ -35,7 +35,6 @@ import { Route as DashboardCommunitySessionsIndexRouteImport } from './routes/da
 import { Route as DashboardAnnouncementsIndexRouteImport } from './routes/dashboard/announcements/index'
 import { Route as DashboardAccountsIndexRouteImport } from './routes/dashboard/accounts/index'
 import { Route as DashboardSurveysThankYouRouteImport } from './routes/dashboard/surveys/thank-you'
-import { Route as DashboardSurveysReviewSurveyRouteImport } from './routes/dashboard/surveys/review-survey'
 import { Route as DashboardSurveysAddNewRouteImport } from './routes/dashboard/surveys/add-new'
 import { Route as DashboardStakeholdersAddNewRouteImport } from './routes/dashboard/stakeholders/add-new'
 import { Route as DashboardStakeholdersViewIdRouteImport } from './routes/dashboard/stakeholders/$view-id'
@@ -43,6 +42,7 @@ import { Route as DashboardStakeholdersEditIdRouteImport } from './routes/dashbo
 import { Route as DashboardSettingsAddRoleRouteImport } from './routes/dashboard/settings/add-role'
 import { Route as DashboardReportingReviewReportRouteImport } from './routes/dashboard/reporting/review-report'
 import { Route as DashboardReportingMakeReportRouteImport } from './routes/dashboard/reporting/make-report'
+import { Route as DashboardReportingReportIdRouteImport } from './routes/dashboard/reporting/$report-id'
 import { Route as DashboardRapidEnquiryAddNewRouteImport } from './routes/dashboard/rapid-enquiry/add-new'
 import { Route as DashboardRapidEnquiryEditIdRouteImport } from './routes/dashboard/rapid-enquiry/$edit-id'
 import { Route as DashboardProjectsAddNewRouteImport } from './routes/dashboard/projects/add-new'
@@ -75,7 +75,8 @@ import { Route as DashboardSurveysViewIdResponseIdRouteImport } from './routes/d
 import { Route as DashboardSettingsEditRoleRoleIdRouteImport } from './routes/dashboard/settings/edit-role.$roleId'
 import { Route as DashboardProjectsEditEditIdRouteImport } from './routes/dashboard/projects/edit.$edit-id'
 import { Route as DashboardFeedbackEditEditIdRouteImport } from './routes/dashboard/feedback/edit.$edit-id'
-import { Route as homeRoutesAnswersSurveyIdThankYouRouteImport } from './routes/(home-routes)/answers.$survey-id.thank-you'
+import { Route as homeRoutesAnswersThankYouSurveyIdRouteImport } from './routes/(home-routes)/answers.thank-you.$survey-id'
+import { Route as DashboardSurveysTakeSurveyResponseResponseIdRouteImport } from './routes/dashboard/surveys/take-survey/response.$response-id'
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
@@ -214,12 +215,6 @@ const DashboardSurveysThankYouRoute =
     path: '/surveys/thank-you',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
-const DashboardSurveysReviewSurveyRoute =
-  DashboardSurveysReviewSurveyRouteImport.update({
-    id: '/surveys/review-survey',
-    path: '/surveys/review-survey',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
 const DashboardSurveysAddNewRoute = DashboardSurveysAddNewRouteImport.update({
   id: '/surveys/add-new',
   path: '/surveys/add-new',
@@ -259,6 +254,12 @@ const DashboardReportingMakeReportRoute =
   DashboardReportingMakeReportRouteImport.update({
     id: '/reporting/make-report',
     path: '/reporting/make-report',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardReportingReportIdRoute =
+  DashboardReportingReportIdRouteImport.update({
+    id: '/reporting/$report-id',
+    path: '/reporting/$report-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardRapidEnquiryAddNewRoute =
@@ -449,11 +450,17 @@ const DashboardFeedbackEditEditIdRoute =
     path: '/feedback/edit/$edit-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
-const homeRoutesAnswersSurveyIdThankYouRoute =
-  homeRoutesAnswersSurveyIdThankYouRouteImport.update({
-    id: '/thank-you',
-    path: '/thank-you',
-    getParentRoute: () => homeRoutesAnswersSurveyIdRoute,
+const homeRoutesAnswersThankYouSurveyIdRoute =
+  homeRoutesAnswersThankYouSurveyIdRouteImport.update({
+    id: '/answers/thank-you/$survey-id',
+    path: '/answers/thank-you/$survey-id',
+    getParentRoute: () => homeRoutesRouteRoute,
+  } as any)
+const DashboardSurveysTakeSurveyResponseResponseIdRoute =
+  DashboardSurveysTakeSurveyResponseResponseIdRouteImport.update({
+    id: '/surveys/take-survey/response/$response-id',
+    path: '/surveys/take-survey/response/$response-id',
+    getParentRoute: () => DashboardRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -468,7 +475,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/answers/$survey-id': typeof homeRoutesAnswersSurveyIdRouteWithChildren
+  '/answers/$survey-id': typeof homeRoutesAnswersSurveyIdRoute
   '/feedback/$programme': typeof homeRoutesFeedbackProgrammeRoute
   '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
@@ -484,6 +491,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
   '/dashboard/rapid-enquiry/$edit-id': typeof DashboardRapidEnquiryEditIdRoute
   '/dashboard/rapid-enquiry/add-new': typeof DashboardRapidEnquiryAddNewRoute
+  '/dashboard/reporting/$report-id': typeof DashboardReportingReportIdRoute
   '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
   '/dashboard/reporting/review-report': typeof DashboardReportingReviewReportRoute
   '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
@@ -491,7 +499,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
   '/dashboard/stakeholders/add-new': typeof DashboardStakeholdersAddNewRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
-  '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements': typeof DashboardAnnouncementsIndexRoute
@@ -506,7 +513,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/stakeholders': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
-  '/answers/$survey-id/thank-you': typeof homeRoutesAnswersSurveyIdThankYouRoute
+  '/answers/thank-you/$survey-id': typeof homeRoutesAnswersThankYouSurveyIdRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/projects/edit/$edit-id': typeof DashboardProjectsEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
@@ -523,6 +530,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/surveys/rapid-enquiry': typeof DashboardSurveysRapidEnquiryIndexRoute
   '/dashboard/surveys/report-forms': typeof DashboardSurveysReportFormsIndexRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyIndexRoute
+  '/dashboard/surveys/take-survey/response/$response-id': typeof DashboardSurveysTakeSurveyResponseResponseIdRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
@@ -535,7 +543,7 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/': typeof homeRoutesIndexRoute
   '/dashboard': typeof DashboardIndexRoute
-  '/answers/$survey-id': typeof homeRoutesAnswersSurveyIdRouteWithChildren
+  '/answers/$survey-id': typeof homeRoutesAnswersSurveyIdRoute
   '/feedback/$programme': typeof homeRoutesFeedbackProgrammeRoute
   '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
@@ -551,6 +559,7 @@ export interface FileRoutesByTo {
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
   '/dashboard/rapid-enquiry/$edit-id': typeof DashboardRapidEnquiryEditIdRoute
   '/dashboard/rapid-enquiry/add-new': typeof DashboardRapidEnquiryAddNewRoute
+  '/dashboard/reporting/$report-id': typeof DashboardReportingReportIdRoute
   '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
   '/dashboard/reporting/review-report': typeof DashboardReportingReviewReportRoute
   '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
@@ -558,7 +567,6 @@ export interface FileRoutesByTo {
   '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
   '/dashboard/stakeholders/add-new': typeof DashboardStakeholdersAddNewRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
-  '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
   '/dashboard/accounts': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements': typeof DashboardAnnouncementsIndexRoute
@@ -573,7 +581,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/stakeholders': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
-  '/answers/$survey-id/thank-you': typeof homeRoutesAnswersSurveyIdThankYouRoute
+  '/answers/thank-you/$survey-id': typeof homeRoutesAnswersThankYouSurveyIdRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/projects/edit/$edit-id': typeof DashboardProjectsEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
@@ -590,6 +598,7 @@ export interface FileRoutesByTo {
   '/dashboard/surveys/rapid-enquiry': typeof DashboardSurveysRapidEnquiryIndexRoute
   '/dashboard/surveys/report-forms': typeof DashboardSurveysReportFormsIndexRoute
   '/dashboard/surveys/take-survey': typeof DashboardSurveysTakeSurveyIndexRoute
+  '/dashboard/surveys/take-survey/response/$response-id': typeof DashboardSurveysTakeSurveyResponseResponseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -605,7 +614,7 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/(home-routes)/': typeof homeRoutesIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/(home-routes)/answers/$survey-id': typeof homeRoutesAnswersSurveyIdRouteWithChildren
+  '/(home-routes)/answers/$survey-id': typeof homeRoutesAnswersSurveyIdRoute
   '/(home-routes)/feedback/$programme': typeof homeRoutesFeedbackProgrammeRoute
   '/dashboard/accounts/add-new': typeof DashboardAccountsAddNewRoute
   '/dashboard/accounts/community-members': typeof DashboardAccountsCommunityMembersRoute
@@ -621,6 +630,7 @@ export interface FileRoutesById {
   '/dashboard/projects/add-new': typeof DashboardProjectsAddNewRoute
   '/dashboard/rapid-enquiry/$edit-id': typeof DashboardRapidEnquiryEditIdRoute
   '/dashboard/rapid-enquiry/add-new': typeof DashboardRapidEnquiryAddNewRoute
+  '/dashboard/reporting/$report-id': typeof DashboardReportingReportIdRoute
   '/dashboard/reporting/make-report': typeof DashboardReportingMakeReportRoute
   '/dashboard/reporting/review-report': typeof DashboardReportingReviewReportRoute
   '/dashboard/settings/add-role': typeof DashboardSettingsAddRoleRoute
@@ -628,7 +638,6 @@ export interface FileRoutesById {
   '/dashboard/stakeholders/$view-id': typeof DashboardStakeholdersViewIdRoute
   '/dashboard/stakeholders/add-new': typeof DashboardStakeholdersAddNewRoute
   '/dashboard/surveys/add-new': typeof DashboardSurveysAddNewRoute
-  '/dashboard/surveys/review-survey': typeof DashboardSurveysReviewSurveyRoute
   '/dashboard/surveys/thank-you': typeof DashboardSurveysThankYouRoute
   '/dashboard/accounts/': typeof DashboardAccountsIndexRoute
   '/dashboard/announcements/': typeof DashboardAnnouncementsIndexRoute
@@ -643,7 +652,7 @@ export interface FileRoutesById {
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/dashboard/stakeholders/': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys/': typeof DashboardSurveysIndexRoute
-  '/(home-routes)/answers/$survey-id/thank-you': typeof homeRoutesAnswersSurveyIdThankYouRoute
+  '/(home-routes)/answers/thank-you/$survey-id': typeof homeRoutesAnswersThankYouSurveyIdRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/projects/edit/$edit-id': typeof DashboardProjectsEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
@@ -660,6 +669,7 @@ export interface FileRoutesById {
   '/dashboard/surveys/rapid-enquiry/': typeof DashboardSurveysRapidEnquiryIndexRoute
   '/dashboard/surveys/report-forms/': typeof DashboardSurveysReportFormsIndexRoute
   '/dashboard/surveys/take-survey/': typeof DashboardSurveysTakeSurveyIndexRoute
+  '/dashboard/surveys/take-survey/response/$response-id': typeof DashboardSurveysTakeSurveyResponseResponseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -691,6 +701,7 @@ export interface FileRouteTypes {
     | '/dashboard/projects/add-new'
     | '/dashboard/rapid-enquiry/$edit-id'
     | '/dashboard/rapid-enquiry/add-new'
+    | '/dashboard/reporting/$report-id'
     | '/dashboard/reporting/make-report'
     | '/dashboard/reporting/review-report'
     | '/dashboard/settings/add-role'
@@ -698,7 +709,6 @@ export interface FileRouteTypes {
     | '/dashboard/stakeholders/$view-id'
     | '/dashboard/stakeholders/add-new'
     | '/dashboard/surveys/add-new'
-    | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/thank-you'
     | '/dashboard/accounts'
     | '/dashboard/announcements'
@@ -713,7 +723,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/stakeholders'
     | '/dashboard/surveys'
-    | '/answers/$survey-id/thank-you'
+    | '/answers/thank-you/$survey-id'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/projects/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
@@ -730,6 +740,7 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/rapid-enquiry'
     | '/dashboard/surveys/report-forms'
     | '/dashboard/surveys/take-survey'
+    | '/dashboard/surveys/take-survey/response/$response-id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -758,6 +769,7 @@ export interface FileRouteTypes {
     | '/dashboard/projects/add-new'
     | '/dashboard/rapid-enquiry/$edit-id'
     | '/dashboard/rapid-enquiry/add-new'
+    | '/dashboard/reporting/$report-id'
     | '/dashboard/reporting/make-report'
     | '/dashboard/reporting/review-report'
     | '/dashboard/settings/add-role'
@@ -765,7 +777,6 @@ export interface FileRouteTypes {
     | '/dashboard/stakeholders/$view-id'
     | '/dashboard/stakeholders/add-new'
     | '/dashboard/surveys/add-new'
-    | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/thank-you'
     | '/dashboard/accounts'
     | '/dashboard/announcements'
@@ -780,7 +791,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/stakeholders'
     | '/dashboard/surveys'
-    | '/answers/$survey-id/thank-you'
+    | '/answers/thank-you/$survey-id'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/projects/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
@@ -797,6 +808,7 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/rapid-enquiry'
     | '/dashboard/surveys/report-forms'
     | '/dashboard/surveys/take-survey'
+    | '/dashboard/surveys/take-survey/response/$response-id'
   id:
     | '__root__'
     | '/(home-routes)'
@@ -827,6 +839,7 @@ export interface FileRouteTypes {
     | '/dashboard/projects/add-new'
     | '/dashboard/rapid-enquiry/$edit-id'
     | '/dashboard/rapid-enquiry/add-new'
+    | '/dashboard/reporting/$report-id'
     | '/dashboard/reporting/make-report'
     | '/dashboard/reporting/review-report'
     | '/dashboard/settings/add-role'
@@ -834,7 +847,6 @@ export interface FileRouteTypes {
     | '/dashboard/stakeholders/$view-id'
     | '/dashboard/stakeholders/add-new'
     | '/dashboard/surveys/add-new'
-    | '/dashboard/surveys/review-survey'
     | '/dashboard/surveys/thank-you'
     | '/dashboard/accounts/'
     | '/dashboard/announcements/'
@@ -849,7 +861,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/'
     | '/dashboard/stakeholders/'
     | '/dashboard/surveys/'
-    | '/(home-routes)/answers/$survey-id/thank-you'
+    | '/(home-routes)/answers/thank-you/$survey-id'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/projects/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
@@ -866,6 +878,7 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/rapid-enquiry/'
     | '/dashboard/surveys/report-forms/'
     | '/dashboard/surveys/take-survey/'
+    | '/dashboard/surveys/take-survey/response/$response-id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1058,13 +1071,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSurveysThankYouRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/surveys/review-survey': {
-      id: '/dashboard/surveys/review-survey'
-      path: '/surveys/review-survey'
-      fullPath: '/dashboard/surveys/review-survey'
-      preLoaderRoute: typeof DashboardSurveysReviewSurveyRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
     '/dashboard/surveys/add-new': {
       id: '/dashboard/surveys/add-new'
       path: '/surveys/add-new'
@@ -1112,6 +1118,13 @@ declare module '@tanstack/react-router' {
       path: '/reporting/make-report'
       fullPath: '/dashboard/reporting/make-report'
       preLoaderRoute: typeof DashboardReportingMakeReportRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/reporting/$report-id': {
+      id: '/dashboard/reporting/$report-id'
+      path: '/reporting/$report-id'
+      fullPath: '/dashboard/reporting/$report-id'
+      preLoaderRoute: typeof DashboardReportingReportIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/rapid-enquiry/add-new': {
@@ -1338,38 +1351,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFeedbackEditEditIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/(home-routes)/answers/$survey-id/thank-you': {
-      id: '/(home-routes)/answers/$survey-id/thank-you'
-      path: '/thank-you'
-      fullPath: '/answers/$survey-id/thank-you'
-      preLoaderRoute: typeof homeRoutesAnswersSurveyIdThankYouRouteImport
-      parentRoute: typeof homeRoutesAnswersSurveyIdRoute
+    '/(home-routes)/answers/thank-you/$survey-id': {
+      id: '/(home-routes)/answers/thank-you/$survey-id'
+      path: '/answers/thank-you/$survey-id'
+      fullPath: '/answers/thank-you/$survey-id'
+      preLoaderRoute: typeof homeRoutesAnswersThankYouSurveyIdRouteImport
+      parentRoute: typeof homeRoutesRouteRoute
+    }
+    '/dashboard/surveys/take-survey/response/$response-id': {
+      id: '/dashboard/surveys/take-survey/response/$response-id'
+      path: '/surveys/take-survey/response/$response-id'
+      fullPath: '/dashboard/surveys/take-survey/response/$response-id'
+      preLoaderRoute: typeof DashboardSurveysTakeSurveyResponseResponseIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
   }
 }
-
-interface homeRoutesAnswersSurveyIdRouteChildren {
-  homeRoutesAnswersSurveyIdThankYouRoute: typeof homeRoutesAnswersSurveyIdThankYouRoute
-}
-
-const homeRoutesAnswersSurveyIdRouteChildren: homeRoutesAnswersSurveyIdRouteChildren =
-  {
-    homeRoutesAnswersSurveyIdThankYouRoute:
-      homeRoutesAnswersSurveyIdThankYouRoute,
-  }
-
-const homeRoutesAnswersSurveyIdRouteWithChildren =
-  homeRoutesAnswersSurveyIdRoute._addFileChildren(
-    homeRoutesAnswersSurveyIdRouteChildren,
-  )
 
 interface homeRoutesRouteRouteChildren {
   homeRoutesApprovalRequiredRoute: typeof homeRoutesApprovalRequiredRoute
   homeRoutesOurImpactsRoute: typeof homeRoutesOurImpactsRoute
   homeRoutesVerifyOrganizationRoute: typeof homeRoutesVerifyOrganizationRoute
   homeRoutesIndexRoute: typeof homeRoutesIndexRoute
-  homeRoutesAnswersSurveyIdRoute: typeof homeRoutesAnswersSurveyIdRouteWithChildren
+  homeRoutesAnswersSurveyIdRoute: typeof homeRoutesAnswersSurveyIdRoute
   homeRoutesFeedbackProgrammeRoute: typeof homeRoutesFeedbackProgrammeRoute
+  homeRoutesAnswersThankYouSurveyIdRoute: typeof homeRoutesAnswersThankYouSurveyIdRoute
 }
 
 const homeRoutesRouteRouteChildren: homeRoutesRouteRouteChildren = {
@@ -1377,8 +1383,10 @@ const homeRoutesRouteRouteChildren: homeRoutesRouteRouteChildren = {
   homeRoutesOurImpactsRoute: homeRoutesOurImpactsRoute,
   homeRoutesVerifyOrganizationRoute: homeRoutesVerifyOrganizationRoute,
   homeRoutesIndexRoute: homeRoutesIndexRoute,
-  homeRoutesAnswersSurveyIdRoute: homeRoutesAnswersSurveyIdRouteWithChildren,
+  homeRoutesAnswersSurveyIdRoute: homeRoutesAnswersSurveyIdRoute,
   homeRoutesFeedbackProgrammeRoute: homeRoutesFeedbackProgrammeRoute,
+  homeRoutesAnswersThankYouSurveyIdRoute:
+    homeRoutesAnswersThankYouSurveyIdRoute,
 }
 
 const homeRoutesRouteRouteWithChildren = homeRoutesRouteRoute._addFileChildren(
@@ -1419,6 +1427,7 @@ interface DashboardRouteRouteChildren {
   DashboardProjectsAddNewRoute: typeof DashboardProjectsAddNewRoute
   DashboardRapidEnquiryEditIdRoute: typeof DashboardRapidEnquiryEditIdRoute
   DashboardRapidEnquiryAddNewRoute: typeof DashboardRapidEnquiryAddNewRoute
+  DashboardReportingReportIdRoute: typeof DashboardReportingReportIdRoute
   DashboardReportingMakeReportRoute: typeof DashboardReportingMakeReportRoute
   DashboardReportingReviewReportRoute: typeof DashboardReportingReviewReportRoute
   DashboardSettingsAddRoleRoute: typeof DashboardSettingsAddRoleRoute
@@ -1426,7 +1435,6 @@ interface DashboardRouteRouteChildren {
   DashboardStakeholdersViewIdRoute: typeof DashboardStakeholdersViewIdRoute
   DashboardStakeholdersAddNewRoute: typeof DashboardStakeholdersAddNewRoute
   DashboardSurveysAddNewRoute: typeof DashboardSurveysAddNewRoute
-  DashboardSurveysReviewSurveyRoute: typeof DashboardSurveysReviewSurveyRoute
   DashboardSurveysThankYouRoute: typeof DashboardSurveysThankYouRoute
   DashboardAccountsIndexRoute: typeof DashboardAccountsIndexRoute
   DashboardAnnouncementsIndexRoute: typeof DashboardAnnouncementsIndexRoute
@@ -1457,6 +1465,7 @@ interface DashboardRouteRouteChildren {
   DashboardSurveysRapidEnquiryIndexRoute: typeof DashboardSurveysRapidEnquiryIndexRoute
   DashboardSurveysReportFormsIndexRoute: typeof DashboardSurveysReportFormsIndexRoute
   DashboardSurveysTakeSurveyIndexRoute: typeof DashboardSurveysTakeSurveyIndexRoute
+  DashboardSurveysTakeSurveyResponseResponseIdRoute: typeof DashboardSurveysTakeSurveyResponseResponseIdRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
@@ -1478,6 +1487,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardProjectsAddNewRoute: DashboardProjectsAddNewRoute,
   DashboardRapidEnquiryEditIdRoute: DashboardRapidEnquiryEditIdRoute,
   DashboardRapidEnquiryAddNewRoute: DashboardRapidEnquiryAddNewRoute,
+  DashboardReportingReportIdRoute: DashboardReportingReportIdRoute,
   DashboardReportingMakeReportRoute: DashboardReportingMakeReportRoute,
   DashboardReportingReviewReportRoute: DashboardReportingReviewReportRoute,
   DashboardSettingsAddRoleRoute: DashboardSettingsAddRoleRoute,
@@ -1485,7 +1495,6 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardStakeholdersViewIdRoute: DashboardStakeholdersViewIdRoute,
   DashboardStakeholdersAddNewRoute: DashboardStakeholdersAddNewRoute,
   DashboardSurveysAddNewRoute: DashboardSurveysAddNewRoute,
-  DashboardSurveysReviewSurveyRoute: DashboardSurveysReviewSurveyRoute,
   DashboardSurveysThankYouRoute: DashboardSurveysThankYouRoute,
   DashboardAccountsIndexRoute: DashboardAccountsIndexRoute,
   DashboardAnnouncementsIndexRoute: DashboardAnnouncementsIndexRoute,
@@ -1522,6 +1531,8 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
     DashboardSurveysRapidEnquiryIndexRoute,
   DashboardSurveysReportFormsIndexRoute: DashboardSurveysReportFormsIndexRoute,
   DashboardSurveysTakeSurveyIndexRoute: DashboardSurveysTakeSurveyIndexRoute,
+  DashboardSurveysTakeSurveyResponseResponseIdRoute:
+    DashboardSurveysTakeSurveyResponseResponseIdRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

@@ -71,7 +71,7 @@ function PublicSurveyAnswerPage() {
               } catch (_) {}
             }
             navigate({
-              to: '/answers/$survey-id/thank-you',
+              to: '/answers/thank-you/$survey-id',
               params: { 'survey-id': survey.id },
             });
           }}
@@ -80,5 +80,3 @@ function PublicSurveyAnswerPage() {
     </div>
   )
 }
-
-export default PublicSurveyAnswerPage

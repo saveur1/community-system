@@ -3,9 +3,17 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import Modal, { ModalBody, ModalFooter, ModalButton } from '@/components/ui/modal';
 import { FiPlus, FiSearch } from 'react-icons/fi';
-import { useSurveysList, useDeleteSurvey } from '@/hooks/useSurveys';
+import { FaShare, FaTrash, FaPause, FaPlay, FaStop, FaChartBar, FaDownload, FaFileExcel, FaFilePdf } from 'react-icons/fa';
+import { useSurveysList, useDeleteSurvey, useUpdateSurveyStatus } from '@/hooks/useSurveys';
 import type { SurveysListParams } from '@/api/surveys';
 import { toast } from 'react-toastify';
+import useAuth from '@/hooks/useAuth';
+import type { User } from '@/api/auth';
+import { checkPermissions } from '@/utility/logicFunctions';
+import SurveyShareModal from '@/components/features/surveys/SurveyShareModal';
+import ExportSurveyModal from '@/components/features/surveys/details/export-survey-modal';
+import RapidEnquiryTable from '@/components/features/surveys/rapid-enquiry/RapidEnquiryTable';
+import { SelectDropdown } from '@/components/ui/select';
 
 export const Route = createFileRoute('/dashboard/surveys/rapid-enquiry/')({
   component: RouteComponent,
@@ -13,12 +21,21 @@ export const Route = createFileRoute('/dashboard/surveys/rapid-enquiry/')({
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'active' | 'paused' | 'archived'>('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Share modal state
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareSurvey, setShareSurvey] = useState<any | null>(null);
+  const [isCopying, setIsCopying] = useState(false);
+  // Export modal state
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportType, setExportType] = useState<'excel' | 'pdf'>('excel');
+  const [exportSurvey, setExportSurvey] = useState<any | null>(null);
   const params = useMemo(() => {
     const p: SurveysListParams = { page, limit: pageSize, surveyType: 'rapid-enquiry' };
     // map status filter if applied
@@ -28,7 +45,7 @@ function RouteComponent() {
 
   const { data, isLoading } = useSurveysList(params);
   const deleteSurvey = useDeleteSurvey();
-  // const updateStatus = useUpdateSurveyStatus();
+  const updateStatus = useUpdateSurveyStatus();
 
   const list = useMemo(() => data?.result ?? [], [data]);
 
@@ -42,10 +59,120 @@ function RouteComponent() {
   const currentPage = Math.min(page, totalPages);
   const paginated = filtered; // server-paginated already; we only filter client-side by query
 
-  const formatDateTime = (iso?: string | null) => {
-    if (!iso) return '-';
-    const d = new Date(iso);
-    return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  const getStatusColor = (status: 'active' | 'paused' | 'archived') => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-300 text-green-900';
+      case 'paused':
+        return 'bg-yellow-300 text-yellow-900';
+      case 'archived':
+        return 'bg-gray-200 text-gray-900';
+      default:
+        return 'bg-gray-300 text-gray-900';
+    }
+  };
+
+  const getSurveyActions = (survey: any, u: User | null) => {
+    const baseActions: any[] = [
+      { key: 'share', label: 'Share Survey', icon: <FaShare className="w-4 h-4" />, destructive: false },
+    ];
+
+    if (checkPermissions(u, 'survey:update')) {
+      if (survey.status === 'active') {
+        baseActions.push(
+          { key: 'analytics', label: 'View Analytics', icon: <FaChartBar className="w-4 h-4" />, destructive: false },
+          {
+            key: 'export',
+            label: 'Export Data',
+            icon: <FaDownload className="w-4 h-4" />,
+            destructive: false,
+            hasSubmenu: true,
+            submenu: [
+              { key: 'export-excel', label: 'Export to Excel', icon: <FaFileExcel className="text-green-600" /> },
+              { key: 'export-pdf', label: 'Export to PDF', icon: <FaFilePdf className="text-red-600" /> },
+            ],
+          } as any,
+          { key: 'pause', label: 'Pause Survey', icon: <FaPause className="w-4 h-4" />, destructive: false },
+          { key: 'archive', label: 'Archive Survey', icon: <FaStop className="w-4 h-4" />, destructive: true },
+        );
+      } else if (survey.status === 'paused') {
+        baseActions.push(
+          { key: 'activate', label: 'Activate Survey', icon: <FaPlay className="w-4 h-4" />, destructive: false },
+          { key: 'archive', label: 'Archive Survey', icon: <FaStop className="w-4 h-4" />, destructive: true },
+        );
+      } else if (survey.status === 'archived') {
+        baseActions.push(
+          { key: 'analytics', label: 'View Analytics', icon: <FaChartBar className="w-4 h-4" />, destructive: false },
+          {
+            key: 'export',
+            label: 'Export Data',
+            icon: <FaDownload className="w-4 h-4" />,
+            destructive: false,
+            hasSubmenu: true,
+            submenu: [
+              { key: 'export-excel', label: 'Export to Excel', icon: <FaFileExcel className="text-green-600" /> },
+              { key: 'export-pdf', label: 'Export to PDF', icon: <FaFilePdf className="text-red-600" /> },
+            ],
+          } as any,
+        );
+      }
+    }
+
+    if (checkPermissions(u, 'survey:delete')) {
+      baseActions.push({ key: 'delete', label: 'Delete Survey', icon: <FaTrash className="w-4 h-4" />, destructive: true });
+    }
+
+    return baseActions;
+  };
+
+  const openShareModal = (s: any) => {
+    setShareSurvey(s);
+    setShareModalOpen(true);
+  };
+
+  const handleCopyLink = async (link: string) => {
+    try {
+      setIsCopying(true);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = link;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      toast.success('Link copied to clipboard');
+    } catch (e: any) {
+      toast.error('Failed to copy link');
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  const handleExportClick = (type: 'excel' | 'pdf', surveyId: string) => {
+    const survey = list.find((s: any) => s.id === surveyId);
+    setExportType(type);
+    setExportSurvey(survey);
+    setExportModalOpen(true);
+  };
+
+  const handleActionClick = (actionKey: string, survey: any) => {
+    if (actionKey === 'pause') updateStatus.mutate({ surveyId: String(survey.id), status: 'paused' });
+    else if (actionKey === 'activate') updateStatus.mutate({ surveyId: String(survey.id), status: 'active' });
+    else if (actionKey === 'archive') updateStatus.mutate({ surveyId: String(survey.id), status: 'archived' });
+    else if (actionKey === 'share') openShareModal(survey);
+    else if (actionKey === 'delete') { setDeleteId(String(survey.id)); setConfirmOpen(true); }
+    else if (actionKey === 'export-excel') handleExportClick('excel', survey.id);
+    else if (actionKey === 'export-pdf') handleExportClick('pdf', survey.id);
+    else if (actionKey === 'analytics') navigate({ to: `/dashboard/surveys/${survey.id}/analytics` });
+    else if (actionKey === 'view') alert(`Viewing details for: ${survey.title}`);
+    else if (actionKey === 'edit') alert(`Editing survey: ${survey.title}`);
+    else if (actionKey === 'duplicate') alert(`Duplicating survey: ${survey.title}`);
+    else if (actionKey === 'pause') alert(`Pausing survey: ${survey.title}`);
+    else if (actionKey === 'resume') alert(`Resuming survey: ${survey.title}`);
+    else if (actionKey === 'stop') alert(`Stopping survey: ${survey.title}`);
   };
 
   const handleDelete = async (id?: string) => {
@@ -73,22 +200,23 @@ function RouteComponent() {
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setPage(1); }}
                 placeholder="Search rapid enquiries..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full pl-10 pr-4 py-2 border outline-none focus:ring-2 focus:ring-primary border-gray-300 rounded-lg"
               />
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             </div>
 
-            <select
+            <SelectDropdown
               value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value as any); setPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="draft">Draft</option>
-              <option value="paused">Paused</option>
-              <option value="archived">Archived</option>
-            </select>
+              options={[
+                { value: "all", label: "All Status" },
+                { value: "active", label: "Active" },
+                { value: "draft", label: "Draft" },
+                { value: "paused", label: "Paused" },
+                { value: "archived", label: "Archived" },
+              ]}
+              onChange={(value) => { setStatusFilter(value as any); setPage(1); }}
+              dropdownClassName="min-w-32"
+            />
           </div>
 
           <Link to="/dashboard/surveys/rapid-enquiry/add-new" className="ml-4 px-4 py-2 bg-primary text-white rounded-lg flex items-center">
@@ -105,53 +233,15 @@ function RouteComponent() {
           <div className="text-sm text-gray-600">Showing {filtered.length} item(s)</div>
         </div>
 
-        <div>
-          <table className="min-w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {isLoading ? (
-                <tr><td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">Loading...</td></tr>
-              ) : paginated.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">No rapid enquiries found.</td></tr>
-              ) : paginated.map((s: any) => (
-                <tr key={s.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-800">{s.title}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{formatDateTime(s.startAt)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{formatDateTime(s.endAt)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700 capitalize">{s.status}</td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-3 text-gray-500">
-                      <button
-                        onClick={() => navigate({ to: '/dashboard/surveys/rapid-enquiry/$edit-id', params: { 'edit-id': s.id } })}
-                        className="hover:text-primary p-2 rounded"
-                        title="Edit"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => { setDeleteId(s.id); setConfirmOpen(true); }}
-                        className="text-red-600 hover:text-red-800 p-2 rounded"
-                        title="Delete"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Reuse the shared SurveyListTable to get identical action UI/behavior */}
+        <RapidEnquiryTable
+          paginated={paginated}
+          isLoading={isLoading}
+          getStatusColor={getStatusColor}
+          getSurveyActions={getSurveyActions}
+          user={user}
+          handleActionClick={handleActionClick}
+        />
 
         <div className="p-4 flex items-center justify-between border-t border-gray-200 text-sm">
           <div className="text-gray-600">Showing {paginated.length} of {data?.meta?.total ?? filtered.length}</div>
@@ -175,6 +265,25 @@ function RouteComponent() {
           <ModalButton variant="danger" onClick={() => handleDelete()}>Delete</ModalButton>
         </ModalFooter>
       </Modal>
+
+      {/* Share Survey Modal */}
+      <SurveyShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        survey={shareSurvey}
+        shareLink={shareSurvey ? `${window.location.origin}/answers/${shareSurvey.id}` : ''}
+        isCopying={isCopying}
+        onCopy={handleCopyLink}
+      />
+
+      {/* Export Survey Modal */}
+      <ExportSurveyModal
+        isOpen={exportModalOpen}
+        onClose={() => { setExportModalOpen(false); setExportSurvey(null); }}
+        exportType={exportType}
+        surveyTitle={exportSurvey?.title || ''}
+        survey={exportSurvey}
+      />
     </div>
   );
 }

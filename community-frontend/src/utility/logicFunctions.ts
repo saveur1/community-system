@@ -142,7 +142,7 @@ export const getResourceLink = (activity: string, resourceId: string) => {
       case "created_survey":
       case "updated_survey":
       case "responded_survey":
-        return `/dashboard/surveys/review-survey?surveyId=${resourceId}`;  
+        return `/dashboard/surveys/take-survey/response/${resourceId}`;
       
       case "created_announcement":
       case "updated_announcement":

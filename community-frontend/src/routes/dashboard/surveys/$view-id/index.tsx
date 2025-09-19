@@ -172,6 +172,21 @@ const SurveyDetail = () => {
     }
   };
 
+  const dynamicBreadcrum = () => {
+    const middleLink = () => {
+      switch (survey?.surveyType) {
+        case "rapid-enquiry": return { title: "Rapid Enquiry", link: "/dashboard/surveys/rapid-enquiry"};
+        case "report-form": return { title: "Report Form", link: "/dashboard/surveys/report-form"};
+        default: return { title: "Surveys", link: "/dashboard/surveys"};
+      }
+    }
+    return [
+      { title: "Dashboard", link: "/dashboard" },
+      { ...middleLink() },
+      { title: survey?.title || "—" }
+    ];
+  };
+
   const handleConfirmDelete = () => {
     if (toDelete) {
       deleteSurvey.mutate(toDelete.id, {
@@ -192,9 +207,6 @@ const SurveyDetail = () => {
   const handleExportModalClose = () => {
     setExportModalOpen(false);
   };
-
-  // Use new endpoint to get this survey's responses
-  // const { data: surveyResponses, isLoading: isLoadingResponses } = useSurveyResponses(viewId, page, pageSize, true);
 
   // Adapt rows for table
   const fetchedResponses = useMemo(() => {
@@ -282,12 +294,8 @@ const SurveyDetail = () => {
   return (
     <div className="pb-10">
       <Breadcrumb
-        items={[
-          { title: "Dashboard", link: "/dashboard" },
-          { title: "Surveys", link: "/dashboard/surveys" },
-          { title: survey?.title || "—" }
-        ]}
-        title="Survey Details"
+        items={dynamicBreadcrum()}
+        title={survey?.surveyType === "rapid-enquiry" ? "Rapid Enquiry Details" : "Survey Details"}
         className='absolute top-0 left-0 w-full px-6'
       />
 

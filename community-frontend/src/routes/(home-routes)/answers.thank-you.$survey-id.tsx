@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { FaCheckCircle } from 'react-icons/fa';
 
-export const Route = createFileRoute('/(home-routes)/answers/$survey-id/thank-you')({
+export const Route = createFileRoute('/(home-routes)/answers/thank-you/$survey-id')({
   component: SurveyThankYou,
 })
 

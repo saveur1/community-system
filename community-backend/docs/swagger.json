@@ -2834,6 +2834,14 @@
 					},
 					{
 						"in": "query",
+						"name": "available",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"in": "query",
 						"name": "startDate",
 						"required": false,
 						"schema": {
@@ -2940,7 +2948,7 @@
 				]
 			}
 		},
-		"/api/surveys/responses/{surveyId}": {
+		"/api/surveys/responses": {
 			"get": {
 				"operationId": "GetSurveyResponses",
 				"responses": {
@@ -2967,11 +2975,32 @@
 				],
 				"parameters": [
 					{
-						"in": "path",
+						"in": "query",
 						"name": "surveyId",
-						"required": true,
+						"required": false,
 						"schema": {
 							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "responderId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "surveyType",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"report-form",
+								"general",
+								"rapid-enquiry"
+							]
 						}
 					},
 					{
@@ -3025,7 +3054,11 @@
 				"tags": [
 					"Surveys"
 				],
-				"security": [],
+				"security": [
+					{
+						"optionalJwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3138,9 +3171,7 @@
 				],
 				"security": [
 					{
-						"jwt": [
-							"survey:respond"
-						]
+						"optionalJwt": []
 					}
 				],
 				"parameters": [
@@ -3254,7 +3285,11 @@
 				"tags": [
 					"Surveys"
 				],
-				"security": [],
+				"security": [
+					{
+						"optionalJwt": []
+					}
+				],
 				"parameters": []
 			}
 		},

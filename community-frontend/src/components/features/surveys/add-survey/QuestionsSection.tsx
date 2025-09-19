@@ -51,15 +51,8 @@ const QuestionsSection: FC<QuestionsSectionProps> = ({
   }
 
   const handleSectionTitleSave = () => {
-    console.log("[v0] Save button clicked, editTitle:", editTitle)
-    console.log("[v0] Current section:", currentSection)
-
     if (currentSection && editTitle.trim()) {
-      console.log("[v0] Calling onUpdateSection with:", currentSection.id, editTitle.trim())
       onUpdateSection(currentSection.id, editTitle.trim())
-      console.log("[v0] onUpdateSection called successfully")
-    } else {
-      console.log("[v0] Save failed - missing section or empty title")
     }
     setIsEditingTitle(false)
   }

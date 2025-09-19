@@ -100,15 +100,16 @@ export class SurveyController extends Controller {
     @Query() owner?: 'me' | 'others' | 'any', // owner filter
     @Query() responded?: boolean, // if true, return only surveys the current user has answered
     @Query() allowed?: boolean, // if true, return only surveys that allow any of the current user's roles
+    @Query() available?: boolean, // if true, return only surveys the current user hasn't responded to
     @Query() startDate?: string,
     @Query() endDate?: string
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
     const where: any = {};
-    // base includes; we'll adjust allowedRoles include below if `allowed` is true
+    // base includes; we'll adjust allowedRoles and responses includes below
     const includeArr: any[] = [
       { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-      { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+      { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
       // Include responses with nested answers
       {
         model: db.Response, as: 'responses', include: [
@@ -152,13 +153,32 @@ export class SurveyController extends Controller {
       if (!userId) {
         return ServiceResponse.failure('Authentication required to filter by responded', [], 401);
       }
-      // require at least one answer by this user (inner join)
+      // require at least one response by this user (inner join)
       includeArr[2] = {
         model: db.Response, as: 'responses', required: true, where: { userId }, include: [
           { model: db.Answer, as: 'answers', include: [{ model: db.User, as: 'user', attributes: ['id', 'name'] }] },
           { model: db.User, as: 'user', attributes: ['id', 'name'] }
         ]
       };
+    }
+
+    // AVAILABLE FILTERING: only surveys the current user hasn't responded to
+    if (available) {
+      if (!userId) {
+        return ServiceResponse.failure('Authentication required to filter by available', [], 401);
+      }
+      
+      // Use a subquery approach to exclude surveys the user has already responded to
+      where[Op.and] = where[Op.and] || [];
+      where[Op.and].push({
+        id: {
+          [Op.notIn]: db.sequelize.literal(`(
+            SELECT DISTINCT surveyId 
+            FROM responses 
+            WHERE userId = '${userId}'
+          )`)
+        }
+      });
     }
 
     // ALLOWED FILTERING: only surveys that allow any of the current user's roles
@@ -216,7 +236,7 @@ export class SurveyController extends Controller {
     const survey = await db.Survey.findByPk(surveyId, {
       attributes: ['id', 'title', 'estimatedTime', 'status', 'surveyType', 'createdAt'],
       include: [
-        { model: db.Question, as: 'questionItems', attributes: ['id', 'type', 'title', 'required', 'options', 'minValue', 'maxValue', 'maxRating'] } as Includeable,
+        { model: db.Question, as: 'questionItems', attributes: ['id', 'type', 'title', 'required', 'options', 'minValue', 'maxValue', 'maxRating'], order: [['questionNumber', 'ASC']] } as Includeable,
       ],
     });
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
@@ -267,7 +287,7 @@ export class SurveyController extends Controller {
       let answerDistribution: any = {};
       if (q.type === 'single_choice' || q.type === 'multiple_choice') {
         answerDistribution = {} as Record<string, number>;
-        
+
         // Initialize all possible options with 0 count
         if (q.options) {
           let allOptions: string[] = [];
@@ -276,13 +296,13 @@ export class SurveyController extends Controller {
           } catch (e) {
             allOptions = [];
           }
-          
+
           // Initialize all options with 0
           for (const option of allOptions) {
             answerDistribution[String(option)] = 0;
           }
         }
-        
+
         // Count actual responses
         for (const a of answersForQ) {
           const opts: string[] = Array.isArray(a.answerOptions) ? a.answerOptions : (a.answerOptions ? [a.answerOptions] : []);
@@ -352,70 +372,75 @@ export class SurveyController extends Controller {
 
   // list responses for a survey with compact survey and user info
   @Security('jwt', ['survey:read'])
-  @Get('/responses/{surveyId}')
+  @Get('/responses')
   @asyncCatch
   public async getSurveyResponses(
-    @Path() surveyId: string,
+    @Query() surveyId?: string,
+    @Query() responderId?: string,
+    @Query() surveyType?: 'report-form' | 'general' | 'rapid-enquiry',
     @Query() page: number = 1,
     @Query() limit: number = 10,
   ): Promise<ServiceResponse<any[]>> {
-    const survey = await db.Survey.findByPk(surveyId, {
-      attributes: ['id', 'title', 'surveyType', 'estimatedTime'],
+    // Validate that at least one query parameter is provided
+    if (!surveyId && !responderId) {
+      return ServiceResponse.failure('Either surveyId or responderId query parameter is required', [], 400);
+    }
+
+    // Build where clause based on provided parameters
+    const whereClause: any = {};
+    if (surveyId) whereClause.surveyId = surveyId;
+    if (responderId) whereClause.userId = responderId;
+
+    // Build survey include with surveyType filter
+    const surveyInclude: any = {
+      model: db.Survey,
+      as: 'survey',
       include: [
+        { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
-      ],
-    });
-    if (!survey) return ServiceResponse.failure('Survey not found', [], 404);
-
-    const offset = (page - 1) * limit;
-    const { count, rows } = await db.Response.findAndCountAll({
-      where: { surveyId },
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']],
-      include: [
-        { model: db.Answer, as: 'answers' },
-        {
-          model: db.User, as: 'user', attributes: ['id', 'name', 'email', 'phone'], include: [
-            { model: db.Role, as: 'roles', through: { attributes: [] } },
-          ]
-        },
-      ],
-      distinct: true,
-    });
-
-    const compactSurvey = {
-      id: survey.id,
-      title: survey.title,
-      surveyType: survey.surveyType,
-      projectId: survey.projectId,
-      estimatedTime: survey.estimatedTime,
-      organization: survey.organization ? { id: survey.organization.id, name: survey.organization.name } : null,
+        { model: db.User, as: 'creator', attributes: ['id', 'name'] },
+      ]
     };
 
-    const payload = rows.map((r: any) => ({
-      id: r.id,
-      survey: compactSurvey,
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-      user: r.user ? {
-        id: r.user.id,
-        name: r.user.name,
-        email: r.user.email,
-        phone: r.user.phone,
-        roles: Array.isArray(r.user.roles) ? r.user.roles.map((role: any) => ({ id: role.id, name: role.name, category: role.category })) : [],
-      } : null,
-      answers: (r.answers || []).map((a: any) => ({
-        id: a.id,
-        questionId: a.questionId,
-        answerText: a.answerText,
-        answerOptions: a.answerOptions,
-        createdAt: a.createdAt,
-        updatedAt: a.updatedAt,
-      })),
-    }));
+    // Add surveyType filter if provided
+    if (surveyType) {
+      surveyInclude.where = { surveyType };
+    }
 
-    return ServiceResponse.success('Survey responses retrieved successfully', payload, 200, { total: count, page, totalPages: Math.ceil(count / limit) });
+    const offset = (page - 1) * Math.max(1, limit);
+    
+    // Handle negative limit (fetch all records)
+    const queryOptions: any = {
+      where: whereClause,
+      offset: limit > 0 ? offset : 0,
+      order: [['createdAt', 'DESC']],
+      include: [
+        {
+          model: db.Answer,
+          as: 'answers'
+        },
+        {
+          model: db.User,
+          as: 'user',
+          attributes: ['id', 'name', 'email', 'phone'],
+          include: [
+            { model: db.Role, as: 'roles', through: { attributes: [] } }
+          ]
+        },
+        surveyInclude
+      ],
+      distinct: true,
+    };
+
+    // Only add limit if it's positive
+    if (limit > 0) {
+      queryOptions.limit = limit;
+    }
+
+    const { count, rows } = await db.Response.findAndCountAll(queryOptions);
+
+    return ServiceResponse.success('Responses retrieved successfully', rows, 200, { total: count, page, totalPages: limit > 0 ? Math.ceil(count / limit) : 1 });
   }
 
 
@@ -427,12 +452,13 @@ export class SurveyController extends Controller {
     const survey = await db.Survey.findByPk(surveyId, {
       include: [
         { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
         { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name', 'email', 'phone', 'status'], include: [{ model: db.Role, as: 'roles', attributes: ['id', 'name'], through: { attributes: [] } }] }] },
         { model: db.Role, as: 'allowedRoles', through: { attributes: [] } },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
         { model: db.User, as: 'creator', attributes: ['id', 'name'] },
       ],
+      order: [['createdAt', 'DESC']],
     });
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
     return ServiceResponse.success('Survey retrieved successfully', survey);
@@ -587,7 +613,7 @@ export class SurveyController extends Controller {
     const result = await db.Survey.findByPk(created.id, {
       include: [
         { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
         { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
         { model: db.Role, as: 'allowedRoles', through: { attributes: [] } },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
@@ -745,7 +771,7 @@ export class SurveyController extends Controller {
     const result = await db.Survey.findByPk(survey.id, {
       include: [
         { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
         { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
         { model: db.Role, as: 'allowedRoles', through: { attributes: [] } },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
@@ -821,7 +847,7 @@ export class SurveyController extends Controller {
     const result = await db.Survey.findByPk(survey.id, {
       include: [
         { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
         { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
         { model: db.User, as: 'creator', attributes: ['id', 'name'] },
@@ -856,7 +882,7 @@ export class SurveyController extends Controller {
           as: 'survey',
           include: [
             { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-            { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+            { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
             { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
             { model: db.User, as: 'creator', attributes: ['id', 'name'] },
           ]
@@ -884,7 +910,7 @@ export class SurveyController extends Controller {
       order: [['createdAt', 'DESC']], // Get the latest one
       include: [
         { model: db.Section, as: 'sections', order: [['order', 'ASC']] },
-        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }] },
+        { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
         { model: db.User, as: 'creator', attributes: ['id', 'name'] },
       ],

@@ -1,50 +1,66 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import {  FaPlus } from 'react-icons/fa';
 import MainToolbar from '@/components/common/main-toolbar';
 import { SurveyPagination } from '@/components/features/surveys/survey-pagination';
-import { useSurveysList } from '@/hooks/useSurveys';
+import { useSurveyResponses } from '@/hooks/useSurveys';
+import { useAuth } from '@/hooks/useAuth';
+import { format, parseISO } from 'date-fns';
 
 const ReportingList = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(20);
 
-  // Use API to fetch report-forms the user can access
-  const { data: reportsResp, isLoading: isLoadingReports, isError: isErrorReports } = useSurveysList({
-    surveyType: 'report-form',
-    status: 'active',
+  // Get current user for responderId
+  const { user } = useAuth();
+  
+  // Use API to fetch user's responses to report-forms
+  const { data: reportsResp, isLoading: isLoadingReports, isError: isErrorReports } = useSurveyResponses(
+    undefined, // surveyId - not filtering by specific survey
+    user?.id, // responderId - get responses by current user
     page,
-    limit: pageSize,
-    responded: true,
-    allowed: true,
-  });
+    pageSize,
+    "report-form",
+    !!user?.id // only enabled when we have user ID
+  );
 
-  const getStatusColor = (status: 'active' | 'paused' | 'archived') => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'archived':
-        return 'bg-gray-200 text-gray-700';
-      default:
-        return 'bg-gray-100 text-gray-800';
+
+  // Map backend ResponseDetailItem -> UI report shape
+  const reports = (reportsResp?.result ?? [])
+    .filter((response: any) => response.survey?.surveyType === 'report-form') // Only show report-form responses
+    .map((response: any, index: number) => ({
+      id: response.id,
+      title: `Report ${index + 1}`, // Report 1, Report 2, etc.
+      surveyTitle: response.survey?.title || 'Unknown Survey',
+      questionCount: (response.survey?.questionItems ?? []).length,
+      respondedAt: response.createdAt,
+      project: response.survey?.project?.title || 'No Project',
+      surveyId: response.survey?.id,
+    }));
+
+  // Build rows for Excel export
+  const excelDataExported = useMemo(() => {
+    return reports.map((r, idx) => ({
+      id: idx + 1,
+      reportTitle: r.title,
+      surveyTitle: r.surveyTitle,
+      questionCount: r.questionCount,
+      respondedAt: r.respondedAt ? format(parseISO(r.respondedAt), 'MMM dd, yyyy h:mm a') : '',
+      project: r.project,
+    }));
+  }, [reports]);
+
+  // Format date with date-fns
+  const formatDate = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), 'MMM dd, yyyy h:mm a');
+    } catch {
+      return 'Invalid Date';
     }
   };
-
-  // Map backend Survey -> UI report shape
-  const reports = (reportsResp?.result ?? []).map((s: any) => ({
-    id: s.id,
-    title: s.title,
-    description: s.description ?? '',
-    status: s.status ?? 'active',
-    estimatedTime: Number(s.estimatedTime) || 0,
-    project: s.project || '',
-    questionCount: (s.questionItems ?? []).length,
-  }));
 
   // derive pagination from backend meta when available
   const totalItems = reportsResp?.meta?.total ?? (reportsResp ? reports.length : 0);
@@ -60,9 +76,8 @@ const ReportingList = () => {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report</th>
-              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responded At</th>
               <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
               <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -72,31 +87,23 @@ const ReportingList = () => {
               <tr key={r.id} className="hover:bg-gray-50">
                 <td className="px-3 lg:px-6 py-4">
                   <div className="text-sm font-medium text-gray-700">{r.title}</div>
-                  <div className="text-xs text-gray-500">{r.description}</div>
+                  <div className="text-xs text-gray-500">{r.surveyTitle}</div>
                   {/* Show additional info on mobile only */}
                   <div className="lg:hidden mt-2 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(r.status)}`}>
-                        {r.status}
-                      </span>
                       <span className="text-xs text-gray-500">{r.questionCount} questions</span>
-                      <span className="text-xs text-gray-500">{r.estimatedTime}Min</span>
+                      <span className="text-xs text-gray-500">{formatDate(r.respondedAt)}</span>
                       <span className="text-xs text-gray-500">{r.project}</span>
                     </div>
                   </div>
                 </td>
-                <td className="hidden lg:table-cell px-6 py-4">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(r.status)}`}>
-                    {r.status}
-                  </span>
-                </td>
                 <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-700">{r.questionCount}</td>
-                <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-700">{r.estimatedTime}Min</td>
+                <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-700">{formatDate(r.respondedAt)}</td>
                 <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-700">{r.project}</td>
                 <td className="px-3 lg:px-6 py-4">
                   <Link
-                    to="/dashboard/reporting/review-report"
-                    search={{ reportId: r.id }}
+                    to="/dashboard/reporting/$report-id"
+                    params={{ 'report-id': r.id }}
                     className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-md hover:bg-primary hover:text-white text-sm"
                   >
                     Review
@@ -106,8 +113,8 @@ const ReportingList = () => {
             ))}
             {paginated.length === 0 && (
               <tr>
-                <td className="px-3 lg:px-6 py-4 text-center text-sm text-gray-500" colSpan={6}>
-                  {isLoadingReports ? 'Loading report forms...' : isErrorReports ? 'Failed to load report forms.' : 'No report submissions available.'}
+                <td className="px-3 lg:px-6 py-4 text-center text-sm text-gray-500" colSpan={5}>
+                  {isLoadingReports ? 'Loading your responses...' : isErrorReports ? 'Failed to load your responses.' : 'No report submissions available.'}
                 </td>
               </tr>
             )}
@@ -123,21 +130,20 @@ const ReportingList = () => {
         <div key={r.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center mb-2 justify-between">
             <h3 className="text-lg font-medium text-gray-700">{r.title}</h3>
-            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(r.status)}`}>{r.status}</span>
           </div>
-          <p className="text-sm text-gray-600 mb-3">{r.description}</p>
+          <p className="text-sm text-gray-600 mb-3">{r.surveyTitle}</p>
           <div className="flex justify-between text-sm text-gray-500 mb-4">
             <span>{r.questionCount} questions</span>
-            <span>{r.estimatedTime}Min</span>
+            <span>{formatDate(r.respondedAt)}</span>
           </div>
           <div className="flex items-center justify-between pt-3 border-t border-gray-200">
             <span className="text-sm text-gray-500">{r.project}</span>
             <Link
-              to="/dashboard/reporting/make-report"
-              search={{ reportId: r.id }}
+              to="/dashboard/reporting/$report-id"
+              params={{ 'report-id': r.id }}
               className="inline-flex items-center gap-2 bg-primary text-white px-3 py-1.5 rounded-md hover:bg-primary/90"
             >
-              Make report
+              Review
             </Link>
           </div>
         </div>
@@ -147,11 +153,14 @@ const ReportingList = () => {
 
   return (
     <div className="pb-10">
-      <Breadcrumb items={["Dashboard", "Reporting"]} title="Reporting" className='absolute top-0 left-0 w-full px-6' />
+      <Breadcrumb items={[
+        { title: "Dashboard", link: "/dashboard" },
+        "Data Collection",
+      ]} title="Data collection" className='absolute top-0 left-0 w-full px-6' />
 
       <div className="pt-12 lg:pt-14">
         <MainToolbar
-          title="Reports"
+          title="Data collection"
           filteredCount={filteredCount}
           search={search}
           setSearch={setSearch}
@@ -160,9 +169,19 @@ const ReportingList = () => {
           showCreate={true}
           createButton={{
             to: "/dashboard/reporting/make-report",
-            label: "Make Report",
+            label: "Collect Data",
             icon: <FaPlus />
           }}
+          excelData={excelDataExported}
+          excelColumnWidths={{
+            id: 6,
+            reportTitle: 20,
+            surveyTitle: 30,
+            questionCount: 15,
+            respondedAt: 25,
+            project: 20,
+          }}
+          excelFileName='report-responses'
         />
       </div>
 

@@ -5,8 +5,8 @@ import type { RoleEntity } from './roles';
 
 export const surveysApi = {
   list: async (params: SurveysListParams = { page: 1, limit: 10 }): Promise<SurveysListResponse> => {
-    const { page = 1, limit = 10, status, surveyType, responded, owner, allowed, startDate, endDate } = params;
-    const { data } = await client.get(`/surveys`, { params: { page, limit, status, surveyType, responded, owner, allowed, startDate, endDate } });
+    const { page = 1, limit = 10, status, surveyType, responded, owner, allowed, startDate, endDate, available } = params;
+    const { data } = await client.get(`/surveys`, { params: { page, limit, status, surveyType, responded, owner, allowed, startDate, endDate, available } });
     return data;
   },
 
@@ -36,8 +36,8 @@ export const surveysApi = {
   },
 
   // New: list responses for a survey
-  responses: async (surveyId: string, page: number = 1, limit: number = 10): Promise<SurveyResponsesList> => {
-    const { data } = await client.get(`/surveys/responses/${surveyId}`, { params: { page, limit } });
+  responses: async (surveyId?: string, responderId?: string, page: number = 1, limit: number = 10, surveyType?: 'report-form' | 'general' | 'rapid-enquiry'): Promise<SurveyResponsesList> => {
+    const { data } = await client.get("/surveys/responses", { params: { surveyId, responderId, page, limit, surveyType } });
     return data;
   },
 
@@ -193,29 +193,7 @@ export type SurveyMini = {
   organization?: { id: string; name: string } | null;
 };
 
-export type SurveyResponseRow = {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  survey: SurveyMini;
-  user: {
-    id: string;
-    name: string;
-    email: string | null;
-    phone: string | null;
-    roles: { id: string; name: string; category?: string }[];
-  } | null;
-  answers: Array<{
-    id: string;
-    questionId: string;
-    answerText: string | null;
-    answerOptions: string[] | null;
-    createdAt: string;
-    updatedAt: string;
-  }>;
-};
-
-export type SurveyResponsesList = ServiceResponse<SurveyResponseRow[]>;
+export type SurveyResponsesList = ServiceResponse<ResponseDetailItem[]>;
 
 export type ResponseDetailItem = {
   id: string;
@@ -317,6 +295,7 @@ export type SurveysListParams = {
   responded?: boolean;
   owner?: 'me' | 'any' | "other" | undefined;
   allowed?: boolean;
+  available?: boolean;
   startDate?: string;
   endDate?: string;
 };

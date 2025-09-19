@@ -8,3 +8,5 @@ count.txt
 .nitro
 .tanstack
 /public_html
+/android
+/ios

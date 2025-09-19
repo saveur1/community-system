@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-// import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaArrowRight, FaArrowLeft, FaCheck, FaSpinner, FaCloudUploadAlt } from 'react-icons/fa';
+import { FaArrowRight, FaArrowLeft, FaCheck, FaSpinner, FaCloudUploadAlt, FaStar } from 'react-icons/fa';
 import { useSubmitSurveyAnswers } from '@/hooks/useSurveys';
 import type { SubmitAnswersRequest } from '@/api/surveys';
 import useAuth from '@/hooks/useAuth';
@@ -240,22 +239,31 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
         const max = question.maxRating ?? 5;
         const current = typeof answer === 'number' ? answer : 0;
         return (
-          <div className="flex items-center gap-3 flex-wrap">
-            {Array.from({ length: max }).map((_, i: number) => {
-              const val = i + 1;
-              return (
-                <label key={val} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`question-${question.id}`}
-                    checked={current === val}
-                    onChange={() => handleAnswerChange(question.id, Number(val))}
-                    className="h-4 w-4 text-primary focus:ring-primary"
-                  />
-                  <span className="text-gray-700">{question.ratingLabel ? `${val} ${question.ratingLabel}` : val}</span>
-                </label>
-              );
-            })}
+          <div className="space-y-3">
+            <div className="flex items-center gap-1">
+              {Array.from({ length: max }).map((_, i: number) => {
+                const val = i + 1;
+                const isActive = current >= val;
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => handleAnswerChange(question.id, Number(val))}
+                    className={`p-1 transition-colors duration-200 hover:scale-110 transform ${
+                      isActive ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'
+                    }`}
+                  >
+                    <FaStar className="w-8 h-8" />
+                  </button>
+                );
+              })}
+            </div>
+            {current > 0 && (
+              <div className="text-sm text-gray-600">
+                Rating: <span className="font-medium">{current}</span>
+                {question.ratingLabel && <span className="ml-1">{question.ratingLabel}</span>}
+              </div>
+            )}
           </div>
         );
       }
@@ -264,8 +272,19 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
         const min = question.minValue ?? 1;
         const max = question.maxValue ?? 5;
         const current = typeof answer === 'number' ? answer : min;
+        const range = max - min;
+        const currentPercent = range > 0 ? ((current - min) / range) * 100 : 0;
+        
+        // Generate tick marks and labels
+        const ticks = [];
+        const labels = [];
+        for (let i = min; i <= max; i++) {
+          ticks.push(i);
+          labels.push(i);
+        }
+        
         return (
-          <div>
+          <div className="w-full">
             <input
               type="range"
               min={min}
@@ -273,13 +292,37 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
               step={1}
               value={current}
               onChange={(e) => handleAnswerChange(question.id, Number(e.target.value))}
-              className="w-full"
+              className="range w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+              style={{
+                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${currentPercent}%, #e5e7eb ${currentPercent}%, #e5e7eb 100%)`
+              }}
             />
-            <div className="flex justify-between text-xs text-gray-600 mt-1">
-              <span>{question.minLabel ?? String(min)}</span>
-              <span>{current}</span>
-              <span>{question.maxLabel ?? String(max)}</span>
+            
+            {/* Tick marks */}
+            <div className="flex justify-between px-2.5 mt-2 text-xs">
+              {ticks.map((_, index) => (
+                <span key={index} className="text-gray-400">|</span>
+              ))}
             </div>
+            
+            {/* Numbers */}
+            <div className="flex justify-between px-2.5 mt-1 text-xs">
+              {labels.map((label, index) => (
+                <span key={index} className={`font-medium ${
+                  current === label ? 'text-title' : 'text-gray-600'
+                }`}>
+                  {label}
+                </span>
+              ))}
+            </div>
+            
+            {/* Labels if provided */}
+            {(question.minLabel || question.maxLabel) && (
+              <div className="flex justify-between mt-2 text-xs text-gray-500">
+                <span>{question.minLabel || ''}</span>
+                <span>{question.maxLabel || ''}</span>
+              </div>
+            )}
           </div>
         );
       }

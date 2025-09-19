@@ -904,6 +904,7 @@ export function RegisterRoutes(app: Router) {
                 owner: {"in":"query","name":"owner","dataType":"union","subSchemas":[{"dataType":"enum","enums":["me"]},{"dataType":"enum","enums":["others"]},{"dataType":"enum","enums":["any"]}]},
                 responded: {"in":"query","name":"responded","dataType":"boolean"},
                 allowed: {"in":"query","name":"allowed","dataType":"boolean"},
+                available: {"in":"query","name":"available","dataType":"boolean"},
                 startDate: {"in":"query","name":"startDate","dataType":"string"},
                 endDate: {"in":"query","name":"endDate","dataType":"string"},
         };
@@ -969,11 +970,13 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsSurveyController_getSurveyResponses: Record<string, TsoaRoute.ParameterSchema> = {
-                surveyId: {"in":"path","name":"surveyId","required":true,"dataType":"string"},
+                surveyId: {"in":"query","name":"surveyId","dataType":"string"},
+                responderId: {"in":"query","name":"responderId","dataType":"string"},
+                surveyType: {"in":"query","name":"surveyType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["report-form"]},{"dataType":"enum","enums":["general"]},{"dataType":"enum","enums":["rapid-enquiry"]}]},
                 page: {"default":1,"in":"query","name":"page","dataType":"double"},
                 limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
         };
-        app.get('/api/surveys/responses/:surveyId',
+        app.get('/api/surveys/responses',
             authenticateMiddleware([{"jwt":["survey:read"]}]),
             ...(fetchMiddlewares<RequestHandler>(SurveyController)),
             ...(fetchMiddlewares<RequestHandler>(SurveyController.prototype.getSurveyResponses)),
@@ -1005,6 +1008,7 @@ export function RegisterRoutes(app: Router) {
                 surveyId: {"in":"path","name":"surveyId","required":true,"dataType":"string"},
         };
         app.get('/api/surveys/:surveyId',
+            authenticateMiddleware([{"optionalJwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SurveyController)),
             ...(fetchMiddlewares<RequestHandler>(SurveyController.prototype.getSurveyById)),
 
@@ -1134,7 +1138,7 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"answers":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"answerOptions":{"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}]},"answerText":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},"questionId":{"dataType":"string","required":true}}},"required":true},"userId":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]}}},
         };
         app.post('/api/surveys/:surveyId/answers',
-            authenticateMiddleware([{"jwt":["survey:respond"]}]),
+            authenticateMiddleware([{"optionalJwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SurveyController)),
             ...(fetchMiddlewares<RequestHandler>(SurveyController.prototype.submitAnswers)),
 
@@ -1195,6 +1199,7 @@ export function RegisterRoutes(app: Router) {
         const argsSurveyController_getLatestRapidEnquiry: Record<string, TsoaRoute.ParameterSchema> = {
         };
         app.get('/api/surveys/public/rapid-enquiry/latest',
+            authenticateMiddleware([{"optionalJwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SurveyController)),
             ...(fetchMiddlewares<RequestHandler>(SurveyController.prototype.getLatestRapidEnquiry)),
 

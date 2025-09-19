@@ -1,25 +1,37 @@
 import Breadcrumb from '@/components/ui/breadcrum';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { FaPoll } from 'react-icons/fa';
-import { useSurveysList } from '@/hooks/useSurveys';
+import { useSurveysList, useSurveyResponses } from '@/hooks/useSurveys';
 import { useAuth } from '@/hooks/useAuth';
+import { format, parseISO } from 'date-fns';
 
 const SurveyComponent = () => {
-    const navigate = useNavigate();
     const { user } = useAuth();
     // Fetch active surveys from API
 
-    const { data: completedSurveysResponse, isLoading: isLoadingCompleted, isError: isErrorCompleted } = useSurveysList({ surveyType: "general", responded: true });
-    const { data: activeSurveysResponse, isLoading: isLoadingActive, isError: isErrorActive } = useSurveysList({ status: 'active', surveyType: 'general', allowed: true });
-
-    const completedSurveys = completedSurveysResponse?.result || [];
-    const completedSurveyIds = new Set(completedSurveys.map(s => s.id));
-
-    const availableSurveys = (activeSurveysResponse?.result || []).filter(survey =>
-        !completedSurveyIds.has(survey.id)
+    const { data: completedResponsesResponse, isLoading: isLoadingCompleted, isError: isErrorCompleted } = useSurveyResponses(
+        undefined, // surveyId - not filtering by specific survey
+        user?.id, // responderId - get responses by current user
+        1, // page
+        -1, // limit
+        "general", // surveyType
+        !!user?.id // only enabled when we have user ID
     );
+    const { data: activeSurveysResponse, isLoading: isLoadingActive, isError: isErrorActive } = useSurveysList({ status: 'active', surveyType: 'general', allowed: true, available: true });
 
-    console.log("availableSurveys", availableSurveys);
+    const completedResponses = (completedResponsesResponse?.result ?? [])
+        .filter((response: any) => response.survey?.surveyType === 'general') // Only show general survey responses
+        .map((response: any) => ({
+            id: response.id,
+            surveyTitle: response.survey?.title || 'Unknown Survey',
+            questionCount: (response.survey?.questionItems ?? []).length,
+            completedAt: response.createdAt,
+            surveyId: response.survey?.id,
+        }));
+    
+    const availableSurveys = activeSurveysResponse?.result || [];
+
+    console.log("Available Surveys", availableSurveys);
 
     // Otherwise, show the list of available surveys
     return (
@@ -79,26 +91,24 @@ const SurveyComponent = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {completedSurveys.length > 0 ? (
-                            completedSurveys.map((survey) => (
-                                <tr key={survey.id} className="hover:bg-gray-50">
-                                    <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm">{survey.title}</td>
+                        {completedResponses.length > 0 ? (
+                            completedResponses.map((response) => (
+                                <tr key={response.id} className="hover:bg-gray-50">
+                                    <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm">{response.surveyTitle}</td>
                                     <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">
-                                        {new Date(survey.responses?.find((response) => response.userId == user?.id)?.createdAt || '').toLocaleDateString()}
+                                        {format(parseISO(response.completedAt), 'MMM dd, yyyy h:mm a')}
                                     </td>
                                     <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">
-                                        {survey.questionItems?.length || 0}
+                                        {response.questionCount}
                                     </td>
                                     <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm">
-                                        <button
-                                            onClick={() => navigate({
-                                                to: '/dashboard/surveys/review-survey',
-                                                search: { surveyId: survey.id }
-                                            })}
-                                            className="bg-title cursor-pointer px-4 text-white py-1.5 rounded-md hover:bg-title/90 transition-colors duration-300"
+                                        <Link
+                                            to="/dashboard/surveys/take-survey/response/$response-id"
+                                            params={{ 'response-id': response.id }}
+                                            className="bg-title cursor-pointer px-4 text-white py-1.5 rounded-md hover:bg-title/90 transition-colors duration-300 inline-block"
                                         >
                                             Review
-                                        </button>
+                                        </Link>
                                     </td>
                                 </tr>
                             ))

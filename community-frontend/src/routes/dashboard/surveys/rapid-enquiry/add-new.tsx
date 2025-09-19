@@ -307,20 +307,6 @@ function CreateRapidEnquiryComponent() {
       toast.warn("At least one section is required.")
       return
     }
-    // // Compute the new sections list first
-    // const updatedSections = sections.filter((s) => s.id !== sectionId)
-    // setSections(updatedSections)
-    // // Switch current section if needed
-    // if (currentSectionId === sectionId) {
-    //   setCurrentSectionId(updatedSections[0]?.id ?? initialSectionId)
-    // }
-
-    // // Remove questions belonging to the deleted section and renumber remaining
-    // setSurvey((prev) => {
-    //   const filteredQuestions = prev.questions.filter((q) => q.sectionId !== sectionId)
-    //   const renumbered = renumberQuestions(filteredQuestions, updatedSections)
-    //   return { ...prev, questions: renumbered }
-    // })
   }
 
   const handleReset = () => {
@@ -350,7 +336,11 @@ function CreateRapidEnquiryComponent() {
   return (
     <div className="pb-10">
       <Breadcrumb 
-        items={['Dashboard', 'Surveys', 'Rapid Enquiry', 'Add New']} 
+        items={[
+          { title: 'Dashboard', link: '/dashboard' },
+          { title: 'Rapid Enquiry', link: '/dashboard/surveys/rapid-enquiry' },
+          'Add New'
+        ]} 
         title="Create Rapid Enquiry" 
         className="absolute top-0 left-0 w-full" 
       />
