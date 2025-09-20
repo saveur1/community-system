@@ -13,14 +13,15 @@ const sequelizeOptions: any = {
 
 const sequelize = new Sequelize(config.database.databaseName, config.database.user, config.database.password, sequelizeOptions);
 
-export const initializeDatabase = async () => {
+export const initializeDatabase = async (): Promise<{ success: boolean; error?: any }> => {
   try {
     await sequelize.authenticate();
     // await sequelize.sync({ alter: true });
     console.info("Connection to the database has been established successfully.");
+    return { success: true };
   } catch (error) {
     console.error("Unable to connect to the database:", error);
-    process.exit(1);
+    return { success: false, error };
   }
 };
 

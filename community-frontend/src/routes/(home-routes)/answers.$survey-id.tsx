@@ -47,8 +47,8 @@ function PublicSurveyAnswerPage() {
 
   // Success state
   return (
-    <div>
-      <div className="container mx-auto pt-20 px-4 py-8">
+    <div className="bg-gray-50">
+      <div className="container mx-auto pt-10 px-4 py-8">
         <SurveyAnswerForm
           survey={{
             id: survey.id,

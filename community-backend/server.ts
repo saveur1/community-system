@@ -1,12 +1,11 @@
-import express, { type Request, type Response, type NextFunction } from "express";
+import express, { type Request, type Response } from "express";
 import swaggerUi from "swagger-ui-express";
 import { RegisterRoutes } from "./generated/routes";
 import errorHandlerMiddleware from "./middlewares/errorHandler";
 import dotenv from "dotenv";
 import { initializeDatabase } from "./config/database";
+
 // Ensure all models are loaded and associations are registered
-import "./models/index";
-import cookie from "cookie";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
@@ -15,12 +14,21 @@ dotenv.config();
 
 const app = express();
 
+// Track database connection status
+let databaseConnected = false;
+let databaseError: any = null;
+
 // Initialize database connection
-initializeDatabase();
+initializeDatabase().then((result) => {
+  databaseConnected = result.success;
+  if (!result.success) {
+    databaseError = result.error;
+  }
+});
 
 
 // CORS configuration
-const allowedOrigins = ["http://localhost:3000", "https://sugiramwana.rw","https://api.sugiramwana.rw" ];
+const allowedOrigins = ["http://localhost:3000", "https://sugiramwana.rw","https://api.sugiramwana.rw", "http://localhost:8080"];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -43,49 +51,32 @@ app.use(express.json());
 app.use(morgan('combined'));
 app.use(cookieParser())
 
-
-
+// Add database status check route before other routes
+app.get('/', (req: Request, res: Response) => {
+  if (!databaseConnected) {
+    return res.status(503).json({
+      error: 'Failed to connect to database',
+      message: 'Database connection failed during startup',
+      details: databaseError?.message || 'Unknown database error',
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  // If database is connected, redirect to swagger docs
+  res.redirect('/docs');
+});
 
 // Register TSOA-generated routes
 RegisterRoutes(app);
 
 // Swagger docs
 import swaggerDocument from "./docs/swagger.json";
-app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const [notFoundHandler, errorLogger, errorResponder] = errorHandlerMiddleware();
 app.use(notFoundHandler);
 app.use(errorLogger);
 app.use(errorResponder);
-
-// import express from 'express';
-// const app = express();
-// import dotenv from "dotenv";
-// import config from "./config/config";
-// import { Sequelize } from 'sequelize';
-// // import { Sequelize } from 'sequelize';
-// dotenv.config()
-
-// Sample users list
-// const users = [
-//   { id: 1, name: 'Alice', email: 'alice@example.com' },
-//   { id: 2, name: 'Bob', email: 'bob@example.com' },
-//   { id: 3, name: 'Charlie', email: 'charlie@example.com' },
-// ];
-
-// Root route → prints users list
-// app.get('/', (req, res) => {
-
-//   const sequelizeOptions: any = {
-//     host: config.database.host,
-//     port: config.database.port,
-//     dialect: config.database.dialect,
-//     logging: config.database.logging,
-//   };
-  
-//   const sequelize = new Sequelize(config.database.databaseName, config.database.user, config.database.password, sequelizeOptions);
-//   res.json(sequelizeOptions); // Respond with JSON
-// });
 
 
 
