@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { feedbackApi, type FeedbackListParams, type FeedbackCreateRequest, type FeedbackUpdateRequest, type FeedbackReplyCreateRequest, type FeedbackReplyEntity } from '../api/feedback';
+import { offlineApi } from '@/services/offline-api';
+import { toast } from 'react-toastify';
 
 const feedbackKeys = {
   all: ['feedback'] as const,
@@ -14,7 +16,9 @@ const feedbackKeys = {
 export const useGetFeedback = (params: FeedbackListParams) => {
   return useQuery({
     queryKey: [...feedbackKeys.lists(), params],
-    queryFn: () => feedbackApi.list(params),
+    queryFn: () => offlineApi.getFeedback(params),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 };
 
@@ -51,12 +55,23 @@ export const useGetFeedbackStats = () => {
 export const useCreateFeedback = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: FeedbackCreateRequest) => feedbackApi.create(data),
-    onSuccess: async () => {
+    mutationFn: (data: FeedbackCreateRequest) => offlineApi.createFeedback(data),
+    onSuccess: async (data) => {
+      // Show success message
+      if (data.message.includes('offline')) {
+        toast.info('Feedback saved offline and will be synced when online');
+      } else {
+        toast.success('Feedback submitted successfully');
+      }
+      
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: feedbackKeys.lists() }),
         queryClient.invalidateQueries({ queryKey: feedbackKeys.stats() }),
       ]);
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || 'Failed to submit feedback';
+      toast.error(msg);
     },
   });
 };

@@ -9,6 +9,7 @@ import {
   useCommunitySessionComments,
 } from '@/hooks/useCommunitySession';
 import { spacer } from '@/utility/logicFunctions';
+import useAuth from '@/hooks/useAuth';
 
 const MediaBox = ({ src, filename, type }: { src?: string; filename?: string; type: any }) => {
   return (
@@ -47,11 +48,15 @@ const Comments = ({ sessionId }: { sessionId: string }) => {
   const { data: listResp, isLoading } = useCommunitySessionComments(sessionId, { page: 1, limit: 50 });
   const addComment = useAddComment(sessionId);
   const comments = listResp?.result ?? [];
+  const { user } = useAuth();
 
   const handleAdd = async () => {
     const text = content.trim();
     if (!text) return;
-    await addComment.mutateAsync({ content: text });
+    await addComment.mutateAsync({ 
+      data: { content: text }, 
+      userId: user?.id || '' // TODO: Get from auth context
+    });
     setContent('');
   };
 

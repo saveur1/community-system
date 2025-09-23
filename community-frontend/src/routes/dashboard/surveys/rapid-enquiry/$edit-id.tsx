@@ -7,7 +7,8 @@ import QuestionsSection from '@/components/features/surveys/add-survey/Questions
 import SidebarQuestionPicker from '@/components/features/surveys/add-survey/SidebarQuestionPicker'
 import type { Question, Section } from '@/components/features/surveys/types'
 import { FaPlus, FaTimes } from 'react-icons/fa'
-import { useSurvey, useUpdateSurvey } from '@/hooks/useSurveys'
+import { useSurvey } from '@/hooks/useSurveys'
+import { useUpdateSurvey } from '@/hooks/useSurveys'
 
 const LOCAL_STORAGE_KEY = 'rapid-enquiry-edit-draft'
 

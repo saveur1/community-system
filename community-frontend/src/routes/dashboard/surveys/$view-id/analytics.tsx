@@ -2,7 +2,8 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { createFileRoute } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { useSurvey, useSurveyAnalytics } from '@/hooks/useSurveys';
+import { useSurvey } from '@/hooks/useSurveys';
+import { useSurveyAnalytics } from '@/hooks/useSurveys';
 import { FaChartBar, FaUsers, FaCheckCircle, FaPrint } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 

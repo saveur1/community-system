@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectsApi, type ProjectsListParams, type ProjectsListResponse, type ProjectResponse, type ProjectCreateRequest, type ProjectUpdateRequest } from '../api/projects';
+import { offlineApi } from '@/services/offline-api';
 import { toast } from 'react-toastify';
 
 // Query keys for projects
@@ -18,8 +19,10 @@ export const projectsKeys = {
 export function useProjectsList(params: ProjectsListParams = { page: 1, limit: 10 }) {
   return useQuery<ProjectsListResponse>({
     queryKey: projectsKeys.list(params),
-    queryFn: () => projectsApi.list(params),
+    queryFn: () => offlineApi.getProjects(params),
     placeholderData: keepPreviousData,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 }
 
@@ -27,8 +30,10 @@ export function useProjectsList(params: ProjectsListParams = { page: 1, limit: 1
 export function useProject(projectId: string, enabled: boolean = true) {
   return useQuery<ProjectResponse>({
     queryKey: projectsKeys.detail(projectId),
-    queryFn: () => projectsApi.getById(projectId),
+    queryFn: () => offlineApi.getProject(projectId),
     enabled: !!projectId && enabled,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 }
 

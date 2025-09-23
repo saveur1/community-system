@@ -2,15 +2,13 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { 
   communitySessionsApi, 
   type CommunitySessionsListParams, 
-  type CommunitySessionsListResponse, 
-  type CommunitySessionResponse, 
   type CommunitySessionCreateRequest, 
   type CommunitySessionUpdateRequest,
   type CommentsListParams,
-  type CommentsListResponse,
   type CommentCreateRequest,
   type CommentUpdateRequest,
 } from '../api/community-sessions';
+import { offlineApi } from '@/services/offline-api';
 import { toast } from 'react-toastify';
 
 // Query keys for community sessions
@@ -35,135 +33,135 @@ export const communitySessionsKeys = {
 };
 
 // List community sessions
-export function useCommunitySessionsList(params: CommunitySessionsListParams = { page: 1, limit: 10 }) {
-  return useQuery<CommunitySessionsListResponse>({
+export const useCommunitySessionsList = (params?: CommunitySessionsListParams) => {
+  return useQuery({
     queryKey: communitySessionsKeys.list(params),
-    queryFn: () => communitySessionsApi.list(params),
+    queryFn: () => offlineApi.getCommunitySessions(params),
     placeholderData: keepPreviousData,
   });
-}
+};
 
 // Get single community session by id
-export function useCommunitySession(sessionId: string, enabled: boolean = true) {
-  return useQuery<CommunitySessionResponse>({
-    queryKey: communitySessionsKeys.detail(sessionId),
-    queryFn: () => communitySessionsApi.getById(sessionId),
-    enabled: !!sessionId && enabled,
+export const useCommunitySession = (id: string) => {
+  return useQuery({
+    queryKey: communitySessionsKeys.detail(id),
+    queryFn: () => offlineApi.getCommunitySession(id),
+    enabled: !!id,
   });
-}
+};
 
 // Create community session
-export function useCreateCommunitySession() {
-  const qc = useQueryClient();
+export const useCreateCommunitySession = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: (payload: CommunitySessionCreateRequest) => communitySessionsApi.create(payload),
-    onSuccess: async () => {
+    mutationFn: (data: CommunitySessionCreateRequest) => communitySessionsApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.all });
       toast.success('Community session created successfully');
-      await qc.invalidateQueries({ queryKey: communitySessionsKeys.all });
     },
-    onError: (error: any) => {
-      const msg = error?.response?.data?.message || 'Failed to create community session';
-      toast.error(msg);
+    onError: (error) => {
+      console.error('Error creating community session:', error);
+      toast.error('Failed to create community session');
     },
   });
-}
+};
 
 // Update community session
-export function useUpdateCommunitySession(sessionId: string) {
-  const qc = useQueryClient();
+export const useUpdateCommunitySession = () => {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CommunitySessionUpdateRequest) => communitySessionsApi.update(sessionId, payload),
-    onSuccess: async () => {
+    mutationFn: ({ id, data }: { id: string; data: CommunitySessionUpdateRequest }) => 
+      communitySessionsApi.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.all });
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.detail(id) });
       toast.success('Community session updated successfully');
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.detail(sessionId) }),
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.all }),
-      ]);
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to update community session';
       toast.error(msg);
     },
   });
-}
+};
 
 // Update community session status
-export function useUpdateCommunitySessionStatus() {
-  const qc = useQueryClient();
+export const useUpdateCommunitySessionStatus = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ sessionId, isActive }: { sessionId: string; isActive: boolean }) =>
       communitySessionsApi.update(sessionId, { isActive }),
-    onSuccess: async () => {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.all });
       toast.success('Community session status updated');
-      await qc.invalidateQueries({ queryKey: communitySessionsKeys.all });
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to update status';
       toast.error(msg);
     },
   });
-}
+};
 
 // Delete community session
-export function useDeleteCommunitySession() {
-  const qc = useQueryClient();
+export const useDeleteCommunitySession = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (sessionId: string) => communitySessionsApi.remove(sessionId),
-    onSuccess: async (_data, sessionId) => {
+    onSuccess: (_, sessionId) => {
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.all });
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.detail(sessionId) });
       toast.success('Community session deleted successfully');
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.all }),
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.detail(sessionId) }),
-      ]);
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to delete community session';
       toast.error(msg);
     },
   });
-}
+};
 
 // Get comments for a community session
-export function useCommunitySessionComments(sessionId: string, params: CommentsListParams = { page: 1, limit: 50 }) {
-  return useQuery<CommentsListResponse>({
+export const useCommunitySessionComments = (sessionId: string, params?: CommentsListParams) => {
+  return useQuery({
     queryKey: communitySessionsKeys.comments(sessionId, params),
-    queryFn: () => communitySessionsApi.getComments(sessionId, params),
+    queryFn: () => offlineApi.getComments(sessionId),
     enabled: !!sessionId,
     placeholderData: keepPreviousData,
   });
-}
+};
 
 // Add comment to community session
-export function useAddComment(sessionId: string) {
-  const qc = useQueryClient();
+export const useAddComment = (sessionId: string) => {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: (payload: CommentCreateRequest) => communitySessionsApi.addComment(sessionId, payload),
-    onSuccess: async () => {
+    mutationFn: ({ data, userId }: { data: CommentCreateRequest; userId: string }) => 
+      offlineApi.addComment(sessionId, data, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ 
+        queryKey: communitySessionsKeys.comments(sessionId) 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: communitySessionsKeys.detail(sessionId) 
+      });
       toast.success('Comment added successfully');
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.comments(sessionId) }),
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.detail(sessionId) }),
-      ]);
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to add comment';
       toast.error(msg);
     },
   });
-}
+};
 
 // Update comment
 export function useUpdateComment(sessionId: string) {
-  const qc = useQueryClient();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ commentId, payload }: { commentId: string; payload: CommentUpdateRequest }) =>
       communitySessionsApi.updateComment(commentId, payload),
-    onSuccess: async () => {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.comments(sessionId) });
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.detail(sessionId) });
       toast.success('Comment updated successfully');
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.comments(sessionId) }),
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.detail(sessionId) }),
-      ]);
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to update comment';
@@ -174,15 +172,13 @@ export function useUpdateComment(sessionId: string) {
 
 // Delete comment
 export function useDeleteComment(sessionId: string) {
-  const qc = useQueryClient();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (commentId: string) => communitySessionsApi.deleteComment(commentId),
-    onSuccess: async () => {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.comments(sessionId) });
+      queryClient.invalidateQueries({ queryKey: communitySessionsKeys.detail(sessionId) });
       toast.success('Comment deleted successfully');
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.comments(sessionId) }),
-        qc.invalidateQueries({ queryKey: communitySessionsKeys.detail(sessionId) }),
-      ]);
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to delete comment';

@@ -3,7 +3,8 @@ import { createFileRoute, Link, useParams, useRouter } from '@tanstack/react-rou
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { FaClock, FaListOl, FaUsers, FaAsterisk, FaChevronLeft, FaChevronRight, FaSort, FaSortUp, FaSortDown, FaEdit, FaEye, FaTrash, FaDownload, FaFilePdf, FaFileExcel, FaChartLine } from 'react-icons/fa';
-import { useSurvey, useDeleteSurvey } from '@/hooks/useSurveys';
+import { useSurvey } from '@/hooks/useSurveys';
+import { useDeleteSurvey } from '@/hooks/useSurveys';
 import { spacer, timeAgo } from '@/utility/logicFunctions';
 import DeleteSurveyModal from '@/components/features/surveys/delete-survey-modal';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
@@ -142,7 +143,7 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
 
 const SurveyDetail = () => {
   const { 'view-id': viewId } = useParams({ strict: false }) as { 'view-id': string };
-  const { data, isLoading } = useSurvey(viewId, true);
+  const { data, isLoading } = useSurvey(viewId);
   const survey = data?.result;
   const router = useRouter();
 

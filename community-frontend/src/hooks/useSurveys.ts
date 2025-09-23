@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { surveysApi, type SurveysListParams, type SurveysListResponse, type SurveyResponse, type SurveyCreateRequest, type SurveyUpdateRequest, type SubmitAnswersRequest, type SurveyResponsesList, type SurveyAnalytics, type ResponseDetailResponse } from '../api/surveys';
+import { offlineApi } from '@/services/offline-api';
 import { toast } from 'react-toastify';
 
 // Query keys for surveys
@@ -26,8 +27,10 @@ export const surveysKeys = {
 export function useSurveysList(params: SurveysListParams = { page: 1, limit: 10, surveyType: undefined }) {
   return useQuery<SurveysListResponse>({
     queryKey: surveysKeys.list(params),
-    queryFn: () => surveysApi.list(params),
+    queryFn: () => offlineApi.getSurveys(params),
     placeholderData: keepPreviousData,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 }
 
@@ -35,8 +38,10 @@ export function useSurveysList(params: SurveysListParams = { page: 1, limit: 10,
 export function useSurvey(surveyId: string, enabled: boolean = true) {
   return useQuery<SurveyResponse>({
     queryKey: surveysKeys.detail(surveyId),
-    queryFn: () => surveysApi.getById(surveyId),
+    queryFn: () => offlineApi.getSurvey(surveyId),
     enabled: !!surveyId && enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 }
 
@@ -44,7 +49,7 @@ export function useSurvey(surveyId: string, enabled: boolean = true) {
 export function useResponseById(responseId: string, enabled: boolean = true) {
   return useQuery<ResponseDetailResponse>({
     queryKey: surveysKeys.responseDetail(responseId),
-    queryFn: () => surveysApi.getResponseById(responseId),
+    queryFn: () => offlineApi.getResponseById(responseId),
     enabled: !!responseId && enabled,
   });
 }
@@ -53,7 +58,7 @@ export function useResponseById(responseId: string, enabled: boolean = true) {
 export function useSurveyResponses(surveyId?: string, responderId?: string, page: number = 1, limit: number = 10, surveyType?: 'report-form' | 'general' | 'rapid-enquiry', enabled: boolean = true) {
   return useQuery<SurveyResponsesList>({
     queryKey: surveysKeys.responses(surveyId, responderId, page, limit, surveyType),
-    queryFn: () => surveysApi.responses(surveyId, responderId, page, limit, surveyType),
+    queryFn: () => offlineApi.getSurveyResponses(surveyId, responderId, page, limit, surveyType),
     enabled: (!!surveyId || !!responderId) && enabled,
     placeholderData: keepPreviousData,
   });
@@ -63,7 +68,7 @@ export function useSurveyResponses(surveyId?: string, responderId?: string, page
 export function useSurveyAnalytics(surveyId: string, enabled: boolean = true) {
   return useQuery<SurveyAnalytics>({
     queryKey: surveysKeys.analytics(surveyId),
-    queryFn: () => surveysApi.getAnalytics(surveyId),
+    queryFn: () => offlineApi.getSurveyAnalytics(surveyId),
     enabled: !!surveyId && enabled,
   });
 }
@@ -72,7 +77,7 @@ export function useSurveyAnalytics(surveyId: string, enabled: boolean = true) {
 export function useLatestRapidEnquiry() {
   return useQuery<SurveyResponse>({
     queryKey: surveysKeys.latestRapidEnquiry(),
-    queryFn: () => surveysApi.getLatestRapidEnquiry(),
+    queryFn: () => offlineApi.getLatestRapidEnquiry(),
     placeholderData: keepPreviousData,
   });
 }
@@ -96,7 +101,7 @@ export function useCreateSurvey() {
 export function useUpdateSurvey(surveyId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: SurveyUpdateRequest) => surveysApi.update(surveyId, payload),
+    mutationFn: (payload: SurveyUpdateRequest) => offlineApi.updateSurvey(surveyId, payload as any),
     onSuccess: async () => {
       await Promise.all([
         qc.invalidateQueries({ queryKey: surveysKeys.detail(surveyId) }),
@@ -115,7 +120,7 @@ export function useUpdateSurveyStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ surveyId, status }: { surveyId: string; status: 'active' | 'paused' | 'archived' }) =>
-      surveysApi.update(surveyId, { status } as any),
+      offlineApi.updateSurvey(surveyId, { status } as any),
     onSuccess: async () => {
       toast.success('Survey status updated');
       await qc.invalidateQueries({ queryKey: surveysKeys.all });
@@ -131,7 +136,7 @@ export function useUpdateSurveyStatus() {
 export function useDeleteSurvey() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (surveyId: string) => surveysApi.remove(surveyId),
+    mutationFn: (surveyId: string) => offlineApi.deleteSurvey(surveyId),
     onSuccess: async (_data, surveyId) => {
       toast.success('Survey deleted successfully');
       await Promise.all([
@@ -150,9 +155,17 @@ export function useDeleteSurvey() {
 export function useSubmitSurveyAnswers(surveyId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: SubmitAnswersRequest) => surveysApi.submitAnswers(surveyId, payload),
-    onSuccess: async () => {
+    mutationFn: (payload: SubmitAnswersRequest) => offlineApi.submitSurveyAnswers(surveyId, payload),
+    onSuccess: async (data) => {
+      // Show success message
+      if (data.message.includes('offline')) {
+        toast.info('Survey response saved offline and will be synced when online');
+      } else {
+        toast.success('Survey response submitted successfully');
+      }
+      
       await qc.invalidateQueries({ queryKey: surveysKeys.detail(surveyId) });
+      await qc.invalidateQueries({ queryKey: surveysKeys.all });
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to submit answers';

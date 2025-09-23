@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useMemo, useState, type DragEvent, type JSX } from 'react';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { useSurvey, useUpdateSurvey } from '@/hooks/useSurveys';
+import { useSurvey } from '@/hooks/useSurveys';
+import { useUpdateSurvey } from '@/hooks/useSurveys';
 import { useProjectsList } from '@/hooks/useProjects';
 import { useRolesList } from '@/hooks/useRoles';
 import SurveyInfoForm from '@/components/features/surveys/SurveyInfoForm';
@@ -120,7 +121,7 @@ function EditSurveyComponent(): JSX.Element {
   const params = Route.useParams();
   const surveyId = params['edit-id'];
   const navigate = useNavigate();
-  const { data } = useSurvey(surveyId, true);
+  const { data } = useSurvey(surveyId);
   const updateSurvey = useUpdateSurvey(surveyId);
   const { data: projectsData } = useProjectsList({ page: 1, limit: 100 });
   const { data: rolesData, isLoading: rolesLoading, isError: rolesError } = useRolesList({ page: 1, limit: 200 });
@@ -129,6 +130,12 @@ function EditSurveyComponent(): JSX.Element {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const isReportForm = data?.result?.surveyType === 'report-form';
   const backHomeLink = isReportForm ? '/dashboard/surveys/report-forms' : '/dashboard/surveys';
+
+  const getOptions = (options: any)=> {
+    if(typeof options === 'string')
+      return JSON.parse(options);
+    return options;
+  }
 
   const roleGroups = useMemo(() => {
     const list = rolesData?.result ?? [];
@@ -155,6 +162,7 @@ function EditSurveyComponent(): JSX.Element {
       setSelectedRoles(prev => prev.includes(roleId) ? prev.filter(r => r !== roleId) : [...prev, roleId]);
     }
   };
+
   const toggleGroupRoles = (roleValues: string[], selectAll: boolean) => {
     setSelectedRoles(prev => {
       const set = new Set(prev);
@@ -370,7 +378,7 @@ function EditSurveyComponent(): JSX.Element {
       ...prev,
       questions: prev.questions.map(q => {
         if (q.id === questionId && (q.type === 'single_choice' || q.type === 'multiple_choice')) {
-          const options = (Array.isArray((q as any).options) ? (q as any).options : []).map((opt: string, idx: number) => (idx === optionIndex ? value : opt));
+          const options = (Array.isArray((getOptions(q as any).options)) ? (getOptions(q as any).options) : []).map((opt: string, idx: number) => (idx === optionIndex ? value : opt));
           return { ...(q as any), options } as Question;
         }
         return q;

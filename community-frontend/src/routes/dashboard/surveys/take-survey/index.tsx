@@ -1,7 +1,8 @@
 import Breadcrumb from '@/components/ui/breadcrum';
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { FaPoll } from 'react-icons/fa';
-import { useSurveysList, useSurveyResponses } from '@/hooks/useSurveys';
+import { useSurveysList } from '@/hooks/useSurveys';
+import { useSurveyResponses } from '@/hooks/useSurveys';
 import { useAuth } from '@/hooks/useAuth';
 import { format, parseISO } from 'date-fns';
 

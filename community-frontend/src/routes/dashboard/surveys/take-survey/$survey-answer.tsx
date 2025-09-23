@@ -13,7 +13,7 @@ function SurveyAnswerPage() {
   const surveyId = String(params['survey-answer'] ?? '');
   const navigate = useNavigate();
 
-  const { data, isLoading, isError } = useSurvey(surveyId, true);
+  const { data, isLoading, isError } = useSurvey(surveyId);
   const survey = data?.result;
 
   useEffect(() => {

@@ -48,9 +48,9 @@ const CreateSurveyComponent: FC = () => {
     const list = rolesData?.result ?? []
     const toLabel = (name: string) =>
       name
-        .split("_")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ")
+        ?.split("_")
+        ?.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        ?.join(" ")
     const map = new Map<string, { title: string; options: { value: string; label: string }[] }>()
     for (const r of list) {
       const cat = r.category?.trim() || "Other"

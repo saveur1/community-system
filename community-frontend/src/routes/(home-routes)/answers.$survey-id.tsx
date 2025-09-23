@@ -16,7 +16,7 @@ function PublicSurveyAnswerPage() {
   const surveyId = String(params['survey-id'] ?? '')
   const navigate = useNavigate()
 
-  const { data, isLoading, isError } = useSurvey(surveyId, true)
+  const { data, isLoading, isError } = useSurvey(surveyId)
   const survey = data?.result
 
   useEffect(() => {
