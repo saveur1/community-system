@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { statisticsApi, type OverviewParams, type SurveysHistoryParams, type StatisticsOverviewResponse, type SurveysHistoryResponse } from '@/api/statistics';
+import { type OverviewParams, type SurveysHistoryParams, type StatisticsOverviewResponse, type SurveysHistoryResponse } from '@/api/statistics';
+import { offlineStatisticsApi } from '@/api-offline/statistics';
 
 // query keys
 export const statisticsKeys = {
@@ -15,7 +16,7 @@ export const statisticsKeys = {
 export function useStatisticsOverview(params: OverviewParams = {}) {
   const queryResult = useQuery<StatisticsOverviewResponse>({
     queryKey: statisticsKeys.overview(params),
-    queryFn: () => statisticsApi.overview(params),
+    queryFn: () => offlineStatisticsApi.overview(params),
     placeholderData: keepPreviousData,
   });
 
@@ -29,7 +30,7 @@ export function useStatisticsOverview(params: OverviewParams = {}) {
 export function useSurveysHistory(params: SurveysHistoryParams = { group: 'monthly' }) {
   const queryResult = useQuery<SurveysHistoryResponse>({
     queryKey: statisticsKeys.surveysHistory(params),
-    queryFn: () => statisticsApi.surveysHistory(params),
+    queryFn: () => offlineStatisticsApi.surveysHistory(params),
     placeholderData: keepPreviousData,
   });
 

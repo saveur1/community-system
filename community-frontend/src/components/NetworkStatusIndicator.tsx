@@ -1,8 +1,9 @@
 // src/components/NetworkStatusIndicator.tsx
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { toast } from 'react-toastify';
 
 export function NetworkStatusIndicator() {
-  const { isOnline, syncInProgress, pendingItems, forceSync, retryFailedItems } = useNetworkStatus();
+  const { isOnline, syncInProgress, pendingItems, forceSync } = useNetworkStatus();
 
   if (isOnline && pendingItems === 0) {
     return null; // Don't show anything when online and synced
@@ -33,20 +34,32 @@ export function NetworkStatusIndicator() {
             <p className="text-xs text-blue-600">Syncing in progress...</p>
           )}
         </div>
-        {isOnline && pendingItems > 0 && !syncInProgress && (
+        {pendingItems > 0 && !syncInProgress && (
           <button
-            onClick={forceSync}
-            className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+            onClick={async () => {
+              if (!isOnline) {
+                toast.warning('You are offline. Data will sync automatically when connection is restored.');
+                return;
+              }
+              try {
+                const result = await forceSync();
+                if (result.success) {
+                  toast.success(`Synced ${result.synced} items successfully`);
+                } else {
+                  toast.error('Sync failed. Will retry automatically when online.');
+                }
+              } catch (error) {
+                toast.error('Sync failed. Will retry automatically when online.');
+              }
+            }}
+            className={`text-xs px-2 py-1 rounded ${
+              isOnline 
+                ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                : 'bg-gray-400 text-white cursor-not-allowed'
+            }`}
+            disabled={syncInProgress}
           >
-            Sync Now
-          </button>
-        )}
-        {isOnline && (
-          <button
-            onClick={retryFailedItems}
-            className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-          >
-            Retry Failed
+            {syncInProgress ? 'Syncing...' : 'Sync Now'}
           </button>
         )}
       </div>

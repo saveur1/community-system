@@ -28,7 +28,7 @@ initializeDatabase().then((result) => {
 
 
 // CORS configuration
-const allowedOrigins = ["http://localhost:3000", "https://sugiramwana.rw","https://api.sugiramwana.rw", "http://localhost:8080"];
+const allowedOrigins = ["http://localhost:3000", "capacitor://localhost", "https://sugiramwana.rw","https://api.sugiramwana.rw", "http://localhost:8080"];
 
 app.use(cors({
   origin: function (origin, callback) {

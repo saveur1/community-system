@@ -62,15 +62,18 @@ export class SyncService {
   }
 
   public async syncPendingData(): Promise<SyncResult> {
-    if (this.syncInProgress || !this.isOnline) {
-      return { success: false, synced: 0, failed: 0, errors: [] };
+    if (this.syncInProgress) {
+      return { success: false, synced: 0, failed: 0, errors: [{ entityType: 'system', entityId: 'sync', error: 'Sync already in progress' }] };
+    }
+    
+    if (!this.isOnline) {
+      return { success: false, synced: 0, failed: 0, errors: [{ entityType: 'system', entityId: 'network', error: 'Device is offline' }] };
     }
 
     this.syncInProgress = true;
     const result: SyncResult = { success: true, synced: 0, failed: 0, errors: [] };
 
     try {
-      console.log('Starting sync process...');
       const syncQueue = await offlineStorage.getSyncQueue();
       
       for (const item of syncQueue) {
@@ -95,14 +98,11 @@ export class SyncService {
           await this.handleSyncFailure(item, errorMessage);
         }
       }
-
-      console.log(`Sync completed: ${result.synced} synced, ${result.failed} failed`);
       
       // Update last sync timestamp
       await offlineStorage.setMetadata('lastSyncAttempt', Date.now());
       
     } catch (error) {
-      console.error('Sync process failed:', error);
       result.success = false;
     } finally {
       this.syncInProgress = false;
@@ -217,23 +217,25 @@ export class SyncService {
   private async handleSyncFailure(item: SyncQueue, error: string): Promise<void> {
     const newRetryCount = item.retryCount + 1;
     
+    // NEVER remove items from sync queue - keep them forever until successfully synced
+    // This ensures data is never lost, even after weeks offline
+    
+    // Calculate exponential backoff delay (max 1 hour)
+    const delay = Math.min(5000 * Math.pow(2, newRetryCount - 1), 3600000);
+    
+    console.log(`Sync failed for ${item.entityType} ${item.entityId}, retry ${newRetryCount} in ${delay / 1000} seconds`);
+    
+    // Update retry count and last attempt time, but keep item in queue
+    await offlineStorage.updateSyncQueueItem(item.id!, {
+      retryCount: newRetryCount,
+      lastAttempt: Date.now(),
+      error
+    });
+    
+    // Mark the entity as failed but don't remove from sync queue
     if (newRetryCount >= this.maxRetries) {
-      // Max retries reached, mark as permanently failed
-      console.error(`Max retries reached for ${item.entityType} ${item.entityId}`);
+      console.warn(`${item.entityType} ${item.entityId} has failed ${this.maxRetries} times but will keep retrying`);
       await offlineStorage.markSyncFailed(item.entityType, item.entityId, error);
-      await offlineStorage.removeSyncQueueItem(item.id!);
-    } else {
-      // Calculate exponential backoff delay
-      const delay = 5000 * Math.pow(2, newRetryCount - 1);
-      
-      console.log(`Sync failed for ${item.entityType} ${item.entityId}, retry ${newRetryCount} in ${delay / 1000} seconds`);
-      
-      // Update retry count and last attempt time
-      await offlineStorage.updateSyncQueueItem(item.id!, {
-        retryCount: newRetryCount,
-        lastAttempt: Date.now(),
-        error
-      });
     }
   }
 
@@ -288,11 +290,22 @@ export class SyncService {
     return this.syncPendingData();
   }
 
-  // Clear all pending sync data (use with caution)
+  // Clear all pending sync data (use with EXTREME caution - this will cause data loss!)
   public async clearPendingData(): Promise<void> {
+    console.warn('⚠️ CLEARING ALL PENDING SYNC DATA - THIS WILL CAUSE DATA LOSS!');
     const syncQueue = await offlineStorage.getSyncQueue();
     for (const item of syncQueue) {
       await offlineStorage.removeSyncQueueItem(item.id!);
+    }
+  }
+
+  // Clear specific item from sync queue (use with caution)
+  public async clearSpecificItem(entityType: string, entityId: string): Promise<void> {
+    console.warn(`⚠️ Clearing specific item from sync queue: ${entityType}:${entityId}`);
+    const syncQueue = await offlineStorage.getSyncQueue();
+    const item = syncQueue.find(i => i.entityType === entityType && i.entityId === entityId);
+    if (item?.id) {
+      await offlineStorage.removeSyncQueueItem(item.id);
     }
   }
 

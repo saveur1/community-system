@@ -2603,7 +2603,7 @@
 						}
 					}
 				},
-				"description": "(Optional) Create a system log via API - marked as internal usage; protected by permission\r\nAccepts minimal payload and stores meta as provided.",
+				"description": "(Optional) Create a system log via API - marked as internal usage; protected by permission\nAccepts minimal payload and stores meta as provided.",
 				"tags": [
 					"System Logs"
 				],
@@ -3308,7 +3308,7 @@
 						}
 					}
 				},
-				"description": "Overview statistics (counts + deltas) for a given period.\r\nDefaults to last 30 days when startDate/endDate not provided.",
+				"description": "Overview statistics (counts + deltas) for a given period.\nDefaults to last 30 days when startDate/endDate not provided.",
 				"tags": [
 					"Statistics"
 				],
@@ -3355,7 +3355,7 @@
 						}
 					}
 				},
-				"description": "Surveys history / responses timeseries\r\nQuery params:\r\n - startDate, endDate: range (defaults to last 12 months)\r\n - group: 'daily' | 'weekly' | 'monthly' (default 'monthly')\r\n - surveyId: optional to filter to a single survey\r\n\r\nReturns: { labels: string[], data: number[] } where labels are ISO or human-readable periods",
+				"description": "Surveys history / responses timeseries\nQuery params:\n - startDate, endDate: range (defaults to last 12 months)\n - group: 'daily' | 'weekly' | 'monthly' (default 'monthly')\n - surveyId: optional to filter to a single survey\n\nReturns: { labels: string[], data: number[] } where labels are ISO or human-readable periods",
 				"tags": [
 					"Statistics"
 				],

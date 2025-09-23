@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RICH CLS</string>
+    <string name="title_activity_main">RICH CLS</string>
+    <string name="package_name">com.santech.community_listening</string>
+    <string name="custom_url_scheme">com.santech.community_listening</string>
+</resources>

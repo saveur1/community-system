@@ -13,7 +13,7 @@ export default defineConfig({
     tailwindcss(),
   ],
   build: {
-    outDir: 'public_html',
+    outDir: 'dist',
   },
   resolve: {
     alias: {

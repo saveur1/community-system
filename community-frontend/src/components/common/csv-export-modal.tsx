@@ -1,5 +1,6 @@
 import React from 'react';
 import ExportFilterModal from './export-filter-modal';
+import { saveAs } from 'file-saver';
 
 type ColumnMeta = { key: string; label?: string; default?: boolean };
 
@@ -67,8 +68,7 @@ const CsvExportModal: React.FC<Props> = ({ isOpen, onClose, onExportCsv, excelDa
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const FileSaver = await import('file-saver');
-    FileSaver.saveAs(blob, `${excelFileName}.csv`);
+    saveAs(blob, `${excelFileName}.csv`);
   };
 
   return (

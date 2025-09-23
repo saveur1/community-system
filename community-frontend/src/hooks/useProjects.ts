@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectsApi, type ProjectsListParams, type ProjectsListResponse, type ProjectResponse, type ProjectCreateRequest, type ProjectUpdateRequest } from '../api/projects';
-import { offlineApi } from '@/services/offline-api';
+import { offlineProjectsApi } from '@/api-offline/projects';
 import { toast } from 'react-toastify';
 
 // Query keys for projects
@@ -15,22 +15,22 @@ export const projectsKeys = {
   detail: (id: string) => [...projectsKeys.all, 'detail', id] as const,
 };
 
-// List projects
+// List projects(offline support)
 export function useProjectsList(params: ProjectsListParams = { page: 1, limit: 10 }) {
   return useQuery<ProjectsListResponse>({
     queryKey: projectsKeys.list(params),
-    queryFn: () => offlineApi.getProjects(params),
+    queryFn: () => offlineProjectsApi.getProjects(params),
     placeholderData: keepPreviousData,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
   });
 }
 
-// Get single project by id
+// Get single project by id(offline support)
 export function useProject(projectId: string, enabled: boolean = true) {
   return useQuery<ProjectResponse>({
     queryKey: projectsKeys.detail(projectId),
-    queryFn: () => offlineApi.getProject(projectId),
+    queryFn: () => offlineProjectsApi.getProject(projectId),
     enabled: !!projectId && enabled,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000, // 1 hour

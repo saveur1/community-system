@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { feedbackApi, type FeedbackListParams, type FeedbackCreateRequest, type FeedbackUpdateRequest, type FeedbackReplyCreateRequest, type FeedbackReplyEntity } from '../api/feedback';
-import { offlineApi } from '@/services/offline-api';
+import { offlineFeedbackApi } from '@/api-offline/feedbacks';
 import { toast } from 'react-toastify';
 
 const feedbackKeys = {
@@ -16,7 +16,7 @@ const feedbackKeys = {
 export const useGetFeedback = (params: FeedbackListParams) => {
   return useQuery({
     queryKey: [...feedbackKeys.lists(), params],
-    queryFn: () => offlineApi.getFeedback(params),
+    queryFn: () => offlineFeedbackApi.getFeedback(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
   });
@@ -55,7 +55,7 @@ export const useGetFeedbackStats = () => {
 export const useCreateFeedback = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: FeedbackCreateRequest) => offlineApi.createFeedback(data),
+    mutationFn: (data: FeedbackCreateRequest) => offlineFeedbackApi.createFeedback(data),
     onSuccess: async (data) => {
       // Show success message
       if (data.message.includes('offline')) {

@@ -3,17 +3,16 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanstackDevtools } from '@tanstack/react-devtools'
 import QueryProvider from '@/providers/query-provider'
 import { ToastContainer } from 'react-toastify'
-import { OfflineProvider } from '@/contexts/OfflineContext';
+import { OfflineProvider } from '@/providers/OfflineContext';
 import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator';
 // import { OfflineStatusBar } from '@/components/OfflineStatusBar';
 
 export const Route = createRootRoute({
   component: () => (
-    <>
+    <div className="scheme-light-dark">
       <OfflineProvider>
         <QueryProvider>
           <NetworkStatusIndicator />
-          {/* <OfflineStatusBar /> */}
           <ToastContainer
             position="bottom-center"
             autoClose={5000}
@@ -44,6 +43,6 @@ export const Route = createRootRoute({
           )}
         </QueryProvider>
       </OfflineProvider>
-    </>
+    </div>
   ),
 })

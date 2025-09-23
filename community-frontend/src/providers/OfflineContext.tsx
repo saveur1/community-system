@@ -9,7 +9,6 @@ interface OfflineContextType {
   syncInProgress: boolean;
   pendingItems: number;
   forceSync: () => Promise<any>;
-  retryFailedItems: () => Promise<any>;
   clearOfflineData: () => Promise<void>;
 }
 
@@ -42,7 +41,6 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     syncInProgress: networkStatus.syncInProgress,
     pendingItems: networkStatus.pendingItems,
     forceSync: networkStatus.forceSync,
-    retryFailedItems: networkStatus.retryFailedItems,
     clearOfflineData,
   };
 

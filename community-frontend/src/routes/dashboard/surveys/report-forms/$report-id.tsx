@@ -24,13 +24,37 @@ function formatStatus(status: 'active' | 'paused' | 'archived' | undefined) {
   }
 }
 
+// Utility function to handle both stringified and regular arrays for question options
+const parseQuestionOptions = (options: any): string[] => {
+  if (!options) return [];
+  
+  // If it's already an array, return it
+  if (Array.isArray(options)) {
+    return options;
+  }
+  
+  // If it's a string, try to parse it as JSON
+  if (typeof options === 'string') {
+    try {
+      const parsed = JSON.parse(options);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.warn('Failed to parse question options:', error);
+      return [];
+    }
+  }
+  
+  // Fallback for any other type
+  return [];
+};
+
 const QuestionPreview = ({ question, index }: { question: any; index: number }) => {
   const renderQuestionInput = () => {
     switch (question.type) {
       case 'single_choice':
         return (
           <div className="space-y-3">
-            {(question.options || []).map((option: string, idx: number) => (
+            {parseQuestionOptions(question.options).map((option: string, idx: number) => (
               <label key={idx} className="flex items-center space-x-3 cursor-not-allowed opacity-70">
                 <input type="radio" disabled className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                 <span className="text-gray-700">{option}</span>
@@ -41,7 +65,7 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
       case 'multiple_choice':
         return (
           <div className="space-y-3">
-            {(question.options || []).map((option: string, idx: number) => (
+            {parseQuestionOptions(question.options).map((option: string, idx: number) => (
               <label key={idx} className="flex items-center space-x-3 cursor-not-allowed opacity-70">
                 <input type="checkbox" disabled className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
                 <span className="text-gray-700">{option}</span>

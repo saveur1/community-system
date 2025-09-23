@@ -1,4 +1,5 @@
 import { spacer } from '@/utility/logicFunctions';
+import { saveAs } from "file-saver";
 
 // Types for survey response data
 interface SurveyResponse {
@@ -94,7 +95,6 @@ export const generateSurveyResponsesExcel = async (options: ExportOptions): Prom
 
     // Dynamic imports for ExcelJS and FileSaver
     const ExcelJS = await import('exceljs');
-    const FileSaver = await import('file-saver');
     
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Survey Responses');
@@ -210,7 +210,7 @@ export const generateSurveyResponsesExcel = async (options: ExportOptions): Prom
     const blob = new Blob([buffer], { 
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
     });
-    FileSaver.saveAs(blob, `${fileName}_responses.xlsx`);
+    saveAs(blob, `${fileName}_responses.xlsx`);
 
   } catch (err) {
     console.error('Failed to export survey responses Excel:', err);

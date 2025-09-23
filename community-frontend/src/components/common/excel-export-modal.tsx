@@ -1,5 +1,6 @@
 import React from 'react';
 import ExportFilterModal from './export-filter-modal';
+import { saveAs } from "file-saver";
 
 type ColumnMeta = { key: string; label?: string; default?: boolean };
 
@@ -56,7 +57,6 @@ const ExcelExportModal: React.FC<Props> = ({ isOpen, onClose, onExportExcel, exc
 
     try {
       const ExcelJS = await import('exceljs');
-      const FileSaver = await import('file-saver');
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Data');
 
@@ -129,7 +129,7 @@ const ExcelExportModal: React.FC<Props> = ({ isOpen, onClose, onExportExcel, exc
       worksheet.getCell('A1').value = null;
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      FileSaver.saveAs(blob, `${excelFileName}.xlsx`);
+      saveAs(blob, `${excelFileName}.xlsx`);
     } catch (e) {
       console.error('Excel export failed', e);
     }

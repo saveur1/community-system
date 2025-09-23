@@ -24,9 +24,6 @@ export class OfflineInitService {
       // Initialize database
       await this.initializeDatabase();
 
-      // Setup service worker messaging
-      await this.setupServiceWorkerMessaging();
-
       // Start sync service
       this.initializeSyncService();
 
@@ -49,19 +46,6 @@ export class OfflineInitService {
     } catch (error) {
       console.error('Database initialization failed:', error);
       throw error;
-    }
-  }
-
-  private async setupServiceWorkerMessaging(): Promise<void> {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'BACKGROUND_SYNC') {
-          if (event.data.action === 'START_SYNC') {
-            console.log('Background sync requested by service worker');
-            syncService.syncPendingData();
-          }
-        }
-      });
     }
   }
 

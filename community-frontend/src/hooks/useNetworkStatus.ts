@@ -59,13 +59,8 @@ export function useNetworkStatus() {
     return syncService.forcSync();
   };
 
-  const retryFailedItems = async () => {
-    return syncService.retryFailedItems();
-  };
-
   return {
     ...status,
-    forceSync,
-    retryFailedItems
+    forceSync
   };
 }

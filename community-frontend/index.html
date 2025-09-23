@@ -12,6 +12,22 @@
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />
     <title>RICH CLS</title>
+    
+    <!-- Theme script to prevent FOUC (Flash of Unstyled Content) -->
+    <script>
+      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+      document.documentElement.classList.toggle(
+        "dark",
+        localStorage.theme === "dark" ||
+          (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
+      );
+      
+      // Also set data-theme attribute for custom variant
+      const resolvedTheme = localStorage.theme === "dark" ||
+        (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", resolvedTheme);
+    </script>
   </head>
   <body>
     <div id="app"></div>

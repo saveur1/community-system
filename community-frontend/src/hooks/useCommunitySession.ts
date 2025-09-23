@@ -7,8 +7,8 @@ import {
   type CommentsListParams,
   type CommentCreateRequest,
   type CommentUpdateRequest,
-} from '../api/community-sessions';
-import { offlineApi } from '@/services/offline-api';
+} from '../api/community-sessions'
+import { offlineCommunitySessionApi } from '@/api-offline/community-session';
 import { toast } from 'react-toastify';
 
 // Query keys for community sessions
@@ -36,7 +36,7 @@ export const communitySessionsKeys = {
 export const useCommunitySessionsList = (params?: CommunitySessionsListParams) => {
   return useQuery({
     queryKey: communitySessionsKeys.list(params),
-    queryFn: () => offlineApi.getCommunitySessions(params),
+    queryFn: () => offlineCommunitySessionApi.getCommunitySessions(params),
     placeholderData: keepPreviousData,
   });
 };
@@ -45,7 +45,7 @@ export const useCommunitySessionsList = (params?: CommunitySessionsListParams) =
 export const useCommunitySession = (id: string) => {
   return useQuery({
     queryKey: communitySessionsKeys.detail(id),
-    queryFn: () => offlineApi.getCommunitySession(id),
+    queryFn: () => offlineCommunitySessionApi.getCommunitySession(id),
     enabled: !!id,
   });
 };
@@ -123,7 +123,7 @@ export const useDeleteCommunitySession = () => {
 export const useCommunitySessionComments = (sessionId: string, params?: CommentsListParams) => {
   return useQuery({
     queryKey: communitySessionsKeys.comments(sessionId, params),
-    queryFn: () => offlineApi.getComments(sessionId),
+    queryFn: () => offlineCommunitySessionApi.getComments(sessionId),
     enabled: !!sessionId,
     placeholderData: keepPreviousData,
   });
@@ -135,7 +135,7 @@ export const useAddComment = (sessionId: string) => {
 
   return useMutation({
     mutationFn: ({ data, userId }: { data: CommentCreateRequest; userId: string }) => 
-      offlineApi.addComment(sessionId, data, userId),
+      offlineCommunitySessionApi.addComment(sessionId, data, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: communitySessionsKeys.comments(sessionId) 

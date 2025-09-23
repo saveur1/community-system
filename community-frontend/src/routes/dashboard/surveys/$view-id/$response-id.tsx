@@ -47,7 +47,7 @@ function RouteComponent() {
           title="Response Details"
           className='absolute top-0 left-0 w-full px-6'
         />
-        <div className="pt-14 px-6">
+        <div className="pt-14 px-6 max-sm:px-2 max-md:px-4">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <h3 className="text-lg font-medium text-red-800">Error Loading Response</h3>
             <p className="text-red-600 mt-2">

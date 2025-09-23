@@ -49,7 +49,7 @@ export function SummaryCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 sm:p-5 justify-between items-center flex gap-3 sm:gap-4 hover:shadow-md transition-shadow"
+      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4 sm:p-5 justify-between items-center flex gap-3 sm:gap-4 hover:shadow-md dark:hover:shadow-lg transition-shadow"
     >
       {/* Icon */}
       <div className="flex gap-3 sm:gap-4">
@@ -59,10 +59,10 @@ export function SummaryCard({
 
         <div className="flex flex-col">
           {/* Title */}
-          <h3 className="text-sm sm:text-base text-gray-500 font-medium">{title}</h3>
+          <h3 className="text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium">{title}</h3>
 
           {/* Value */}
-          <div className="text-xl sm:text-2xl font-bold text-gray-900">
+          <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
             {isNumber ? <motion.span>{rounded}</motion.span> : value}
           </div>
         </div>
@@ -81,7 +81,7 @@ export function SummaryCard({
           {isPositive ? "↑" : isNegative ? "↓" : "→"}{" "}
           {Math.abs(delta).toFixed(2)}%
         </p>
-        <p className="text-gray-500 text-center min-w-20 mt-1">{period}</p>
+        <p className="text-gray-500 dark:text-gray-400 text-center min-w-20 mt-1">{period}</p>
       </div>}
     </motion.div>
   );

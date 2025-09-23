@@ -1,5 +1,5 @@
 // src/services/offline-storage.ts
-import { db, type OfflineSurvey, type OfflineSurveyResponse, type OfflineCommunitySession, type OfflineComment, type OfflineFeedback, type OfflineProject, type SyncQueue } from '@/db/schema';
+import { db, type OfflineSurvey, type OfflineSurveyResponse, type OfflineCommunitySession, type OfflineComment, type OfflineFeedback, type OfflineProject, type OfflineStatisticsOverview, type OfflineSurveysHistory, type SyncQueue } from '@/db/schema';
 import { v4 as uuidv4 } from 'uuid';
 
 export class OfflineStorageService {
@@ -33,6 +33,12 @@ export class OfflineStorageService {
       case 'projects':
         await db.projects.bulkPut(dataWithTimestamp as unknown as OfflineProject[]);
         break;
+      case 'statisticsOverview':
+        await db.statisticsOverview.bulkPut(dataWithTimestamp as unknown as OfflineStatisticsOverview[]);
+        break;
+      case 'surveysHistory':
+        await db.surveysHistory.bulkPut(dataWithTimestamp as unknown as OfflineSurveysHistory[]);
+        break;
     }
   }
 
@@ -51,6 +57,12 @@ export class OfflineStorageService {
         break;
       case 'projects':
         collection = db.projects;
+        break;
+      case 'statisticsOverview':
+        collection = db.statisticsOverview;
+        break;
+      case 'surveysHistory':
+        collection = db.surveysHistory;
         break;
       default:
         throw new Error(`Unknown table: ${table}`);
@@ -82,6 +94,10 @@ export class OfflineStorageService {
         return db.feedback.get(id) as Promise<T | undefined>;
       case 'projects':
         return db.projects.get(id) as Promise<T | undefined>;
+      case 'statisticsOverview':
+        return db.statisticsOverview.get(id) as Promise<T | undefined>;
+      case 'surveysHistory':
+        return db.surveysHistory.get(id) as Promise<T | undefined>;
       default:
         throw new Error(`Unknown table: ${table}`);
     }
@@ -239,6 +255,26 @@ export class OfflineStorageService {
     return this.getCachedItem<OfflineProject>('projects', id);
   }
 
+  // Statistics Overview
+  async cacheStatisticsOverview(overview: OfflineStatisticsOverview): Promise<void> {
+    const dataToCache = { ...overview, lastSynced: Date.now() };
+    await db.statisticsOverview.put(dataToCache);
+  }
+
+  async getCachedStatisticsOverview(id: string): Promise<OfflineStatisticsOverview | undefined> {
+    const result = await this.getCachedItem<OfflineStatisticsOverview>('statisticsOverview', id);
+    return result;
+  }
+
+  // Surveys History
+  async cacheSurveysHistory(history: OfflineSurveysHistory): Promise<void> {
+    await db.surveysHistory.put({ ...history, lastSynced: Date.now() });
+  }
+
+  async getCachedSurveysHistory(id: string): Promise<OfflineSurveysHistory | undefined> {
+    return this.getCachedItem<OfflineSurveysHistory>('surveysHistory', id);
+  }
+
   // Sync queue management
   async addToSyncQueue(entityType: SyncQueue['entityType'], entityId: string, action: SyncQueue['action'], data: any): Promise<void> {
     const queueItem: SyncQueue = {
@@ -285,6 +321,8 @@ export class OfflineStorageService {
     await db.communitySessions.clear();
     await db.feedback.clear();
     await db.projects.clear();
+    await db.statisticsOverview.clear();
+    await db.surveysHistory.clear();
     await db.comments.clear();
     await db.surveyResponses.clear();
   }
@@ -294,13 +332,17 @@ export class OfflineStorageService {
     communitySessions: number;
     feedback: number;
     projects: number;
+    statisticsOverview: number;
+    surveysHistory: number;
     pendingSync: number;
   }> {
-    const [surveys, communitySessions, feedback, projects, pendingSync] = await Promise.all([
+    const [surveys, communitySessions, feedback, projects, statisticsOverview, surveysHistory, pendingSync] = await Promise.all([
       db.surveys.count(),
       db.communitySessions.count(),
       db.feedback.count(),
       db.projects.count(),
+      db.statisticsOverview.count(),
+      db.surveysHistory.count(),
       db.syncQueue.count()
     ]);
 
@@ -309,6 +351,8 @@ export class OfflineStorageService {
       communitySessions,
       feedback,
       projects,
+      statisticsOverview,
+      surveysHistory,
       pendingSync
     };
   }

@@ -112,6 +112,45 @@ export interface OfflineProject {
   lastSynced?: number;
 }
 
+export interface OfflineStatisticsOverview {
+  id: string; // Unique key for caching (e.g., "overview:startDate:endDate")
+  feedbacks: {
+    count: number;
+    deltaPercent: number;
+    previousCount?: number;
+    userCount?: number | null;
+    userDeltaPercent?: number | null;
+  };
+  users: {
+    total: number;
+    createdInPeriod: number;
+    createdDeltaPercent: number;
+    previousCreated?: number;
+  };
+  surveys: {
+    activeNow: number;
+    createdInPeriod: number;
+    createdDeltaPercent: number;
+    previousCreated?: number;
+    respondedByUser: number | null;
+    respondedDeltaPercent: number | null;
+  };
+  period: {
+    start: string;
+    end: string;
+    previousStart: string;
+    previousEnd: string;
+  };
+  lastSynced?: number;
+}
+
+export interface OfflineSurveysHistory {
+  id: string; // Unique key for caching (e.g., "history:group:surveyId:startDate:endDate")
+  labels: string[];
+  data: number[];
+  lastSynced?: number;
+}
+
 export interface SyncQueue {
   id?: number;
   entityType: 'survey' | 'surveyResponse' | 'communitySession' | 'comment' | 'feedback' | 'project';
@@ -139,6 +178,8 @@ export class OfflineDatabase extends Dexie {
   comments!: Table<OfflineComment>;
   feedback!: Table<OfflineFeedback>;
   projects!: Table<OfflineProject>;
+  statisticsOverview!: Table<OfflineStatisticsOverview>;
+  surveysHistory!: Table<OfflineSurveysHistory>;
   syncQueue!: Table<SyncQueue>;
   metadata!: Table<AppMetadata>;
 
@@ -152,6 +193,20 @@ export class OfflineDatabase extends Dexie {
       comments: 'id, communitySessionId, userId, syncStatus, createdAt, lastSynced',
       feedback: 'id, feedbackType, feedbackMethod, status, projectId, userId, syncStatus, createdAt, lastSynced',
       projects: 'id, name, status, createdAt, lastSynced',
+      syncQueue: '++id, entityType, entityId, action, retryCount, createdAt, lastAttempt',
+      metadata: '++id, key, updatedAt'
+    });
+
+    // Version 2: Add statistics tables
+    this.version(2).stores({
+      surveys: 'id, title, status, surveyType, organizationId, createdBy, startAt, endAt, lastSynced',
+      surveyResponses: 'id, surveyId, userId, syncStatus, createdAt, lastSynced',
+      communitySessions: 'id, title, type, createdBy, isActive, createdAt, lastSynced',
+      comments: 'id, communitySessionId, userId, syncStatus, createdAt, lastSynced',
+      feedback: 'id, feedbackType, feedbackMethod, status, projectId, userId, syncStatus, createdAt, lastSynced',
+      projects: 'id, name, status, createdAt, lastSynced',
+      statisticsOverview: 'id, lastSynced',
+      surveysHistory: 'id, lastSynced',
       syncQueue: '++id, entityType, entityId, action, retryCount, createdAt, lastAttempt',
       metadata: '++id, key, updatedAt'
     });

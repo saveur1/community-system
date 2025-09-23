@@ -1,8 +1,8 @@
 // src/components/OfflineStatusBar.tsx
-import { useOffline } from '@/contexts/OfflineContext';
+import { useOffline } from '@/providers/OfflineContext';
 
 export function OfflineStatusBar() {
-  const { isOnline, syncInProgress, pendingItems, forceSync, retryFailedItems } = useOffline();
+  const { isOnline, syncInProgress, pendingItems, forceSync } = useOffline();
 
   if (isOnline && pendingItems === 0 && !syncInProgress) {
     return null;
@@ -34,12 +34,6 @@ export function OfflineStatusBar() {
               className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
             >
               Sync Now
-            </button>
-            <button
-              onClick={retryFailedItems}
-              className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-            >
-              Retry Failed
             </button>
           </div>
         )}

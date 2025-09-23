@@ -36,7 +36,7 @@ function DashboardLayout() {
         {/* Header fixed at top */}
         <div className="sticky top-0 z-40">
           <ImigongoStarter />
-          <Header setMobileMenuOpen={setMobileMenuOpen} isDarkMode={false} />
+          <Header setMobileMenuOpen={setMobileMenuOpen} />
         </div>
         {/* Scrollable content area */}
         <div className="h-[calc(100vh-109px)] overflow-y-auto">
