@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGetFeedback, useDeleteFeedback, useUpdateFeedback } from '@/hooks/useFeedback';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
@@ -42,6 +42,7 @@ const FeedbacksPage = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackEntity | undefined>(undefined);
   const { user } = useAuth();
+  const searchParams = Route.useSearch();
 
   const feedbackParams = useMemo(() => {
     const param: FeedbackListParams = { page, limit: pageSize, search: search || undefined, owner: 'me' };
@@ -68,6 +69,15 @@ const FeedbacksPage = () => {
       default: return 'bg-gray-100 text-gray-800 border border-gray-200';
     }
   };
+
+  useEffect(()=> {
+    const feedbackId =(searchParams as any)?.feedbackId;
+    if(feedbackId){
+        const feedback = feedbacks.find((fb: any)=> fb.id === feedbackId)
+        setSelectedFeedback(feedback);
+        setIsViewOpen(true);
+    }
+  }, [])
 
   const getInitials = (text: string) => text?.split(' ')?.map((n) => n[0])?.join('')?.toUpperCase();
   const onReply = (feedback: FeedbackEntity) => feedback.followUpNeeded === true && feedback?.user !== null;
