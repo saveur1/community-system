@@ -217,7 +217,7 @@ export class FeedbackController extends Controller {
         `New feedback has been submitted on ${feedbackSubject}. Please review and take appropriate action.`,
         {
           icon: 'HiOutlineChatAlt',
-          link: `/dashboard/feedback/${feedback.id}`,
+          link: `/dashboard/feedback?feedbackId=${feedback.id}`,
           entityId: feedback.id,
           entityType: 'Feedback',
           createdBy: req.user?.id,
