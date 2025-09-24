@@ -42,7 +42,7 @@ const SurveyAnswerReview: React.FC<SurveyAnswerReviewProps> = ({
 
 
   return (
-    <div className={`divide-y divide-gray-200 ${className}`}>
+    <div className={`divide-y divide-gray-200 dark:divide-gray-700 ${className}`}>
       {questions.map((question: QuestionItem, index: number) => {
         const answer = answerMap[question.id];
         const answerValue = answer?.answerText || (parseOptions(answer?.answerOptions) || []).join(', ');
@@ -51,16 +51,16 @@ const SurveyAnswerReview: React.FC<SurveyAnswerReviewProps> = ({
         return (
           <div key={question.id} className="p-6">
             <div className="flex items-start">
-              <div className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/30 text-white text-sm font-medium mr-3 mt-1">
+              <div className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/30 dark:bg-primary/40 text-white text-sm font-medium mr-3 mt-1">
                 {index + 1}
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                   {question.title}
                   {question.required && <span className="text-red-500 ml-1">*</span>}
                 </h3>
                 {question.description && (
-                  <p className="mt-1 text-sm text-gray-500">{question.description}</p>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{question.description}</p>
                 )}
                 <div className="mt-4">
                   {question.type === 'single_choice' && parsedOptions.length > 0 && (
@@ -71,9 +71,9 @@ const SurveyAnswerReview: React.FC<SurveyAnswerReviewProps> = ({
                             type="radio" 
                             checked={answerValue === option} 
                             readOnly 
-                            className="h-4 w-4 text-primary/30 border-gray-300 opacity-60" 
+                            className="h-4 w-4 text-primary/30 dark:text-primary/40 border-gray-300 dark:border-gray-600 dark:bg-gray-600 opacity-60" 
                           />
-                          <label className="ml-3 block text-sm font-medium text-gray-700">{option}</label>
+                          <label className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">{option}</label>
                         </div>
                       ))}
                     </div>
@@ -84,39 +84,39 @@ const SurveyAnswerReview: React.FC<SurveyAnswerReviewProps> = ({
                         <div key={option} className="flex items-center">
                           <input 
                             type="checkbox" 
-                            checked={answer?.answerOptions?.includes(option) || false} 
+                            checked={parseOptions(answer?.answerOptions)?.includes(option) || false} 
                             readOnly 
-                            className="h-4 w-4 text-primary/30 border-gray-300 rounded opacity-60" 
+                            className="h-4 w-4 text-primary/30 dark:text-primary/40 border-gray-300 dark:border-gray-600 dark:bg-gray-600 rounded opacity-60" 
                           />
-                          <label className="ml-3 block text-sm font-medium text-gray-700">{option}</label>
+                          <label className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">{option}</label>
                         </div>
                       ))}
                     </div>
                   )}
                   {(question.type === 'text_input' || question.type === 'textarea') && (
                     <div className="mt-1">
-                      <div className="mt-1 block w-full rounded-md bg-gray-50 border-gray-200 border p-2 text-gray-700">
+                      <div className="mt-1 block w-full rounded-md bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 border p-2 text-gray-700 dark:text-gray-300">
                         {answerValue || 'No answer provided'}
                       </div>
                     </div>
                   )}
                   {question.type === 'file_upload' && (
                     <div className="mt-1">
-                      {(answer?.answerOptions?.length ?? 0) > 0 ? (
+                      {(parseOptions(answer?.answerOptions)?.length ?? 0) > 0 ? (
                         <div className="flex flex-wrap gap-2">
-                          {answer?.answerOptions?.map((name: string) => (
-                            <span key={name} className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                          {parseOptions(answer?.answerOptions)?.map((name: string) => (
+                            <span key={name} className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded">
                               {name}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <div className="text-sm text-gray-500">No files uploaded</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">No files uploaded</div>
                       )}
                     </div>
                   )}
                   {question.type === 'rating' && (
-                    <div className="mt-1 text-sm text-gray-700">
+                    <div className="mt-1 text-sm text-gray-700 dark:text-gray-300">
                       Rating: <span className="font-medium">{answer?.answerText ?? '—'}</span>
                       {question.ratingLabel ? ` ${question.ratingLabel}` : ''}
                     </div>
@@ -124,7 +124,7 @@ const SurveyAnswerReview: React.FC<SurveyAnswerReviewProps> = ({
                   {question.type === 'linear_scale' && (
                     <div className="mt-1">
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500">{question.minLabel ?? question.minValue}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{question.minLabel ?? question.minValue}</span>
                         <input 
                           type="range" 
                           min={question.minValue ?? 1} 
@@ -132,11 +132,11 @@ const SurveyAnswerReview: React.FC<SurveyAnswerReviewProps> = ({
                           step={1} 
                           value={Number(answer?.answerText ?? question.minValue ?? 1)} 
                           readOnly 
-                          className="w-full" 
+                          className="w-full bg-gray-200 dark:bg-gray-700" 
                         />
-                        <span className="text-xs text-gray-500">{question.maxLabel ?? question.maxValue}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{question.maxLabel ?? question.maxValue}</span>
                       </div>
-                      <div className="text-sm text-gray-700 mt-1">
+                      <div className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                         Selected: <span className="font-medium">{answer?.answerText ?? '—'}</span>
                       </div>
                     </div>

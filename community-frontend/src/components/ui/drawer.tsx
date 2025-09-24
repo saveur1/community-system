@@ -81,7 +81,7 @@ const Drawer: React.FC<DrawerProps> = ({
             aria-modal="true"
             aria-labelledby="drawer-title"
             className={cn(
-              'relative bg-white shadow-xl border border-gray-200',
+              'relative bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-600',
               isRight ? 'h-full' : 'w-full rounded-t-xl',
               className
             )}
@@ -89,15 +89,15 @@ const Drawer: React.FC<DrawerProps> = ({
             variants={panelVariants}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
-            <div className={cn('flex items-center justify-between border-b border-gray-200 px-4 sm:px-6', isRight ? 'h-14' : 'h-12 rounded-t-xl bg-white') }>
-              <div id="drawer-title" className="text-sm font-semibold text-gray-800 truncate">
+            <div className={cn('flex items-center justify-between border-b border-gray-200 dark:border-gray-600 px-4 sm:px-6', isRight ? 'h-14' : 'h-12 rounded-t-xl bg-white dark:bg-gray-800') }>
+              <div id="drawer-title" className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
                 {title}
               </div>
               {showClose && (
                 <button
                   onClick={onClose}
                   aria-label="Close drawer"
-                  className="p-2 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                  className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 >
                   <FaTimes className="w-4 h-4" />
                 </button>

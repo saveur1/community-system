@@ -21,12 +21,12 @@ interface FeedbackPaginationProps {
   }: FeedbackPaginationProps) => {
     return (
       <div className="flex items-center justify-between mt-4">
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
           Page {currentPage} of {totalPages} • Showing {paginatedCount} of {filteredCount}
         </div>
         <div className="flex items-center gap-2">
           <select
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+            className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             value={pageSize}
             onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
           >
@@ -35,14 +35,14 @@ interface FeedbackPaginationProps {
             ))}
           </select>
           <button
-            className="px-3 py-1 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+            className="px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
             disabled={currentPage <= 1}
             onClick={() => setPage((p: number) => Math.max(1, p - 1))}
           >
             Prev
           </button>
           <button
-            className="px-3 py-1 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+            className="px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
             disabled={currentPage >= totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           >

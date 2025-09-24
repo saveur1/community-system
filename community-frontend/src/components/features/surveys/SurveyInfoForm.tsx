@@ -56,28 +56,28 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
   console.log("visibleProjects", visibleProjects)
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
       <div
-        className="flex items-center justify-between p-4 sm:p-6 cursor-pointer hover:bg-gray-50 hover:rounded-xl"
+        className="flex items-center justify-between p-4 sm:p-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:rounded-xl transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-x-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <FaFileAlt className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+            <FaFileAlt className="w-4 h-4 sm:w-5 sm:h-5 text-primary dark:text-primary-200" />
           </div>
-          <h2 className="text-lg sm:text-2xl font-semibold text-gray-900">Survey Information</h2>
+          <h2 className="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-gray-100">Survey Information</h2>
         </div>
         {isExpanded ? (
-          <FaChevronUp className="w-5 h-5 text-gray-500" />
+          <FaChevronUp className="w-5 h-5 text-gray-500 dark:text-gray-400" />
         ) : (
-          <FaChevronDown className="w-5 h-5 text-gray-500" />
+          <FaChevronDown className="w-5 h-5 text-gray-500 dark:text-gray-400" />
         )}
       </div>
 
       {isExpanded && (
         <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-4">
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               <FaBullseye className="w-4 h-4" />
               Survey Title
               <span className="text-red-500">*</span>
@@ -87,29 +87,28 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
               placeholder="Enter a descriptive title for your survey"
               value={title}
               onChange={(e) => onChange({ title: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-400 focus:border-transparent transition-all duration-200"
             />
             {!title && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 A clear, descriptive title helps participants understand your survey's purpose
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Description</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Description</label>
             <textarea
               placeholder="Provide a brief description of what this survey is about and why you're conducting it"
               value={description}
               onChange={(e) => onChange({ description: e.target.value })}
               rows={4}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-400 focus:border-transparent transition-all duration-200 resize-none"
             />
             <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Help participants understand the context and importance of your survey
               </p>
-              <span className="text-xs text-gray-400">{description.length}/500</span>
             </div>
           </div>
 
@@ -126,26 +125,26 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                 onChange={(e) => onChange({ estimatedTime: e.target.value })}
                 min="1"
                 max="120"
-                className="w-20 sm:w-24 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-20 sm:w-24 border border-gray-300 dark:border-gray-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200"
               />
-              <span className="text-sm text-gray-600">minutes</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">minutes</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Realistic time estimates improve response rates</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Realistic time estimates improve response rates</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               {t("feedback.project")} <span className="text-red-500">*</span>
             </label>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 sm:p-6">
               {visibleProjects.length === 0 && moreProjects.length === 0 ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <FaBullseye className="w-6 h-6 text-gray-400" />
+                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <FaBullseye className="w-6 h-6 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <p className="text-gray-500">Loading projects...</p>
+                    <p className="text-gray-500 dark:text-gray-400">Loading projects...</p>
                   </div>
                 </div>
               ) : (
@@ -154,7 +153,7 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                     <label
                       key={p.id}
                       htmlFor={`project-${p.id}`}
-                      className="flex items-center p-2 sm:p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 cursor-pointer transition-all duration-200"
+                      className="flex items-center p-2 sm:p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-primary dark:hover:border-primary-400 hover:bg-primary/5 dark:hover:bg-primary/10 cursor-pointer transition-all duration-200"
                     >
                       <input
                         type="radio"
@@ -163,14 +162,14 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                         value={p.id}
                         checked={projectId === p.id}
                         onChange={(e) => onChange({ projectId: e.target.value })}
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                        className="h-4 w-4 text-primary dark:text-primary-200 focus:ring-primary dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 dark:bg-gray-600"
                       />
-                      <span className="ml-3 text-sm font-medium text-gray-900">{p.name}</span>
+                      <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-100">{p.name}</span>
                     </label>
                   ))}
 
                   {moreProjects.length > 0 && (
-                    <div className="pt-2 border-t border-gray-200">
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
                       <ViewMoreProjects
                         projects={moreProjects}
                         selectedProject={projectId}
@@ -183,47 +182,47 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
               )}
             </div>
             {!projectId && (
-              <p className="text-xs text-red-500 mt-2">Please select a project to associate with this survey</p>
+              <p className="text-xs text-red-500 dark:text-red-400 mt-2">Please select a project to associate with this survey</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Availability window</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Availability window</label>
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full">
               <button
                 type="button"
                 onClick={onStartPickerOpen}
-                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md w-full sm:w-52 bg-white hover:bg-gray-50 text-left"
+                className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md w-full sm:w-52 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-left text-gray-900 dark:text-gray-100 transition-colors"
               >
                 {startDate ? `${startDate.toLocaleDateString()} ${startHour}:${startMinute}` : `Set start time`}
               </button>
-              <span className="text-sm text-gray-500 self-center">to</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 self-center">to</span>
               <button
                 type="button"
                 onClick={onEndPickerOpen}
-                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md w-full sm:w-52 bg-white hover:bg-gray-50 text-left"
+                className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md w-full sm:w-52 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-left text-gray-900 dark:text-gray-100 transition-colors"
               >
                 {endDate ? `${endDate.toLocaleDateString()} ${endHour}:${endMinute}` : `Set end time`}
               </button>
             </div>
-            <div className="text-xs text-gray-400 mt-2">Set when this survey will be open to respondents.</div>
+            <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">Set when this survey will be open to respondents.</div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Allowed Roles (who can view)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Allowed Roles (who can view)</label>
             <div
               onClick={onRolesModalOpen}
               role="button"
               tabIndex={0}
-              className="min-h-[44px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 flex items-center gap-2 flex-wrap cursor-pointer touch-manipulation"
+              className="min-h-[44px] w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 flex items-center gap-2 flex-wrap cursor-pointer touch-manipulation hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
             >
               {selectedRoles?.length === 0 ? (
-                <span className="text-sm text-gray-400">Click to select roles...</span>
+                <span className="text-sm text-gray-400 dark:text-gray-500">Click to select roles...</span>
               ) : (
                 selectedRoles?.map((id) => (
                   <span
                     key={id}
-                    className="inline-flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full text-xs mr-1 sm:mr-2 mb-2"
+                    className="inline-flex items-center bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-200 px-2 py-1 rounded-full text-xs mr-1 sm:mr-2 mb-2"
                   >
                     <span className="mr-1 sm:mr-2 capitalize">{roleLabelById(id)}</span>
                     <button
@@ -232,7 +231,7 @@ const SurveyInfoForm: React.FC<SurveyInfoFormProps> = ({
                         e.stopPropagation()
                         onRemoveRole(id)
                       }}
-                      className="text-primary/80 hover:text-primary text-sm leading-none p-0.5 touch-manipulation"
+                      className="text-primary/80 dark:text-primary-200/80 hover:text-primary dark:hover:text-primary-200 text-sm leading-none p-0.5 touch-manipulation transition-colors"
                       aria-label={`Remove ${id}`}
                     >
                       <FaX className="w-2.5 h-2.5" />

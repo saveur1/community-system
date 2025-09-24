@@ -36,7 +36,8 @@ export class OfflineApiService {
     const cachedFeedback = await offlineStorage.getCachedFeedback({
       status: params.status,
       feedbackType: params.feedbackType,
-      projectId: params.projectId
+      projectId: params.projectId,
+      search: params.search
     });
 
     // Apply pagination

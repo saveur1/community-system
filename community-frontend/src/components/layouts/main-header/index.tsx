@@ -124,7 +124,7 @@ const MainHeader = () => {
                 <MdOutlineFiberNew size={40}  className="text-white font-bold"/>
                 <span>{repidEnquiry.title} <a href={`${window.location.origin}/answers/${repidEnquiry.id}`} className="underline">Click here</a></span>
             </div>}
-            <header className="w-full bg-white border-b border-gray-200 z-50 sticky top-0">
+            <header className="w-full bg-white border-b border-gray-200 z-40 sticky top-0">
                 <div className="px-4">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo/TC on the left */}

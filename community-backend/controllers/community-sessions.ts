@@ -9,6 +9,7 @@ import { asyncCatch } from '../middlewares/errorHandler';
 import { IUserAttributes } from '@/types';
 import { createSystemLog } from '../utils/systemLog';
 import { createNotificationForRoles } from './notifications';
+import db from '@/models';
 
 interface CommunitySessionCreateRequest {
   title: string;
@@ -43,27 +44,60 @@ export class CommunitySessionController extends Controller {
   @Get('/')
   @asyncCatch
   public async getCommunitySessions(
+    @Request() request: any,
     @Query() page: number = 1,
     @Query() limit: number = 10,
     @Query() type?: 'video' | 'image' | 'document' | 'audio',
-    @Query() isActive?: boolean
+    @Query() isActive?: boolean,
+    @Query() allowed?: boolean // if true, return only sessions that allow any of the current user's roles
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
     const where: any = {};
     if (type) where.type = type;
     if (isActive !== undefined) where.isActive = isActive;
 
+    // base includes; we'll adjust roles include below if needed
+    const includeArr: any[] = [
+      { model: db.Document, as: 'document', attributes: ['id', 'documentName', 'documentUrl', 'type', 'size'] },
+      { model: db.Role, as: 'roles', attributes: ['id', 'name', 'description'], required: false },
+      { model: db.User, as: 'creator', attributes: ['id', 'name', 'email', 'profile'] },
+      { model: db.Comment, as: 'comments', include: [{ model: db.User, as: 'user', attributes: ['id', 'name', 'profile'] }] }
+    ];
+
+    // ALLOWED FILTERING: only sessions that allow any of the current user's roles
+    if (allowed) {
+      const userId = request?.user?.id ?? null;
+      if (!userId) {
+        return ServiceResponse.failure('Authentication required to filter by allowed', [], 401);
+      }
+      
+      // load user's roles
+      const user = await db.User.findByPk(userId, {
+        include: [{ model: db.Role, as: 'roles', through: { attributes: [] } }],
+      });
+
+      const roleIds = (user?.roles ?? []).map((r: any) => r.id).filter(Boolean);
+      if (!roleIds.length) {
+        // user has no roles -> no sessions allowed
+        return ServiceResponse.success('Community sessions retrieved successfully', [], 200, { total: 0, page, totalPages: 0 });
+      }
+
+      // replace roles include to be required and filter by user's role ids (inner join)
+      includeArr[1] = {
+        model: db.Role,
+        as: 'roles',
+        attributes: ['id', 'name', 'description'],
+        required: true,
+        where: { id: roleIds },
+      };
+    }
+
     const { count, rows } = await CommunitySession.findAndCountAll({
       limit,
       offset,
       order: [['createdAt', 'DESC']],
       where,
-      include: [
-        { model: Document, as: 'document', attributes: ['id', 'documentName', 'documentUrl', 'type', 'size'] },
-        { model: Role, as: 'roles', attributes: ['id', 'name', 'description'] },
-        { model: User, as: 'creator', attributes: ['id', 'name', 'email', 'profile'] },
-        { model: Comment, as: 'comments', include: [{ model: User, as: 'user', attributes: ['id', 'name', 'profile'] }] }
-      ],
+      include: includeArr,
       distinct: true,
     });
 
@@ -256,6 +290,7 @@ export class CommunitySessionController extends Controller {
     );
   }
 
+  @Security("jwt")
   @Post('/{sessionId}/comments')
   @asyncCatch
   public async addComment(

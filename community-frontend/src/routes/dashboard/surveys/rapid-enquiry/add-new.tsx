@@ -286,6 +286,8 @@ function CreateRapidEnquiryComponent() {
       allowedRoles: [], // Rapid enquiry doesn't have allowed roles
     }
 
+    console.log(payload)
+
     createSurveyMutation.mutate(payload as any, {
       onSuccess: () => {
         localStorage.removeItem(LOCAL_STORAGE_KEY) // Clear draft

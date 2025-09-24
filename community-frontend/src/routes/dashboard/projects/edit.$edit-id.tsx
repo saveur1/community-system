@@ -109,7 +109,7 @@ const EditProjectComponent: FC = (): JSX.Element => {
 
   const handleSave = () => {
     if (!programme.title.trim()) {
-      alert('Please enter a project title');
+      toast.error('Please enter a project title');
       return;
     }
     void (async () => {
@@ -159,7 +159,6 @@ const EditProjectComponent: FC = (): JSX.Element => {
           ...(uploads.length > 0 && { documents: uploads }),
         });
 
-        toast.success('Project updated successfully');
         navigate({ to: '/dashboard/projects' });
       } catch (err) {
         const msg = (err as any)?.response?.data?.message || 'Failed to update project';

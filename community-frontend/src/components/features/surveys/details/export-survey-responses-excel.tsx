@@ -1,4 +1,4 @@
-import { spacer } from '@/utility/logicFunctions';
+import { getOptions, spacer } from '@/utility/logicFunctions';
 import { saveAs } from "file-saver";
 
 // Types for survey response data
@@ -59,13 +59,14 @@ const getAnswerForQuestion = (questionId: string, answers: SurveyResponse['answe
 // Helper function to format answer text
 const formatAnswerText = (answer: SurveyResponse['answers'][0] | undefined): string => {
   if (!answer) return 'No answer provided';
+  const answerOptions = getOptions(answer?.answerOptions);
   
   if (answer.answerText) {
     return answer.answerText;
   }
   
-  if (answer.answerOptions && answer.answerOptions.length > 0) {
-    return answer.answerOptions.join(', ');
+  if (answerOptions && answerOptions?.length > 0) {
+    return answerOptions.join(', ');
   }
   
   return 'No answer provided';

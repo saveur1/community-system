@@ -78,14 +78,14 @@ const QuestionsSection: FC<QuestionsSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-primary rounded-lg shadow-sm border border-primary p-6 text-white">
+      <div className="bg-primary dark:bg-primary/90 rounded-lg shadow-sm border border-primary dark:border-primary/70 p-6 text-white">
         {isEditingTitle ? (
           <div className="space-y-3">
             <input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               placeholder="Section title..."
-              className="w-full border border-primary px-3 py-2 rounded text-primary-dark bg-white placeholder-primary focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-primary dark:border-primary/70 px-3 py-2 rounded text-primary-dark dark:text-gray-900 bg-white dark:bg-gray-100 placeholder-primary dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary/70"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSectionTitleSave()
                 if (e.key === "Escape") handleSectionTitleCancel()
@@ -95,13 +95,13 @@ const QuestionsSection: FC<QuestionsSectionProps> = ({
             <div className="flex gap-2">
               <button
                 onClick={handleSectionTitleSave}
-                className="px-4 py-2 bg-white text-primary rounded hover:bg-blue-50 transition-colors font-medium"
+                className="px-4 py-2 bg-white dark:bg-gray-100 text-primary dark:text-primary rounded hover:bg-blue-50 dark:hover:bg-gray-200 transition-colors font-medium"
               >
                 Save
               </button>
               <button
                 onClick={handleSectionTitleCancel}
-                className="px-4 py-2 border border-blue-300 text-white rounded hover:bg-primary transition-colors"
+                className="px-4 py-2 border border-blue-300 dark:border-blue-400 text-white rounded hover:bg-primary dark:hover:bg-primary/80 transition-colors"
               >
                 Cancel
               </button>
@@ -111,12 +111,12 @@ const QuestionsSection: FC<QuestionsSectionProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h2
-                className="text-xl font-semibold mb-2 cursor-pointer hover:text-blue-100 transition-colors"
+                className="text-xl font-semibold mb-2 cursor-pointer hover:text-blue-100 dark:hover:text-blue-200 transition-colors"
                 onClick={handleSectionTitleEdit}
               >
                 {currentSection?.title || "Untitled Section"}
               </h2>
-              <div className="text-blue-100 text-sm">
+              <div className="text-blue-100 dark:text-blue-200 text-sm">
                 {currentSectionQuestions?.length || 0} question{currentSectionQuestions?.length !== 1 ? "s" : ""} in
                 this section
               </div>
@@ -124,7 +124,7 @@ const QuestionsSection: FC<QuestionsSectionProps> = ({
             <div className="flex items-center gap-1">
               <button
                 onClick={handleSectionTitleEdit}
-                className="p-2 rounded hover:bg-primary transition-colors"
+                className="p-2 rounded hover:bg-primary dark:hover:bg-primary/80 transition-colors"
                 title="Edit section title"
               >
                 <FaEdit className="w-4 h-4" />
@@ -132,7 +132,7 @@ const QuestionsSection: FC<QuestionsSectionProps> = ({
               {currentSection && (
                 <button
                   onClick={() => onDeleteSection(currentSection.id)}
-                  className="p-2 rounded hover:bg-red-500/20 transition-colors"
+                  className="p-2 rounded hover:bg-red-500/20 dark:hover:bg-red-500/30 transition-colors"
                   title="Delete section"
                 >
                   <FaTrash className="w-4 h-4" />
@@ -144,9 +144,9 @@ const QuestionsSection: FC<QuestionsSectionProps> = ({
       </div>
 
       {currentSectionQuestions?.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-          <div className="text-gray-500 mb-2">No questions in this section yet</div>
-          <div className="text-sm text-gray-400">Use the sidebar to add your first question to this section</div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+          <div className="text-gray-500 dark:text-gray-400 mb-2">No questions in this section yet</div>
+          <div className="text-sm text-gray-400 dark:text-gray-500">Use the sidebar to add your first question to this section</div>
         </div>
       ) : (
         <div className="space-y-4">

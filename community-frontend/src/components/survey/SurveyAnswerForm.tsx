@@ -5,6 +5,7 @@ import { useSubmitSurveyAnswers } from '@/hooks/useSurveys';
 import type { SubmitAnswersRequest } from '@/api/surveys';
 import useAuth from '@/hooks/useAuth';
 import { toast } from 'react-toastify';
+import { getOptions } from '@/utility/logicFunctions';
 
 type QuestionType = 'single_choice' | 'multiple_choice' | 'text_input' | 'textarea' | 'file_upload' | 'rating' | 'linear_scale';
 
@@ -183,16 +184,16 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
       case 'single_choice':
         return (
           <div className="space-y-2">
-            {question.options?.map((option: string) => (
-              <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer">
+            {getOptions(question.options).map((option: string) => (
+              <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
                 <input
                   type="radio"
                   name={`question-${question.id}`}
                   checked={answer === option}
                   onChange={() => handleAnswerChange(question.id, option)}
-                  className="h-4 w-4 text-primary focus:ring-primary"
+                  className="h-4 w-4 text-primary dark:text-primary-200 focus:ring-primary dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 dark:bg-gray-600"
                 />
-                <span className="text-gray-700">{option}</span>
+                <span className="text-gray-700 dark:text-gray-300">{option}</span>
               </label>
             ))}
           </div>
@@ -201,10 +202,10 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
       case 'multiple_choice':
         return (
           <div className="space-y-2">
-            {question.options?.map((option: string) => {
+            {getOptions(question.options).map((option: string) => {
               const isChecked = Array.isArray(answer) && answer.includes(option);
               return (
-                <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <label key={option} className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
                   <input
                     type="checkbox"
                     checked={isChecked}
@@ -214,9 +215,9 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
                         : [...(answer as string[]), option];
                       handleAnswerChange(question.id, newValue);
                     }}
-                    className="h-4 w-4 text-primary outline-none focus:ring-primary"
+                    className="h-4 w-4 text-primary dark:text-primary-200 outline-none focus:ring-primary dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 dark:bg-gray-600"
                   />
-                  <span className="text-gray-700">{option}</span>
+                  <span className="text-gray-700 dark:text-gray-300">{option}</span>
                 </label>
               );
             })}
@@ -231,7 +232,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
             value={answer as string}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             placeholder={question.placeholder || 'Type your answer here...'}
-            className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
           />
         );
 
@@ -250,7 +251,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
                     type="button"
                     onClick={() => handleAnswerChange(question.id, Number(val))}
                     className={`p-1 transition-colors duration-200 hover:scale-110 transform ${
-                      isActive ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'
+                      isActive ? 'text-yellow-400 dark:text-yellow-300' : 'text-gray-300 dark:text-gray-600 hover:text-yellow-200 dark:hover:text-yellow-400'
                     }`}
                   >
                     <FaStar className="w-8 h-8" />
@@ -259,7 +260,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
               })}
             </div>
             {current > 0 && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 Rating: <span className="font-medium">{current}</span>
                 {question.ratingLabel && <span className="ml-1">{question.ratingLabel}</span>}
               </div>
@@ -292,7 +293,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
               step={1}
               value={current}
               onChange={(e) => handleAnswerChange(question.id, Number(e.target.value))}
-              className="range w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+              className="range w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
               style={{
                 background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${currentPercent}%, #e5e7eb ${currentPercent}%, #e5e7eb 100%)`
               }}
@@ -301,7 +302,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
             {/* Tick marks */}
             <div className="flex justify-between px-2.5 mt-2 text-xs">
               {ticks.map((_, index) => (
-                <span key={index} className="text-gray-400">|</span>
+                <span key={index} className="text-gray-400 dark:text-gray-500">|</span>
               ))}
             </div>
             
@@ -309,7 +310,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
             <div className="flex justify-between px-2.5 mt-1 text-xs">
               {labels.map((label, index) => (
                 <span key={index} className={`font-medium ${
-                  current === label ? 'text-title' : 'text-gray-600'
+                  current === label ? 'text-title dark:text-primary-200' : 'text-gray-600 dark:text-gray-400'
                 }`}>
                   {label}
                 </span>
@@ -318,7 +319,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
             
             {/* Labels if provided */}
             {(question.minLabel || question.maxLabel) && (
-              <div className="flex justify-between mt-2 text-xs text-gray-500">
+              <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
                 <span>{question.minLabel || ''}</span>
                 <span>{question.maxLabel || ''}</span>
               </div>
@@ -328,7 +329,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
       }
 
       case 'file_upload': {
-        const accept = (question.allowedTypes ?? []).join(',');
+        const accept = (getOptions(question?.allowedTypes) ?? []).join(',');
         const files: File[] = Array.isArray(answer) ? (answer as File[]) : [];
         const inputId = `file-${question.id}`;
         return (
@@ -336,13 +337,13 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
             <div className="flex items-center justify-center w-full">
               <label
                 htmlFor={inputId}
-                className="flex flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                className="flex flex-col items-center justify-center w-full h-36 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
               >
                 <div className="flex flex-col items-center justify-center py-4">
                   {/* Icon */}
-                  <FaCloudUploadAlt className="w-8 h-8 mb-2 text-gray-500" />
-                  <p className="mb-1 text-xs text-gray-600"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                  <p className="text-[10px] text-gray-500">{accept ? accept.toUpperCase() : 'Files'} (max size depends on question)</p>
+                  <FaCloudUploadAlt className="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" />
+                  <p className="mb-1 text-xs text-gray-600 dark:text-gray-300"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">{accept ? accept.toUpperCase() : 'Files'} (max size depends on question)</p>
                 </div>
                 <input
                   id={inputId}
@@ -355,7 +356,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
               </label>
             </div>
             {files.length > 0 && (
-              <ul className="text-sm text-gray-600 list-disc pl-5">
+              <ul className="text-sm text-gray-600 dark:text-gray-400 list-disc pl-5">
                 {files.map((f) => (
                   <li key={f.name}>{f.name}</li>
                 ))}
@@ -371,21 +372,21 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 border border-gray-300 bg-white rounded-xl shadow-md">
+    <div className="max-w-4xl mx-auto p-6 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl shadow-md">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2 text-center">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2 text-center">
           {survey.title}
         </h2>
-        <p className="text-gray-600 text-center max-w-2xl mx-auto">{survey.description}</p>
+        <p className="text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto">{survey.description}</p>
 
         {/* Centered step badges */}
         {totalSteps > 0 && (
           <div className="mt-4 flex flex-col items-center">
             
-            <div className="mt-2 text-sm text-gray-500">
+            <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               Step {currentStep + 1} of {totalSteps}
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
               <div
                 className="bg-primary h-2.5 rounded-full"
                 style={{ width: `${totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0}%` }}
@@ -397,7 +398,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
         {/* Section title below steps */}
         {steps[currentStep]?.section && (
           <div className="mt-4 text-center">
-            <h3 className="text-lg font-semibold text-gray-800">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
               {steps[currentStep].section.title}
             </h3>
           </div>
@@ -416,16 +417,16 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           {currentQuestions.map((question, idx) => (
             <div key={question.id} className="space-y-2">
               <div className="flex items-start gap-3">
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-semibold flex-shrink-0">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary dark:bg-primary/90 text-white text-sm font-semibold flex-shrink-0">
                   {startNumberForCurrentSection + idx + 1}
                 </span>
-                <h3 className="text-lg font-medium text-gray-800">
+                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
                   {question.title}
                   {question.required && <span className="text-red-500 ml-1">*</span>}
                 </h3>
               </div>
               {question.description && (
-                <p className="text-sm text-gray-500 mb-3">{question.description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{question.description}</p>
               )}
               {renderQuestion(question)}
             </div>
@@ -433,15 +434,15 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
         </motion.div>
       </AnimatePresence>
 
-      <div className="mt-10 pt-6 border-t border-gray-200 flex justify-between">
+      <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-between">
         <button
           type="button"
           onClick={handlePrevious}
           disabled={currentStep === 0}
-          className={`flex items-center px-6 py-2.5 rounded-lg border ${
+          className={`flex items-center px-6 py-2.5 rounded-lg border transition-colors ${
             currentStep === 0
-              ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-              : 'border-primary text-primary hover:bg-primary/5'
+              ? 'border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+              : 'border-primary dark:border-primary-400 text-primary dark:text-primary-200 hover:bg-primary/5 dark:hover:bg-primary/10'
           }`}
         >
           <FaArrowLeft className="mr-2" /> Previous
@@ -451,7 +452,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex items-center px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            className="flex items-center px-6 py-2.5 bg-primary dark:bg-primary/90 text-white rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors"
           >
             {isSubmitting ? (
               <>
@@ -468,7 +469,7 @@ const SurveyAnswerForm: React.FC<SurveyAnswerFormProps> = ({ onComplete, survey 
           <button
             type="button"
             onClick={handleNext}
-            className="flex items-center px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            className="flex items-center px-6 py-2.5 bg-primary dark:bg-primary/90 text-white rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors"
           >
             Next <FaArrowRight className="ml-2" />
           </button>

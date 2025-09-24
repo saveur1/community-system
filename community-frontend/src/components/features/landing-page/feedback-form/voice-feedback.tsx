@@ -31,7 +31,7 @@ const VoiceWaveform: React.FC<VoiceWaveformProps> = ({ isRecording }) => {
       {waveHeights.map((baseHeight, index) => (
         <motion.div
           key={index}
-          className="bg-primary rounded-full"
+          className="bg-primary dark:bg-primary/80 rounded-full"
           style={{
             width: '3px',
             height: isRecording ? `${baseHeight}px` : `${baseHeight * 0.3}px`,
@@ -72,7 +72,7 @@ const RecordingTimer: React.FC<RecordingTimerProps> = ({ seconds }) => {
   return (
     <div className="text-center">
       <motion.div
-        className="text-2xl font-mono font-medium text-gray-700"
+        className="text-2xl font-mono font-medium text-gray-700 dark:text-gray-300"
         animate={{ scale: [1, 1.05, 1] }}
         transition={{ duration: 1, repeat: Infinity }}
       >
@@ -91,7 +91,7 @@ interface PlayButtonProps {
 const PlayButton: React.FC<PlayButtonProps> = ({ onClick, isPlaying = false }) => (
   <motion.button
     onClick={onClick}
-    className="w-14 h-14 sm:w-16 sm:h-16 bg-primary hover:bg-primary/80 rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
+    className="w-14 h-14 sm:w-16 sm:h-16 bg-primary dark:bg-primary/90 hover:bg-primary/80 dark:hover:bg-primary rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
     aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -233,7 +233,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFe
   return (
     <div className="mt-4 sm:mt-6">
       <motion.div
-        className="bg-white rounded-2xl p-4 border border-gray-300"
+        className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-300 dark:border-gray-600"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -244,7 +244,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFe
               type="button"
               onClick={startRecording}
               disabled={micPermission === 'denied'}
-              className="w-14 h-14 sm:w-16 sm:h-16 bg-primary hover:bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-14 h-14 sm:w-16 sm:h-16 bg-primary dark:bg-primary/90 hover:bg-primary-dark dark:hover:bg-primary rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -254,14 +254,14 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFe
             <motion.button
               type="button"
               onClick={stopRecording}
-              className="w-14 h-14 sm:w-16 sm:h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto"
+              className="w-14 h-14 sm:w-16 sm:h-16 bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors mx-auto"
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             >
               <FaStop className="text-xl" />
             </motion.button>
           )}
-          <p className="mt-3 text-sm text-gray-600">
+          <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
             {micPermission === 'denied' 
               ? t('feedback.mic_permission_denied') 
               : !isRecording 
@@ -277,10 +277,10 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFe
 
       {voiceFeedback && (
         <div className="mt-6 space-y-3">
-          <h4 className="text-sm font-medium text-gray-700">Recorded Message</h4>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Recorded Message</h4>
             <motion.div
               key={voiceFeedback.id}
-              className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-3 border border-purple-200"
+              className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-3 border border-purple-200 dark:border-purple-700"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
@@ -295,7 +295,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFe
                     {Array.from({ length: 15 }, (_, i) => (
                       <div
                         key={i}
-                        className="bg-primary rounded-full"
+                        className="bg-primary dark:bg-primary/80 rounded-full"
                         style={{
                           width: '2px',
                           height: `${Math.random() * 20 + 8}px`,
@@ -304,10 +304,10 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFe
                     ))}
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-medium text-gray-700">
+                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {Math.floor(voiceFeedback.duration / 60)}:{(voiceFeedback.duration % 60).toString().padStart(2, '0')}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       {new Date(voiceFeedback.timestamp).toLocaleTimeString()}
                     </div>
                   </div>
@@ -315,7 +315,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({ voiceFeedback, setVoiceFe
                 <button
                   type="button"
                   onClick={deleteRecording}
-                  className="ml-4 text-red-500 hover:text-red-700 transition-colors"
+                  className="ml-4 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                 >
                   <FaTrash />
                 </button>

@@ -14,7 +14,7 @@ import { uploadToCloudinary } from '@/utility/logicFunctions';
 import { toast } from 'react-toastify';
 
 interface EditFeedbackState {
-  projectId: string;
+  projectId: string | null;
   mainMessage: string;
   feedbackType: 'positive' | 'negative' | 'suggestion' | 'concern' | null;
   feedbackMethod: 'text' | 'voice' | 'video';
@@ -36,7 +36,7 @@ function fromEntityToState(entity: FeedbackEntity): EditFeedbackState {
   const videoDoc = (entity.documents || []).find(d => (d.type?.includes('video') || d.type === 'mp4' || d.type === 'webm'));
 
   return {
-    projectId: entity.projectId || '',
+    projectId: entity.projectId || null,
     mainMessage: entity.mainMessage || '',
     feedbackType: entity.feedbackType,
     feedbackMethod: entity.feedbackMethod,

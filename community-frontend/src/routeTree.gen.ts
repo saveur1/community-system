@@ -75,6 +75,7 @@ import { Route as DashboardSurveysViewIdResponseIdRouteImport } from './routes/d
 import { Route as DashboardSettingsEditRoleRoleIdRouteImport } from './routes/dashboard/settings/edit-role.$roleId'
 import { Route as DashboardProjectsEditEditIdRouteImport } from './routes/dashboard/projects/edit.$edit-id'
 import { Route as DashboardFeedbackEditEditIdRouteImport } from './routes/dashboard/feedback/edit.$edit-id'
+import { Route as DashboardCommunitySessionsEditSessionIdRouteImport } from './routes/dashboard/community-sessions/edit.$sessionId'
 import { Route as homeRoutesAnswersThankYouSurveyIdRouteImport } from './routes/(home-routes)/answers.thank-you.$survey-id'
 import { Route as DashboardSurveysTakeSurveyResponseResponseIdRouteImport } from './routes/dashboard/surveys/take-survey/response.$response-id'
 
@@ -450,6 +451,12 @@ const DashboardFeedbackEditEditIdRoute =
     path: '/feedback/edit/$edit-id',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardCommunitySessionsEditSessionIdRoute =
+  DashboardCommunitySessionsEditSessionIdRouteImport.update({
+    id: '/community-sessions/edit/$sessionId',
+    path: '/community-sessions/edit/$sessionId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const homeRoutesAnswersThankYouSurveyIdRoute =
   homeRoutesAnswersThankYouSurveyIdRouteImport.update({
     id: '/answers/thank-you/$survey-id',
@@ -514,6 +521,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/stakeholders': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
   '/answers/thank-you/$survey-id': typeof homeRoutesAnswersThankYouSurveyIdRoute
+  '/dashboard/community-sessions/edit/$sessionId': typeof DashboardCommunitySessionsEditSessionIdRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/projects/edit/$edit-id': typeof DashboardProjectsEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
@@ -582,6 +590,7 @@ export interface FileRoutesByTo {
   '/dashboard/stakeholders': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys': typeof DashboardSurveysIndexRoute
   '/answers/thank-you/$survey-id': typeof homeRoutesAnswersThankYouSurveyIdRoute
+  '/dashboard/community-sessions/edit/$sessionId': typeof DashboardCommunitySessionsEditSessionIdRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/projects/edit/$edit-id': typeof DashboardProjectsEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
@@ -653,6 +662,7 @@ export interface FileRoutesById {
   '/dashboard/stakeholders/': typeof DashboardStakeholdersIndexRoute
   '/dashboard/surveys/': typeof DashboardSurveysIndexRoute
   '/(home-routes)/answers/thank-you/$survey-id': typeof homeRoutesAnswersThankYouSurveyIdRoute
+  '/dashboard/community-sessions/edit/$sessionId': typeof DashboardCommunitySessionsEditSessionIdRoute
   '/dashboard/feedback/edit/$edit-id': typeof DashboardFeedbackEditEditIdRoute
   '/dashboard/projects/edit/$edit-id': typeof DashboardProjectsEditEditIdRoute
   '/dashboard/settings/edit-role/$roleId': typeof DashboardSettingsEditRoleRoleIdRoute
@@ -724,6 +734,7 @@ export interface FileRouteTypes {
     | '/dashboard/stakeholders'
     | '/dashboard/surveys'
     | '/answers/thank-you/$survey-id'
+    | '/dashboard/community-sessions/edit/$sessionId'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/projects/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
@@ -792,6 +803,7 @@ export interface FileRouteTypes {
     | '/dashboard/stakeholders'
     | '/dashboard/surveys'
     | '/answers/thank-you/$survey-id'
+    | '/dashboard/community-sessions/edit/$sessionId'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/projects/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
@@ -862,6 +874,7 @@ export interface FileRouteTypes {
     | '/dashboard/stakeholders/'
     | '/dashboard/surveys/'
     | '/(home-routes)/answers/thank-you/$survey-id'
+    | '/dashboard/community-sessions/edit/$sessionId'
     | '/dashboard/feedback/edit/$edit-id'
     | '/dashboard/projects/edit/$edit-id'
     | '/dashboard/settings/edit-role/$roleId'
@@ -1351,6 +1364,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFeedbackEditEditIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/community-sessions/edit/$sessionId': {
+      id: '/dashboard/community-sessions/edit/$sessionId'
+      path: '/community-sessions/edit/$sessionId'
+      fullPath: '/dashboard/community-sessions/edit/$sessionId'
+      preLoaderRoute: typeof DashboardCommunitySessionsEditSessionIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/(home-routes)/answers/thank-you/$survey-id': {
       id: '/(home-routes)/answers/thank-you/$survey-id'
       path: '/answers/thank-you/$survey-id'
@@ -1449,6 +1469,7 @@ interface DashboardRouteRouteChildren {
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
   DashboardStakeholdersIndexRoute: typeof DashboardStakeholdersIndexRoute
   DashboardSurveysIndexRoute: typeof DashboardSurveysIndexRoute
+  DashboardCommunitySessionsEditSessionIdRoute: typeof DashboardCommunitySessionsEditSessionIdRoute
   DashboardFeedbackEditEditIdRoute: typeof DashboardFeedbackEditEditIdRoute
   DashboardProjectsEditEditIdRoute: typeof DashboardProjectsEditEditIdRoute
   DashboardSettingsEditRoleRoleIdRoute: typeof DashboardSettingsEditRoleRoleIdRoute
@@ -1509,6 +1530,8 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
   DashboardStakeholdersIndexRoute: DashboardStakeholdersIndexRoute,
   DashboardSurveysIndexRoute: DashboardSurveysIndexRoute,
+  DashboardCommunitySessionsEditSessionIdRoute:
+    DashboardCommunitySessionsEditSessionIdRoute,
   DashboardFeedbackEditEditIdRoute: DashboardFeedbackEditEditIdRoute,
   DashboardProjectsEditEditIdRoute: DashboardProjectsEditEditIdRoute,
   DashboardSettingsEditRoleRoleIdRoute: DashboardSettingsEditRoleRoleIdRoute,

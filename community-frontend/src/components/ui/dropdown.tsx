@@ -288,10 +288,10 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
       onClick={handleClick}
       className={cn(`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${
         disabled
-          ? 'text-gray-400 cursor-not-allowed'
+          ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
           : destructive
-          ? 'text-red-700 hover:bg-red-50 hover:text-red-900'
-          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+          ? 'text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-900 dark:hover:text-red-300'
+          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
       }`, className)}
     >
       {icon && <span className="flex-shrink-0">{icon}</span>}

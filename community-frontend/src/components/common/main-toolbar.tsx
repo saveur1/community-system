@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { FaList, FaPlus, FaTh, FaSearch, FaFileCsv, FaFilePdf, FaPrint } from 'react-icons/fa';
 import { Link } from '@tanstack/react-router';
 import { PiMicrosoftExcelLogoFill } from 'react-icons/pi';
@@ -58,6 +58,23 @@ const MainToolbar = ({
   const [openCsv, setOpenCsv] = useState(false);
   const [openPdf, setOpenPdf] = useState(false);
   const [openPrint, setOpenPrint] = useState(false);
+  
+  // Local search state for immediate UI updates
+  const [localSearch, setLocalSearch] = useState(search);
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSearch(localSearch);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timeoutId);
+  }, [localSearch, setSearch]);
+
+  // Update local search when external search prop changes
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
 
   const createBtn = createButton ?? { to: '#', label: 'New', icon: <FaPlus />, className: '' };
 
@@ -84,24 +101,24 @@ const MainToolbar = ({
   // CSV/Excel/PDF logic is delegated to respective modals
 
   return (
-    <div className={`flex flex-col sm:flex-row sm:justify-between w-full bg-white px-4 max-sm:px-2 py-2 my-6 border border-gray-300 rounded-md items-center mb-6 ${className}`}>
+    <div className={`flex flex-col sm:flex-row sm:justify-between w-full bg-white dark:bg-gray-800 px-4 max-sm:px-2 py-2 my-6 border border-gray-300 dark:border-gray-600 rounded-md items-center mb-6 ${className}`}>
       <div className="flex justify-between items-center sm:justifystart gap-x-3 w-full sm:w-2/3">
         <div className="flex items-center max-sm:max-w-24 w-auto">
-          <h2 className="text-xl font-bold text-gray-600 mr-2 max-sm:mr-1 max-sm:text-sm">{title}</h2>
-          <span className="text-gray-500 text-lg max-sm:text-sm">({filteredCount})</span>
+          <h2 className="text-xl font-bold text-gray-600 dark:text-gray-300 mr-2 max-sm:mr-1 max-sm:text-sm">{title}</h2>
+          <span className="text-gray-500 dark:text-gray-400 text-lg max-sm:text-sm">({filteredCount})</span>
         </div>
 
         <div className="flex-1 w-full sm:w-auto sm:mt-0 ml-3">
           <div className="max-md:relative">
             <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
               placeholder={`Search ${title.toLowerCase()}...`}
-              className={`max-w-sm border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isSearchOpen ? 'visible' : 'invisible sm:visible'}`}
+              className={`max-w-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary ${isSearchOpen ? 'visible' : 'invisible sm:visible'}`}
             />
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="sm:hidden absolute top-1/2 -translate-y-1/2 right-2 text-gray-600 hover:text-gray-800"
+              className="sm:hidden absolute top-1/2 -translate-y-1/2 right-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               aria-label="toggle search"
             >
               {!isSearchOpen ? <FaSearch className="w-4 h-4" /> : <FaX className="w-4 h-4 text-red-500" />}
@@ -116,53 +133,53 @@ const MainToolbar = ({
           <button
             type="button"
             onClick={() => handleOpenModal('excel')}
-            className="flex items-center hover:bg-gray-100 gap-1.5 px-3 py-2.5 rounded-md bg-gray-200 text-success font-bold cursor-pointer border border-gray-300 transition-colors text-xs shadow-sm"
+            className="flex items-center hover:bg-gray-100 dark:hover:bg-gray-600 gap-1.5 px-3 py-2.5 rounded-md bg-gray-200 dark:bg-gray-700 text-success dark:text-green-400 font-bold cursor-pointer border border-gray-300 dark:border-gray-600 transition-colors text-xs shadow-sm"
             title="Export to Excel"
           >
-            <PiMicrosoftExcelLogoFill className="w-4 h-4 text-success" />
+            <PiMicrosoftExcelLogoFill className="w-4 h-4 text-success dark:text-green-400" />
             <span>Excel</span>
           </button>
           <button
             type="button"
             onClick={() => handleOpenModal('csv')}
-            className="flex items-center gap-1.5 hover:bg-gray-100 cursor-pointer px-3 py-2.5 rounded-md bg-gray-200 text-blue-600 font-bold border-gray-300 border transition-colors text-xs shadow-sm"
+            className="flex items-center gap-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer px-3 py-2.5 rounded-md bg-gray-200 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-bold border-gray-300 dark:border-gray-600 border transition-colors text-xs shadow-sm"
             title="Export to CSV"
           >
-            <FaFileCsv className="w-4 h-4 text-blue-600" />
+            <FaFileCsv className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>CSV</span>
           </button>
           <button
             type="button"
             onClick={() => handleOpenModal('pdf')}
-            className="flex items-center gap-1.5 px-3 py-2.5 hover:bg-gray-100 cursor-pointer rounded-md bg-gray-200 text-red-700 font-bold border-gray-300 border transition-colors text-xs shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer rounded-md bg-gray-200 dark:bg-gray-700 text-red-700 dark:text-red-400 font-bold border-gray-300 dark:border-gray-600 border transition-colors text-xs shadow-sm"
             title="Export to PDF"
           >
-            <FaFilePdf className="w-4 h-4 text-red-700" />
+            <FaFilePdf className="w-4 h-4 text-red-700 dark:text-red-400" />
             <span>PDF</span>
           </button>
           <button
             type="button"
             onClick={() => handleOpenModal('print')}
-            className="flex items-center gap-1.5 px-3 py-2.5 hover:bg-gray-100 cursor-pointer rounded-md bg-gray-200 text-title font-bold border-gray-300 border transition-colors text-xs shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer rounded-md bg-gray-200 dark:bg-gray-700 text-title dark:text-gray-300 font-bold border-gray-300 dark:border-gray-600 border transition-colors text-xs shadow-sm"
             title="Print"
           >
-            <FaPrint className="w-4 h-4 text-title" />
+            <FaPrint className="w-4 h-4 text-title dark:text-gray-300" />
             <span>Print</span>
           </button>
         </div>
 
         <div className="flex items-center gap-2 max-md:mt-2">
-          <div className="flex items-center bg-white rounded-lg p-1 border border-gray-200">
+          <div className="flex items-center bg-white dark:bg-gray-700 rounded-lg p-1 border border-gray-200 dark:border-gray-600">
             <button
               onClick={() => setViewMode('list')}
-              className={`p-1.5 max-sm:p-1 rounded-md transition-colors ${viewMode === 'list' ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:text-gray-800'}`}
+              className={`p-1.5 max-sm:p-1 rounded-md transition-colors ${viewMode === 'list' ? 'bg-primary text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'}`}
               title="List View"
             >
               <FaList className="w-4 h-4 max-sm:w-3 max-sm:h-3" />
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 max-sm:p-1 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:text-gray-800'}`}
+              className={`p-1.5 max-sm:p-1 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-primary text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'}`}
               title="Grid View"
             >
               <FaTh className="w-4 h-4 max-sm:w-3 max-sm:h-3" />

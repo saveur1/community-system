@@ -14,19 +14,19 @@ const KPICard: React.FC<{
   icon?: React.ReactNode;
   isLoading?: boolean;
 }> = ({ title, value, hint, icon, isLoading }) => (
-  <div className="bg-white border border-gray-300 rounded-lg p-3 sm:p-4 shadow-sm">
+  <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 sm:p-4 shadow-sm">
     <div className="flex items-center justify-between">
-      <div className="text-sm sm:text-base text-gray-700 font-medium">{title}</div>
+      <div className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-medium">{title}</div>
       {icon && <div className="text-primary flex-shrink-0">{icon}</div>}
     </div>
-    <div className="mt-2 text-xl sm:text-2xl font-semibold text-gray-800">
+    <div className="mt-2 text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100">
       {isLoading ? (
-        <div className="animate-pulse bg-gray-200 h-6 sm:h-8 w-12 sm:w-16 rounded"></div>
+        <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-6 sm:h-8 w-12 sm:w-16 rounded"></div>
       ) : (
         typeof value === 'number' ? value.toLocaleString() : value
       )}
     </div>
-    {hint && <div className="text-xs text-gray-500 mt-1">{hint}</div>}
+    {hint && <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{hint}</div>}
   </div>
 );
 
@@ -207,14 +207,14 @@ const AnalyticsPage: React.FC = () => {
         {/* Header actions */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">Survey Analytics</h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">Survey Analytics</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               {analytics?.result ? `Analysis for ${analytics?.result?.surveyTitle}` : `Overview and detailed metrics for this survey.`}
             </p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
             <button 
-              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 w-full sm:w-auto justify-center" 
+              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors w-full sm:w-auto justify-center" 
               onClick={handleExport}
             >
               <FaPrint /> <span className="hidden sm:inline">Export PDF</span><span className="sm:hidden">Export</span>
@@ -270,17 +270,17 @@ const AnalyticsPage: React.FC = () => {
 
           <div className="mb-6">
             {/* Trends & Response Overview */}
-            <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-4 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                <h3 className="font-semibold text-gray-800">Response Trends</h3>
-                <div className="text-sm text-gray-500">Daily / Weekly submissions</div>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-100">Response Trends</h3>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Daily / Weekly submissions</div>
               </div>
               <div className="overflow-hidden">
                 {ChartComponent ? (
                   // @ts-ignore - ChartComponent is dynamically imported
                   (<ChartComponent options={trendsOptions} series={trendsSeries as any} type="area" height={isMobile ? 200 : 280} />)
                 ) : (
-                  <div className="h-[200px] sm:h-[280px] flex items-center justify-center text-sm text-gray-500 bg-gray-50 rounded">Loading chart...</div>
+                  <div className="h-[200px] sm:h-[280px] flex items-center justify-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded">Loading chart...</div>
                 )}
               </div>
             </div>
@@ -288,12 +288,12 @@ const AnalyticsPage: React.FC = () => {
 
           {/* Question-by-Question Analysis */}
           <div className="print-break mt-6">
-            <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 print:text-xl">Question Analysis</h2>
+            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-4 sm:p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 print:text-xl">Question Analysis</h2>
 
               {/* Response Count Table */}
               <div className="mb-4 sm:mb-6">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Response Counts per Question</h4>
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Response Counts per Question</h4>
                 {analytics?.result?.questionAnalytics?.map((q: any, idx: number) => (
                   <div key={q.questionId} className="mb-6 p-3 sm:p-4 border border-gray-200 rounded-lg">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4">

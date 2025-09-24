@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { FaShare, FaTrash, FaPause, FaPlay, FaStop, FaChartBar, FaDownload, FaPlus, FaFileExcel, FaFilePdf } from 'react-icons/fa';
@@ -36,14 +36,21 @@ const SurveyComponent = () => {
     const { user } = useAuth();
 
     const params = useMemo(() => {
-        const param: SurveysListParams = { page, limit: pageSize, surveyType: "general", owner: "me" };
+        const param: SurveysListParams = { page, limit: pageSize, surveyType: "general", owner: "me", search: search || undefined };
 
         if(checkPermissions(user, 'survey:view:all')) {
             param.owner = "any";
         }
 
         return param;
-    }, [page, pageSize]);
+    }, [page, pageSize, search, user]);
+
+    // Reset to first page whenever search changes and we are not already on page 1
+    useEffect(() => {
+      if (search && page !== 1) {
+        setPage(1);
+      }
+    }, [search]);
 
     const { data, isLoading } = useSurveysList(params);
     const deleteSurvey = useDeleteSurvey();
@@ -76,18 +83,18 @@ const SurveyComponent = () => {
     const getStatusColor = (status: 'active' | 'paused' | 'archived') => {
         switch (status) {
             case 'active':
-                return 'bg-green-300 text-green-900';
+                return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
             case 'paused':
-                return 'bg-yellow-300 text-yellow-900';
+                return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
             case 'archived':
-                return 'bg-gray-200 text-gray-900';
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
             default:
-                return 'bg-gray-300 text-gray-900';
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
         }
     };
 
     const getInitials = (name: string) => {
-        return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
     };
 
     const handleSurveyAction = (action: string, surveyId: string, surveyName: string) => {
@@ -146,8 +153,11 @@ const SurveyComponent = () => {
         );
     }, [surveys, search]);
 
-    const totalPages = data?.meta?.totalPages ?? Math.max(1, Math.ceil(filtered.length / pageSize));
+    const totalPages = data?.totalPages ?? Math.max(1, Math.ceil(filtered.length / pageSize));
+    console.log(data);
+    console.log("totoal pages", totalPages)
     const currentPage = Math.min(page, totalPages);
+    console.log("current page", currentPage)
     const paginated = filtered; // server-paginated; filter client-side only
 
     const handleConfirmDelete = () => {
@@ -307,7 +317,7 @@ const SurveyComponent = () => {
                     "Surveys"
                 ]}
                 title="Surveys"
-                className='absolute top-0 left-0 w-full px-6'
+                className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
             />
 
             {/* Header with view controls */}
@@ -319,7 +329,7 @@ const SurveyComponent = () => {
                     setViewMode={setViewMode}
                     search={search}
                     setSearch={setSearch}
-                    filteredCount={filtered.length}
+                    filteredCount={data?.total ?? filtered.length}
                     showCreate={true}
                     createButton={{ to: '/dashboard/surveys/add-new', label: 'New Survey', icon: <FaPlus /> }}
                     excelData={excelDataExported(surveys)}
@@ -352,7 +362,7 @@ const SurveyComponent = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 paginatedCount={paginated.length}
-                filteredCount={data?.meta?.total ?? filtered.length}
+                filteredCount={data?.total ?? filtered.length}
                 pageSize={pageSize}
                 setPage={setPage}
                 setPageSize={setPageSize}

@@ -27,7 +27,7 @@ function SurveyAnswerPage() {
     return (
       <div>
         <Breadcrumb items={['Dashboard', 'Surveys']} title='Survey' className='absolute top-0 left-0 w-full' />
-        <div className="pt-20 px-4">Loading survey...</div>
+        <div className="pt-20 px-4 text-gray-600 dark:text-gray-400">Loading survey...</div>
       </div>
     );
   }
@@ -36,7 +36,7 @@ function SurveyAnswerPage() {
     return (
       <div>
         <Breadcrumb items={['Dashboard', 'Surveys']} title='Survey' className='absolute top-0 left-0 w-full' />
-        <div className="pt-20 px-4 text-red-600">Failed to load survey.</div>
+        <div className="pt-20 px-4 text-red-600 dark:text-red-400">Failed to load survey.</div>
       </div>
     );
   }

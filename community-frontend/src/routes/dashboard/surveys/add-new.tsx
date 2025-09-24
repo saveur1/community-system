@@ -589,7 +589,7 @@ const CreateSurveyComponent: FC = () => {
         <div className="flex items-center justify-center pt-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Restoring your survey...</p>
+            <p className="text-gray-600 dark:text-gray-400">Restoring your survey...</p>
           </div>
         </div>
       </div>
@@ -663,15 +663,15 @@ const CreateSurveyComponent: FC = () => {
             closeOnOverlayClick={true}
           >
             <ModalBody className="p-4 space-y-4 max-h-[57vh] overflow-auto">
-              {rolesLoading && <div className="text-sm text-gray-500">Loading roles...</div>}
-              {rolesError && <div className="text-sm text-red-600">Failed to load roles</div>}
+              {rolesLoading && <div className="text-sm text-gray-500 dark:text-gray-400">Loading roles...</div>}
+              {rolesError && <div className="text-sm text-red-600 dark:text-red-400">Failed to load roles</div>}
               {!rolesLoading && !rolesError && roleGroups.length === 0 && (
-                <div className="text-sm text-gray-500">No roles found.</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">No roles found.</div>
               )}
               {roleGroups.map((group) => (
-                <div key={group.title} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                <div key={group.title} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 space-y-3 bg-white dark:bg-gray-700">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium text-gray-900">{group.title}</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">{group.title}</h4>
                     {!isReport &&
                       (() => {
                         const groupValues = group.options.map((o) => o.value)
@@ -681,27 +681,27 @@ const CreateSurveyComponent: FC = () => {
                           <button
                             type="button"
                             onClick={() => toggleGroupRoles(groupValues, nextSelectAll)}
-                            className={`text-xs px-2 py-1 rounded border transition-colors ${allSelected ? `text-red-600 border-red-300 hover:bg-red-50` : `text-primary border-primary/40 hover:bg-primary/5`}`}
+                            className={`text-xs px-2 py-1 rounded border transition-colors ${allSelected ? `text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20` : `text-primary dark:text-primary-200 border-primary/40 dark:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10`}`}
                           >
                             {allSelected ? "Clear all" : "Select all"}
                           </button>
                         )
-                      })()}
+                      })()} 
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {group.options.map((option) => (
                       <label
                         key={option.value}
-                        className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                       >
                         <input
                           type={isReport ? "radio" : "checkbox"}
                           name={isReport ? "allowedRoleSelect" : undefined}
                           checked={isReport ? selectedRoles[0] === option.value : selectedRoles.includes(option.value)}
                           onChange={() => handleRoleToggle(option.value)}
-                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                          className="h-4 w-4 text-primary dark:text-primary-200 focus:ring-primary dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 dark:bg-gray-600 rounded"
                         />
-                        <span className="text-sm text-gray-700">{option.label}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
                       </label>
                     ))}
                   </div>
@@ -817,13 +817,13 @@ const CreateSurveyComponent: FC = () => {
           {/* Use default footer for surveys; for report form show custom Save label */}
           {isReport ? (
             <div className="flex items-center justify-end gap-3 mt-6">
-              <button onClick={handleCancel} className="px-4 py-2 border border-gray-300 rounded-md">
+              <button onClick={handleCancel} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={createSurveyMutation.isPending}
-                className="px-4 py-2 bg-primary text-white rounded-md"
+                className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md transition-colors"
               >
                 {createSurveyMutation.isPending ? "Saving..." : "Save report form"}
               </button>
@@ -852,20 +852,20 @@ const CreateSurveyComponent: FC = () => {
 
             {/* Survey Summary */}
             {survey.questions.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Survey Summary</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mt-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Survey Summary</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Total Questions:</span>
-                    <span className="font-medium">{survey.questions.length}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Total Questions:</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{survey.questions.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Estimated Time:</span>
-                    <span className="font-medium">{survey.estimatedTime || "0"} min</span>
+                    <span className="text-gray-600 dark:text-gray-400">Estimated Time:</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{survey.estimatedTime || "0"} min</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Required Questions:</span>
-                    <span className="font-medium">{survey.questions.filter((q) => q.required).length}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Required Questions:</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{survey.questions.filter((q) => q.required).length}</span>
                   </div>
                 </div>
               </div>

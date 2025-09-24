@@ -168,7 +168,7 @@ export class SyncService {
     
     try {
       // Remove offline-specific fields
-      const { syncStatus, retryCount, lastSynced, ...cleanData } = feedbackData;
+      const { syncStatus, retryCount, lastSynced,status,userId, createdAt, updatedAt,id, ...cleanData } = feedbackData;
       await feedbackApi.create(cleanData);
       return true;
     } catch (error) {

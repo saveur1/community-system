@@ -4,8 +4,8 @@ import type { RoleEntity } from './roles';
 
 export const communitySessionsApi = {
   list: async (params: CommunitySessionsListParams = { page: 1, limit: 10 }): Promise<CommunitySessionsListResponse> => {
-    const { page = 1, limit = 10, type, isActive } = params;
-    const { data } = await client.get(`/community-sessions`, { params: { page, limit, type, isActive } });
+    const { page = 1, limit = 10, type, isActive, allowed } = params;
+    const { data } = await client.get(`/community-sessions`, { params: { page, limit, type, isActive, allowed } });
     return data;
   },
 
@@ -125,6 +125,7 @@ export type CommunitySessionsListParams = {
   limit?: number;
   type?: CommunitySessionType;
   isActive?: boolean;
+  allowed?: boolean;
 };
 
 export type CommentsListParams = {

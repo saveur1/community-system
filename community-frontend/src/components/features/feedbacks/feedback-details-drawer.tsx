@@ -122,10 +122,10 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
 
     const getFeedbackTypeColor = (feedbackType: string) => {
         switch (feedbackType) {
-            case 'text': return 'bg-green-100 text-green-800 border border-green-200';
-            case 'voice': return 'bg-blue-100 text-blue-800 border border-blue-200';
-            case 'video': return 'bg-red-100 text-red-800 border border-red-200';
-            default: return 'bg-gray-100 text-gray-800 border border-gray-200';
+            case 'text': return 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700';
+            case 'voice': return 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700';
+            case 'video': return 'bg-red-100 text-red-800 border border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700';
+            default: return 'bg-gray-100 text-gray-800 border border-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600';
         }
     };
 
@@ -187,16 +187,16 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
             return (
                 <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                        <FaUser className="text-gray-400 text-sm" />
-                        <span className="font-medium text-gray-900">{feedback.user.name}</span>
+                        <FaUser className="text-gray-400 dark:text-gray-500 text-sm" />
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{feedback.user.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <FaEnvelope className="text-gray-400 text-sm" />
-                        <span className="text-sm text-gray-700">{feedback.user.email}</span>
+                        <FaEnvelope className="text-gray-400 dark:text-gray-500 text-sm" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{feedback.user.email}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <FaTag className="text-gray-400 text-sm" />
-                        <span className="text-sm text-gray-700 capitalize">
+                        <FaTag className="text-gray-400 dark:text-gray-500 text-sm" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
                             {spacer(feedback.user.roles?.[0]?.name) || 'No role assigned'}
                         </span>
                     </div>
@@ -205,15 +205,15 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
         } else if (feedback?.responderName) {
             return (
                 <div className="flex items-center gap-2">
-                    <FaUser className="text-gray-400 text-sm" />
-                    <span className="text-sm text-gray-700">{feedback.responderName}</span>
+                    <FaUser className="text-gray-400 dark:text-gray-500 text-sm" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{feedback.responderName}</span>
                 </div>
             );
         } else {
             return (
                 <div className="flex items-center gap-2">
-                    <FaUser className="text-gray-400 text-sm" />
-                    <span className="text-sm text-gray-500 italic">Unknown user</span>
+                    <FaUser className="text-gray-400 dark:text-gray-500 text-sm" />
+                    <span className="text-sm text-gray-500 dark:text-gray-400 italic">Unknown user</span>
                 </div>
             );
         }
@@ -228,14 +228,14 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
             case 'voice':
                 return (
                     <div>
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Voice Message</div>
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Voice Message</div>
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                    <FaVolumeUp className="text-blue-600" />
-                                    <span className="text-sm font-medium text-blue-800">Audio Feedback</span>
+                                    <FaVolumeUp className="text-blue-600 dark:text-blue-400" />
+                                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Audio Feedback</span>
                                 </div>
-                                <span className="text-xs text-blue-600">
+                                <span className="text-xs text-blue-600 dark:text-blue-400">
                                     {audioDuration ? formatTime(audioDuration) : '--:--'}
                                 </span>
                             </div>
@@ -247,13 +247,13 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                             </div>
                             {audioDuration && (
                                 <div className="mt-3">
-                                    <div className="flex justify-between text-xs text-blue-600 mb-1">
+                                    <div className="flex justify-between text-xs text-blue-600 dark:text-blue-400 mb-1">
                                         <span>{formatTime(currentTime)}</span>
                                         <span>{formatTime(audioDuration)}</span>
                                     </div>
-                                    <div className="w-full bg-blue-200 rounded-full h-1">
+                                    <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-1">
                                         <div
-                                            className="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                                            className="bg-blue-600 dark:bg-blue-400 h-1 rounded-full transition-all duration-300"
                                             style={{ width: `${(currentTime / audioDuration) * 100}%` }}
                                         />
                                     </div>
@@ -266,12 +266,12 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
             case 'video':
                 return (
                     <div>
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Video Message</div>
-                        <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-4 border border-red-200">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Video Message</div>
+                        <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-red-200 dark:border-red-700">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                    <FaVideo className="text-red-600" />
-                                    <span className="text-sm font-medium text-red-800">Video Feedback</span>
+                                    <FaVideo className="text-red-600 dark:text-red-400" />
+                                    <span className="text-sm font-medium text-red-800 dark:text-red-200">Video Feedback</span>
                                 </div>
                             </div>
                             <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
@@ -304,9 +304,9 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
         const isMine = (feedback?.user?.id || feedback?.userId) === currentUserId;
         return (
             <div className={`flex ${isMine ? 'justify-start' : 'justify-end'}`}>
-                <div className={`max-w-[75%] rounded-lg p-3 text-sm ${isMine ? 'bg-blue-50 text-gray-800' : 'bg-gray-100 text-gray-800'}`}>
+                <div className={`max-w-[75%] rounded-lg p-3 text-sm ${isMine ? 'bg-blue-50 dark:bg-blue-900/30 text-gray-800 dark:text-gray-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
                     <div className="whitespace-pre-wrap">{feedback.mainMessage}</div>
-                    <div className={`mt-1 text-[11px] ${isMine ? 'text-blue-700/70' : 'text-gray-500'}`}>
+                    <div className={`mt-1 text-[11px] ${isMine ? 'text-blue-700/70 dark:text-blue-300/70' : 'text-gray-500 dark:text-gray-400'}`}>
                         {feedback.createdAt ? new Date(feedback.createdAt).toLocaleString() : ''}
                     </div>
                 </div>
@@ -324,14 +324,14 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                 title={
                     <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-200 flex items-center justify-center text-sm font-semibold flex-shrink-0">
                                 {feedback ? getInitials(feedback.feedbackMethod || '') : ''}
                             </div>
                             <div className="min-w-0">
-                                <div className="text-gray-900 truncate">
+                                <div className="text-gray-900 dark:text-gray-100 truncate">
                                     {feedback?.mainMessage || `${feedback?.feedbackMethod} feedback` || '—'}
                                 </div>
-                                <div className="text-xs text-gray-500 truncate">Feedback details</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 truncate">Feedback details</div>
                             </div>
                         </div>
                     </div>
@@ -341,7 +341,7 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                     {/* Status and Type and actions */}
                     <div className="flex justify-between">
                         <div className="flex items-center gap-3 flex-wrap">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${feedback ? getStatusColor(feedback.status) : 'bg-gray-100 text-gray-800'}`}>
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${feedback ? getStatusColor(feedback.status) : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
                                 {feedback?.status || 'Unknown'}
                             </span>
                             {feedback?.feedbackMethod && (
@@ -357,7 +357,7 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                                     className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors"
                                     aria-label="Edit"
                                 >
-                                    <FaPencilAlt size={18} className="text-gray-600" />
+                                    <FaPencilAlt size={18} className="text-gray-600 dark:text-gray-400" />
                                 </button>
                             )}
                             {onResolve && (
@@ -372,7 +372,7 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                             {feedback && onReply?.(feedback!) === true && (
                                 <button
                                     onClick={() => setIsReplyModalOpen(true)}
-                                    className="bg-gray-100 hover:bg-gray-200 cursor-pointer rounded-full p-2 px-4 transition-colors flex gap-x-2 items-center"
+                                    className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer rounded-full p-2 px-4 transition-colors flex gap-x-2 items-center"
                                     aria-label="Reply"
                                 >
                                     <FaReply size={18} className="text-primary" />
@@ -383,19 +383,19 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                                 <CustomDropdown
                                     trigger={
                                         <button
-                                            className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors"
+                                            className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full p-2 transition-colors"
                                         >
-                                            <FaEllipsisV size={18} className="text-gray-600" />
+                                            <FaEllipsisV size={18} className="text-gray-600 dark:text-gray-400" />
                                         </button>
                                     }
                                     position="bottom-right"
-                                    dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg min-w-[120px]"
+                                    dropdownClassName="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg min-w-[120px]"
                                 >
                                     {onReject && (
                                         <DropdownItem
                                             onClick={() => onReject(feedback!)}
                                             icon={<FaTimes className="text-red-500" />}
-                                            className="hover:bg-red-50"
+                                            className="hover:bg-red-50 dark:hover:bg-red-900/20"
                                         >
                                             Reject
                                         </DropdownItem>
@@ -416,20 +416,20 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
 
                     {/* User Information */}
                     <div>
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">User Information</div>
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">User Information</div>
                         {renderUserInfo()}
                     </div>
 
                     {/* Project Information */}
                     <div>
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Project</div>
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Project</div>
                         <div className="flex items-center gap-2">
-                            <FaBuilding className="text-gray-400 text-sm" />
-                            <span className="text-sm text-gray-700">
+                            <FaBuilding className="text-gray-400 dark:text-gray-500 text-sm" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">
                                 {feedback?.project?.name || 'No project assigned'}
                             </span>
                             {feedback?.project?.status && (
-                                <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full capitalize">
+                                <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full capitalize">
                                     {spacer(feedback.project.status)}
                                 </span>
                             )}
@@ -442,16 +442,16 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                     {/* Primary fields */}
                     <div className="space-y-4">
                         <div>
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Feedback Type</div>
-                            <div className="flex items-center gap-2 text-gray-800">
-                                <FaTag className="text-gray-400" />
+                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Feedback Type</div>
+                            <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                                <FaTag className="text-gray-400 dark:text-gray-500" />
                                 <span className="capitalize">{feedback?.feedbackType || '—'}</span>
                             </div>
                         </div>
 
                         <div>
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Follow Up Needed</div>
-                            <div className="flex items-center gap-2 text-gray-800">
+                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Follow Up Needed</div>
+                            <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200">
                                 {feedback?.followUpNeeded ? (
                                     <><FaCheckCircle className="text-green-500" /> Yes</>
                                 ) : (
@@ -464,8 +464,8 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                     {/* Message / Response */}
                     {feedback?.mainMessage && (
                         <div>
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Main Message</div>
-                            <div className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Main Message</div>
+                            <div className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
                                 {feedback.mainMessage}
                             </div>
                         </div>
@@ -474,8 +474,8 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                     {/* Suggestions */}
                     {feedback?.suggestions && (
                         <div>
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Suggestions</div>
-                            <div className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Suggestions</div>
+                            <div className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
                                 {feedback.suggestions}
                             </div>
                         </div>
@@ -483,19 +483,19 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
 
                     {/* Timestamps */}
                     {(feedback?.createdAt || feedback?.updatedAt) && (
-                        <div className="space-y-3 pt-4 border-t border-gray-200">
+                        <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-600">
                             {feedback.createdAt && (
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-500">Created</span>
-                                    <span className="text-gray-800">
+                                    <span className="text-gray-500 dark:text-gray-400">Created</span>
+                                    <span className="text-gray-800 dark:text-gray-200">
                                         {new Date(feedback.createdAt).toLocaleString()}
                                     </span>
                                 </div>
                             )}
                             {feedback.updatedAt && (
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-500">Last Updated</span>
-                                    <span className="text-gray-800">
+                                    <span className="text-gray-500 dark:text-gray-400">Last Updated</span>
+                                    <span className="text-gray-800 dark:text-gray-200">
                                         {new Date(feedback.updatedAt).toLocaleString()}
                                     </span>
                                 </div>
@@ -504,26 +504,26 @@ export const FeedbackDetailsDrawer: React.FC<FeedbackDetailsDrawerProps> = ({
                     )}
 
                     {/* Conversation */}
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Feedback Replies</div>
-                    <div className="border border-gray-200 rounded-lg p-3 max-h-80 overflow-y-auto bg-white">
+                    <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Feedback Replies</div>
+                    <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-3 max-h-80 overflow-y-auto bg-white dark:bg-gray-800">
                         <div className="space-y-3">
                             {initialFeedbackBubble}
                             {isRepliesLoading && (
-                                <div className="text-xs text-gray-500">Loading replies…</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">Loading replies…</div>
                             )}
                             {!isRepliesLoading && replies?.length === 0 && (
-                                <div className="text-xs text-gray-400">No replies yet.</div>
+                                <div className="text-xs text-gray-400 dark:text-gray-500">No replies yet.</div>
                             )}
                             {replies?.map((r) => {
                                 const isMine = r.userId === currentUserId;
                                 return (
                                     <div key={r.id} className={`flex ${isMine ? 'justify-start' : 'justify-end'}`}>
-                                        <div className={`max-w-[75%] rounded-lg p-3 text-sm ${isMine ? 'bg-blue-50 text-gray-800' : 'bg-gray-100 text-gray-800'}`}>
+                                        <div className={`max-w-[75%] rounded-lg p-3 text-sm ${isMine ? 'bg-blue-50 dark:bg-blue-900/30 text-gray-800 dark:text-gray-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
                                             {r.subject && (
                                                 <div className="font-medium text-[13px] mb-1 font-semibold">{r.subject}</div>
                                             )}
                                             <div className="whitespace-pre-wrap">{r.message}</div>
-                                            <div className={`mt-1 text-[11px] ${isMine ? 'text-primary/70' : 'text-gray-500'}`}>
+                                            <div className={`mt-1 text-[11px] ${isMine ? 'text-primary/70 dark:text-primary-200/70' : 'text-gray-500 dark:text-gray-400'}`}>
                                                 {r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}
                                             </div>
                                         </div>

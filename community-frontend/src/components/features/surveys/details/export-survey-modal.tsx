@@ -2,6 +2,7 @@ import React from 'react';
 import ExportFilterModal from '@/components/common/export-filter-modal';
 import { generateSurveyResponsesPDF } from './export-survey-responses-pdf';
 import { generateSurveyResponsesExcel } from './export-survey-responses-excel';
+import { toast } from 'react-toastify';
 
 type ExportType = 'excel' | 'pdf';
 
@@ -24,7 +25,8 @@ const ExportSurveyModal: React.FC<ExportSurveyModalProps> = ({
     try {
       if (exportType === 'pdf') {
         if (!survey || !survey.responses) {
-          throw new Error('Survey data not available for PDF export');
+          toast.error('Survey data not available for PDF export');
+          return;
         }
 
         await generateSurveyResponsesPDF({
@@ -35,7 +37,8 @@ const ExportSurveyModal: React.FC<ExportSurveyModalProps> = ({
         });
       } else if (exportType === 'excel') {
         if (!survey || !survey.responses) {
-          throw new Error('Survey data not available for Excel export');
+          toast.error('Survey data not available for Excel export');
+          return;
         }
 
         await generateSurveyResponsesExcel({
@@ -50,7 +53,7 @@ const ExportSurveyModal: React.FC<ExportSurveyModalProps> = ({
     } catch (error) {
       console.error('Export failed:', error);
       // TODO: Add proper error handling/toast notification
-      alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

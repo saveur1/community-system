@@ -17,6 +17,15 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({ label, value, onChange, t
 
   const isFloating = isFocused || !!value;
 
+  // Get background color based on theme
+  const getBackgroundColor = () => {
+    if (typeof window !== 'undefined') {
+      const isDark = document.documentElement.classList.contains('dark');
+      return isFloating ? (isDark ? '#1f2937' : '#ffffff') : 'transparent';
+    }
+    return isFloating ? '#ffffff' : 'transparent';
+  };
+
   return (
     <div className="relative w-full">
       <input
@@ -25,17 +34,17 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({ label, value, onChange, t
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-primary bg-white text-black peer"
+        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-2 focus:border-primary bg-white dark:bg-gray-800 text-black dark:text-white peer"
         {...props}
       />
       <motion.label
-        className="absolute left-4 text-gray-500 rounded-lg pointer-events-none origin-top-left"
+        className="absolute left-4 text-gray-500 dark:text-gray-400 rounded-lg pointer-events-none origin-top-left"
         initial={false}
         animate={{
           top: isFloating ? '-8px' : '50%',
           scale: isFloating ? 0.75 : 1,
           translateY: isFloating ? 0 : '-50%',
-          backgroundColor: isFloating ? 'white' : 'transparent',
+          backgroundColor: getBackgroundColor(),
           paddingLeft: isFloating ? '4px' : '0px',
           paddingRight: isFloating ? '4px' : '0px',
         }}

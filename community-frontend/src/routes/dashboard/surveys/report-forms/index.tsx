@@ -63,13 +63,13 @@ const SurveyReportForms = () => {
     const getStatusColor = (status: 'active' | 'paused' | 'archived' | 'draft') => {
         switch (status) {
             case 'active':
-                return 'bg-green-100 text-green-800';
+                return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
             case 'paused':
-                return 'bg-yellow-100 text-yellow-800';
+                return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
             case 'archived':
-                return 'bg-gray-200 text-gray-700';
+                return 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
         }
     };
 
@@ -257,30 +257,30 @@ const SurveyReportForms = () => {
     };
 
     const renderTableView = () => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Survey Title</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Status</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Target User</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Questions</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Time</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Project</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Actions</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Survey Title</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Status</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Target User</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Questions</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Time</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm max-sm:hidden">Project</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:px-6 sm:py-3 sm:text-sm">Actions</th>
                     </tr>
                 </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                         {isLoading ? (
                             <tr>
-                                <td className="px-3 py-2 text-xs text-gray-500 sm:px-6 sm:py-4 sm:text-sm" colSpan={7}>Loading surveys...</td>
+                                <td className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 sm:px-6 sm:py-4 sm:text-sm" colSpan={7}>Loading surveys...</td>
                             </tr>
                         ) : paginated?.map((survey) => (
-                            <tr key={survey.id} className="hover:bg-gray-50">
+                            <tr key={survey.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <td className="px-3 py-2 sm:px-6 sm:py-4">
                                     <div className="flex items-center">
                                         <div>
-                                            <div className="text-xs font-medium text-gray-700 sm:text-sm">{survey.title}</div>
+                                            <div className="text-xs font-medium text-gray-700 dark:text-gray-300 sm:text-sm">{survey.title}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -289,19 +289,19 @@ const SurveyReportForms = () => {
                                         {survey.status}
                                     </span>
                                 </td>
-                                <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm flex gap-1 sm:gap-2">{
+                                <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 sm:px-6 sm:py-4 sm:text-sm flex gap-1 sm:gap-2">{
                                         survey?.allowedRoles?.slice(0, 4).map((role, index) => 
-                                            <p key={index} className="bg-gray-300 capitalize text-gray-800 rounded-lg p-1 text-xs">{role.name}</p>
+                                            <p key={index} className="bg-gray-300 dark:bg-gray-600 capitalize text-gray-800 dark:text-gray-200 rounded-lg p-1 text-xs">{role.name}</p>
                                 )}</td>
-                                <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.questionItems?.length ?? 0}</td>
-                                <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.estimatedTime}Min</td>
-                                <td className="px-3 py-2 text-xs text-gray-700 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.project}</td>
+                                <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.questionItems?.length ?? 0}</td>
+                                <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.estimatedTime}Min</td>
+                                <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.project}</td>
                                 <td className="px-3 py-2 sm:px-6 sm:py-4">
                                     <div className="flex items-center space-x-4">
                                         <Link
                                             to="/dashboard/surveys/edit/$edit-id"
                                             params={{ 'edit-id': String(survey.id) }}
-                                            className="text-primary cursor-pointer hover:text-blue-700"
+                                            className="text-primary dark:text-primary-200 cursor-pointer hover:text-blue-700 dark:hover:text-primary-300"
                                             title="Edit Survey"
                                         >
                                             <FaEdit className="w-4 h-4" />
@@ -309,7 +309,7 @@ const SurveyReportForms = () => {
                                         <Link
                                             to="/dashboard/surveys/report-forms/$report-id"
                                             params={{ 'report-id': String(survey.id) }}
-                                            className="text-title cursor-pointer hover:text-shadow-title"
+                                            className="text-title dark:text-gray-300 cursor-pointer hover:text-shadow-title dark:hover:text-gray-100"
                                             title="View Survey"
                                         >
                                             <FaEye className="w-4 h-4" />
@@ -318,26 +318,26 @@ const SurveyReportForms = () => {
                                         {/* ACTION Menu with submenu support */}
                                         <CustomDropdown
                                             trigger={
-                                                <button className="text-gray-400 cursor-pointer hover:text-gray-600 p-1">
+                                                <button className="text-gray-400 dark:text-gray-500 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 p-1">
                                                     <FaEllipsisV className="w-4 h-4" />
                                                 </button>
                                             }
                                             position="bottom-right"
                                             portal={true}
-                                            dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-48 z-50 overflow-visible"
+                                            dropdownClassName="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 min-w-48 z-50 overflow-visible"
                                         >
                                             {getSurveyActions(survey, user).map((action) => (
                                               action.hasSubmenu ? (
                                                 <div key={action.key} className="relative group">
-                                                  <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between cursor-pointer">
+                                                  <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between cursor-pointer">
                                                     <div className="flex items-center gap-3">
                                                       {action.icon}
                                                       <span>{action.label}</span>
                                                     </div>
-                                                    <FaChevronRight className="w-3 h-3 text-gray-400" />
+                                                    <FaChevronRight className="w-3 h-3 text-gray-400 dark:text-gray-500" />
                                                   </div>
                                                   <div className="absolute right-full top-0 ml-1 hidden group-hover:block z-50">
-                                                    <div className="bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-40">
+                                                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 min-w-40">
                                                       {action.submenu?.map((subAction: any) => (
                                                         <DropdownItem
                                                           key={subAction.key}
@@ -370,7 +370,7 @@ const SurveyReportForms = () => {
 
                         {paginated?.length === 0 && (
                             <tr>
-                                <td className="px-3 py-2 text-center text-xs text-gray-500 sm:px-6 sm:py-4 sm:text-sm" colSpan={7}>No report forms found.</td>
+                                <td className="px-3 py-2 text-center text-xs text-gray-500 dark:text-gray-400 sm:px-6 sm:py-4 sm:text-sm" colSpan={7}>No report forms found.</td>
                             </tr>
                         )}
                     </tbody>
@@ -381,15 +381,15 @@ const SurveyReportForms = () => {
     const renderGridView = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoading ? (
-                <div className="col-span-full text-sm text-gray-500">Loading surveys...</div>
+                <div className="col-span-full text-sm text-gray-500 dark:text-gray-400">Loading surveys...</div>
             ) : paginated.map((survey: any) => (
-                <div key={survey.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div key={survey.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white text-lg font-medium mr-4">
+                        <div className="w-12 h-12 rounded-full bg-primary dark:bg-primary/80 flex items-center justify-center text-white text-lg font-medium mr-4">
                             {getInitials(survey.title)}
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-lg font-medium text-gray-700 mb-1">{survey.title}</h3>
+                            <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">{survey.title}</h3>
                             <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(survey.status)}`}>
                                 {survey.status}
                             </span>
@@ -397,30 +397,30 @@ const SurveyReportForms = () => {
                     </div>
 
                     <div className="space-y-3 mb-4">
-                        <p className="text-sm text-gray-600">{survey.description}</p>
-                        <div className="flex justify-between text-sm text-gray-500">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{survey.description}</p>
+                        <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                             <span>{survey.questionItems?.length ?? 0} questions</span>
                             <span>{survey.estimatedTime}Min to complete</span>
                         </div>
-                        <div className="text-sm text-gray-700">
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
                             <span className="font-medium">{(survey.answers?.length) ?? 0}</span> responses received
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <span className="text-sm text-gray-500">{survey.project}</span>
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-600">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">{survey.project}</span>
                         <div className="flex items-center space-x-2">
                             <Link
                                 to="/dashboard/surveys/edit/$edit-id"
                                 params={{ 'edit-id': String(survey.id) }}
-                                className="text-primary hover:text-blue-700"
+                                className="text-primary dark:text-primary-200 hover:text-blue-700 dark:hover:text-primary-300"
                                 title="Edit Survey"
                             >
                                 <FaEdit className="w-4 h-4" />
                             </Link>
                             <button
                                 onClick={() => handleActionClick('delete', survey)}
-                                className="text-red-500 hover:text-red-700"
+                                className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                                 title="Delete Survey"
                             >
                                 <FaTrash className="w-4 h-4" />
@@ -429,26 +429,26 @@ const SurveyReportForms = () => {
                             {/* Dropdown Menu with submenu support */}
                             <CustomDropdown
                                 trigger={
-                                    <button className="text-gray-400 hover:text-gray-600 p-1">
+                                    <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-1">
                                         <FaEllipsisV className="w-4 h-4" />
                                     </button>
                                 }
                                 position="bottom-right"
                                 portal={true}
-                                dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-48 z-50 overflow-visible"
+                                dropdownClassName="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 min-w-48 z-50 overflow-visible"
                             >
                                 {getSurveyActions(survey, user).map((action) => (
                                   action.hasSubmenu ? (
                                     <div key={action.key} className="relative group">
-                                      <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between cursor-pointer">
+                                      <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between cursor-pointer">
                                         <div className="flex items-center gap-3">
                                           {action.icon}
                                           <span>{action.label}</span>
                                         </div>
-                                        <FaChevronRight className="w-3 h-3 text-gray-400" />
+                                        <FaChevronRight className="w-3 h-3 text-gray-400 dark:text-gray-500" />
                                       </div>
                                       <div className="absolute right-full top-0 ml-1 hidden group-hover:block z-50">
-                                        <div className="bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-40">
+                                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 min-w-40">
                                           {action.submenu?.map((subAction: any) => (
                                             <DropdownItem
                                               key={subAction.key}

@@ -86,7 +86,7 @@ function RichMembersAccountsPage() {
     <AccountsList
       accounts={accounts}
       title="RICH Members"
-      addButtonLabel="add RICH Member"
+      addButtonLabel="add Member"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}

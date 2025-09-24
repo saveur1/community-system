@@ -295,7 +295,9 @@ const ProgrammesComponent = () => {
   return (
     <div className="pb-6 lg:pb-10 px-2 lg:px-0">
       <Breadcrumb
-        items={["Community", "Projects"]}
+        items={[
+          {title: "Dashboard", link: "/dashboard"}, 
+          "Projects"]}
         title="Projects"
         className='absolute top-0 left-0 w-full px-4 lg:px-6'
       />

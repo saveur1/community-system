@@ -1,4 +1,4 @@
-import { spacer } from '@/utility/logicFunctions';
+import { getOptions, spacer } from '@/utility/logicFunctions';
 import { Document, Page, Text, View, StyleSheet, pdf, Image } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import * as React from 'react';
@@ -400,9 +400,9 @@ export const generateSurveyResponsesPDF = async (options: ExportOptions): Promis
                                   {answer.answerText}
                                 </Text>
                               )}
-                              {answer.answerOptions && answer.answerOptions.length > 0 && (
+                              {getOptions(answer.answerOptions)?.length > 0 && (
                                 <View style={styles.multipleChoice}>
-                                  {answer.answerOptions.map((option, optIndex) => (
+                                  {getOptions(answer.answerOptions)?.map((option, optIndex) => (
                                     <View key={optIndex} style={styles.choiceItem}>
                                       <View style={styles.bullet} />
                                       <Text>{option}</Text>

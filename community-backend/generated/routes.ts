@@ -907,6 +907,7 @@ export function RegisterRoutes(app: Router) {
                 available: {"in":"query","name":"available","dataType":"boolean"},
                 startDate: {"in":"query","name":"startDate","dataType":"string"},
                 endDate: {"in":"query","name":"endDate","dataType":"string"},
+                search: {"in":"query","name":"search","dataType":"string"},
         };
         app.get('/api/surveys',
             authenticateMiddleware([{"jwt":["survey:read"]}]),
@@ -2321,6 +2322,7 @@ export function RegisterRoutes(app: Router) {
                 org: {"in":"query","name":"org","dataType":"union","subSchemas":[{"dataType":"enum","enums":["mine"]},{"dataType":"enum","enums":["others"]},{"dataType":"enum","enums":["all"]}]},
                 startDate: {"in":"query","name":"startDate","dataType":"string"},
                 endDate: {"in":"query","name":"endDate","dataType":"string"},
+                search: {"in":"query","name":"search","dataType":"string"},
         };
         app.get('/api/feedback',
             authenticateMiddleware([{"jwt":["feedback:read"]}]),
@@ -2386,7 +2388,7 @@ export function RegisterRoutes(app: Router) {
                 data: {"in":"body","name":"data","required":true,"ref":"FeedbackCreateRequest"},
         };
         app.post('/api/feedback',
-            authenticateMiddleware([{"jwt":["feedback:create"]}]),
+            authenticateMiddleware([{"optionalJwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(FeedbackController)),
             ...(fetchMiddlewares<RequestHandler>(FeedbackController.prototype.createFeedback)),
 
@@ -2732,10 +2734,12 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsCommunitySessionController_getCommunitySessions: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 page: {"default":1,"in":"query","name":"page","dataType":"double"},
                 limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
                 type: {"in":"query","name":"type","dataType":"union","subSchemas":[{"dataType":"enum","enums":["video"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["document"]},{"dataType":"enum","enums":["audio"]}]},
                 isActive: {"in":"query","name":"isActive","dataType":"boolean"},
+                allowed: {"in":"query","name":"allowed","dataType":"boolean"},
         };
         app.get('/api/community-sessions',
             authenticateMiddleware([{"jwt":["community_session:read"]}]),
@@ -2931,6 +2935,7 @@ export function RegisterRoutes(app: Router) {
                 data: {"in":"body","name":"data","required":true,"ref":"CommentCreateRequest"},
         };
         app.post('/api/community-sessions/:sessionId/comments',
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(CommunitySessionController)),
             ...(fetchMiddlewares<RequestHandler>(CommunitySessionController.prototype.addComment)),
 

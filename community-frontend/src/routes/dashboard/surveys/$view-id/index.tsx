@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { FaClock, FaListOl, FaUsers, FaAsterisk, FaChevronLeft, FaChevronRight, FaSort, FaSortUp, FaSortDown, FaEdit, FaEye, FaTrash, FaDownload, FaFilePdf, FaFileExcel, FaChartLine } from 'react-icons/fa';
 import { useSurvey } from '@/hooks/useSurveys';
 import { useDeleteSurvey } from '@/hooks/useSurveys';
-import { spacer, timeAgo } from '@/utility/logicFunctions';
+import { getOptions, spacer, timeAgo } from '@/utility/logicFunctions';
 import DeleteSurveyModal from '@/components/features/surveys/delete-survey-modal';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import ExportSurveyModal from '@/components/features/surveys/details/export-survey-modal';
@@ -13,13 +13,13 @@ import ExportSurveyModal from '@/components/features/surveys/details/export-surv
 function formatStatus(status: 'active' | 'paused' | 'archived' | undefined) {
   switch (status) {
     case 'active':
-      return 'bg-green-300 text-green-900';
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
     case 'paused':
-      return 'bg-yellow-300 text-yellow-900';
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
     case 'archived':
-      return 'bg-gray-300 text-gray-900';
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     default:
-      return 'bg-gray-300 text-gray-900';
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
   }
 }
 
@@ -29,7 +29,7 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
       case 'single_choice':
         return (
           <div className="space-y-3">
-            {(question.options || []).map((option: string, idx: number) => (
+            {(getOptions(question.options) || []).map((option: string, idx: number) => (
               <label key={idx} className="flex items-center space-x-3 cursor-not-allowed opacity-70">
                 <input type="radio" disabled className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                 <span className="text-gray-700">{option}</span>
@@ -40,7 +40,7 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
       case 'multiple_choice':
         return (
           <div className="space-y-3">
-            {(question.options || []).map((option: string, idx: number) => (
+            {(getOptions(question.options) || []).map((option: string, idx: number) => (
               <label key={idx} className="flex items-center space-x-3 cursor-not-allowed opacity-70">
                 <input type="checkbox" disabled className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
                 <span className="text-gray-700">{option}</span>
@@ -54,7 +54,7 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
             type="text"
             disabled
             placeholder={question.placeholder || 'Enter your answer...'}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
           />
         );
       case 'textarea':
@@ -63,11 +63,11 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
             disabled
             rows={4}
             placeholder={question.placeholder || 'Enter your detailed response...'}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed resize-none"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed resize-none"
           />
         );
       default:
-        return <div className="text-gray-400 italic">Question preview not available</div>;
+        return <div className="text-gray-400 dark:text-gray-500 italic">Question preview not available</div>;
     }
   };
 
@@ -83,11 +83,11 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
 
   const getQuestionTypeColor = () => {
     switch (question.type) {
-      case 'single_choice': return 'bg-blue-100 text-blue-800';
-      case 'multiple_choice': return 'bg-purple-100 text-purple-800';
-      case 'text_input': return 'bg-gray-100 text-gray-800';
-      case 'textarea': return 'bg-indigo-100 text-indigo-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'single_choice': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'multiple_choice': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'text_input': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+      case 'textarea': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     }
   };
 
@@ -96,30 +96,30 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.05 }}
-      className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-start gap-3">
-            <span className="flex-shrink-0 w-8 h-8 bg-blue-100 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
+            <span className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 text-primary dark:text-primary-200 rounded-full flex items-center justify-center text-sm font-semibold">
               {index + 1}
             </span>
             <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                 {question.title}
                 {question.required && (
                   <FaAsterisk className="inline-block ml-2 text-red-500 text-xs" />
                 )}
               </h3>
               {question.description && (
-                <p className="text-sm text-gray-600 mb-3">{question.description}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{question.description}</p>
               )}
               <div className="flex items-center gap-3 mb-4">
                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getQuestionTypeColor()}`}>
                   {getQuestionTypeLabel()}
                 </span>
                 {question.required && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">
                     Required
                   </span>
                 )}
@@ -127,13 +127,13 @@ const QuestionPreview = ({ question, index }: { question: any; index: number }) 
             </div>
           </div>
         </div>
-        <div className="hidden md:block text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">
+        <div className="hidden md:block text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded">
           ID: {question.id}
         </div>
       </div>
 
       <div className="ml-11">
-        <div className="border-l-2 border-gray-100 pl-4">
+        <div className="border-l-2 border-gray-100 dark:border-gray-600 pl-4">
           {renderQuestionInput()}
         </div>
       </div>
@@ -297,31 +297,31 @@ const SurveyDetail = () => {
       <Breadcrumb
         items={dynamicBreadcrum()}
         title={survey?.surveyType === "rapid-enquiry" ? "Rapid Enquiry Details" : "Survey Details"}
-        className='absolute top-0 left-0 w-full px-6'
+        className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
       />
 
       <div className="pt-20 space-y-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 bg-title/5 w-full overflow-hidden pb-0">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 bg-title/5 dark:bg-gray-700/20 w-full overflow-hidden pb-0">
             <div className="flex items-start flex-wrap w-full gap-4">
               <div className="flex-1 flex-wrap">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">{survey?.title || (isLoading ? "Loading…" : "Survey")}</h1>
+                  <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-200">{survey?.title || (isLoading ? "Loading…" : "Survey")}</h1>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Link to={`/dashboard/surveys/edit/$edit-id`} params={{ 'edit-id': survey?.id || "" }} className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary-dark cursor-pointer py-1.5 px-3 border border-transparent hover:border-primary/30 rounded-md">
+                    <Link to={`/dashboard/surveys/edit/$edit-id`} params={{ 'edit-id': survey?.id || "" }} className="inline-flex items-center gap-2 text-sm text-primary dark:text-primary-200 hover:text-primary-dark dark:hover:text-primary-300 cursor-pointer py-1.5 px-3 border border-transparent hover:border-primary/30 dark:hover:border-primary/40 rounded-md">
                       <FaEdit className="" /><span className="hidden sm:inline">Edit</span>
                     </Link>
-                    <button onClick={handleDeleteClick} className="inline-flex items-center gap-2 text-sm text-red-700 hover:text-red-900 cursor-pointer py-1.5 px-3 border border-transparent hover:border-red-200 rounded-md">
+                    <button onClick={handleDeleteClick} className="inline-flex items-center gap-2 text-sm text-red-700 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 cursor-pointer py-1.5 px-3 border border-transparent hover:border-red-200 dark:hover:border-red-700 rounded-md">
                       <FaTrash className="" /><span className="hidden sm:inline">Delete</span>
                     </button>
                     <CustomDropdown
                       trigger={
-                        <button className="inline-flex items-center gap-2 text-sm text-title hover:text-title/80 cursor-pointer py-1.5 px-3 border border-gray-200 rounded-md">
+                        <button className="inline-flex items-center gap-2 text-sm text-title dark:text-gray-300 hover:text-title/80 dark:hover:text-gray-200 cursor-pointer py-1.5 px-3 border border-gray-200 dark:border-gray-600 rounded-md">
                           <FaDownload /> <span>Export</span>
                         </button>
                       }
                       position="bottom-right"
-                      dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-40"
+                      dropdownClassName="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 min-w-40"
                     >
                       <DropdownItem
                         icon={<FaFileExcel className="text-green-600" />}
@@ -336,12 +336,12 @@ const SurveyDetail = () => {
                         Export to PDF
                       </DropdownItem>
                     </CustomDropdown>
-                    <Link to={`/dashboard/surveys/$view-id/analytics`} params={{ 'view-id': survey?.id || "" }} className="inline-flex items-center gap-2 text-sm text-success hover:text-success/80 cursor-pointer py-1.5 px-3 border border-gray-200 rounded-md">
+                    <Link to={`/dashboard/surveys/$view-id/analytics`} params={{ 'view-id': survey?.id || "" }} className="inline-flex items-center gap-2 text-sm text-success dark:text-green-400 hover:text-success/80 dark:hover:text-green-300 cursor-pointer py-1.5 px-3 border border-gray-200 dark:border-gray-600 rounded-md">
                       <FaChartLine /> <span>Analytics</span>
                     </Link>
                   </div>
                 </div>
-                <div className="mt-2 flex items-center flex-wrap w-full gap-6 text-sm text-gray-600">
+                <div className="mt-2 flex items-center flex-wrap w-full gap-6 text-sm text-gray-600 dark:text-gray-400">
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus((survey as any)?.status)}`}>{(survey as any)?.status ?? `—`}</span>
                   <span className="inline-flex items-center gap-2"><FaClock /> Estimated: {survey?.estimatedTime ?? "—"}Min</span>
                   <span className="inline-flex items-center gap-2"><FaListOl /> Questions: {questions.length}</span>
@@ -349,16 +349,16 @@ const SurveyDetail = () => {
                 </div>
               </div>
             </div>
-            <div className="mt-10 border-b border-gray-200">
+            <div className="mt-10 border-b border-gray-200 dark:border-gray-600">
               <nav className="-mb-px flex gap-6" aria-label="Tabs">
                 <button
-                  className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `questions` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`}
+                  className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `questions` ? `border-primary text-primary` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`}
                   onClick={() => setActiveTab('questions')}
                 >
                   Questions ({questions.length})
                 </button>
                 <button
-                  className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `responses` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`}
+                  className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `responses` ? `border-primary text-primary` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`}
                   onClick={() => setActiveTab('responses')}
                 >
                   Responses ({sorted.length})
@@ -370,13 +370,13 @@ const SurveyDetail = () => {
         {activeTab === 'questions' ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">Survey Questions</h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Survey Questions</h2>
               <div className="text-sm text-gray-500">
                 {questions.filter((q: any) => q.required).length} required • {questions.filter((q: any) => !q.required).length} optional
               </div>
             </div>
             {isLoading ? (
-              <div className="text-sm text-gray-500">Loading questions…</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Loading questions…</div>
             ) : (
               questions.map((question: any, index: number) => (
                 <QuestionPreview key={question.id} question={question} index={index} />
@@ -384,20 +384,20 @@ const SurveyDetail = () => {
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-200">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-200 dark:border-gray-600">
               <input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 placeholder="Search by name, id, status..."
-                className="w-full sm:flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full sm:flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <div className="flex items-center justify-between sm:justify-end gap-2">
-                <label className="text-sm text-gray-600">Rows:</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">Rows:</label>
                 <select
                   value={pageSize}
                   onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                  className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                  className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   {[5, 10, 20].map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
@@ -406,24 +406,24 @@ const SurveyDetail = () => {
             {/* Mobile cards */}
             <div className="sm:hidden p-4 space-y-3">
               {isLoading ? (
-                <div className="text-center text-gray-500 py-8">Loading responses...</div>
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading responses...</div>
               ) : pageData.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">No responses found.</div>
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8">No responses found.</div>
               ) : (
                 pageData.map((r) => (
-                  <div key={r.id} className="border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <div key={r.id} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 shadow-sm bg-white dark:bg-gray-700">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{r.respondentName}</div>
-                        <div className="text-xs text-gray-500 capitalize">{spacer(r.respondentRole ?? 'Unknown')}</div>
-                        <div className="mt-1 text-xs text-gray-500">{timeAgo(r.time)}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{r.respondentName}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">{spacer(r.respondentRole ?? 'Unknown')}</div>
+                        <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{timeAgo(r.time)}</div>
                       </div>
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus(r.surveyStatus as any)}`}>
                         {r.surveyStatus}
                       </span>
                     </div>
                     <div className="mt-3">
-                      <Link to={`/dashboard/surveys/$view-id/$response-id`} params={{ 'view-id': r.id, 'response-id': r.id }} className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 bg-gray-50 rounded-md hover:bg-gray-100 text-sm">
+                      <Link to={`/dashboard/surveys/$view-id/$response-id`} params={{ 'view-id': r.id, 'response-id': r.id }} className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-500 text-sm text-gray-900 dark:text-gray-100">
                         <FaEye /> Review
                       </Link>
                     </div>
@@ -434,35 +434,35 @@ const SurveyDetail = () => {
             {/* Desktop table */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="min-w-full">
-                <thead className="border-b border-gray-200">
+                <thead className="border-b border-gray-200 dark:border-gray-600">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('respondentName')}>Responder {sortIcon('respondentName')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Responder Role</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort('time')}>Time {sortIcon('time')}</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Survey Status</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Actions</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-200 cursor-pointer" onClick={() => toggleSort('respondentName')}>Responder {sortIcon('respondentName')}</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-200">Responder Role</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-200 cursor-pointer" onClick={() => toggleSort('time')}>Time {sortIcon('time')}</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-200">Survey Status</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-200">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                   {isLoading ? (
-                    <tr><td colSpan={5} className="py-8 text-center text-gray-500">Loading responses...</td></tr>
+                    <tr><td colSpan={5} className="py-8 text-center text-gray-500 dark:text-gray-400">Loading responses...</td></tr>
                   ) : pageData.length === 0 ? (
-                    <tr><td colSpan={5} className="py-8 text-center text-gray-500">No responses found.</td></tr>
+                    <tr><td colSpan={5} className="py-8 text-center text-gray-500 dark:text-gray-400">No responses found.</td></tr>
                   ) : (
                     pageData.map((r) => (
-                      <tr key={r.id} className="hover:bg-gray-50">
+                      <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-6 py-4 text-sm text-gray-700">
                           <div className="font-medium">{r.respondentName}</div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-700 capitalize">{spacer(r.respondentRole ?? 'Unknown')}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{timeAgo(r.time)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 capitalize">{spacer(r.respondentRole ?? 'Unknown')}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{timeAgo(r.time)}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${formatStatus(r.surveyStatus as any)}`}>
                             {r.surveyStatus}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <Link to={`/dashboard/surveys/$view-id/$response-id`} params={{ 'view-id': r.id, 'response-id': r.id }} className="px-3 py-1.5 border border-gray-300 cursor-pointer bg-gray-50 rounded-md hover:bg-gray-100 disabled:opacity-50 flex items-center gap-2">
+                          <Link to={`/dashboard/surveys/$view-id/$response-id`} params={{ 'view-id': r.id, 'response-id': r.id }} className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 cursor-pointer bg-gray-50 dark:bg-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-500 disabled:opacity-50 flex items-center gap-2 text-gray-900 dark:text-gray-100">
                             <FaEye />
                             <span>Review</span>
                           </Link>
@@ -473,7 +473,7 @@ const SurveyDetail = () => {
                 </tbody>
               </table>
             </div>
-            <div className="flex items-center justify-between p-4 border-t border-gray-200 text-sm text-gray-600">
+            <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400">
               <div>
                 Page {page} of {totalPages} • {sorted.length} total
               </div>

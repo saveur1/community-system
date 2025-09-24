@@ -52,7 +52,7 @@ const FeedbacksPage = () => {
     }
 
     return param;
-  }, [page, pageSize]);
+  }, [page, pageSize, search, user]);
 
   const { data, isLoading } = useGetFeedback(feedbackParams);
   const deleteFeedback = useDeleteFeedback();
@@ -69,6 +69,13 @@ const FeedbacksPage = () => {
       default: return 'bg-gray-100 text-gray-800 border border-gray-200';
     }
   };
+
+  // Reset page to 1 when search changes
+  useEffect(() => {
+    if (search && page !== 1) {
+      setPage(1);
+    }
+  }, [search]);
 
   useEffect(()=> {
     const feedbackId =(searchParams as any)?.feedbackId;
@@ -158,7 +165,7 @@ const FeedbacksPage = () => {
           viewMode={viewMode}
           setViewMode={setViewMode}
           search={search}
-          setSearch={(value) => { setSearch(value); setPage(1); }}
+          setSearch={setSearch}
           filteredCount={meta?.total ?? 0}
           showCreate={true}
           excelData={excelDataExported(feedbacks)}

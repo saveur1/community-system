@@ -76,11 +76,11 @@ const CustomCalendar = ({ selectedDate, setSelectedDate, minDate }: { selectedDa
         disabled={disabled}
         className={`
           h-10 w-10 rounded-lg flex items-center justify-center text-sm font-medium transition-colors
-          ${disabled ? 'text-gray-300 cursor-not-allowed' : isToday(day)
+          ${disabled ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : isToday(day)
             ? 'bg-blue-600 text-white'
             : isSelected(day)
-            ? 'bg-blue-100 text-blue-600'
-            : 'hover:bg-gray-100 text-gray-700'}
+            ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300'
+            : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'}
         `}
       >
         {day}
@@ -89,19 +89,19 @@ const CustomCalendar = ({ selectedDate, setSelectedDate, minDate }: { selectedDa
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 min-w-[300px] max-w-sm mx-auto">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-4 min-w-[300px] max-w-sm mx-auto">
       {/* Calendar Header */}
       <div className="flex items-center justify-between mb-4">
-        <button onClick={previousMonth} type="button" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <FiChevronLeft size={20} className="text-gray-600" />
+        <button onClick={previousMonth} type="button" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          <FiChevronLeft size={20} className="text-gray-600 dark:text-gray-400" />
         </button>
 
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           {monthNames[currentMonth]} {currentYear}
         </h2>
 
-        <button onClick={nextMonth} type="button" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <FiChevronRight size={20} className="text-gray-600" />
+        <button onClick={nextMonth} type="button" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          <FiChevronRight size={20} className="text-gray-600 dark:text-gray-400" />
         </button>
       </div>
 
@@ -109,7 +109,7 @@ const CustomCalendar = ({ selectedDate, setSelectedDate, minDate }: { selectedDa
       <div className="grid grid-cols-7 gap-1 mb-2">
         {dayNames.map(day => (
           <div key={day} className="h-10 flex items-center justify-center">
-            <span className="text-xs font-medium text-gray-500">{day}</span>
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{day}</span>
           </div>
         ))}
       </div>

@@ -45,7 +45,7 @@ const SidebarQuestionPicker: FC<SidebarQuestionPickerProps> = ({
   }))
 
   const Panel = (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <CustomDropdown
         trigger={
           <button className="w-full flex items-center justify-center gap-2 p-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
@@ -53,7 +53,7 @@ const SidebarQuestionPicker: FC<SidebarQuestionPickerProps> = ({
             Add Question
           </button>
         }
-        dropdownClassName="bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-64 h-80 overflow-y-auto"
+        dropdownClassName="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-2 min-w-64 h-80 overflow-y-auto"
         position="bottom-left"
         closeOnClick={true}
       >
@@ -62,11 +62,11 @@ const SidebarQuestionPicker: FC<SidebarQuestionPickerProps> = ({
             key={type.id}
             onClick={() => { onAdd(type.id); setMobileOpen(false) }}
             icon={<span className="text-lg">{type.icon}</span>}
-            className="px-4 py-3 hover:bg-gray-50"
+            className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             <div className="flex flex-col">
-              <span className="font-medium text-gray-900">{type.label}</span>
-              <span className="text-xs text-gray-500">{type.description}</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">{type.label}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{type.description}</span>
             </div>
           </DropdownItem>
         ))}
@@ -84,7 +84,7 @@ const SidebarQuestionPicker: FC<SidebarQuestionPickerProps> = ({
 
           <button
             onClick={onAddSection}
-            className="w-full flex items-center justify-center gap-2 p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="w-full flex items-center justify-center gap-2 p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm text-gray-700 dark:text-gray-300"
           >
             <FaPlus className="w-3 h-3" />
             Add Section
@@ -119,13 +119,13 @@ const SidebarQuestionPicker: FC<SidebarQuestionPickerProps> = ({
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute bottom-0 left-0 right-0 max-h-[80vh] bg-white rounded-t-xl shadow-2xl p-4 overflow-auto">
+          <div className="absolute bottom-0 left-0 right-0 max-h-[80vh] bg-white dark:bg-gray-800 rounded-t-xl shadow-2xl p-4 overflow-auto">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-semibold text-gray-800">Add questions</h3>
+              <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200">Add questions</h3>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="p-2 rounded hover:bg-gray-100"
+                className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
                 aria-label="Close"
               >
                 <FaX className="w-4 h-4" />

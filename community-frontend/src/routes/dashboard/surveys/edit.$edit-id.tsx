@@ -14,6 +14,7 @@ import { toast } from 'react-toastify';
 import Modal, { ModalFooter, ModalButton } from '@/components/ui/modal';
 import { FaX } from 'react-icons/fa6';
 import ConfirmModal from '@/components/common/confirm-modal';
+import { getOptions } from '@/utility/logicFunctions';
 
 export const Route = createFileRoute('/dashboard/surveys/edit/$edit-id')({
   component: EditSurveyComponent,
@@ -33,7 +34,7 @@ function mapFromServerToDraft(entity: any): SurveyDraft {
       questionNumber: qi.questionNumber ?? undefined,
     };
     if (qi.type === 'single_choice' || qi.type === 'multiple_choice') {
-      return { ...base, options: qi.options ?? [] } as Question;
+      return { ...base, options: getOptions(qi.options) ?? [] } as Question;
     }
     if (qi.type === 'text_input' || qi.type === 'textarea') {
       return { ...base, placeholder: qi.placeholder ?? '' } as Question;
@@ -90,7 +91,7 @@ function mapDraftToUpdatePayload(draft: SurveyDraft) {
       switch (q.type) {
         case 'single_choice':
         case 'multiple_choice':
-          return { ...common, options: (q.options ?? []).map((o: any) => String(o)) };
+          return { ...common, options: (getOptions(q.options) ?? []).map((o: any) => String(o)) };
         case 'text_input':
         case 'textarea':
           return { ...common, placeholder: q.placeholder ?? '' };
@@ -130,12 +131,6 @@ function EditSurveyComponent(): JSX.Element {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const isReportForm = data?.result?.surveyType === 'report-form';
   const backHomeLink = isReportForm ? '/dashboard/surveys/report-forms' : '/dashboard/surveys';
-
-  const getOptions = (options: any)=> {
-    if(typeof options === 'string')
-      return JSON.parse(options);
-    return options;
-  }
 
   const roleGroups = useMemo(() => {
     const list = rolesData?.result ?? [];
@@ -365,7 +360,7 @@ function EditSurveyComponent(): JSX.Element {
       ...prev,
       questions: prev.questions.map(q => {
         if (q.id === questionId && (q.type === 'single_choice' || q.type === 'multiple_choice')) {
-          const options = Array.isArray((q as any).options) ? ([...((q as any).options), '']) : [''];
+          const options = Array.isArray(getOptions((q as any).options)) ? ([...getOptions((q as any).options), '']) : [''];
           return { ...(q as any), options } as Question;
         }
         return q;
@@ -378,7 +373,7 @@ function EditSurveyComponent(): JSX.Element {
       ...prev,
       questions: prev.questions.map(q => {
         if (q.id === questionId && (q.type === 'single_choice' || q.type === 'multiple_choice')) {
-          const options = (Array.isArray((getOptions(q as any).options)) ? (getOptions(q as any).options) : []).map((opt: string, idx: number) => (idx === optionIndex ? value : opt));
+          const options = (Array.isArray(getOptions((q as any).options)) ? getOptions((q as any).options) : []).map((opt: string, idx: number) => (idx === optionIndex ? value : opt));
           return { ...(q as any), options } as Question;
         }
         return q;
@@ -391,7 +386,7 @@ function EditSurveyComponent(): JSX.Element {
       ...prev,
       questions: prev.questions.map(q => {
         if (q.id === questionId && (q.type === 'single_choice' || q.type === 'multiple_choice')) {
-          const options = (Array.isArray((q as any).options) ? (q as any).options : []).filter((_: string, idx: number) => idx !== optionIndex);
+          const options = (Array.isArray(getOptions((q as any).options)) ? getOptions((q as any).options) : []).filter((_: string, idx: number) => idx !== optionIndex);
           return { ...(q as any), options } as Question;
         }
         return q;

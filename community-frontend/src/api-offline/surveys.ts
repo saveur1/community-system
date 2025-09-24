@@ -59,12 +59,10 @@ export class OfflineApiService {
       return {
         message: 'Responses loaded from offline cache',
         result: slice,
-        meta: {
-          total: cached.length,
-          page,
-          totalPages: Math.ceil(cached.length / limit),
-          limit
-        }
+        total: cached.length,
+        page,
+        totalPages: Math.ceil(cached.length / limit),
+        limit
       };
     } catch { }
 
@@ -72,12 +70,10 @@ export class OfflineApiService {
     return {
       message: 'Responses not available offline; showing empty list',
       result: [],
-      meta: {
-        total: 0,
-        page,
-        totalPages: 0,
-        limit
-      }
+      total: 0,
+      page,
+      totalPages: 0,
+      limit
     };
   }
 
@@ -242,10 +238,21 @@ export class OfflineApiService {
     }
 
     // Fallback to cached data
-    const cachedSurveys = await offlineStorage.getCachedSurveys({
+    let cachedSurveys = await offlineStorage.getCachedSurveys({
       status: params.status,
       surveyType: params.surveyType
     });
+
+    // Apply offline search filtering if search term provided
+    if (params.search && params.search.trim()) {
+      const q = params.search.trim().toLowerCase();
+      cachedSurveys = cachedSurveys.filter((s: any) => {
+        const title = String(s.title ?? '').toLowerCase();
+        const description = String(s.description ?? '').toLowerCase();
+        const project = String(s.project ?? '').toLowerCase();
+        return title.includes(q) || description.includes(q) || project.includes(q);
+      });
+    }
 
     // Apply pagination to cached results
     const page = params.page || 1;
@@ -257,12 +264,10 @@ export class OfflineApiService {
     return {
       message: 'Data retrieved from offline cache',
       result: paginatedResults as SurveyEntity[],
-      meta: {
-        total: cachedSurveys.length,
-        page,
-        totalPages: Math.ceil(cachedSurveys.length / limit),
-        limit
-      }
+      total: cachedSurveys.length,
+      page,
+      totalPages: Math.ceil(cachedSurveys.length / limit),
+      limit
     };
   }
 

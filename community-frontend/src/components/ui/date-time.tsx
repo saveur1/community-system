@@ -48,7 +48,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
         minDate={minDate}
       />
       <div>
-        <div className="mb-3 text-sm text-gray-700 font-medium">Time</div>
+        <div className="mb-3 text-sm text-gray-700 dark:text-gray-300 font-medium">Time</div>
         <div className="grid grid-cols-2 gap-4">
           <SelectDropdown
             label="Hour"
@@ -69,7 +69,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
             }))}
           />
         </div>
-        <div className="mt-4 text-xs text-gray-500">
+        <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
           {selectedDate
             ? `Selected: ${selectedDate.toLocaleDateString()} ${selectedHour}:${selectedMinute}`
             : "Pick a date"}

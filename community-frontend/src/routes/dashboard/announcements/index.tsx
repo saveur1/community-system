@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import Breadcrumb from '@/components/ui/breadcrum';
-import {  HiOutlineClock, HiOutlinePencil, HiOutlineSearch } from 'react-icons/hi';
+import {  HiOutlineClock, HiOutlinePencil } from 'react-icons/hi';
 import { SelectDropdown } from '@/components/ui/select';
 import Modal, { ModalBody, ModalFooter, ModalButton } from '@/components/ui/modal';
 import { FiPlus, FiSearch } from 'react-icons/fi';
@@ -91,131 +91,122 @@ function AnnouncementsPage() {
   return (
     <div className="space-y-6 pb-10">
       <Breadcrumb
-        items={["Dashboard", "Announcements"]}
+        items={[
+          { title: 'Dashboard', link: '/dashboard' },
+          'Announcements'
+        ]}
         title="Announcements"
-        className="absolute top-0 left-0 w-full px-6"
+        className="absolute top-0 left-0 w-full px-4 lg:px-6"
       />
 
       {/* Toolbar */}
       <div className="pt-20">
-        <div className="bg-white border rounded-lg border-gray-300 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-4 flex-1">
-            <div className="relative flex-1 max-w-md">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-                placeholder="Search announcements..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
-              />
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="bg-white dark:bg-gray-800 border rounded-lg border-gray-300 dark:border-gray-600 p-3 lg:p-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            {/* Search and Filter Container */}
+            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+                  placeholder="Search announcements..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
+
+              <div className="w-full sm:w-48">
+                <SelectDropdown
+                  value={statusFilter}
+                  onChange={(v) => { setStatusFilter(v as any); setPage(1); }}
+                  options={[
+                    { label: 'All Status', value: 'all' },
+                    { label: 'Sent', value: 'sent' },
+                    { label: 'Scheduled', value: 'scheduled' },
+                    { label: 'Draft', value: 'draft' },
+                  ]}
+                  placeholder="Filter by status"
+                  triggerClassName="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                />
+              </div>
             </div>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value as any); setPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2"
+            {/* Add Button */}
+            <Link
+              to="/dashboard/announcements/add-new"
+              className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary-dark transition-colors font-medium shadow-sm whitespace-nowrap"
             >
-              <option value="all">All Status</option>
-              <option value="sent">Sent</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="draft">Draft</option>
-            </select>
+              <FiPlus className="w-4 h-4" />
+              <span className="hidden sm:inline">New Announcement</span>
+              <span className="sm:hidden">New</span>
+            </Link>
           </div>
-
-          <Link
-            to="/dashboard/announcements/add-new"
-            className="ml-4 px-4 py-2 bg-primary text-white rounded-lg flex items-center"
-          >
-            <FiPlus className="mr-2" /> New Announcement
-          </Link>
         </div>
       </div>
 
       {/* History / List */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-          <div className="flex items-center gap-2 text-gray-700">
-            <HiOutlineClock />
-            <span className="font-medium">Announcement History</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <input
-                value={query}
-                onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-                placeholder="Search announcements..."
-                className="w-64 border border-gray-300 rounded-md pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-              />
-              <HiOutlineSearch className="absolute left-3 top-2.5 text-gray-400" />
-            </div>
-            <div className="w-48">
-              <SelectDropdown
-                value={statusFilter}
-                onChange={(v) => { setStatusFilter(v as any); setPage(1); }}
-                options={[
-                  { label: 'All', value: 'all' },
-                  { label: 'Sent', value: 'sent' },
-                  { label: 'Scheduled', value: 'scheduled' },
-                  { label: 'Draft', value: 'draft' },
-                ]}
-                placeholder="Filter status"
-              />
-            </div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-3 lg:p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mb-4 lg:mb-0">
+            <HiOutlineClock className="w-5 h-5" />
+            <span className="font-medium text-sm lg:text-base">Announcement History</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">({totalItems})</span>
           </div>
         </div>
 
-        <div className="">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scheduled</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Scheduled</th>
+                <th className="px-4 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {announcementsLoading ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">Loading announcements...</td></tr>
+                <tr><td colSpan={5} className="px-4 lg:px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">Loading announcements...</td></tr>
               ) : announcementsError ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-sm text-red-500">Failed to load announcements</td></tr>
+                <tr><td colSpan={5} className="px-4 lg:px-6 py-8 text-center text-sm text-red-500">Failed to load announcements</td></tr>
               ) : paginated.map((a) => (
-                 <tr key={a.id} className="hover:bg-gray-50">
-                   <td className="px-6 py-4">
-                     <div className="text-sm font-medium text-gray-800">{a.title}</div>
-                     <div className="text-xs text-gray-500 line-clamp-1">{a.message}</div>
+                 <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                   <td className="px-4 lg:px-6 py-4">
+                     <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{a.title}</div>
+                     <div className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{a.message}</div>
                    </td>
-                   <td className="px-6 py-4">
-                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${a.status === 'sent' ? 'bg-green-100 text-green-800' :
-                         a.status === 'scheduled' ? 'bg-amber-100 text-amber-800' :
-                           'bg-gray-100 text-gray-800'
+                   <td className="px-4 lg:px-6 py-4">
+                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${a.status === 'sent' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                         a.status === 'scheduled' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' :
+                           'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                          }`}>
                        {a.status}
                      </span>
                    </td>
-                   <td className="px-6 py-4 text-sm text-gray-700">{formatDateTime(a.createdAt)}</td>
-                   <td className="px-6 py-4 text-sm text-gray-700">{formatDateTime(a.scheduledAt || '')}</td>
-                   <td className="px-6 py-4 text-right">
-                     <div className="flex items-center justify-end gap-3 text-gray-500">
+                   <td className="px-4 lg:px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(a.createdAt)}</td>
+                   <td className="px-4 lg:px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(a.scheduledAt || '')}</td>
+                   <td className="px-4 lg:px-6 py-4 text-right">
+                     <div className="flex items-center justify-end gap-2 text-gray-500 dark:text-gray-400">
                        <Link
-                         className="hover:text-primary p-2 rounded"
+                         className="hover:text-primary p-2 rounded transition-colors"
                          title="Edit"
                          to= '/dashboard/announcements/$edit-id'
                          params={{ 'edit-id': a.id }}
                        >
-                         <HiOutlinePencil className="w-5 h-5" />
+                         <HiOutlinePencil className="w-4 h-4" />
                        </Link>
                        <CustomDropdown
                          trigger={
-                           <button className="px-2 py-1 rounded hover:bg-gray-100" aria-label="Actions">
+                           <button className="px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors" aria-label="Actions">
                              •••
                            </button>
                          }
                          position="bottom-right"
                        >
-                         <div className="w-44 bg-white rounded-md shadow-lg ring-1 ring-black/5">
+                         <div className="w-44 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black/5 dark:ring-gray-600">
                            <DropdownItem onClick={() => openDetails(a.id)}>View details</DropdownItem>
                            <DropdownItem
                              onClick={async () => {
@@ -223,7 +214,7 @@ function AnnouncementsPage() {
                                  await updateAnnouncement.mutateAsync({ id: a.id, payload: { status: 'sent' } });
                                } catch (e) {}
                            }}
-                           className="text-green-700"
+                           className="text-green-700 dark:text-green-400"
                          >
                            Activate
                          </DropdownItem>
@@ -233,13 +224,13 @@ function AnnouncementsPage() {
                                await updateAnnouncement.mutateAsync({ id: a.id, payload: { status: 'stopped' } });
                              } catch (e) {}
                            }}
-                           className="text-red-600"
+                           className="text-red-600 dark:text-red-400"
                          >
                            Stop
                          </DropdownItem>
                          <DropdownItem
                            onClick={() => { setDeleteId(a.id); setConfirmOpen(true); }}
-                           className="text-red-700"
+                           className="text-red-700 dark:text-red-400"
                          >
                            Delete
                          </DropdownItem>
@@ -252,43 +243,133 @@ function AnnouncementsPage() {
 
               {(!announcementsLoading && !announcementsError && paginated.length === 0) && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">No announcements found.</td>
+                  <td colSpan={5} className="px-4 lg:px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No announcements found.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
 
+        {/* Mobile Card View */}
+        <div className="lg:hidden">
+          {announcementsLoading ? (
+            <div className="p-6 text-center text-sm text-gray-500 dark:text-gray-400">Loading announcements...</div>
+          ) : announcementsError ? (
+            <div className="p-6 text-center text-sm text-red-500">Failed to load announcements</div>
+          ) : paginated.length === 0 ? (
+            <div className="p-6 text-center text-sm text-gray-500 dark:text-gray-400">No announcements found.</div>
+          ) : (
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {paginated.map((a) => (
+                <div key={a.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{a.title}</h3>
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${a.status === 'sent' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                            a.status === 'scheduled' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' :
+                              'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                            }`}>
+                          {a.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">{a.message}</p>
+                      <div className="flex flex-col gap-1 text-xs text-gray-500 dark:text-gray-400">
+                        <div>Created: {formatDateTime(a.createdAt)}</div>
+                        {a.scheduledAt && <div>Scheduled: {formatDateTime(a.scheduledAt)}</div>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Link
+                        className="p-2 hover:text-primary rounded transition-colors"
+                        title="Edit"
+                        to='/dashboard/announcements/$edit-id'
+                        params={{ 'edit-id': a.id }}
+                      >
+                        <HiOutlinePencil className="w-4 h-4" />
+                      </Link>
+                      <CustomDropdown
+                        trigger={
+                          <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors" aria-label="Actions">
+                            •••
+                          </button>
+                        }
+                        position="bottom-right"
+                      >
+                        <div className="w-44 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black/5 dark:ring-gray-600">
+                          <DropdownItem onClick={() => openDetails(a.id)}>View details</DropdownItem>
+                          <DropdownItem
+                            onClick={async () => {
+                              try {
+                                await updateAnnouncement.mutateAsync({ id: a.id, payload: { status: 'sent' } });
+                              } catch (e) {}
+                            }}
+                            className="text-green-700 dark:text-green-400"
+                          >
+                            Activate
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={async () => {
+                              try {
+                                await updateAnnouncement.mutateAsync({ id: a.id, payload: { status: 'stopped' } });
+                              } catch (e) {}
+                            }}
+                            className="text-red-600 dark:text-red-400"
+                          >
+                            Stop
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => { setDeleteId(a.id); setConfirmOpen(true); }}
+                            className="text-red-700 dark:text-red-400"
+                          >
+                            Delete
+                          </DropdownItem>
+                        </div>
+                      </CustomDropdown>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Pagination */}
-        <div className="p-4 flex items-center justify-between border-t border-gray-200 text-sm">
-          <div className="text-gray-600">
+        <div className="p-3 lg:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 dark:border-gray-700 text-sm">
+          <div className="text-gray-600 dark:text-gray-400 order-2 sm:order-1">
             Showing <span className="font-medium">{paginated.length}</span> of <span className="font-medium">{totalItems}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              disabled={currentPage <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="px-3 py-1.5 border rounded disabled:opacity-50 cursor-pointer"
-            >
-              Prev
-            </button>
-            <span className="px-2">{currentPage} / {totalPages}</span>
-            <button
-              disabled={currentPage >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="px-3 py-1.5 border rounded disabled:opacity-50 cursor-pointer"
-            >
-              Next
-            </button>
-            <select
-              value={pageSize}
-              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-              className="ml-2 border rounded px-2 py-1"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-            </select>
+          <div className="flex flex-col sm:flex-row items-center gap-2 lg:gap-3 order-1 sm:order-2">
+            <div className="flex items-center gap-2">
+              <button
+                disabled={currentPage <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+              >
+                Prev
+              </button>
+              <span className="px-2 text-gray-700 dark:text-gray-300">{currentPage} / {totalPages}</span>
+              <button
+                disabled={currentPage >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+              >
+                Next
+              </button>
+            </div>
+            <div className="w-20">
+              <SelectDropdown
+                value={pageSize.toString()}
+                onChange={(v) => { setPageSize(Number(v)); setPage(1); }}
+                options={[
+                  { label: '5', value: '5' },
+                  { label: '10', value: '10' },
+                  { label: '20', value: '20' },
+                ]}
+                placeholder="Size"
+                triggerClassName="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-xs"
+              />
+            </div>
           </div>
         </div>
       </div>

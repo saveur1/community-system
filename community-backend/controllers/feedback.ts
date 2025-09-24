@@ -61,7 +61,8 @@ export class FeedbackController extends Controller {
     @Query() owner?: 'me' | 'other',
     @Query() org?: 'mine' | 'others' | 'all',
     @Query() startDate?: string,
-    @Query() endDate?: string
+    @Query() endDate?: string,
+    @Query() search?: string
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
     const where: any = {};
@@ -92,11 +93,38 @@ export class FeedbackController extends Controller {
       if (endDate) where.createdAt[Op.lte] = new Date(endDate);
     }
 
+    // Search functionality
+    let searchConditions: any = {};
+    if (search && search.trim()) {
+      const searchTerm = `%${search.trim()}%`;
+      searchConditions = {
+        [Op.or]: [
+          // Search in feedback main message
+          { mainMessage: { [Op.like]: searchTerm } },
+          // Search in feedback suggestions
+          { suggestions: { [Op.like]: searchTerm } },
+          // Search in otherFeedbackOn field
+          { otherFeedbackOn: { [Op.like]: searchTerm } },
+          // Search in user name
+          { '$user.name$': { [Op.like]: searchTerm } },
+          // Search in user email
+          { '$user.email$': { [Op.like]: searchTerm } },
+          // Search in project name
+          { '$project.name$': { [Op.like]: searchTerm } }
+        ]
+      };
+    }
+
+    // Combine where conditions with search conditions
+    const finalWhere = search && search.trim() 
+      ? { [Op.and]: [where, searchConditions] }
+      : where;
+
     const { count, rows } = await Feedback.findAndCountAll({
       limit,
       offset,
       order: [['createdAt', 'DESC']],
-      where,
+      where: finalWhere,
       include: [
         {
           model: Document,
@@ -147,7 +175,7 @@ export class FeedbackController extends Controller {
     return ServiceResponse.success('Feedback retrieved successfully', feedback);
   }
 
-  @Security('jwt', ['feedback:create'])
+  @Security('optionalJwt')
   @Post('/')
   @asyncCatch
   public async createFeedback(
@@ -334,7 +362,7 @@ export class FeedbackController extends Controller {
     }
 
     await feedback.update({
-      projectId: data.projectId ?? feedback.projectId,
+      projectId: data.projectId ?? feedback.projectId ?? null,
       mainMessage: data.mainMessage ?? feedback.mainMessage,
       feedbackType: data.feedbackType ?? feedback.feedbackType,
       feedbackMethod: data.feedbackMethod ?? feedback.feedbackMethod,

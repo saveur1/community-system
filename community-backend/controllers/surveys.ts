@@ -102,7 +102,8 @@ export class SurveyController extends Controller {
     @Query() allowed?: boolean, // if true, return only surveys that allow any of the current user's roles
     @Query() available?: boolean, // if true, return only surveys the current user hasn't responded to
     @Query() startDate?: string,
-    @Query() endDate?: string
+    @Query() endDate?: string,
+    @Query() search?: string
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
     const where: any = {};
@@ -133,6 +134,19 @@ export class SurveyController extends Controller {
 
     // SURVEY TYPE FILTER
     if (surveyType) where.surveyType = surveyType;
+
+    // SEARCH FILTER (title, description)
+    if (search && search.trim()) {
+      const term = `%${search.trim()}%`;
+      // Ensure Op.and exists if already used elsewhere
+      where[Op.and] = where[Op.and] || [];
+      (where[Op.and] as any[]).push({
+        [Op.or]: [
+          { title: { [Op.like]: term } },
+          { description: { [Op.like]: term } },
+        ],
+      });
+    }
 
     // OWNER FILTERING (requires authenticated user)
     const userId = request?.user?.id ?? null;

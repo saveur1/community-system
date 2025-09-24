@@ -3,6 +3,7 @@ import { useResponseById } from '@/hooks/useSurveys'
 import Breadcrumb from '@/components/ui/breadcrum'
 import SurveyAnswerReview from '@/components/survey/SurveyAnswerReview'
 import { FaUser, FaCalendar, FaBuilding } from 'react-icons/fa'
+import { getOptions } from '@/utility/logicFunctions'
 
 export const Route = createFileRoute('/dashboard/reporting/$report-id')({
   component: RouteComponent,
@@ -69,9 +70,9 @@ function RouteComponent() {
         className='absolute top-0 left-0 w-full px-6'
       />
 
-      <div className="pt-20 px-6">
+      <div className="pt-20 px-6 max-sm:px-2">
         {/* Response Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-sm:p-4 mb-6">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -81,7 +82,7 @@ function RouteComponent() {
                 Survey: <span className="font-medium">{survey?.title}</span>
               </p>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 max-sm:hidden">
               Report ID: {responseData.id}
             </div>
           </div>
@@ -146,7 +147,7 @@ function RouteComponent() {
             answers={answers.map(answer => ({
               questionId: answer.questionId,
               answerText: answer.answerText,
-              answerOptions: answer.answerOptions
+              answerOptions: getOptions(answer.answerOptions)
             }))}
             className="divide-y divide-gray-100"
           />

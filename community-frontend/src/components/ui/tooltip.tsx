@@ -137,7 +137,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   }, [isVisible, trigger]);
 
   const getArrowClasses = () => {
-    const baseClasses = 'absolute w-2 h-2 bg-gray-900 transform rotate-45';
+    const baseClasses = 'absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 transform rotate-45';
     
     switch (position) {
       case 'top':
@@ -213,7 +213,7 @@ const Tooltip: React.FC<TooltipProps> = ({
                 duration: 0.2
               }}
               className={`
-                relative bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg
+                relative bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-100 text-sm px-3 py-2 rounded-lg shadow-lg
                 max-w-xs break-words pointer-events-auto
                 ${className}
               `}
@@ -221,7 +221,7 @@ const Tooltip: React.FC<TooltipProps> = ({
               {closable && (
                 <button
                   onClick={hideTooltip}
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-colors"
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-gray-700 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500 rounded-full flex items-center justify-center transition-colors"
                 >
                   <FaX size={12} />
                 </button>

@@ -15,6 +15,7 @@ export const surveysKeys = {
     params?.status ?? null,
     params?.surveyType ?? null,
     params?.responded ?? null,
+    params?.search ?? null,
   ] as const,
   detail: (id: string) => [...surveysKeys.all, 'detail', id] as const,
   responses: (id?: string, responderId?: string, page?: number, limit?: number, surveyType?: 'report-form' | 'general' | 'rapid-enquiry') => [...surveysKeys.all, 'responses', id, responderId, page, limit, surveyType] as const,

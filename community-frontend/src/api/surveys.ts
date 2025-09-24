@@ -5,8 +5,8 @@ import type { RoleEntity } from './roles';
 
 export const surveysApi = {
   list: async (params: SurveysListParams = { page: 1, limit: 10 }): Promise<SurveysListResponse> => {
-    const { page = 1, limit = 10, status, surveyType, responded, owner, allowed, startDate, endDate, available } = params;
-    const { data } = await client.get(`/surveys`, { params: { page, limit, status, surveyType, responded, owner, allowed, startDate, endDate, available } });
+    const { page = 1, limit = 10, status, surveyType, responded, owner, allowed, startDate, endDate, available, search } = params;
+    const { data } = await client.get(`/surveys`, { params: { page, limit, status, surveyType, responded, owner, allowed, startDate, endDate, available, search } });
     return data;
   },
 
@@ -62,13 +62,11 @@ export const surveysApi = {
 export type ServiceResponse<T> = {
   message: string;
   result: T;
-  meta?: {
-    total?: number;
-    page?: number;
-    totalPages?: number;
-    limit?: number;
-    [key: string]: any;
-  };
+  total?: number;
+  page?: number;
+  totalPages?: number;
+  limit?: number;
+  [key: string]: any;
 };
 
 // Types aligned with backend controllers/models
@@ -298,6 +296,7 @@ export type SurveysListParams = {
   available?: boolean;
   startDate?: string;
   endDate?: string;
+  search?: string
 };
 
 export type SurveysListResponse = ServiceResponse<SurveyEntity[]>;

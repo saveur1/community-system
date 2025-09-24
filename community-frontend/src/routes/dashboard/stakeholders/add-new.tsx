@@ -209,14 +209,19 @@ const CreateStakeholderComponent: React.FC = () => {
   return (
     <div className="w-full">
       <Breadcrumb
-        items={['Dashboard', 'Organizations', 'Add New']}
+        items={[
+          {title: 'Dashboard', link: "/dashboard"}, 
+          {title: 'Stakeholders', link: "/dashboard/stakeholders"}, 
+          'Add New'
+        ]
+        }
         title="Add New Organization"
         className='absolute top-0 px-6 left-0 w-full'
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 lg:px-8 pt-20 pb-12">
         <div className="bg-white rounded-lg shadow-lg drop-shadow-2xl border border-gray-200">
-          <div className="p-8">
+          <div className="p-4 sm:p-6 lg:p-8">
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-gray-900 mb-2">Create New Organization</h1>
               <p className="text-gray-600">Add a new organization and select permissions for its role</p>

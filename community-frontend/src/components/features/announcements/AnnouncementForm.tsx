@@ -117,7 +117,7 @@ export const AnnouncementForm = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-6">
+    <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-6 max-sm:px-4">
       {/* Progress indicator */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">

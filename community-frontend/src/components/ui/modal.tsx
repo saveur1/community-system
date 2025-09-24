@@ -99,18 +99,18 @@ const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative bg-white rounded-lg shadow-xl w-full ${getSizeClasses()} max-h-[90vh] overflow-hidden ${contentClassName}`}
+            className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full ${getSizeClasses()} max-h-[90vh] overflow-hidden ${contentClassName}`}
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-600">
                 {title && (
-                  <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
                 )}
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
                     aria-label="Close modal"
                   >
                     <FaTimes className="w-5 h-5" />
@@ -151,7 +151,7 @@ interface ModalFooterProps {
 }
 
 export const ModalFooter: React.FC<ModalFooterProps> = ({ children, className = '' }) => (
-  <div className={`flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50 ${className}`}>
+  <div className={`flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 ${className}`}>
     {children}
   </div>
 );
@@ -179,7 +179,7 @@ export const ModalButton: React.FC<ModalButtonProps> = ({
       case 'primary':
         return 'bg-primary text-white hover:bg-blue-600 focus:ring-blue-500';
       case 'secondary':
-        return 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500';
+        return 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-500 focus:ring-gray-500';
       case 'danger':
         return 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500';
       default:

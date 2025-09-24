@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import Breadcrumb from '@/components/ui/breadcrum';
-import { useCreateCommunitySession } from '@/hooks/useCommunitySession';
+import { useCommunitySession, useUpdateCommunitySession } from '@/hooks/useCommunitySession';
 import { useRolesList } from '@/hooks/useRoles';
 import useAuth from '@/hooks/useAuth';
 import { uploadToCloudinary } from '@/utility/logicFunctions';
@@ -28,6 +28,7 @@ interface FormData {
   type: CommunitySessionType;
   documentUrl: string;
   allowedRoles: string[];
+  isActive: boolean;
 }
 
 const contentTypes = [
@@ -37,9 +38,10 @@ const contentTypes = [
   { value: 'audio' as CommunitySessionType, label: 'Audio', icon: FaMusic, color: 'text-purple-500' },
 ];
 
-const AddCommunitySessionPage = () => {
+const EditCommunitySessionPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { sessionId } = Route.useParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [form, setForm] = useState<FormData>({
@@ -48,14 +50,32 @@ const AddCommunitySessionPage = () => {
     type: 'video',
     documentUrl: '',
     allowedRoles: [],
+    isActive: true,
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const createSession = useCreateCommunitySession();
+  // Fetch existing session data
+  const { data: sessionResp, isLoading: sessionLoading, isError: sessionError } = useCommunitySession(sessionId);
+  const updateSession = useUpdateCommunitySession();
 
   // Fetch roles and group by category for display
   const { data: rolesResp, isLoading: rolesLoading, isError: rolesError } = useRolesList({ page: 1, limit: 200 });
+
+  // Pre-populate form with existing session data
+  useEffect(() => {
+    if (sessionResp?.result) {
+      const session = sessionResp.result;
+      setForm({
+        title: session.title || '',
+        shortDescription: session.shortDescription || '',
+        type: session.type || 'video',
+        documentUrl: session.document?.documentUrl || '',
+        allowedRoles: session.roles?.map(role => role.id) || [],
+        isActive: session.isActive ?? true,
+      });
+    }
+  }, [sessionResp]);
 
   const roleGroups = useMemo(() => {
     const list = rolesResp?.result ?? [];
@@ -133,10 +153,6 @@ const AddCommunitySessionPage = () => {
           toast.error('Description is required');
           return false;
         }
-        if (!uploadedFile) {
-          toast.error('Please upload a file');
-          return false;
-        }
         return true;
       case 2:
         if (form.allowedRoles.length === 0) {
@@ -163,37 +179,29 @@ const AddCommunitySessionPage = () => {
     if (!validateStep(2)) return;
 
     try {
-      // First upload the file to Cloudinary
-      if (!uploadedFile) {
-        toast.error('No file to upload');
-        return;
-      }
-      if (!user?.id) {
-        toast.error('User not authenticated');
-        return;
-      }
+      let documentData = undefined;
 
-      setIsUploading(true);
-      setUploadProgress(0);
+      // If a new file was uploaded, upload it to Cloudinary
+      if (uploadedFile) {
+        if (!user?.id) {
+          toast.error('User not authenticated');
+          return;
+        }
 
-      const uploadResult = await uploadToCloudinary(uploadedFile, {
-        folder: 'community-sessions',
-        onProgress: (percent) => setUploadProgress(percent)
-      });
-      
-      if (!uploadResult.secureUrl) {
-        toast.error('Failed to upload file');
-        return;
-      }
+        setIsUploading(true);
+        setUploadProgress(0);
 
-      // Then create the community session with full document payload
-      console.log(form.allowedRoles);
-      await createSession.mutateAsync({
-        title: form.title,
-        shortDescription: form.shortDescription,
-        type: form.type,
-        allowedRoles: form.allowedRoles,
-        document: {
+        const uploadResult = await uploadToCloudinary(uploadedFile, {
+          folder: 'community-sessions',
+          onProgress: (percent) => setUploadProgress(percent)
+        });
+        
+        if (!uploadResult.secureUrl) {
+          toast.error('Failed to upload file');
+          return;
+        }
+
+        documentData = {
           documentName: uploadedFile.name,
           size: uploadResult.bytes ?? uploadedFile.size,
           type: uploadedFile.type || uploadResult.format || null,
@@ -202,12 +210,25 @@ const AddCommunitySessionPage = () => {
           userId: user.id,
           publicId: uploadResult.publicId,
           deleteToken: uploadResult.deleteToken,
+        };
+      }
+
+      // Update the community session
+      await updateSession.mutateAsync({
+        id: sessionId,
+        data: {
+          title: form.title,
+          shortDescription: form.shortDescription,
+          type: form.type,
+          allowedRoles: form.allowedRoles,
+          isActive: form.isActive,
+          ...(documentData && { document: documentData }),
         },
       });
 
       navigate({ to: '/dashboard/community-sessions' });
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to create community session');
+      toast.error(error?.message || 'Failed to update community session');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
@@ -279,9 +300,30 @@ const AddCommunitySessionPage = () => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Upload Resource *
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Session Status
         </label>
+        <div className="flex items-center space-x-3">
+          <input
+            type="checkbox"
+            id="isActive"
+            checked={form.isActive}
+            onChange={(e) => setForm(prev => ({ ...prev, isActive: e.target.checked }))}
+            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+          />
+          <label htmlFor="isActive" className="text-sm text-gray-700">
+            Session is active and visible to users
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Update Resource (Optional)
+        </label>
+        <p className="text-sm text-gray-600 mb-3">
+          Leave empty to keep the current file. Upload a new file to replace it.
+        </p>
         {!uploadedFile ? (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
             <input
@@ -299,7 +341,7 @@ const AddCommunitySessionPage = () => {
             <label htmlFor="file-upload" className="cursor-pointer">
               <FiUpload className="mx-auto text-4xl text-gray-400 mb-4" />
               <p className="text-lg font-medium text-gray-600 mb-2">
-                Click to upload {form.type}
+                Click to upload new {form.type}
               </p>
               <p className="text-sm text-gray-500">
                 {form.type === 'video' && 'MP4, AVI, MOV files'}
@@ -377,9 +419,8 @@ const AddCommunitySessionPage = () => {
               {(() => {
                 const groupValues = group.options.map(o => o.value);
                 const allSelected = groupValues.every(v => form.allowedRoles.includes(v));
-                // const noneSelected = groupValues.every(v => !form.allowedRoles.includes(v));
                 const buttonLabel = allSelected ? 'Clear all' : 'Select all';
-                const nextSelectAll = !allSelected; // if all selected, clicking clears; else selects all
+                const nextSelectAll = !allSelected;
                 return (
                   <button
                     type="button"
@@ -420,33 +461,49 @@ const AddCommunitySessionPage = () => {
     </motion.div>
   );
 
-  const isLoading = createSession.isPending || isUploading;
+  const isLoading = updateSession.isPending || isUploading || sessionLoading;
+
+  if (sessionLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg text-gray-600">Loading session data...</div>
+      </div>
+    );
+  }
+
+  if (sessionError || !sessionResp?.result) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg text-red-600">Failed to load session data. Please try again.</div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <Breadcrumb 
-        title="Add Community Session" 
+        title="Edit Community Session" 
         items={[
-          { title: 'Dashboard', link: '/dashboard' },
-          { title: 'Community Sessions', link: '/dashboard/community-sessions' },
-          'Add Session'
+          { link: '/dashboard', title: 'Dashboard' },
+          { link: '/dashboard/community-sessions', title: 'Community Sessions' },
+          'Edit Session'
         ]} 
         className="absolute top-0 left-0 w-full"
       />
       
-      <div className="pt-20 max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg drop-shadow-xl p-8 max-md:px-4">
+      <div className="pt-16 max-w-4xl mx-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg drop-shadow-xl p-8">
           {/* Progress indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-600">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 Step {currentStep} of 2
               </span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {currentStep === 1 ? 'Session Details' : 'Role Selection'}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div 
                 className="bg-primary h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(currentStep / 2) * 100}%` }}
@@ -463,12 +520,12 @@ const AddCommunitySessionPage = () => {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex justify-between pt-8 border-t border-gray-200">
+          <div className="flex justify-between pt-8 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
-              className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiChevronLeft className="mr-2" />
               Previous
@@ -490,7 +547,7 @@ const AddCommunitySessionPage = () => {
                 disabled={isLoading}
                 className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
               >
-                {isUploading ? `Uploading... ${uploadProgress}%` : createSession.isPending ? 'Creating...' : 'Create Session'}
+                {isUploading ? `Uploading... ${uploadProgress}%` : updateSession.isPending ? 'Updating...' : 'Update Session'}
               </button>
             )}
           </div>
@@ -500,6 +557,6 @@ const AddCommunitySessionPage = () => {
   );
 };
 
-export const Route = createFileRoute('/dashboard/community-sessions/add-new')({
-  component: AddCommunitySessionPage,
+export const Route = createFileRoute('/dashboard/community-sessions/edit/$sessionId')({
+  component: EditCommunitySessionPage,
 });

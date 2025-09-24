@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import Breadcrumb from '@/components/ui/breadcrum';
 import FilePreview from '@/components/common/file-preview';
 import { FaDownload, FaEllipsisV, FaShare, FaUserCircle, FaArrowLeft } from 'react-icons/fa';
+import { BsExclamationOctagon } from 'react-icons/bs';
 import {
   useAddComment,
   useCommunitySession,
@@ -45,6 +46,8 @@ function timeAgo(dateStr: string) {
 
 const Comments = ({ sessionId }: { sessionId: string }) => {
   const [content, setContent] = useState('');
+  console.log("Sesssion id:", sessionId);
+  
   const { data: listResp, isLoading } = useCommunitySessionComments(sessionId, { page: 1, limit: 50 });
   const addComment = useAddComment(sessionId);
   const comments = listResp?.result ?? [];
@@ -99,22 +102,11 @@ const Comments = ({ sessionId }: { sessionId: string }) => {
       ) : (
         <>
           {comments.length === 0 ? (
-            <ul className="space-y-4">
-              {[1,2].map((i) => (
-                <li key={i} className="flex gap-3">
-                  <div className="mt-1">
-                    <FaUserCircle className="text-gray-300" size={36} />
-                  </div>
-                  <div className="flex-1 bg-gray-50 rounded-lg p-3 pt-1">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-medium text-gray-500">Sample User</div>
-                      <div className="text-xs text-gray-400">just now</div>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">This is a sample comment. Be the first to comment!</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <BsExclamationOctagon className="text-6xl mb-4 text-gray-400" />
+              <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">No Comments Found</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Be the first to share your thoughts!</p>
+            </div>
           ) : (
             <ul className="space-y-4">
               {comments.map((c) => (

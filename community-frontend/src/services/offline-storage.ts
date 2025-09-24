@@ -234,8 +234,31 @@ export class OfflineStorageService {
     return feedbackId;
   }
 
-  async getCachedFeedback(filters?: { status?: string; feedbackType?: string; projectId?: string }): Promise<OfflineFeedback[]> {
-    return this.getCachedData<OfflineFeedback>('feedback', filters);
+  async getCachedFeedback(filters?: { status?: string; feedbackType?: string; projectId?: string; search?: string }): Promise<OfflineFeedback[]> {
+    let feedbackData = await this.getCachedData<OfflineFeedback>('feedback', {
+      status: filters?.status,
+      feedbackType: filters?.feedbackType,
+      projectId: filters?.projectId
+    });
+
+    // Apply search filter if provided
+    if (filters?.search && filters.search.trim()) {
+      const searchTerm = filters.search.toLowerCase().trim();
+      feedbackData = feedbackData.filter(feedback => {
+        // Search in feedback content
+        const mainMessage = feedback.mainMessage?.toLowerCase() || '';
+        const suggestions = feedback.suggestions?.toLowerCase() || '';
+        const otherFeedbackOn = feedback.otherFeedbackOn?.toLowerCase() || '';
+        const responderName = feedback.responderName?.toLowerCase() || '';
+        
+        return mainMessage.includes(searchTerm) ||
+               suggestions.includes(searchTerm) ||
+               otherFeedbackOn.includes(searchTerm) ||
+               responderName.includes(searchTerm);
+      });
+    }
+
+    return feedbackData;
   }
 
   async getPendingFeedback(): Promise<OfflineFeedback[]> {

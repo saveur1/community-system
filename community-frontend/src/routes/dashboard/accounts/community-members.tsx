@@ -87,7 +87,7 @@ function CommunityAccountsPage() {
     <AccountsList
       accounts={accounts}
       title="Community Members"
-      addButtonLabel="add community member"
+      addButtonLabel="add member"
       onSearch={handleSearch}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}

@@ -10,19 +10,19 @@ interface Props {
 
 export default function SurveyFooterActions({ questionsCount, estimatedTime, isSaving, onSave, onCancel }: Props): JSX.Element {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mt-6 p-6">
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {questionsCount} question{questionsCount !== 1 ? 's' : ''} •
           Estimated time: {estimatedTime || '0'} minutes
         </div>
         <div className="flex space-x-3">
-          <button onClick={onCancel} className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 font-medium">
+          <button onClick={onCancel} className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition-colors">
             Cancel
           </button>
           <button
             onClick={onSave}
-            className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark font-medium flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark font-medium flex items-center disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
             disabled={isSaving}
           >
             {isSaving ? (
