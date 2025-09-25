@@ -45,7 +45,6 @@ export interface SurveyAttributes {
   // New: when survey opens and closes
   startAt: Date;
   endAt: Date;
-
   createdAt?: Date;
   updatedAt?: Date;
 }

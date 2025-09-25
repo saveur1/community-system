@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { FaEdit, FaEye, FaEllipsisV, FaExclamationTriangle, FaChevronRight } from 'react-icons/fa';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
+import type { SurveyEntity } from '@/api/surveys';
 
 type Props = {
   paginated: any[];
@@ -50,7 +51,7 @@ const SurveyListTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor
                   </td>
                 </tr>
               ) : (
-                paginated.map((survey: any) => (
+                paginated.map((survey: SurveyEntity) => (
                   <tr key={survey.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-4 py-4 md:px-6">
                       <div className="flex flex-col sm:flex-row sm:items-center">
@@ -70,7 +71,7 @@ const SurveyListTable: React.FC<Props> = ({ paginated, isLoading, getStatusColor
                     <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-300 md:px-6 hidden lg:table-cell">{(survey.responses?.length) ?? 0}</td>
                     <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-300 md:px-6 hidden lg:table-cell">{survey.questionItems?.length ?? 0}</td>
                     <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-300 md:px-6 hidden lg:table-cell">{survey.estimatedTime}Min</td>
-                    <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-300 md:px-6 hidden lg:table-cell">{survey.project}</td>
+                    <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-300 md:px-6 hidden lg:table-cell">{survey?.project?.name}</td>
                     <td className="px-4 py-4 md:px-6">
                       <div className="flex items-center space-x-3 md:space-x-4">
                         <Link

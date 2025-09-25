@@ -7,6 +7,7 @@ import { createSystemLog } from '../utils/systemLog';
 import { generateInviteToken, verifyInviteToken } from '../utils/tokenService';
 import { sendOrganizationInviteEmail } from '../utils/emailService';
 import { hash } from 'bcrypt';
+import { Op } from 'sequelize';
 
 // NOTE: this controller previously called "StakeholderController" — updated to manage Organizations
 @Route('api/organizations')
@@ -19,7 +20,8 @@ export class OrganizationController extends Controller {
     @Query() page: number = 1,
     @Query() limit: number = 10,
     @Query() type?: 'stakeholder' | 'system_owner',
-    @Query() status?: 'active' | 'suspended' | 'deleted'
+    @Query() status?: 'active' | 'suspended' | 'deleted',
+    @Query() search?: string
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
 
@@ -32,6 +34,15 @@ export class OrganizationController extends Controller {
 
     if (status) {
       whereClause.status = status;
+    }
+
+    // Add search functionality
+    if (search && search.trim()) {
+      const searchTerm = search.trim();
+      whereClause[Op.or] = [
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('Organization.name')), 'LIKE', `%${searchTerm.toLowerCase()}%`),
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('Organization.description')), 'LIKE', `%${searchTerm.toLowerCase()}%`)
+      ];
     }
 
     const { count, rows } = await db.Organization.findAndCountAll({

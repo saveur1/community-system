@@ -1,5 +1,5 @@
 // src/services/offline-storage.ts
-import { db, type OfflineSurvey, type OfflineSurveyResponse, type OfflineCommunitySession, type OfflineComment, type OfflineFeedback, type OfflineProject, type OfflineStatisticsOverview, type OfflineSurveysHistory, type SyncQueue } from '@/db/schema';
+import { db, type OfflineSurvey, type OfflineSurveyResponse, type OfflineCommunitySession, type OfflineComment, type OfflineFeedback, type OfflineProject, type OfflineStatisticsOverview, type OfflineSurveysHistory, type OfflineOrganization, type SyncQueue } from '@/db/schema';
 import { v4 as uuidv4 } from 'uuid';
 
 export class OfflineStorageService {
@@ -33,6 +33,9 @@ export class OfflineStorageService {
       case 'projects':
         await db.projects.bulkPut(dataWithTimestamp as unknown as OfflineProject[]);
         break;
+      case 'organizations':
+        await db.organizations.bulkPut(dataWithTimestamp as unknown as OfflineOrganization[]);
+        break;
       case 'statisticsOverview':
         await db.statisticsOverview.bulkPut(dataWithTimestamp as unknown as OfflineStatisticsOverview[]);
         break;
@@ -57,6 +60,9 @@ export class OfflineStorageService {
         break;
       case 'projects':
         collection = db.projects;
+        break;
+      case 'organizations':
+        collection = db.organizations;
         break;
       case 'statisticsOverview':
         collection = db.statisticsOverview;
@@ -94,6 +100,8 @@ export class OfflineStorageService {
         return db.feedback.get(id) as Promise<T | undefined>;
       case 'projects':
         return db.projects.get(id) as Promise<T | undefined>;
+      case 'organizations':
+        return db.organizations.get(id) as Promise<T | undefined>;
       case 'statisticsOverview':
         return db.statisticsOverview.get(id) as Promise<T | undefined>;
       case 'surveysHistory':
@@ -176,8 +184,28 @@ export class OfflineStorageService {
     await db.communitySessions.put({ ...session, lastSynced: Date.now() });
   }
 
-  async getCachedCommunitySessions(filters?: { type?: string; isActive?: boolean }): Promise<OfflineCommunitySession[]> {
-    return this.getCachedData<OfflineCommunitySession>('communitySessions', filters);
+  async getCachedCommunitySessions(filters?: { type?: string; isActive?: boolean; search?: string }): Promise<OfflineCommunitySession[]> {
+    let sessions = await this.getCachedData<OfflineCommunitySession>('communitySessions', {
+      type: filters?.type,
+      isActive: filters?.isActive
+    });
+
+    // Apply search filter if provided
+    if (filters?.search && filters.search.trim()) {
+      const searchTerm = filters.search.toLowerCase().trim();
+      sessions = sessions.filter(session => {
+        // Search in title
+        const title = session.title?.toLowerCase() || '';
+        const shortDescription = session.shortDescription?.toLowerCase() || '';
+        const creatorName = session.creator?.name?.toLowerCase() || '';
+
+        return title.includes(searchTerm) ||
+               shortDescription.includes(searchTerm) ||
+               creatorName.includes(searchTerm);
+      });
+    }
+
+    return sessions;
   }
 
   async getCachedCommunitySession(id: string): Promise<OfflineCommunitySession | undefined> {
@@ -278,6 +306,39 @@ export class OfflineStorageService {
     return this.getCachedItem<OfflineProject>('projects', id);
   }
 
+  // Organizations
+  async cacheOrganizations(organizations: OfflineOrganization[]): Promise<void> {
+    await this.cacheData('organizations', organizations);
+  }
+
+  async getCachedOrganizations(filters?: { type?: string; status?: string; search?: string }): Promise<OfflineOrganization[]> {
+    let organizations = await this.getCachedData<OfflineOrganization>('organizations', {
+      type: filters?.type,
+      status: filters?.status
+    });
+
+    // Apply search filter if provided
+    if (filters?.search && filters.search.trim()) {
+      const searchTerm = filters.search.toLowerCase().trim();
+      organizations = organizations.filter(org => {
+        // Search in name, description, and owner email
+        const name = org.name?.toLowerCase() || '';
+        const description = org.description?.toLowerCase() || '';
+        const ownerEmail = org.owner?.email?.toLowerCase() || '';
+
+        return name.includes(searchTerm) ||
+               description.includes(searchTerm) ||
+               ownerEmail.includes(searchTerm);
+      });
+    }
+
+    return organizations;
+  }
+
+  async getCachedOrganization(id: string): Promise<OfflineOrganization | undefined> {
+    return this.getCachedItem<OfflineOrganization>('organizations', id);
+  }
+
   // Statistics Overview
   async cacheStatisticsOverview(overview: OfflineStatisticsOverview): Promise<void> {
     const dataToCache = { ...overview, lastSynced: Date.now() };
@@ -344,6 +405,7 @@ export class OfflineStorageService {
     await db.communitySessions.clear();
     await db.feedback.clear();
     await db.projects.clear();
+    await db.organizations.clear();
     await db.statisticsOverview.clear();
     await db.surveysHistory.clear();
     await db.comments.clear();
@@ -355,15 +417,17 @@ export class OfflineStorageService {
     communitySessions: number;
     feedback: number;
     projects: number;
+    organizations: number;
     statisticsOverview: number;
     surveysHistory: number;
     pendingSync: number;
   }> {
-    const [surveys, communitySessions, feedback, projects, statisticsOverview, surveysHistory, pendingSync] = await Promise.all([
+    const [surveys, communitySessions, feedback, projects, organizations, statisticsOverview, surveysHistory, pendingSync] = await Promise.all([
       db.surveys.count(),
       db.communitySessions.count(),
       db.feedback.count(),
       db.projects.count(),
+      db.organizations.count(),
       db.statisticsOverview.count(),
       db.surveysHistory.count(),
       db.syncQueue.count()
@@ -374,6 +438,7 @@ export class OfflineStorageService {
       communitySessions,
       feedback,
       projects,
+      organizations,
       statisticsOverview,
       surveysHistory,
       pendingSync
@@ -403,6 +468,11 @@ export class OfflineStorageService {
           lastSynced: timestamp 
         });
         break;
+      case 'organization':
+        await db.organizations.update(entityId, { 
+          lastSynced: timestamp 
+        });
+        break;
     }
   }
 
@@ -425,6 +495,9 @@ export class OfflineStorageService {
           item.syncStatus = 'failed';
           item.retryCount = (item.retryCount || 0) + 1;
         });
+        break;
+      case 'organization':
+        // Organizations don't have syncStatus, so we don't need to update anything
         break;
     }
   }

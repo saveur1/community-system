@@ -414,6 +414,22 @@
 					"profileImage": {
 						"type": "string"
 					},
+					"district": {
+						"type": "string",
+						"nullable": true
+					},
+					"sector": {
+						"type": "string",
+						"nullable": true
+					},
+					"cell": {
+						"type": "string",
+						"nullable": true
+					},
+					"village": {
+						"type": "string",
+						"nullable": true
+					},
 					"userType": {
 						"type": "string"
 					},
@@ -461,6 +477,18 @@
 						"$ref": "#/components/schemas/UserStatus"
 					},
 					"profileImage": {
+						"type": "string"
+					},
+					"district": {
+						"type": "string"
+					},
+					"sector": {
+						"type": "string"
+					},
+					"cell": {
+						"type": "string"
+					},
+					"village": {
 						"type": "string"
 					},
 					"userType": {
@@ -2231,6 +2259,22 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ChangePasswordRequest": {
+				"properties": {
+					"oldPassword": {
+						"type": "string"
+					},
+					"newPassword": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"oldPassword",
+					"newPassword"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -2292,6 +2336,22 @@
 							"default": 10,
 							"format": "double",
 							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "userType",
+						"required": false,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]
@@ -2498,6 +2558,84 @@
 						}
 					}
 				]
+			}
+		},
+		"/api/users/{userId}/roles": {
+			"put": {
+				"operationId": "UpdateUserRoles",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_IUserResponse-or-null_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid role IDs provided",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwt": [
+							"user:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"roleIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"roleIds"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/system-logs": {
@@ -3029,6 +3167,14 @@
 							"default": 10,
 							"format": "double",
 							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]
@@ -4192,6 +4338,14 @@
 								"suspended",
 								"deleted"
 							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]
@@ -5570,6 +5724,14 @@
 						"schema": {
 							"type": "boolean"
 						}
+					},
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
 					}
 				]
 			},
@@ -6299,6 +6461,62 @@
 									"token"
 								],
 								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/change-password": {
+			"post": {
+				"operationId": "ChangePassword",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ChangePasswordRequest"
 							}
 						}
 					}

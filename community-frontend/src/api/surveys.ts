@@ -36,8 +36,8 @@ export const surveysApi = {
   },
 
   // New: list responses for a survey
-  responses: async (surveyId?: string, responderId?: string, page: number = 1, limit: number = 10, surveyType?: 'report-form' | 'general' | 'rapid-enquiry'): Promise<SurveyResponsesList> => {
-    const { data } = await client.get("/surveys/responses", { params: { surveyId, responderId, page, limit, surveyType } });
+  responses: async (surveyId?: string, responderId?: string, page: number = 1, limit: number = 10, surveyType?: 'report-form' | 'general' | 'rapid-enquiry', search?: string): Promise<SurveyResponsesList> => {
+    const { data } = await client.get("/surveys/responses", { params: { surveyId, responderId, page, limit, surveyType, search } });
     return data;
   },
 
@@ -259,7 +259,6 @@ export type SurveyEntity = {
   id: string;
   title: string;
   description: string;
-  project: string;
   estimatedTime: string;
   status: 'draft' | 'active' | 'paused' | 'archived';
   surveyType?: 'general' | 'report-form' | 'rapid-enquiry';
@@ -282,6 +281,11 @@ export type SurveyEntity = {
   creator?: {
     id: string;
     name: string;
+  };
+  project?: {
+    id: string;
+    name: string;
+    status: string;
   };
 };
 

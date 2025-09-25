@@ -1,11 +1,18 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { usersApi, type UsersListParams, type UsersListResponse, type UserResponse, type UserCreateRequest, type UserUpdateRequest } from '../api/users';
+import { usersApi, type UsersListParams, type UsersListResponse, type UserResponse, type UserCreateRequest, type UserUpdateRequest, type UpdateUserRolesRequest } from '../api/users';
 import { toast } from 'react-toastify';
 
 // Query keys for users
 export const usersKeys = {
   all: ['users'] as const,
-  list: (params?: UsersListParams) => [...usersKeys.all, 'list', params?.page ?? 1, params?.limit ?? 10] as const,
+  list: (params?: UsersListParams) => [
+    ...usersKeys.all, 
+    'list', 
+    params?.page ?? 1, 
+    params?.limit ?? 10,
+    params?.search ?? '',
+    params?.search ?? ''
+  ] as const,
   detail: (id: string) => [...usersKeys.all, 'detail', id] as const,
 };
 
@@ -122,6 +129,25 @@ export function useActivateAndDeactivate() {
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Failed to update active status';
+      toast.error(msg);
+    },
+  });
+}
+
+// Update user roles
+export function useUpdateUserRoles(userId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateUserRolesRequest) => usersApi.updateRoles(userId, payload),
+    onSuccess: async () => {
+      toast.success('User roles updated successfully');
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: usersKeys.detail(userId) }),
+        qc.invalidateQueries({ queryKey: usersKeys.all }),
+      ]);
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || 'Failed to update user roles';
       toast.error(msg);
     },
   });

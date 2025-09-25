@@ -121,6 +121,7 @@ export class SurveyController extends Controller {
       { model: db.Role, as: 'allowedRoles', through: { attributes: [] }, required: false },
       { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
       { model: db.User, as: 'creator', attributes: ['id', 'name'] },
+      { model: db.Project, as: 'project', attributes: ['id', 'name', 'status'] }
     ];
     // DATE RANGE FILTER
     if (startDate || endDate) {
@@ -394,10 +395,11 @@ export class SurveyController extends Controller {
     @Query() surveyType?: 'report-form' | 'general' | 'rapid-enquiry',
     @Query() page: number = 1,
     @Query() limit: number = 10,
+    @Query() search?: string,
   ): Promise<ServiceResponse<any[]>> {
     // Validate that at least one query parameter is provided
-    if (!surveyId && !responderId) {
-      return ServiceResponse.failure('Either surveyId or responderId query parameter is required', [], 400);
+    if (!surveyId && !responderId && !search) {
+      return ServiceResponse.failure('Either surveyId, responderId, or search query parameter is required', [], 400);
     }
 
     // Build where clause based on provided parameters
@@ -414,6 +416,7 @@ export class SurveyController extends Controller {
         { model: db.Question, as: 'questionItems', include: [{ model: db.Section, as: 'section' }], order: [['questionNumber', 'ASC']] },
         { model: db.Organization, as: 'organization', attributes: ['id', 'name'] },
         { model: db.User, as: 'creator', attributes: ['id', 'name'] },
+        { model: db.Project, as: 'project', attributes: ['id', 'name', 'status'] }
       ]
     };
 
@@ -422,11 +425,65 @@ export class SurveyController extends Controller {
       surveyInclude.where = { surveyType };
     }
 
-    const offset = (page - 1) * Math.max(1, limit);
-    
+    // Add search functionality
+    const searchConditions: any[] = [];
+    if (search && search.trim()) {
+      const searchTerm = search.trim();
+
+      // Check if search is for userReportCounter (format: "report [number]")
+      if (searchTerm.toLowerCase().startsWith('visit ')) {
+        const reportNumberMatch = searchTerm.match(/^visit\s+(\d+)$/i);
+        if (reportNumberMatch) {
+          const reportNumber = parseInt(reportNumberMatch[1], 10);
+          whereClause.userReportCounter = reportNumber;
+        }
+      } else if (searchTerm.toLowerCase().startsWith('date:')) {
+        // Date search (format: "date:2023-01-01" or "date:2023-01-01:2023-01-31")
+        const dateMatch = searchTerm.match(/^date:([^:]+)(?::(.+))?$/i);
+        if (dateMatch) {
+          const startDate = new Date(dateMatch[1]);
+          if (!isNaN(startDate.getTime())) {
+            if (dateMatch[2]) {
+              // Date range
+              const endDate = new Date(dateMatch[2]);
+              if (!isNaN(endDate.getTime())) {
+                whereClause.createdAt = {
+                  [Op.gte]: startDate,
+                  [Op.lte]: endDate
+                };
+              }
+            } else {
+              // Single date - search for that day
+              const nextDay = new Date(startDate);
+              nextDay.setDate(nextDay.getDate() + 1);
+              whereClause.createdAt = {
+                [Op.gte]: startDate,
+                [Op.lt]: nextDay
+              };
+            }
+          }
+        }
+      } else {
+        // Regular text search - only search in survey title for simplicity
+        const searchFilter = {
+          [Op.or]: [
+            // Search in survey title using include where clause
+            {
+              '$survey.title$': {
+                [Op.like]: `%${searchTerm}%`
+              }
+            }
+          ]
+        };
+        searchConditions.push(searchFilter);
+      }
+    }
+
+    const offset = limit > 0 ? (page - 1) * Math.max(1, limit) : 0;
+
     // Handle negative limit (fetch all records)
     const queryOptions: any = {
-      where: whereClause,
+      where: searchConditions.length > 0 ? { [Op.and]: [whereClause, ...searchConditions] } : whereClause,
       offset: limit > 0 ? offset : 0,
       order: [['createdAt', 'DESC']],
       include: [
@@ -539,15 +596,6 @@ export class SurveyController extends Controller {
               return {
                 ...baseQuestion,
                 options: (q as any).options ?? null,
-                placeholder: null,
-                allowedTypes: null,
-                maxSize: null,
-                maxRating: null,
-                ratingLabel: null,
-                minValue: null,
-                maxValue: null,
-                minLabel: null,
-                maxLabel: null,
               };
             case 'text_input':
             case 'textarea':
@@ -555,14 +603,6 @@ export class SurveyController extends Controller {
                 ...baseQuestion,
                 options: null,
                 placeholder: (q as any).placeholder ?? null,
-                allowedTypes: null,
-                maxSize: null,
-                maxRating: null,
-                ratingLabel: null,
-                minValue: null,
-                maxValue: null,
-                minLabel: null,
-                maxLabel: null,
               };
             case 'file_upload':
               return {
@@ -571,12 +611,6 @@ export class SurveyController extends Controller {
                 placeholder: null,
                 allowedTypes: (q as any).allowedTypes ?? null,
                 maxSize: (q as any).maxSize ?? null,
-                maxRating: null,
-                ratingLabel: null,
-                minValue: null,
-                maxValue: null,
-                minLabel: null,
-                maxLabel: null,
               };
             case 'rating':
               return {
@@ -587,20 +621,10 @@ export class SurveyController extends Controller {
                 maxSize: null,
                 maxRating: (q as any).maxRating ?? null,
                 ratingLabel: (q as any).ratingLabel ?? null,
-                minValue: null,
-                maxValue: null,
-                minLabel: null,
-                maxLabel: null,
               };
             case 'linear_scale':
               return {
                 ...baseQuestion,
-                options: null,
-                placeholder: null,
-                allowedTypes: null,
-                maxSize: null,
-                maxRating: null,
-                ratingLabel: null,
                 minValue: (q as any).minValue ?? null,
                 maxValue: (q as any).maxValue ?? null,
                 minLabel: (q as any).minLabel ?? null,
@@ -702,15 +726,6 @@ export class SurveyController extends Controller {
               return {
                 ...baseQuestion,
                 options: (q as any).options ?? null,
-                placeholder: null,
-                allowedTypes: null,
-                maxSize: null,
-                maxRating: null,
-                ratingLabel: null,
-                minValue: null,
-                maxValue: null,
-                minLabel: null,
-                maxLabel: null,
               };
             case 'text_input':
             case 'textarea':
@@ -718,14 +733,6 @@ export class SurveyController extends Controller {
                 ...baseQuestion,
                 options: null,
                 placeholder: (q as any).placeholder ?? null,
-                allowedTypes: null,
-                maxSize: null,
-                maxRating: null,
-                ratingLabel: null,
-                minValue: null,
-                maxValue: null,
-                minLabel: null,
-                maxLabel: null,
               };
             case 'file_upload':
               return {
@@ -734,36 +741,16 @@ export class SurveyController extends Controller {
                 placeholder: null,
                 allowedTypes: (q as any).allowedTypes ?? null,
                 maxSize: (q as any).maxSize ?? null,
-                maxRating: null,
-                ratingLabel: null,
-                minValue: null,
-                maxValue: null,
-                minLabel: null,
-                maxLabel: null,
               };
             case 'rating':
               return {
                 ...baseQuestion,
-                options: null,
-                placeholder: null,
-                allowedTypes: null,
-                maxSize: null,
                 maxRating: (q as any).maxRating ?? null,
                 ratingLabel: (q as any).ratingLabel ?? null,
-                minValue: null,
-                maxValue: null,
-                minLabel: null,
-                maxLabel: null,
               };
             case 'linear_scale':
               return {
                 ...baseQuestion,
-                options: null,
-                placeholder: null,
-                allowedTypes: null,
-                maxSize: null,
-                maxRating: null,
-                ratingLabel: null,
                 minValue: (q as any).minValue ?? null,
                 maxValue: (q as any).maxValue ?? null,
                 minLabel: (q as any).minLabel ?? null,
@@ -829,7 +816,11 @@ export class SurveyController extends Controller {
       }>;
     }
   ): Promise<ServiceResponse<any | null>> {
-    const survey = await db.Survey.findByPk(surveyId);
+    const survey = await db.Survey.findByPk(surveyId, {
+      include: [
+        { model: db.Response, as: 'responses', include: [{ model: db.Answer, as: 'answers' }, { model: db.User, as: 'user', attributes: ['id', 'name'] }] },
+      ],
+    });
 
     if (!survey) return ServiceResponse.failure('Survey not found', null, 404);
 
@@ -837,11 +828,26 @@ export class SurveyController extends Controller {
       return ServiceResponse.failure('Survey is not accepting responses', null, 403);
     }
 
+    let userReportCounter = 0;
+
+    if(survey.surveyType == "report-form") {
+      const responses = survey?.responses?.filter(r => r.userId == request?.user?.id);
+      // get last userReportCounter for loggedin user
+      if (responses && responses.length > 0) {
+        const lastResponse = Math.max(...responses.map(r => r.userReportCounter || 0));
+        userReportCounter = lastResponse + 1;
+      } else {
+        // For new users or first submission, start with counter 1
+        userReportCounter = 1;
+      }
+    }
+
     const effectiveUserId = body.userId ?? request?.user?.id ?? null;
     let createdResponse: any = null;
     await sequelize.transaction(async (t) => {
       createdResponse = await db.Response.create({
         surveyId: survey.id,
+        userReportCounter: userReportCounter,
         userId: effectiveUserId,
       }, { transaction: t });
 

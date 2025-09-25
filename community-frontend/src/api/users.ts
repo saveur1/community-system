@@ -6,18 +6,16 @@ import type { User } from './auth';
 export type ServiceResponse<T> = {
   message: string;
   result: T;
-  meta?: {
-    total?: number;
-    page?: number;
-    totalPages?: number;
-    limit?: number;
-    [key: string]: any;
-  };
+  total?: number;
+  page?: number;
+  totalPages?: number;
+  limit?: number;
 };
 
 export type UsersListParams = {
   page?: number;
   limit?: number;
+  search?: string
 };
 
 export type UsersListResponse = ServiceResponse<User[]>;
@@ -41,10 +39,14 @@ export type UserUpdateRequest = Partial<Omit<UserCreateRequest, 'password'>> & {
   verified?: boolean;
 };
 
+export type UpdateUserRolesRequest = {
+  roleIds: string[];
+};
+
 export const usersApi = {
   list: async (params: UsersListParams = {}): Promise<UsersListResponse> => {
-    const { page = 1, limit = 10 } = params;
-    const { data } = await client.get(`/users`, { params: { page, limit } });
+    const { page = 1, limit = 10, search } = params;
+    const { data } = await client.get(`/users`, { params: { page, limit, search } });
     return data;
   },
 
@@ -60,6 +62,11 @@ export const usersApi = {
 
   update: async (userId: string, payload: UserUpdateRequest): Promise<UserResponse> => {
     const { data } = await client.put(`/users/${userId}`, payload);
+    return data;
+  },
+
+  updateRoles: async (userId: string, payload: UpdateUserRolesRequest): Promise<UserResponse> => {
+    const { data } = await client.put(`/users/${userId}/roles`, payload);
     return data;
   },
 

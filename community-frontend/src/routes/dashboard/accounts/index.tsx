@@ -1,9 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import { AccountsList } from '@/components/accounts/accounts-list';
-import type { Account, AccountFilters } from '@/types/account';
 import { useUsersList } from '@/hooks/useUsers';
+import { AccountsList } from '@/components/accounts/accounts-list';
+import { createFileRoute } from '@tanstack/react-router';
+import MainToolbar from '@/components/common/main-toolbar';
+import { FaPlus } from 'react-icons/fa';
+import type { Account, AccountFilters } from '@/types/account';
 import type { User } from '@/api/auth';
+import { spacer } from '@/utility/logicFunctions';
 
 // Helper: determine account type by membership in signup user type groups
 function mapUserTypeToAccountType(userType?: string): Account['type'] {
@@ -27,10 +30,50 @@ function AccountsPage() {
     pageSize: 10,
     total: 0,
   });
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
-  const { data, isLoading } = useUsersList({ page: pagination.page, limit: pagination.pageSize });
+  const { data, isLoading } = useUsersList({ 
+    page: pagination.page, 
+    limit: pagination.pageSize,
+    search: filters.search 
+  });
 
-  // Map API users to Account[] whenever data or filters change
+  const { data: exportData } = useUsersList({ limit:-1});
+
+  // Export data formatter based on IUserAttributes
+  const excelDataExported = (users: any[]) => {
+    return users?.map((user, index) => ({
+      id: index + 1,
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      address: user?.address || '',
+      status: user?.status || '',
+      userType: user?.userType || '',
+      district: user?.district || '',
+      sector: user?.sector || '',
+      cell: user?.cell || '',
+      village: user?.village || '',
+      preferredLanguage: user?.preferredLanguage || '',
+      nearByHealthCenter: user?.nearByHealthCenter || '',
+      schoolName: user?.schoolName || '',
+      schoolAddress: user?.schoolAddress || '',
+      churchName: user?.churchName || '',
+      churchAddress: user?.churchAddress || '',
+      hospitalName: user?.hospitalName || '',
+      hospitalAddress: user?.hospitalAddress || '',
+      healthCenterName: user?.healthCenterName || '',
+      healthCenterAddress: user?.healthCenterAddress || '',
+      epiDistrict: user?.epiDistrict || '',
+      salary: user?.salary || '',
+      profile: user?.profile || '',
+      emailVerified: user?.emailVerified ? 'Yes' : 'No',
+      roles: user?.roles?.map((role: any) => spacer(role.name)).join(', ') || '',
+      createdAt: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
+      updatedAt: user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : ''
+    }))
+  };
+
   const mapped = useMemo(() => {
     const list: User[] = data?.result ?? [];
     let items: Account[] = list.map((u) => ({
@@ -47,18 +90,7 @@ function AccountsPage() {
       updatedAt: (u as any).updatedAt ? String((u as any).updatedAt) : new Date().toISOString(),
     }));
 
-    // Apply client-side filters until backend filtering is added
-    if (filters.search) {
-      const term = filters.search.toLowerCase();
-      items = items.filter(a =>
-        a.name.toLowerCase().includes(term) ||
-        (a.email && a.email.toLowerCase().includes(term)) ||
-        (a.phone && a.phone.includes(term)) ||
-        (a.address && a.address.toLowerCase().includes(term)) ||
-        a.role.toLowerCase().includes(term) ||
-        a.type.toLowerCase().includes(term)
-      );
-    }
+    // Apply remaining client-side filters (search is now handled by backend)
     if (filters.role) items = items.filter(a => a.role === filters.role);
     if (filters.status) items = items.filter(a => a.status === filters.status as any);
     if (filters.type) items = items.filter(a => a.type === filters.type as any);
@@ -68,7 +100,7 @@ function AccountsPage() {
   // Update accounts and total when API data arrives
   useEffect(() => {
     setAccounts(mapped);
-    const total = data?.meta?.total ?? mapped.length;
+    const total = data?.total ?? mapped.length;
     setPagination(prev => ({ ...prev, total }));
   }, [mapped, data]);
 
@@ -84,23 +116,54 @@ function AccountsPage() {
   const handlePageSizeChange = (pageSize: number) => {
     setPagination(prev => ({
       page: 1, // Reset to first page
-      pageSize,
+      pageSize: pageSize,
       total: prev.total,
     }));
   };
 
   return (
-    <AccountsList
-      accounts={accounts}
-      title="All Accounts"
-      onSearch={handleSearch}
-      onPageChange={handlePageChange}
-      onPageSizeChange={handlePageSizeChange}
-      currentPage={pagination.page}
-      totalPages={Math.ceil(pagination.total / pagination.pageSize)}
-      totalItems={pagination.total}
-      pageSize={pagination.pageSize}
-      loading={isLoading}
-    />
+    <div className="pt-1">
+      <MainToolbar
+        title="All Accounts"
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        search={filters.search || ''}
+        setSearch={(search) => {
+          const newFilters = { ...filters, search };
+          setFilters(newFilters);
+          if(search && pagination.page > 1) {
+            setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on new search
+          }
+        }}
+        filteredCount={pagination.total}
+        showCreate={true}
+        excelData={excelDataExported(exportData?.result || [])}
+        excelColumnWidths={{
+          id: 6, name: 25, email: 30, phone: 15, address: 30, status: 12,
+          userType: 20, district: 15, sector: 15, cell: 15, village: 15,
+          preferredLanguage: 20, nearByHealthCenter: 25, schoolName: 25,
+          schoolAddress: 30, churchName: 25, churchAddress: 30,
+          hospitalName: 25, hospitalAddress: 30, healthCenterName: 25,
+          healthCenterAddress: 30, epiDistrict: 20, salary: 12,
+          profile: 40, emailVerified: 15, roles: 30, createdAt: 15, updatedAt: 15
+        }}
+        excelFileName='all_accounts'
+        createButton={{ to: '/dashboard/accounts/add-new', label: 'Add Account', icon: <FaPlus /> }}
+      />
+
+      <AccountsList
+        accounts={accounts}
+        title="All Accounts"
+        onSearch={handleSearch}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        currentPage={pagination.page}
+        totalPages={Math.ceil(pagination.total / pagination.pageSize)}
+        totalItems={pagination.total}
+        pageSize={pagination.pageSize}
+        loading={isLoading}
+        viewMode={viewMode}
+      />
+    </div>
   );
 }

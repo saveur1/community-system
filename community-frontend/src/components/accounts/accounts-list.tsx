@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FaSort, FaSortUp, FaSortDown, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaChevronLeft, FaChevronRight, FaEye, FaTrash, FaPlus, FaEllipsisV } from 'react-icons/fa';
+import { FaSort, FaSortUp, FaSortDown, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaChevronLeft, FaChevronRight, FaEye, FaTrash, FaEllipsisV, FaUserCog } from 'react-icons/fa';
 import type { Account, AccountFilters } from '@/types/account';
 import { SelectDropdown } from '@/components/ui/select';
 import Drawer from '@/components/ui/drawer';
@@ -8,7 +8,8 @@ import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import { spacer } from '@/utility/logicFunctions';
 import { useVerifyAndUnverify, useActivateAndDeactivate } from '@/hooks/useUsers';
 import { useRolesList } from '@/hooks/useRoles';
-import MainToolbar from '@/components/common/main-toolbar';
+import { toast } from 'react-toastify';
+import { ChangeRoleModal } from './change-role-modal';
 
 type ViewMode = 'list' | 'grid';
 
@@ -23,8 +24,8 @@ interface AccountsListProps {
   totalItems: number;
   pageSize: number;
   loading: boolean;
+  viewMode: ViewMode;
   onDeleteAccount?: (account: Account) => void; // optional callback
-  addButtonLabel?: string; // optional custom label for the add button
 }
 
 export function AccountsList({
@@ -38,11 +39,9 @@ export function AccountsList({
   totalItems,
   pageSize,
   loading,
+  viewMode,
   onDeleteAccount,
-  addButtonLabel,
 }: AccountsListProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<AccountFilters>({});
   const [sortConfig, setSortConfig] = useState<{ key: keyof Account; direction: 'asc' | 'desc' }>(
     { key: 'name', direction: 'asc' }
@@ -57,6 +56,10 @@ export function AccountsList({
   // Delete Modal state
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
+
+  // Change Role Modal state
+  const [isChangeRoleOpen, setIsChangeRoleOpen] = useState(false);
+  const [roleChangeAccount, setRoleChangeAccount] = useState<Account | null>(null);
 
   // Mutations for status changes
   const { mutate: verifyToggleMutate } = useVerifyAndUnverify();
@@ -90,8 +93,23 @@ export function AccountsList({
     setIsDeleteOpen(true);
   };
 
+  const openChangeRole = (account: Account) => {
+    setRoleChangeAccount(account);
+    setIsChangeRoleOpen(true);
+  };
+
+  const closeChangeRole = () => {
+    setIsChangeRoleOpen(false);
+    setRoleChangeAccount(null);
+  };
+
   const confirmDelete = () => {
-    if (!selectedAccount) return;
+
+    if (!selectedAccount) {
+      toast.error('Something Went Wrong, please contact support!');
+      return;
+    };
+
     if (deleteInput !== selectedAccount.name) return; // simple guard; button disabled too
     onDeleteAccount?.(selectedAccount);
     setIsDeleteOpen(false);
@@ -129,36 +147,24 @@ export function AccountsList({
   }
 
   return (
-    <div className="pt-6">
-      <MainToolbar
-        title={title}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        search={searchTerm}
-        setSearch={setSearchTerm}
-        filteredCount={totalItems}
-        showCreate={true}
-        createButton={{
-          to: "/dashboard/accounts/add-new",
-          label: addButtonLabel ?? "Add User",
-          icon: <FaPlus />
-        }}
-      />
-
+    <div>
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-300 dark:border-gray-600 p-3 lg:p-4 mb-4 lg:mb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Role</label>
             <SelectDropdown
-              options={roles.map((role) => ({ label: spacer(role.name), value: role.name }))}
-              value={filters.role}
+              options={[
+                { label: 'All Roles', value: 'all' },
+                ...roles.map((role) => ({ label: spacer(role.name), value: role.name }))
+              ]}
+              value={filters.role || 'all'}
               onChange={(value) => {
-                const newFilters = { ...filters, role: value || undefined };
+                const newFilters = { ...filters, role: value === 'all' ? undefined : value };
                 setFilters(newFilters);
                 onSearch(newFilters);
               }}
-              placeholder="All Roles"
+              placeholder="Select a role"
             />
           </div>
           <div>
@@ -325,7 +331,8 @@ export function AccountsList({
                             </button>
                           }
                           position="bottom-right"
-                          dropdownClassName="min-w-44 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 dark:ring-gray-600 py-1"
+                          dropdownClassName="w-44 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 dark:ring-gray-600 py-1"
+                          portal={true}
                         >
                           <DropdownItem
                             onClick={() => { handleVerifyToggle(account); }}
@@ -338,6 +345,12 @@ export function AccountsList({
                             icon={<span className={`inline-block w-2 h-2 rounded-full ${account.status === 'inactive' ? 'bg-green-500' : 'bg-red-500'}`} />}
                           >
                             {account.status === 'inactive' ? 'Activate user' : 'Deactivate user'}
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => { openChangeRole(account); }}
+                            icon={<FaUserCog className="text-blue-600 dark:text-blue-400" />}
+                          >
+                            Change role
                           </DropdownItem>
                           <DropdownItem
                             onClick={() => { openDelete(account); }}
@@ -407,7 +420,7 @@ export function AccountsList({
                         onClick={() => onPageChange(pageNum)}
                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                           currentPage === pageNum
-                            ? 'z-10 bg-primary-50 dark:bg-primary-900/50 border-primary-500 dark:border-primary-400 text-primary-600 dark:text-primary-200'
+                            ? 'z-10 bg-primary dark:bg-primary/50 border-primary dark:border-primary text-white dark:text-white'
                             : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                       >
@@ -437,6 +450,8 @@ export function AccountsList({
                     ]}
                     value={String(pageSize)}
                     onChange={(value) => onPageSizeChange(Number(value))}
+                    dropdownClassName='w-32'
+                    portal={ true }
                   />
                 </div>
               </div>
@@ -544,6 +559,12 @@ export function AccountsList({
                         {account.status === 'inactive' ? 'Activate user' : 'Deactivate user'}
                       </DropdownItem>
                       <DropdownItem
+                        onClick={() => { openChangeRole(account); }}
+                        icon={<FaUserCog className="text-blue-600 dark:text-blue-400" />}
+                      >
+                        Change role
+                      </DropdownItem>
+                      <DropdownItem
                         onClick={() => { openDelete(account); }}
                         icon={<FaTrash className="text-red-600 dark:text-red-400" />}
                         destructive
@@ -631,6 +652,13 @@ export function AccountsList({
           </ModalButton>
         </ModalFooter>
       </Modal>
+
+      {/* Change Role Modal */}
+      <ChangeRoleModal
+        isOpen={isChangeRoleOpen}
+        onClose={closeChangeRole}
+        account={roleChangeAccount}
+      />
     </div>
   );
 }

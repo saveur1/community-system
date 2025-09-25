@@ -28,7 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         className={`
           ${sidebarOpen ? "w-64" : "w-16"}
           ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          bg-primary text-white fixed h-screen flex flex-col z-50 transition-all duration-300 ease-in-out
+          bg-primary dark:bg-primary-dark text-white fixed h-screen flex flex-col z-50 transition-all duration-300 ease-in-out
         `}
       >
         {/* Top section */}

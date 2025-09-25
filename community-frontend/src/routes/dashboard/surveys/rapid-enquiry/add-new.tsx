@@ -334,7 +334,7 @@ function CreateRapidEnquiryComponent() {
   const addSection = () => {
     // No-op for rapid enquiry since we have only one section
   }
-
+  
   return (
     <div className="pb-10">
       <Breadcrumb 
@@ -379,19 +379,19 @@ function CreateRapidEnquiryComponent() {
             onDeleteSection={deleteSection}
             onDrop={handleDrop}
           />
-
+          
           {/* Footer Actions */}
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-between">
             <div className="flex gap-3">
               <button
                 onClick={handleReset}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
                 Reset
               </button>
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
                 Cancel
               </button>
@@ -418,13 +418,13 @@ function CreateRapidEnquiryComponent() {
             />
 
             {/* Rapid Enquiry Preview */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Enquiry Preview</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Enquiry Preview</h3>
               <div className="space-y-4">
                 {title ? (
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-gray-700 mb-2">How it will appear to visitors:</p>
-                    <p className="font-medium text-gray-900">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">How it will appear to visitors:</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       {title}{' '}
                       <a 
                         href="/answers/preview-rapid-enquiry" 
@@ -437,41 +437,41 @@ function CreateRapidEnquiryComponent() {
                     </p>
                   </div>
                 ) : (
-                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <p className="text-sm text-gray-500">Enter a title to see preview</p>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Enter a title to see preview</p>
                   </div>
                 )}
                 
                 <div className="space-y-2 text-sm pt-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Questions:</span>
-                    <span className="font-medium">{questions.length}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Questions:</span>
+                    <span className="font-medium dark:text-gray-100">{questions.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Required:</span>
-                    <span className="font-medium">{questions.filter(q => q.required).length}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Required:</span>
+                    <span className="font-medium dark:text-gray-100">{questions.filter(q => q.required).length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Status:</span>
                     <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      status === 'active' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
+                      status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                     }`}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                   </div>
                   {startDate && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Starts:</span>
-                      <span className="font-medium text-right flex-1 ml-2 text-xs">
+                      <span className="text-gray-600 dark:text-gray-400">Starts:</span>
+                      <span className="font-medium text-right flex-1 ml-2 text-xs text-gray-900 dark:text-gray-100">
                         {startDate.toLocaleDateString()}
                       </span>
                     </div>
                   )}
                   {endDate && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Ends:</span>
-                      <span className="font-medium text-right flex-1 ml-2 text-xs">
+                      <span className="text-gray-600 dark:text-gray-400">Ends:</span>
+                      <span className="font-medium text-right flex-1 ml-2 text-xs text-gray-900 dark:text-gray-100">
                         {endDate.toLocaleDateString()}
                       </span>
                     </div>
@@ -500,10 +500,10 @@ function CreateRapidEnquiryComponent() {
 
         {/* Floating Panel */}
         {mobileQuestionPickerOpen && (
-          <div className="absolute bottom-16 right-0 w-80 max-w-[90vw] bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+          <div className="absolute bottom-16 right-0 w-80 max-w-[90vw] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl overflow-hidden">
             <div className="p-4">
               <div className="mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Add Questions</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Add Questions</h3>
               </div>
               <div className="max-h-[60vh] overflow-y-auto">
                 <SidebarQuestionPicker
@@ -520,16 +520,16 @@ function CreateRapidEnquiryComponent() {
               
               {/* Mobile Summary */}
               {questions.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Summary</h4>
+                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Summary</h4>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Total Questions:</span>
-                      <span className="font-medium">{questions.length}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Total Questions:</span>
+                      <span className="font-medium dark:text-gray-100">{questions.length}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Required Questions:</span>
-                      <span className="font-medium">{questions.filter(q => q.required).length}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Required Questions:</span>
+                      <span className="font-medium dark:text-gray-100">{questions.filter(q => q.required).length}</span>
                     </div>
                   </div>
                 </div>

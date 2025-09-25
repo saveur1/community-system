@@ -31,6 +31,13 @@ declare global {
   }
 }
 
+// First, add this to your auth-controller-types.ts file:
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+
 
 @Route('api/auth')
 @Tags('Authentication')
@@ -104,7 +111,7 @@ export class AuthController extends Controller {
     return res(200, ServiceResponse.success('Login successful', { user: userResponse }), {
       'Set-Cookie': cookieString,
     });
-    
+
   }
 
   @Post('/signup')
@@ -519,6 +526,73 @@ export class AuthController extends Controller {
       console.error('Organization signup error:', err);
       throw err;
     }
+  }
+
+  // Then add this route to your AuthController class:
+
+  @Post('/change-password')
+  @Security("jwt")
+  @SuccessResponse(200, 'Password changed successfully')
+  @Response(400, 'Invalid old password')
+  @Response(401, 'Unauthorized')
+  @asyncCatch
+  public async changePassword(
+    @Body() body: ChangePasswordRequest,
+    @Request() req: ExpressRequest,
+    @Res() res: TsoaResponse<200 | 400 | 401, ServiceResponse<null>>
+  ): Promise<void> {
+    const { oldPassword, newPassword } = body;
+
+    // Check if user is authenticated
+    const user = req.user;
+    if (!user?.id) {
+      res(401, ServiceResponse.failure('Not authenticated', null));
+      return;
+    }
+
+    // Validate input
+    if (!oldPassword || !newPassword) {
+      res(400, ServiceResponse.failure('Old password and new password are required', null));
+      return;
+    }
+
+    // Additional validation for new password (you can customize these rules)
+    if (newPassword.length < 6) {
+      res(400, ServiceResponse.failure('New password must be at least 6 characters long', null));
+      return;
+    }
+
+    // Get user from database with password
+    const userModel = await db.User.findByPk(user.id);
+    if (!userModel || !userModel.password) {
+      res(401, ServiceResponse.failure('User not found', null));
+      return;
+    }
+
+    // Verify old password
+    const isOldPasswordValid = await compare(oldPassword, userModel.password);
+    if (!isOldPasswordValid) {
+      res(400, ServiceResponse.failure('Current password is incorrect', null));
+      return;
+    }
+
+    // Check if new password is different from old password
+    const isSamePassword = await compare(newPassword, userModel.password);
+    if (isSamePassword) {
+      res(400, ServiceResponse.failure('New password must be different from current password', null));
+      return;
+    }
+
+    // Hash new password and update
+    const hashedNewPassword = await hash(newPassword, 10);
+    await userModel.update({
+      password: hashedNewPassword,
+      // Optionally clear reset password fields if they exist
+      resetPasswordCode: null,
+      resetPasswordExpires: null
+    });
+
+    res(200, ServiceResponse.success('Password changed successfully', null));
   }
 
   private async generateToken(userModel: User): Promise<string> {

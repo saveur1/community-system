@@ -6,7 +6,6 @@ export interface OfflineSurvey {
   id: string;
   title: string;
   description: string;
-  project: string;
   estimatedTime: string;
   status: 'draft' | 'active' | 'paused' | 'archived';
   surveyType?: 'general' | 'report-form' | 'rapid-enquiry';
@@ -19,6 +18,7 @@ export interface OfflineSurvey {
   questionItems?: any[];
   responses?: any[];
   allowedRoles?: any[];
+  project?: any;
   organization?: any;
   creator?: any;
   createdAt?: string;
@@ -144,6 +144,22 @@ export interface OfflineStatisticsOverview {
   lastSynced?: number;
 }
 
+export interface OfflineOrganization {
+  id: string;
+  name: string;
+  description?: string | null;
+  logo?: string | null;
+  type?: 'stakeholder' | 'system_owner';
+  ownerId?: string | null;
+  status?: 'active' | 'suspended' | 'deleted';
+  createdAt?: string;
+  updatedAt?: string;
+  owner?: any;
+  projects?: any[];
+  users?: any[];
+  lastSynced?: number;
+}
+
 export interface OfflineSurveysHistory {
   id: string; // Unique key for caching (e.g., "history:group:surveyId:startDate:endDate")
   labels: string[];
@@ -153,7 +169,7 @@ export interface OfflineSurveysHistory {
 
 export interface SyncQueue {
   id?: number;
-  entityType: 'survey' | 'surveyResponse' | 'communitySession' | 'comment' | 'feedback' | 'project';
+  entityType: 'survey' | 'surveyResponse' | 'communitySession' | 'comment' | 'feedback' | 'project' | 'organization';
   entityId: string;
   action: 'create' | 'update' | 'delete';
   data: any;
@@ -178,6 +194,7 @@ export class OfflineDatabase extends Dexie {
   comments!: Table<OfflineComment>;
   feedback!: Table<OfflineFeedback>;
   projects!: Table<OfflineProject>;
+  organizations!: Table<OfflineOrganization>;
   statisticsOverview!: Table<OfflineStatisticsOverview>;
   surveysHistory!: Table<OfflineSurveysHistory>;
   syncQueue!: Table<SyncQueue>;
@@ -193,6 +210,7 @@ export class OfflineDatabase extends Dexie {
       comments: 'id, communitySessionId, userId, syncStatus, createdAt, lastSynced',
       feedback: 'id, feedbackType, feedbackMethod, status, projectId, userId, syncStatus, createdAt, lastSynced',
       projects: 'id, name, status, createdAt, lastSynced',
+      organizations: 'id, name, type, status, ownerId, createdAt, lastSynced',
       syncQueue: '++id, entityType, entityId, action, retryCount, createdAt, lastAttempt',
       metadata: '++id, key, updatedAt'
     });
@@ -205,6 +223,7 @@ export class OfflineDatabase extends Dexie {
       comments: 'id, communitySessionId, userId, syncStatus, createdAt, lastSynced',
       feedback: 'id, feedbackType, feedbackMethod, status, projectId, userId, syncStatus, createdAt, lastSynced',
       projects: 'id, name, status, createdAt, lastSynced',
+      organizations: 'id, name, type, status, ownerId, createdAt, lastSynced',
       statisticsOverview: 'id, lastSynced',
       surveysHistory: 'id, lastSynced',
       syncQueue: '++id, entityType, entityId, action, retryCount, createdAt, lastAttempt',

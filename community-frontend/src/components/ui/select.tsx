@@ -19,6 +19,7 @@ interface SelectDropdownProps {
   dropdownClassName?: string;
   triggerClassName?: string;
   disabled?: boolean;
+  portal?:boolean;
 }
 
 export const SelectDropdown: React.FC<SelectDropdownProps> = ({
@@ -31,7 +32,8 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
   dropdownClassName = "",
   labelClassName,
   triggerClassName="",
-  disabled = false
+  disabled = false,
+  portal = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options?.find(option => option.value === value);
@@ -72,6 +74,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
         disabled={disabled}
         dropdownClassName={cn("w-full max-h-56 overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-black/5 dark:ring-gray-600 sm:text-sm", dropdownClassName)}
         position="bottom-right"
+        portal={ portal }
       >
         {options?.map((option) => (
           <div

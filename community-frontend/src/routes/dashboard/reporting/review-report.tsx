@@ -24,7 +24,6 @@ function RouteComponent() {
 
   // Build answer list: prefer answers included on survey.result.answers, fallback to userSurveyAnswers
   const response = (survey?.responses || []).find(r => r.id === reportId);
-  console.log(survey?.responses);
   const answersList: AnswerItem[] = (response?.answers ?? userSurveyAnswers) as AnswerItem[];
 
   if (isLoading) {

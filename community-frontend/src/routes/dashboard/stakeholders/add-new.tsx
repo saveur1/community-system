@@ -220,18 +220,18 @@ const CreateStakeholderComponent: React.FC = () => {
       />
 
       <div className="max-w-4xl mx-auto px-2 sm:px-4 lg:px-8 pt-20 pb-12">
-        <div className="bg-white rounded-lg shadow-lg drop-shadow-2xl border border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg drop-shadow-2xl border border-gray-200 dark:border-gray-600">
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Create New Organization</h1>
-              <p className="text-gray-600">Add a new organization and select permissions for its role</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Create New Organization</h1>
+              <p className="text-gray-600 dark:text-gray-400">Add a new organization and select permissions for its role</p>
             </div>
 
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-600">Step {currentStep} of 2</span>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Step {currentStep} of 2</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${(currentStep / 2) * 100}%` }} />
               </div>
             </div>
@@ -241,7 +241,7 @@ const CreateStakeholderComponent: React.FC = () => {
                 <div className="space-y-6">
                   {/* Step 1: form fields */}
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Organization Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -249,13 +249,13 @@ const CreateStakeholderComponent: React.FC = () => {
                       id="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                       placeholder="Enter organization name"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Description
                     </label>
                     <textarea
@@ -263,13 +263,13 @@ const CreateStakeholderComponent: React.FC = () => {
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                       placeholder="Short description of the organization (optional)"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Contact Email <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -277,36 +277,36 @@ const CreateStakeholderComponent: React.FC = () => {
                       id="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                       placeholder="Enter contact email address"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Logo</label>
                     <div className="space-y-4">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary transition-colors bg-gray-50 dark:bg-gray-700/50">
                         <div className="space-y-2">
-                          <FaUpload className="mx-auto h-12 w-12 text-gray-400" />
+                          <FaUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
                           <div>
                             <label htmlFor="logo-upload" className="cursor-pointer">
                               <span className="text-primary hover:text-primary-dark font-medium">Click to upload</span>
-                              <span className="text-gray-500"> or drag and drop</span>
+                              <span className="text-gray-500 dark:text-gray-400"> or drag and drop</span>
                             </label>
-                            <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, GIF up to 5MB</p>
                           </div>
                         </div>
                         <input id="logo-upload" type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isUploading} />
                       </div>
 
                       {(logoPreview || formData.logo) && (
-                        <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                          <img src={logoPreview || formData.logo || ''} alt="Logo preview" className="w-16 h-16 rounded-lg object-cover border border-gray-300" />
+                        <div className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                          <img src={logoPreview || formData.logo || ''} alt="Logo preview" className="w-16 h-16 rounded-lg object-cover border border-gray-300 dark:border-gray-600" />
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">{logoFile?.name || 'Uploaded logo'}</p>
-                            <p className="text-xs text-gray-500">{logoFile ? `${(logoFile.size / 1024 / 1024).toFixed(2)} MB` : 'Cloudinary hosted'}</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{logoFile?.name || 'Uploaded logo'}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{logoFile ? `${(logoFile.size / 1024 / 1024).toFixed(2)} MB` : 'Cloudinary hosted'}</p>
                           </div>
-                          <button type="button" onClick={removeLogo} className="text-red-500 hover:text-red-700 p-2" disabled={isUploading}><FaTrash className="w-4 h-4" /></button>
+                          <button type="button" onClick={removeLogo} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2" disabled={isUploading}><FaTrash className="w-4 h-4" /></button>
                         </div>
                       )}
                     </div>
@@ -317,23 +317,23 @@ const CreateStakeholderComponent: React.FC = () => {
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Select Permissions for Stakeholder Role</h3>
-                    <p className="text-sm text-gray-600 mb-4">Choose which permissions the stakeholder role should have.</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Select Permissions for Stakeholder Role</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Choose which permissions the stakeholder role should have.</p>
                   </div>
                   <div className="space-y-4">
-                    {permissionsLoading && <div className="text-sm text-gray-500">Loading permissions...</div>}
-                    {permissionsError && <div className="text-sm text-red-600">Failed to load permissions</div>}
-                    {!permissionsLoading && !permissionsError && permissionGroups.length === 0 && <div className="text-sm text-gray-500">No permissions found.</div>}
+                    {permissionsLoading && <div className="text-sm text-gray-500 dark:text-gray-400">Loading permissions...</div>}
+                    {permissionsError && <div className="text-sm text-red-600 dark:text-red-400">Failed to load permissions</div>}
+                    {!permissionsLoading && !permissionsError && permissionGroups.length === 0 && <div className="text-sm text-gray-500 dark:text-gray-400">No permissions found.</div>}
                     {permissionGroups.map(group => (
-                      <div key={group.title} className="border border-gray-200 rounded-lg p-4">
+                      <div key={group.title} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800">
                         <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium text-gray-900">{group.title}</h4>
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100">{group.title}</h4>
                           {(() => {
                             const groupValues = group.options.map(o => o.value);
                             const allSelected = groupValues.every(v => permissionIds.includes(v));
                             const nextSelectAll = !allSelected;
                             return (
-                              <button type="button" onClick={() => toggleGroupPermissions(groupValues, nextSelectAll)} className={`text-xs px-2 py-1 rounded border transition-colors ${allSelected ? 'text-red-600 border-red-300 hover:bg-red-50' : 'text-primary border-primary/40 hover:bg-primary/5'}`}>
+                              <button type="button" onClick={() => toggleGroupPermissions(groupValues, nextSelectAll)} className={`text-xs px-2 py-1 rounded border transition-colors ${allSelected ? 'text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20' : 'text-primary border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10'}`}>
                                 {allSelected ? 'Clear all' : 'Select all'}
                               </button>
                             );
@@ -341,9 +341,9 @@ const CreateStakeholderComponent: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {group.options.map(option => (
-                            <label key={option.value} className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                              <input type="checkbox" checked={permissionIds.includes(option.value)} onChange={() => handlePermissionToggle(option.value)} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                            <label key={option.value} className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                              <input type="checkbox" checked={permissionIds.includes(option.value)} onChange={() => handlePermissionToggle(option.value)} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700" />
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
                             </label>
                           ))}
                         </div>
@@ -355,17 +355,17 @@ const CreateStakeholderComponent: React.FC = () => {
             </div>
 
             {/* Navigation buttons */}
-            <div className="flex justify-between pt-6 border-t border-gray-200">
-              <button type="button" onClick={prevStep} disabled={currentStep === 1} className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50">
+            <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-600">
+              <button type="button" onClick={prevStep} disabled={currentStep === 1} className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-50 transition-colors">
                 <FiChevronLeft className="mr-2" /> Previous
               </button>
 
               {currentStep < 2 ? (
-                <button type="button" onClick={nextStep} className="flex items-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Next <FiChevronRight className="ml-2" /></button>
+                <button type="button" onClick={nextStep} className="flex items-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">Next <FiChevronRight className="ml-2" /></button>
               ) : (
                 <div className="flex gap-3">
-                  <button type="button" onClick={handleCancel} className="px-6 py-2 border rounded-md">Cancel</button>
-                  <button type="button" onClick={handleSubmit} disabled={createOrganization.isPending || isUploading} className="px-6 py-2 bg-primary text-white rounded-md">{createOrganization.isPending ? 'Creating...' : 'Create Organization'}</button>
+                  <button type="button" onClick={handleCancel} className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                  <button type="button" onClick={handleSubmit} disabled={createOrganization.isPending || isUploading} className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50 transition-colors">{createOrganization.isPending ? 'Creating...' : 'Create Organization'}</button>
                 </div>
               )}
             </div>
@@ -378,15 +378,15 @@ const CreateStakeholderComponent: React.FC = () => {
         {addUserOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40" onClick={() => setAddUserOpen(false)} />
-            <div className="bg-white rounded-lg shadow-lg z-10 p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Add User</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg z-10 p-6 w-full max-w-md border border-gray-200 dark:border-gray-600">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Add User</h3>
               <div className="space-y-3">
-                <input placeholder="Full name" className="w-full px-3 py-2 border rounded" id="new-user-name" />
-                <input placeholder="Email" className="w-full px-3 py-2 border rounded" id="new-user-email" />
+                <input placeholder="Full name" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" id="new-user-name" />
+                <input placeholder="Email" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" id="new-user-email" />
                 <div className="flex justify-end gap-2">
-                  <button className="px-3 py-2 border rounded" onClick={() => setAddUserOpen(false)}>Cancel</button>
+                  <button className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setAddUserOpen(false)}>Cancel</button>
                   <button
-                    className="px-3 py-2 bg-primary text-white rounded"
+                    className="px-3 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors"
                     onClick={async () => {
                       const name = (document.getElementById('new-user-name') as HTMLInputElement).value;
                       const email = (document.getElementById('new-user-email') as HTMLInputElement).value;

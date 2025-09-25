@@ -48,7 +48,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, filename, className, typ
       <img
         src={src || "/images/image_icon.png"}
         alt={ filename || "image"}
-        className={`w-full h-48 object-cover rounded border border-gray-200 ${className}`}
+        className={`w-full h-48 object-cover rounded border border-gray-200 dark:border-gray-700 ${className}`}
       />
     );
   }
@@ -60,14 +60,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, filename, className, typ
       if (!src) {
         // fallback visual if no video src
         return (
-          <img src={"/images/video_icon.png"} alt={filename || 'video'} className={`w-full h-48 object-contain rounded border border-gray-200 ${className}`} />
+          <img src={"/images/video_icon.png"} alt={filename || 'video'} className={`w-full h-48 object-contain rounded border border-gray-200 dark:border-gray-700 ${className}`} />
         );
       }
       return (
         <video
           src={src}
           controls
-          className={`w-full h-48 rounded border border-gray-200 object-contain bg-black ${className}`}
+          className={`w-full h-48 rounded border border-gray-200 dark:border-gray-700 object-contain bg-black ${className}`}
         />
       );
     }
@@ -94,7 +94,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, filename, className, typ
             v.currentTime = 0;
           }
         }}
-        className={`w-full h-48 rounded border border-gray-200 object-cover ${className}`}
+        className={`w-full h-48 rounded border border-gray-200 dark:border-gray-700 object-cover ${className}`}
       />
     );
   }
@@ -102,9 +102,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, filename, className, typ
   // 🎵 Audio icon only
   if (resolvedType === "audio") {
     return (
-      <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 rounded-lg ${className}`}>
+      <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 ${className}`}>
         <FaFileAudio size={50} className="text-blue-500 mb-2" />
-        <p className="text-xs text-gray-600 truncate">{filename || 'audio'}</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{filename || 'audio'}</p>
       </div>
     );
   }
@@ -112,9 +112,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, filename, className, typ
   // 📄 PDF
   if (resolvedType === "document" && ext === "pdf") {
     return (
-      <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 rounded-lg ${className}`}>
+      <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 ${className}`}>
         <FaFilePdf size={50} className="text-red-600 mb-2" />
-        <p className="text-xs text-gray-600 truncate">{filename || 'document.pdf'}</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{filename || 'document.pdf'}</p>
       </div>
     );
   }
@@ -122,9 +122,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, filename, className, typ
   // 📝 Word
   if (resolvedType === "document" && ext && ["doc", "docx"].includes(ext)) {
     return (
-      <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 rounded-lg ${className}`}>
+      <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 ${className}`}>
         <FaFileWord size={50} className="text-blue-600 mb-2" />
-        <p className="text-xs text-gray-600 truncate">{ filename || 'document'}</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{ filename || 'document'}</p>
       </div>
     );
   }
@@ -132,18 +132,18 @@ const FilePreview: React.FC<FilePreviewProps> = ({ src, filename, className, typ
   // 📊 Excel
   if (resolvedType === "document" && ext && ["xls", "xlsx"].includes(ext)) {
     return (
-      <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 rounded-lg ${className}`}>
+      <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 ${className}`}>
         <FaFileExcel size={50} className="text-green-600 mb-2" />
-        <p className="text-xs text-gray-600 truncate">{ filename || 'spreadsheet'}</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{ filename || 'spreadsheet'}</p>
       </div>
     );
   }
 
   // 📦 Fallback
   return (
-    <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 rounded-lg ${className}`}>
+    <div className={`flex flex-col items-center justify-center w-full h-48 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 ${className}`}>
       <FaFileAlt size={50} className="text-gray-500 mb-2" />
-      <p className="text-xs text-gray-600 truncate">{ filename || 'file'}</p>
+      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{ filename || 'file'}</p>
     </div>
   );
 };

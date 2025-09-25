@@ -10,6 +10,7 @@ import { IUserAttributes } from '@/types';
 import { createSystemLog } from '../utils/systemLog';
 import { createNotificationForRoles } from './notifications';
 import db from '@/models';
+import { Op } from 'sequelize';
 
 interface CommunitySessionCreateRequest {
   title: string;
@@ -49,12 +50,24 @@ export class CommunitySessionController extends Controller {
     @Query() limit: number = 10,
     @Query() type?: 'video' | 'image' | 'document' | 'audio',
     @Query() isActive?: boolean,
-    @Query() allowed?: boolean // if true, return only sessions that allow any of the current user's roles
+    @Query() allowed?: boolean, // if true, return only sessions that allow any of the current user's roles
+    @Query() search?: string // search across title, shortDescription, and creator name
   ): Promise<ServiceResponse<any[]>> {
     const offset = (page - 1) * limit;
     const where: any = {};
     if (type) where.type = type;
     if (isActive !== undefined) where.isActive = isActive;
+
+    // Add search functionality
+    if (search && search.trim()) {
+      const searchTerm = search.trim();
+      where[Op.or] = [
+        { title: { [Op.like]: `%${searchTerm}%` } },
+        { shortDescription: { [Op.like]: `%${searchTerm}%` } },
+        // Search by creator name (requires join with User model)
+        { '$creator.name$': { [Op.like]: `%${searchTerm}%` } }
+      ];
+    }
 
     // base includes; we'll adjust roles include below if needed
     const includeArr: any[] = [
@@ -70,7 +83,7 @@ export class CommunitySessionController extends Controller {
       if (!userId) {
         return ServiceResponse.failure('Authentication required to filter by allowed', [], 401);
       }
-      
+
       // load user's roles
       const user = await db.User.findByPk(userId, {
         include: [{ model: db.Role, as: 'roles', through: { attributes: [] } }],

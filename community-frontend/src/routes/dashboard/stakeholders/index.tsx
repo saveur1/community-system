@@ -41,25 +41,23 @@ const StakeholdersComponent = () => {
   // Backend pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
+  const [search, setSearch] = useState('');
   // fetch organizations (get a reasonably large pageSize or rely on server pagination) and filter to type === 'stakeholder'
-  const { data, isLoading, isError, refetch, isFetching } = useOrganizationsList({ page, limit: pageSize, type: "stakeholder" });
+  const { data, isLoading, isError, refetch, isFetching } = useOrganizationsList({ page, limit: pageSize, type: "stakeholder", search });
   const deleteOrganization = useDeleteOrganization();
 
   // search & pagination
-  const [search, setSearch] = useState('');
+  
   const serverItems: OrganizationEntity[] = useMemo(() => data?.result ?? [], [data]);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return serverItems;
-    return serverItems.filter((s) =>
-      [s.name].some((v) => String(v).toLowerCase().includes(q))
-    );
-  }, [serverItems, search]);
+    // Backend now handles search, so we just return server items
+    return serverItems;
+  }, [serverItems]);
 
-  const totalPages = Math.max(1, data?.meta?.totalPages ?? 1);
-  const currentPage = Math.min(data?.meta?.page ?? page, totalPages);
-  const totalCount = data?.meta?.total ?? filtered.length;
+  const totalPages = Math.max(1, data?.totalPages ?? 1);
+  const currentPage = Math.min(data?.page ?? page, totalPages);
+  const totalCount = data?.total ?? filtered.length;
   const paginated = filtered; // server already paginates; filtering is within current page only
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -372,7 +370,10 @@ const StakeholdersComponent = () => {
           viewMode={viewMode}
           setViewMode={setViewMode}
           search={search}
-          setSearch={(value) => { setSearch(value); setPage(1); }}
+          setSearch={(value) => { 
+            setSearch(value); 
+            if(search && page > 1) setPage(1); 
+          }}
           filteredCount={totalCount}
           showCreate={true}
           excelData={excelDataExported(paginated)}
@@ -494,7 +495,7 @@ const StakeholdersComponent = () => {
         <div className="flex items-center gap-2">
           <button
             className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
-            onClick={() => setPage((p) => Math.max(1, (data?.meta?.page ?? p) - 1))}
+            onClick={() => setPage((p) => Math.max(1, (data?.page ?? p) - 1))}
             disabled={currentPage === 1 || isLoading}
           >
             Prev
@@ -504,7 +505,7 @@ const StakeholdersComponent = () => {
           </span>
           <button
             className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
-            onClick={() => setPage((p) => Math.min(totalPages, (data?.meta?.page ?? p) + 1))}
+            onClick={() => setPage((p) => Math.min(totalPages, (data?.page ?? p) + 1))}
             disabled={currentPage === totalPages || isLoading}
           >
             Next

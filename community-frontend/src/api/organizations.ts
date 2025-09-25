@@ -6,13 +6,10 @@ import type { ProjectEntity } from './projects';
 export type ServiceResponse<T> = {
   message: string;
   result: T;
-  meta?: {
-    total?: number;
-    page?: number;
-    totalPages?: number;
-    limit?: number;
-    [key: string]: any;
-  };
+  total?: number;
+  page?: number;
+  totalPages?: number;
+  limit?: number;
 };
 
 // Organization types (replaces Stakeholder types)
@@ -50,6 +47,7 @@ export interface OrganizationListParams {
   limit?: number;
   type?: 'stakeholder' | 'system_owner';
   status?: 'active' | 'suspended' | 'deleted';
+  search?: string;
 }
 
 // Response types
@@ -59,8 +57,8 @@ export type OrganizationListResponse = ServiceResponse<OrganizationEntity[]>;
 // Organizations API (was stakeholdersApi)
 export const organizationsApi = {
   list: async (params: OrganizationListParams = { page: 1, limit: 10 }): Promise<OrganizationListResponse> => {
-    const { page = 1, limit = 10, type, status } = params;
-    const { data } = await client.get(`/organizations`, { params: { page, limit, type, status } });
+    const { page = 1, limit = 10, type, status, search } = params;
+    const { data } = await client.get(`/organizations`, { params: { page, limit, type, status, search } });
     return data;
   },
 

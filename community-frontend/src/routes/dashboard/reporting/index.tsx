@@ -22,18 +22,19 @@ const ReportingList = () => {
     page,
     pageSize,
     "report-form",
-    !!user?.id
+    !!user?.id,
+    search
   );
 
   const reports = (reportsResp?.result ?? [])
     .filter((response: any) => response.survey?.surveyType === 'report-form')
-    .map((response: any, index: number) => ({
+    .map((response: any) => ({
       id: response.id,
-      title: `Report ${index + 1}`,
+      title: `Visit ${response.userReportCounter}`,
       surveyTitle: response.survey?.title || 'Unknown Survey',
       questionCount: (response.survey?.questionItems ?? []).length,
       respondedAt: response.createdAt,
-      project: response.survey?.project?.title || 'No Project',
+      project: response.survey?.project?.name || 'No Project',
       surveyId: response.survey?.id,
     }));
 
@@ -56,11 +57,10 @@ const ReportingList = () => {
     }
   };
 
-  const totalItems = reportsResp?.meta?.total ?? (reportsResp ? reports.length : 0);
+  const totalItems = reportsResp?.total ?? (reportsResp ? reports.length : 0);
   const totalPages = Math.max(1, Math.ceil((totalItems || 0) / pageSize));
   const currentPage = Math.min(page, totalPages);
-  const paginated = reports;
-  const filteredCount = reportsResp?.meta?.total ?? reports.length;
+  const filteredCount = reportsResp?.total ?? reports.length;
 
   const renderTableView = () => (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -76,7 +76,7 @@ const ReportingList = () => {
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {paginated.map((r) => (
+            {reports.map((r) => (
               <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td className="px-3 lg:px-6 py-4">
                   <div className="text-sm font-medium text-gray-700 dark:text-gray-200">{r.title}</div>
@@ -103,7 +103,7 @@ const ReportingList = () => {
                 </td>
               </tr>
             ))}
-            {paginated.length === 0 && (
+            {reports.length === 0 && (
               <tr>
                 <td className="px-3 lg:px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400" colSpan={5}>
                   {isLoadingReports ? 'Loading your responses...' : isErrorReports ? 'Failed to load your responses.' : 'No report submissions available.'}
@@ -118,7 +118,7 @@ const ReportingList = () => {
 
   const renderGridView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {paginated.map((r) => (
+      {reports.map((r) => (
         <div key={r.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center mb-2 justify-between">
             <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">{r.title}</h3>
@@ -186,7 +186,7 @@ const ReportingList = () => {
       <SurveyPagination
         currentPage={currentPage}
         totalPages={totalPages}
-        paginatedCount={paginated.length}
+        paginatedCount={reports.length}
         filteredCount={filteredCount}
         pageSize={pageSize}
         setPage={setPage}

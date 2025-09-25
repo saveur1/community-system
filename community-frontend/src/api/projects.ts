@@ -6,13 +6,10 @@ import type { DocumentCreateRequest } from './documents';
 export type ServiceResponse<T> = {
   message: string;
   result: T;
-  meta?: {
-    total?: number;
-    page?: number;
-    totalPages?: number;
-    limit?: number;
-    [key: string]: any;
-  };
+  total?: number;
+  page?: number;
+  totalPages?: number;
+  limit?: number;
 };
 
 export type ProjectStatus = 'draft' | 'in_progress' | 'completed' | 'on_hold' | 'cancelled';

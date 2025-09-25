@@ -27,10 +27,14 @@ export class AnnouncementController extends Controller {
 
     // Base filters
     if (status) where.status = status;
-    if (q) where[Op.or] = [
-      { title: { [Op.iLike]: `%${q}%` } },
-      { message: { [Op.iLike]: `%${q}%` } },
-    ];
+    if (q) {
+      // Use LOWER() for case-insensitive search in MySQL/MariaDB
+      const searchTerm = q.toLowerCase();
+      where[Op.or] = [
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('Announcement.title')), 'LIKE', `%${searchTerm}%`),
+        sequelize.where(sequelize.fn('LOWER', sequelize.col('Announcement.message')), 'LIKE', `%${searchTerm}%`)
+      ];
+    }
 
     if (startDate || endDate) {
       where.createdAt = {};

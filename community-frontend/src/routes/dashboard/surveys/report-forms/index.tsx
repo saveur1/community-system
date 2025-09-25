@@ -24,7 +24,7 @@ const SurveyReportForms = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const { user } = useAuth();
-    const { data, isLoading } = useSurveysList({ page, limit: pageSize, surveyType: "report-form" });
+    const { data, isLoading } = useSurveysList({ page, limit: pageSize, surveyType: "report-form", search: search });
     const deleteSurvey = useDeleteSurvey();
     const updateStatus = useUpdateSurveyStatus();
     const router = useRouter();
@@ -157,7 +157,7 @@ const SurveyReportForms = () => {
         );
     }, [surveys, search]);
 
-    const totalPages = data?.meta?.totalPages ?? Math.max(1, Math.ceil(filtered.length / pageSize));
+    const totalPages = data?.totalPages ?? Math.max(1, Math.ceil(filtered.length / pageSize));
     const currentPage = Math.min(page, totalPages);
     const paginated = filtered; // server-paginated; filter client-side only
 
@@ -295,7 +295,7 @@ const SurveyReportForms = () => {
                                 )}</td>
                                 <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.questionItems?.length ?? 0}</td>
                                 <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.estimatedTime}Min</td>
-                                <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey.project}</td>
+                                <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 sm:px-6 sm:py-4 sm:text-sm max-sm:hidden">{survey?.project?.name}</td>
                                 <td className="px-3 py-2 sm:px-6 sm:py-4">
                                     <div className="flex items-center space-x-4">
                                         <Link
@@ -497,8 +497,8 @@ const SurveyReportForms = () => {
                     viewMode={viewMode}
                     setViewMode={setViewMode}
                     search={search}
-                    setSearch={(value) => { setSearch(value); setPage(1); }}
-                    filteredCount={filtered.length}
+                    setSearch={(value) => { setSearch(value) }}
+                    filteredCount={data?.total || filtered.length}
                     showCreate={true}
                     createButton={{ to: '/dashboard/surveys/add-new?type=report', label: 'New Report Form', icon: <FaPlus /> }}
                     excelData={excelDataExported(surveys)}
@@ -531,7 +531,7 @@ const SurveyReportForms = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 paginatedCount={paginated.length}
-                filteredCount={data?.meta?.total ?? filtered.length}
+                filteredCount={data?.total ?? filtered.length}
                 pageSize={pageSize}
                 setPage={setPage}
                 setPageSize={setPageSize}

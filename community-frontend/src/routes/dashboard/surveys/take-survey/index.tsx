@@ -66,7 +66,7 @@ const SurveyComponent = () => {
                                 <span>Est. {survey.estimatedTime}</span>
                             </div>
                             <Link
-                                to="/dashboard/surveys/take/$survey-answer"
+                                to="/dashboard/surveys/take-survey/$survey-answer"
                                 params={{ 'survey-answer': String(survey.id) }}
                                 className="inline-block bg-title dark:bg-primary cursor-pointer px-4 text-white py-1.5 rounded-md hover:bg-title dark:hover:bg-primary-dark transition-colors duration-300"
                             >

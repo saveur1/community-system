@@ -22,7 +22,6 @@ function DashboardLayout() {
   const path = location.pathname.split('/')[1];
   const { user } = useAuth();
 
-
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       <Sidebar

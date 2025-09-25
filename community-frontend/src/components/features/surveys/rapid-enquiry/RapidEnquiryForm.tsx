@@ -87,28 +87,28 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 mb-8">
       <div
-        className="flex items-center justify-between p-4 sm:p-6 cursor-pointer hover:bg-gray-50 hover:rounded-xl"
+        className="flex items-center justify-between p-4 sm:p-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:rounded-xl"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-x-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
             <FaLink className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
-          <h2 className="text-lg sm:text-2xl font-semibold text-gray-900">Rapid Enquiry Information</h2>
+          <h2 className="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-gray-100">Rapid Enquiry Information</h2>
         </div>
         {isExpanded ? (
-          <FaChevronUp className="w-5 h-5 text-gray-500" />
+          <FaChevronUp className="w-5 h-5 text-gray-500 dark:text-gray-400" />
         ) : (
-          <FaChevronDown className="w-5 h-5 text-gray-500" />
+          <FaChevronDown className="w-5 h-5 text-gray-500 dark:text-gray-400" />
         )}
       </div>
 
       {isExpanded && (
         <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-4">
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               <FaBullseye className="w-4 h-4" />
               Enquiry Title
               <span className="text-red-500">*</span>
@@ -118,10 +118,10 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
               placeholder="Enter a descriptive title for your rapid enquiry"
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
             />
             {!title && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 A clear, descriptive title helps visitors understand your enquiry's purpose
               </p>
             )}
@@ -129,10 +129,11 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
 
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               <FaCalendarAlt className="w-4 h-4" />
               Start Date & Time
             </label>
+            
             <DateTimePicker
               isOpen={isStartDateTimeOpen}
               onClose={() => setIsStartDateTimeOpen(false)}
@@ -156,25 +157,25 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsStartDateTimeOpen(true)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-left text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-left text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                 >
                   {startSelectedDate ? (
-                    <span className="text-gray-900">
+                    <span className="text-gray-900 dark:text-gray-100">
                       {startSelectedDate.toLocaleDateString()} {startSelectedHour}:{startSelectedMinute}
                     </span>
                   ) : (
-                    <span className="text-gray-500">Select start date and time</span>
+                    <span className="text-gray-500 dark:text-gray-400">Select start date and time</span>
                   )}
                 </button>
               }
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               When this rapid enquiry becomes available to visitors
             </p>
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               <FaCalendarAlt className="w-4 h-4" />
               End Date & Time
             </label>
@@ -201,25 +202,25 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsEndDateTimeOpen(true)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-left text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-left text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                 >
                   {endSelectedDate ? (
-                    <span className="text-gray-900">
+                    <span className="text-gray-900 dark:text-gray-100">
                       {endSelectedDate.toLocaleDateString()} {endSelectedHour}:{endSelectedMinute}
                     </span>
                   ) : (
-                    <span className="text-gray-500">Select end date and time</span>
+                    <span className="text-gray-500 dark:text-gray-400">Select end date and time</span>
                   )}
                 </button>
               }
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               When this rapid enquiry stops accepting responses
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Status</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Status</label>
             <div className="flex flex-wrap gap-3">
               {[
                 { value: 'draft', label: 'Draft', color: 'bg-gray-100 text-gray-800' },
@@ -227,7 +228,7 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
               ].map((option) => (
                 <label
                   key={option.value}
-                  className="flex items-center p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 cursor-pointer transition-all duration-200"
+                  className="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-primary hover:bg-primary/5 dark:hover:bg-gray-700 cursor-pointer transition-all duration-200"
                 >
                   <input
                     type="radio"
@@ -235,13 +236,13 @@ const RapidEnquiryForm: FC<RapidEnquiryFormProps> = ({
                     value={option.value}
                     checked={status === option.value}
                     onChange={(e) => onStatusChange(e.target.value as 'draft' | 'active')}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600"
                   />
-                  <span className="ml-3 text-sm font-medium text-gray-900">{option.label}</span>
+                  <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-100">{option.label}</span>
                 </label>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Draft: Not visible to visitors • Active: Currently visible to visitors
             </p>
           </div>

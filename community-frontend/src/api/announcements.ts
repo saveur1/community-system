@@ -4,13 +4,10 @@ import { client } from './client';
 export type ServiceResponse<T> = {
   message: string;
   result: T;
-  meta?: {
-    total?: number;
-    page?: number;
-    totalPages?: number;
-    limit?: number;
-    [key: string]: any;
-  };
+  total?: number;
+  page?: number;
+  totalPages?: number;
+  limit?: number;
 };
 
 export type AnnouncementAudience = 'all' | 'stakeholders' | 'community' | 'rich_members' | 'providers';

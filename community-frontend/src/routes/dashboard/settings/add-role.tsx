@@ -174,7 +174,7 @@ const AddRolePage = () => {
       className="space-y-6"
     >
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Role Name *
         </label>
         <input
@@ -182,13 +182,13 @@ const AddRolePage = () => {
           name="name"
           value={form.name}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
           placeholder="Enter role name..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Description *
         </label>
         <textarea
@@ -196,37 +196,37 @@ const AddRolePage = () => {
           value={form.description}
           onChange={handleChange}
           rows={4}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
           placeholder="Describe what this role is for..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           Category (Optional)
         </label>
         
         {rolesLoading ? (
-          <div className="text-sm text-gray-500">Loading categories...</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Loading categories...</div>
         ) : (
           <>
             {existingCategories.length > 0 && (
               <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-3">Select from existing categories:</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Select from existing categories:</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {existingCategories.map((category) => (
                     <label
                       key={category}
-                      className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                      className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-600"
                     >
                       <input
                         type="radio"
                         name="categorySelect"
                         checked={form.category === category}
                         onChange={() => handleCategorySelect(category)}
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
                       />
-                      <span className="text-sm text-gray-700 capitalize">{category}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{category}</span>
                     </label>
                   ))}
                 </div>
@@ -234,13 +234,13 @@ const AddRolePage = () => {
             )}
             
             <div>
-              <p className="text-sm text-gray-600 mb-2">Or enter a new category:</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Or enter a new category:</p>
               <input
                 type="text"
                 name="category"
                 value={form.category}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder="Enter new category..."
               />
             </div>
@@ -261,27 +261,27 @@ const AddRolePage = () => {
       className="space-y-6"
     >
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Select Permissions for This Role
         </h3>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
           Choose which permissions this role should have. Permissions are grouped by functionality.
         </p>
       </div>
 
       <div className="space-y-6">
         {permissionsLoading && (
-          <div className="text-sm text-gray-500">Loading permissions...</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Loading permissions...</div>
         )}
         
         {!permissionsLoading && permissionGroups.length === 0 && (
-          <div className="text-sm text-gray-500">No permissions found.</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">No permissions found.</div>
         )}
         
         {permissionGroups.map((group) => (
-          <div key={group.groupName} className="border border-gray-200 rounded-lg p-4">
+          <div key={group.groupName} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-gray-900 capitalize flex items-center">
+              <h4 className="font-medium text-gray-900 dark:text-gray-100 capitalize flex items-center">
                 <FiShield className="mr-2 text-primary" />
                 {group.groupName.replace('_', ' ')}
               </h4>
@@ -297,8 +297,8 @@ const AddRolePage = () => {
                     onClick={() => toggleGroupPermissions(groupPermissionIds, nextSelectAll)}
                     className={`text-xs px-2 py-1 rounded border transition-colors ${
                       allSelected 
-                        ? 'text-red-600 border-red-300 hover:bg-red-50' 
-                        : 'text-primary border-primary/40 hover:bg-primary/5'
+                        ? 'text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/20' 
+                        : 'text-primary border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10'
                     }`}
                   >
                     {buttonLabel}
@@ -311,15 +311,15 @@ const AddRolePage = () => {
               {group.permissions.map((permission) => (
                 <label
                   key={permission.id}
-                  className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={form.permissionIds.includes(permission.id)}
                     onChange={() => handlePermissionToggle(permission.id)}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded"
                   />
-                  <span className="text-sm text-gray-700 capitalize">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
                     {permission.action}
                   </span>
                 </label>
@@ -329,8 +329,8 @@ const AddRolePage = () => {
         ))}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-300">
           <strong>Selected permissions:</strong> {form.permissionIds.length} permission(s) selected
         </p>
       </div>
@@ -343,23 +343,27 @@ const AddRolePage = () => {
     <div>
       <Breadcrumb 
         title="Add Role" 
-        items={['Dashboard', 'Settings', 'Add Role']} 
+        items={[
+          {title: 'Dashboard', link: '/dashboard'},
+          {title: 'Settings', link: '/dashboard/settings'},
+          'Add Role'
+        ]} 
         className="absolute top-0 left-0 w-full"
       />
       
-      <div className="pt-16 max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg drop-shadow-xl p-8">
+      <div className="pt-20 max-w-4xl mx-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg drop-shadow-xl p-8 border border-gray-200 dark:border-gray-700">
           {/* Progress indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-600">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 Step {currentStep} of 2
               </span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {currentStep === 1 ? 'Role Details' : 'Permission Selection'}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div 
                 className="bg-primary h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(currentStep / 2) * 100}%` }}
@@ -376,12 +380,12 @@ const AddRolePage = () => {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex justify-between pt-8 border-t border-gray-200">
+          <div className="flex justify-between pt-8 border-t border-gray-200 dark:border-gray-600">
             <button
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
-              className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <FiChevronLeft className="mr-2" />
               Previous
@@ -401,7 +405,7 @@ const AddRolePage = () => {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:bg-gray-400 dark:disabled:bg-gray-600"
               >
                 {isLoading ? 'Creating...' : 'Create Role'}
               </button>

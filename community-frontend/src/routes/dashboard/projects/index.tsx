@@ -59,9 +59,9 @@ const ProgrammesComponent = () => {
     );
   }, [serverItems, search]);
 
-  const totalPages = Math.max(1, data?.meta?.totalPages ?? 1);
-  const currentPage = Math.min(data?.meta?.page ?? page, totalPages);
-  const totalCount = data?.meta?.total ?? filtered.length;
+  const totalPages = Math.max(1, data?.totalPages ?? 1);
+  const currentPage = Math.min(data?.page ?? page, totalPages);
+  const totalCount = data?.total ?? filtered.length;
   const paginated = filtered; // server already paginates; filtering is within current page only
 
   const getStatusColor = (status: ProgrammeStatus) => {
@@ -188,16 +188,21 @@ const ProgrammesComponent = () => {
               <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{programme.projectDuration ?? '-'}</td>
               <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <CustomDropdown
-                  trigger={<button className="p-1 lg:p-2 hover:bg-gray-100 rounded-md transition-colors" aria-label="More actions"><FaEllipsisV className="w-3 h-3 lg:w-4 lg:h-4" /></button>}
+                  trigger={
+                  <button className="p-1 lg:p-2 hover:bg-gray-100 dark:text-gray-100 dark:hover:text-gray-700 rounded-md transition-colors" aria-label="More actions">
+                    <FaEllipsisV className="w-3 h-3 lg:w-4 lg:h-4" />
+                    </button>
+                    }
                   position="bottom-right"
-                  dropdownClassName="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-48"
+                  dropdownClassName="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-40"
+                  portal={true}
                 >
                   {getProgrammeActions(programme).map((action) => (
                     <DropdownItem
                       key={action.label}
                       icon={action.icon}
                       destructive={action.destructive as boolean}
-                      className='min-w-52'
+                      className='min-w-40'
                       onClick={action.onClick}
                     >
                       {action.label}
@@ -296,7 +301,7 @@ const ProgrammesComponent = () => {
     <div className="pb-6 lg:pb-10 px-2 lg:px-0">
       <Breadcrumb
         items={[
-          {title: "Dashboard", link: "/dashboard"}, 
+          { title: "Dashboard", link: "/dashboard" },
           "Projects"]}
         title="Projects"
         className='absolute top-0 left-0 w-full px-4 lg:px-6'
@@ -307,14 +312,14 @@ const ProgrammesComponent = () => {
           title="Project List"
           filteredCount={totalCount}
           search={search}
-          setSearch={(value) => { setSearch(value); setPage(1); }}
+          setSearch={(value) => { setSearch(value); }}
           viewMode={viewMode}
           setViewMode={setViewMode}
           showCreate={true}
-          createButton={{ 
-            to: "/dashboard/projects/add-new", 
-            label: "Add Project", 
-            icon: <FaPlus /> 
+          createButton={{
+            to: "/dashboard/projects/add-new",
+            label: "Add Project",
+            icon: <FaPlus />
           }}
         />
       </div>
@@ -323,33 +328,55 @@ const ProgrammesComponent = () => {
 
       {/* Pagination */}
       <div className="mt-4 lg:mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 px-2 lg:px-0">
+        {/* Text */}
         <div className="text-xs lg:text-sm text-gray-600 dark:text-gray-300 order-2 sm:order-1">
           Showing {paginated.length} of {totalCount} projects
         </div>
+
         <div className="flex flex-col sm:flex-row items-center gap-2 lg:gap-3 order-1 sm:order-2">
           <div className="flex items-center gap-2">
+            {/* Prev Button */}
             <button
-              className="px-2 lg:px-3 py-1 lg:py-2 rounded border border-gray-300 dark:border-gray-600 text-xs lg:text-sm disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              onClick={() => setPage((p) => Math.max(1, (data?.meta?.page ?? p) - 1))}
+              className="px-2 lg:px-3 py-1 lg:py-2 rounded border border-gray-300 dark:border-gray-600 
+            text-xs lg:text-sm disabled:opacity-50 
+            hover:bg-gray-50 dark:hover:bg-gray-700 
+            bg-white dark:bg-gray-800 
+            text-gray-700 dark:text-gray-200 
+            transition-colors"
+              onClick={() => setPage((p) => Math.max(1, (data?.page ?? p) - 1))}
               disabled={currentPage === 1 || isLoading}
             >
               Prev
             </button>
+
+            {/* Page Text */}
             <span className="text-xs lg:text-sm text-gray-700 dark:text-gray-300 px-2">
               Page {currentPage} of {totalPages}
             </span>
+
+            {/* Next Button */}
             <button
-              className="px-2 lg:px-3 py-1 lg:py-2 rounded border border-gray-300 dark:border-gray-600 text-xs lg:text-sm disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              onClick={() => setPage((p) => Math.min(totalPages, (data?.meta?.page ?? p) + 1))}
+              className="px-2 lg:px-3 py-1 lg:py-2 rounded border border-gray-300 dark:border-gray-600 
+            text-xs lg:text-sm disabled:opacity-50 
+            hover:bg-gray-50 dark:hover:bg-gray-700 
+            bg-white dark:bg-gray-800 
+            text-gray-700 dark:text-gray-200 
+            transition-colors"
+              onClick={() => setPage((p) => Math.min(totalPages, (data?.page ?? p) + 1))}
               disabled={currentPage === totalPages || isLoading}
             >
               Next
             </button>
           </div>
+
+          {/* Select */}
           <select
-            className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs lg:text-sm bg-white dark:bg-gray-800 min-w-0"
+            className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 
+          text-xs lg:text-sm bg-white dark:bg-gray-800 
+          text-gray-700 dark:text-gray-200
+          focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             value={pageSize}
-            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+            onChange={(e) => { setPageSize(Number(e.target.value)); }}
           >
             {[6, 9, 12, 24].map((sz) => (
               <option key={sz} value={sz}>{sz} / page</option>
@@ -357,6 +384,7 @@ const ProgrammesComponent = () => {
           </select>
         </div>
       </div>
+
 
       {/* Simple delete confirm inline */}
       {deleteModalOpen && (

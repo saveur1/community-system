@@ -9,6 +9,10 @@ export interface IUserCreateRequest {
   role?: IUserAttributes['roles'];
   status?: IUserAttributes['status'];
   profileImage?: string;
+  district?: string | null;
+  sector?: string | null;
+  cell?: string | null;
+  village?: string | null;
   userType?: string; // Optional: a broader category than role
   // Optional: assign roles by id on creation
   roleIds?: string[];

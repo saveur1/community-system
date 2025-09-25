@@ -225,7 +225,7 @@ const AddCommunitySessionPage = () => {
       className="space-y-6"
     >
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Session Title *
         </label>
         <input
@@ -233,13 +233,13 @@ const AddCommunitySessionPage = () => {
           name="title"
           value={form.title}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           placeholder="Enter session title..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Short Description *
         </label>
         <textarea
@@ -247,13 +247,13 @@ const AddCommunitySessionPage = () => {
           value={form.shortDescription}
           onChange={handleChange}
           rows={4}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           placeholder="Describe what this session is about..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           Content Type *
         </label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -266,12 +266,12 @@ const AddCommunitySessionPage = () => {
                 onClick={() => handleTypeChange(type.value)}
                 className={`p-4 border-2 rounded-lg transition-all duration-200 ${
                   form.type === type.value
-                    ? 'border-primary bg-primary/5'
-                    : 'border-gray-300 hover:border-gray-400'
+                    ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               >
                 <Icon className={`mx-auto mb-2 text-2xl ${type.color}`} />
-                <span className="block text-sm font-medium">{type.label}</span>
+                <span className="block text-sm font-medium text-gray-900 dark:text-gray-100">{type.label}</span>
               </button>
             );
           })}
@@ -279,11 +279,11 @@ const AddCommunitySessionPage = () => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           Upload Resource *
         </label>
         {!uploadedFile ? (
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors bg-gray-50 dark:bg-gray-800">
             <input
               type="file"
               onChange={handleFileUpload}
@@ -297,11 +297,11 @@ const AddCommunitySessionPage = () => {
               }
             />
             <label htmlFor="file-upload" className="cursor-pointer">
-              <FiUpload className="mx-auto text-4xl text-gray-400 mb-4" />
-              <p className="text-lg font-medium text-gray-600 mb-2">
+              <FiUpload className="mx-auto text-4xl text-gray-400 dark:text-gray-500 mb-4" />
+              <p className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">
                 Click to upload {form.type}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {form.type === 'video' && 'MP4, AVI, MOV files'}
                 {form.type === 'image' && 'JPG, PNG, GIF files'}
                 {form.type === 'audio' && 'MP3, WAV, AAC files'}
@@ -310,10 +310,10 @@ const AddCommunitySessionPage = () => {
             </label>
           </div>
         ) : (
-          <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+          <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center">
                   {(() => {
                     const typeConfig = contentTypes.find(t => t.value === form.type);
                     const Icon = typeConfig?.icon;
@@ -321,8 +321,8 @@ const AddCommunitySessionPage = () => {
                   })()}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{uploadedFile.name}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{uploadedFile.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB
                   </p>
                 </div>
@@ -330,7 +330,7 @@ const AddCommunitySessionPage = () => {
               <button
                 type="button"
                 onClick={removeFile}
-                className="text-red-500 hover:text-red-700 p-1"
+                className="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1"
               >
                 <FiX className="text-xl" />
               </button>
@@ -352,28 +352,28 @@ const AddCommunitySessionPage = () => {
       className="space-y-6"
     >
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Select Roles Who Can View This Session
         </h3>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
           Choose which user roles should have access to this community session.
         </p>
       </div>
 
       <div className="space-y-6">
         {rolesLoading && (
-          <div className="text-sm text-gray-500">Loading roles...</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Loading roles...</div>
         )}
         {rolesError && (
-          <div className="text-sm text-red-600">Failed to load roles. Please try again.</div>
+          <div className="text-sm text-red-600 dark:text-red-400">Failed to load roles. Please try again.</div>
         )}
         {!rolesLoading && !rolesError && roleGroups.length === 0 && (
-          <div className="text-sm text-gray-500">No roles found.</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">No roles found.</div>
         )}
         {roleGroups.map((group) => (
-          <div key={group.title} className="border border-gray-200 rounded-lg p-4">
+          <div key={group.title} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-gray-900">{group.title}</h4>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100">{group.title}</h4>
               {(() => {
                 const groupValues = group.options.map(o => o.value);
                 const allSelected = groupValues.every(v => form.allowedRoles.includes(v));
@@ -384,7 +384,11 @@ const AddCommunitySessionPage = () => {
                   <button
                     type="button"
                     onClick={() => toggleGroupRoles(groupValues, nextSelectAll)}
-                    className={`text-xs px-2 py-1 rounded border transition-colors ${allSelected ? 'text-red-600 border-red-300 hover:bg-red-50' : 'text-primary border-primary/40 hover:bg-primary/5'}`}
+                    className={`text-xs px-2 py-1 rounded border transition-colors ${
+                      allSelected
+                        ? 'text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-600 dark:hover:bg-red-900/20'
+                        : 'text-primary border-primary/40 hover:bg-primary/5 dark:border-primary/60 dark:hover:bg-primary/10'
+                    }`}
                     aria-label={`${buttonLabel} in ${group.title}`}
                   >
                     {buttonLabel}
@@ -396,15 +400,15 @@ const AddCommunitySessionPage = () => {
               {group.options.map((option) => (
                 <label
                   key={option.value}
-                  className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={form.allowedRoles.includes(option.value)}
                     onChange={() => handleRoleToggle(option.value)}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                   />
-                  <span className="text-sm text-gray-700">{option.label}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
                 </label>
               ))}
             </div>
@@ -412,8 +416,8 @@ const AddCommunitySessionPage = () => {
         ))}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
           <strong>Selected roles:</strong> {form.allowedRoles.length} role(s) selected
         </p>
       </div>
@@ -435,19 +439,19 @@ const AddCommunitySessionPage = () => {
       />
       
       <div className="pt-20 max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg drop-shadow-xl p-8 max-md:px-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg drop-shadow-xl p-8 max-md:px-4 border border-gray-200 dark:border-gray-700">
           {/* Progress indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-600">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 Step {currentStep} of 2
               </span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {currentStep === 1 ? 'Session Details' : 'Role Selection'}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div
                 className="bg-primary h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(currentStep / 2) * 100}%` }}
               />
@@ -463,12 +467,12 @@ const AddCommunitySessionPage = () => {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex justify-between pt-8 border-t border-gray-200">
+          <div className="flex justify-between pt-8 border-t border-gray-200 dark:border-gray-600">
             <button
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
-              className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <FiChevronLeft className="mr-2" />
               Previous
@@ -488,7 +492,7 @@ const AddCommunitySessionPage = () => {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-500 transition-colors disabled:opacity-50"
               >
                 {isUploading ? `Uploading... ${uploadProgress}%` : createSession.isPending ? 'Creating...' : 'Create Session'}
               </button>

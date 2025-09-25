@@ -58,7 +58,7 @@ function MakeReportPage() {
       <div>
         <Breadcrumb items={["Dashboard", "Reporting"]} title="Make Report" className='absolute top-0 left-0 w-full px-6' />
         <div className="pt-20 px-4 text-center py-20">
-          <div className="text-gray-500">Loading report form…</div>
+          <div className="text-gray-500 dark:text-gray-400">Loading report form…</div>
         </div>
       </div>
     );
@@ -69,16 +69,16 @@ function MakeReportPage() {
       <div>
         <Breadcrumb items={["Dashboard", "Reporting"]} title="Make Report" className='absolute top-0 left-0 w-full px-6' />
         <div className="pt-20 px-4 min-h-[320px] flex items-center justify-center">
-          <div className="max-w-lg w-full bg-white border border-gray-300 rounded-lg shadow-sm p-8 text-center">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">No report form available</h2>
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="max-w-lg w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm p-8 text-center">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">No report form available</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               There are currently no active report forms you can submit. We'll notify you when a report form becomes available for your role.
               In the meantime, check back later or contact your administrator for further details.
             </p>
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => navigate({ to: '/dashboard/reporting' })}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
                 Back to Reporting
               </button>
@@ -100,7 +100,7 @@ function MakeReportPage() {
         <div className="mb-6">
           <button
             onClick={() => navigate({ to: '/dashboard/reporting' })}
-            className="flex items-center text-gray-600 hover:text-primary cursor-pointer transition-colors p-2 rounded-full hover:bg-gray-100 mb-4"
+            className="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 cursor-pointer transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 mb-4"
           >
             <FaArrowLeft className="text-xl mr-2" />
             Back to Reporting

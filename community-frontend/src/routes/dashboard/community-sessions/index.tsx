@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import Breadcrumb from '@/components/ui/breadcrum';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import { FaEye, FaTrash, FaDownload, FaShare, FaEllipsisV, FaVideo, FaImage, FaMusic, FaFileAlt, FaPlus, FaEdit } from 'react-icons/fa';
+import { BsExclamationOctagon } from 'react-icons/bs';
 import { useCommunitySessionsList } from '@/hooks/useCommunitySession';
 import type { CommunitySessionEntity } from '@/api/community-sessions';
 import FilePreview from '@/components/common/file-preview';
@@ -28,18 +29,15 @@ const CommunitySessionsPage = () => {
   const [toDelete, setToDelete] = useState<CommunitySessionEntity | null>(null);
   const { user } = useAuth();
 
-  const { data, isLoading } = useCommunitySessionsList({ page, limit: pageSize, allowed: true });
+  const { data, isLoading } = useCommunitySessionsList({ page, limit: pageSize, allowed: true, search: search.trim() || undefined });
   const sessions = data?.result ?? [];
-  const total = data?.meta?.total ?? sessions.length;
-  const totalPages = data?.meta?.totalPages ?? Math.max(1, Math.ceil(total / pageSize));
+  const total = data?.total ?? sessions.length;
+  const totalPages = data?.totalPages ?? Math.max(1, Math.ceil(total / pageSize));
 
   const filteredSessions = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return sessions;
-    return sessions.filter(s =>
-      s.title.toLowerCase().includes(q) || s.shortDescription.toLowerCase().includes(q)
-    );
-  }, [sessions, search]);
+    // Since backend now handles search, we can remove client-side filtering
+    return sessions;
+  }, [sessions]);
 
   const currentPage = Math.min(page, totalPages);
   const paginatedSessions = filteredSessions; // server-side pagination already applied
@@ -87,72 +85,98 @@ const CommunitySessionsPage = () => {
     setToDelete(null);
   };
 
-  const renderGrid = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 lg:gap-6">
-      {paginatedSessions.map(session => (
-        <div key={session.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700">
-          <Link to="/dashboard/community-sessions/$sessionId" params={{ sessionId: session.id }}>
-            <div className="w-full h-32 sm:h-40 lg:h-48 bg-gray-100 dark:bg-gray-700">
-              <FilePreview
-                src={session.document?.documentUrl || undefined}
-                filename={session.document?.documentName || undefined}
-                type={session.type}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </Link>
-          <div className="p-3 lg:p-4">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex-1 min-w-0 mr-2">
-                <h3 className="text-sm lg:text-lg font-semibold text-gray-800 dark:text-gray-100 truncate">
-                  <Link to="/dashboard/community-sessions/$sessionId" params={{ sessionId: session.id }} className="hover:text-primary transition-colors">
-                    {session.title}
-                  </Link>
-                </h3>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <SessionTypeIcon type={session.type} />
-                <CustomDropdown
-                  trigger={
-                    <button className="p-1.5 lg:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                      <FaEllipsisV className="w-3 h-3 lg:w-4 lg:h-4" />
-                    </button>
-                  }
-                  dropdownClassName='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-52'
-                  position='bottom-right'
-                  portal={true}
-                >
-                  <DropdownItem onClick={() => handleAction('preview', session)} className="text-xs lg:text-sm">
-                    <FaEye className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Preview
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleAction('edit', session)} className="text-xs lg:text-sm">
-                    <FaEdit className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Edit
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleAction('download', session)} className="text-xs lg:text-sm">
-                    <FaDownload className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Download
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleAction('share', session)} className="text-xs lg:text-sm">
-                    <FaShare className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Share
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleAction('delete', session)} className="text-red-500 text-xs lg:text-sm" destructive>
-                    <FaTrash className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Delete
-                  </DropdownItem>
-                </CustomDropdown>
-              </div>
-            </div>
-            <Link to="/dashboard/community-sessions/$sessionId" params={{ sessionId: session.id }}>
-              <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-                {session.shortDescription}
-              </p>
+  const renderGrid = () => {
+    if (paginatedSessions.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+          <BsExclamationOctagon className="text-6xl mb-4 text-gray-400 dark:text-gray-500" />
+          <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">No Community Sessions Found</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-md">
+            {search.trim()
+              ? `No sessions match "${search}". Try adjusting your search terms.`
+              : "Get started by creating your first community session!"
+            }
+          </p>
+          {!search.trim() && checkPermissions(user, 'community_session:create') && (
+            <Link
+              to="/dashboard/community-sessions/add-new"
+              className="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium"
+            >
+              <FaPlus className="inline mr-2" />
+              Create First Session
             </Link>
-            <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
-              <span className="truncate">{new Date(session.createdAt).toLocaleDateString()}</span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 lg:gap-6">
+        {paginatedSessions.map(session => (
+          <div key={session.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700">
+            <Link to="/dashboard/community-sessions/$sessionId" params={{ sessionId: session.id }}>
+              <div className="w-full h-32 sm:h-40 lg:h-48 bg-gray-100 dark:bg-gray-700">
+                <FilePreview
+                  src={session.document?.documentUrl || undefined}
+                  filename={session.document?.documentName || undefined}
+                  type={session.type}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </Link>
+            <div className="p-3 lg:p-4">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex-1 min-w-0 mr-2">
+                  <h3 className="text-sm lg:text-lg font-semibold text-gray-800 dark:text-gray-100 truncate">
+                    <Link to="/dashboard/community-sessions/$sessionId" params={{ sessionId: session.id }} className="hover:text-primary transition-colors">
+                      {session.title}
+                    </Link>
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <SessionTypeIcon type={session.type} />
+                  <CustomDropdown
+                    trigger={
+                      <button className="p-1.5 lg:p-2 dark:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <FaEllipsisV className="w-3 h-3 lg:w-4 lg:h-4" />
+                      </button>
+                    }
+                    dropdownClassName='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 w-40'
+                    position='bottom-right'
+                    portal={true}
+                  >
+                    <DropdownItem onClick={() => handleAction('preview', session)} className="text-xs lg:text-sm">
+                      <FaEye className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Preview
+                    </DropdownItem>
+                    <DropdownItem onClick={() => handleAction('edit', session)} className="text-xs lg:text-sm">
+                      <FaEdit className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Edit
+                    </DropdownItem>
+                    <DropdownItem onClick={() => handleAction('download', session)} className="text-xs lg:text-sm">
+                      <FaDownload className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Download
+                    </DropdownItem>
+                    <DropdownItem onClick={() => handleAction('share', session)} className="text-xs lg:text-sm">
+                      <FaShare className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Share
+                    </DropdownItem>
+                    <DropdownItem onClick={() => handleAction('delete', session)} className="text-red-500 text-xs lg:text-sm" destructive>
+                      <FaTrash className="mr-2 w-3 h-3 lg:w-4 lg:h-4" />Delete
+                    </DropdownItem>
+                  </CustomDropdown>
+                </div>
+              </div>
+              <Link to="/dashboard/community-sessions/$sessionId" params={{ sessionId: session.id }}>
+                <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                  {session.shortDescription}
+                </p>
+              </Link>
+              <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                <span className="truncate">{new Date(session.createdAt).toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
-  );
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="pb-6 lg:pb-10 px-2 lg:px-0">
@@ -214,7 +238,7 @@ const CommunitySessionsPage = () => {
           <div className="flex flex-col sm:flex-row items-center gap-2 lg:gap-3 order-1 sm:order-2">
             <div className="flex items-center gap-2">
               <button
-                className="px-2 lg:px-3 py-1 lg:py-2 rounded border border-gray-300 dark:border-gray-600 text-xs lg:text-sm disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="px-2 lg:px-3 py-1 lg:py-2 rounded border border-gray-300 dark:border-gray-600 text-xs lg:text-sm disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
@@ -224,7 +248,7 @@ const CommunitySessionsPage = () => {
                 Page {currentPage} of {totalPages}
               </span>
               <button
-                className="px-2 lg:px-3 py-1 lg:py-2 rounded border border-gray-300 dark:border-gray-600 text-xs lg:text-sm disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="px-2 lg:px-3 py-1 lg:py-2 rounded border border-gray-300 dark:border-gray-600 text-xs lg:text-sm disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
@@ -232,7 +256,7 @@ const CommunitySessionsPage = () => {
               </button>
             </div>
             <select
-              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs lg:text-sm bg-white dark:bg-gray-700 min-w-0"
+              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs lg:text-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark"
               value={pageSize}
               onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
             >
@@ -251,7 +275,7 @@ const CommunitySessionsPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                 <button
-                  className="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="px-4 py-2 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => { setDeleteModalOpen(false); setToDelete(null); }}
                 >
                   Cancel

@@ -81,7 +81,11 @@ const AddUserPage = () => {
       phone: formData.phoneNumber,
       userType: formData.userType,
       stakeholderId: formData.stakeholderId || undefined,
-      address: `${formData.village}, ${formData.cell}, ${formData.sector}, ${formData.district}`,
+      // Send location fields separately instead of combining them
+      district: formData.district || undefined,
+      sector: formData.sector || undefined,
+      cell: formData.cell || undefined,
+      village: formData.village || undefined,
       roleIds: [formData.roleId],
     };
 
@@ -172,20 +176,20 @@ const AddUserPage = () => {
       transition={springTransition}
       className="space-y-4"
     >
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">{entityLabel} Information</h3>
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">{entityLabel} Information</h3>
       <div>
-        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
         <input
           id="fullName"
           name="fullName"
           value={formData.fullName}
           onChange={handleInputChange}
           placeholder="Enter user's full name"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
         />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
         <input
           id="email"
           name="email"
@@ -193,18 +197,18 @@ const AddUserPage = () => {
           value={formData.email}
           onChange={handleInputChange}
           placeholder="Enter email address"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
         />
       </div>
       <div>
-        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
         <input
           id="phoneNumber"
           name="phoneNumber"
           value={formData.phoneNumber}
           onChange={handleInputChange}
           placeholder="Enter phone number"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
         />
       </div>
     </motion.div>
@@ -220,7 +224,7 @@ const AddUserPage = () => {
       transition={springTransition}
       className="space-y-4"
     >
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">Location Details</h3>
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Location Details</h3>
       <SelectSearch
         label="District"
         value={formData.district}
@@ -275,7 +279,7 @@ const AddUserPage = () => {
       transition={springTransition}
       className="space-y-4"
     >
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">Role and Additional Details</h3>
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Role and Additional Details</h3>
       {!category && (
         <SelectSearch
           label="User Category"
@@ -287,19 +291,19 @@ const AddUserPage = () => {
       )}
       {category ? (
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">User Role</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">User Role</label>
           <div className="space-y-2">
             {roleOptions.map((opt) => (
-              <label key={opt.value} className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 border border-gray-200">
+              <label key={opt.value} className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
                 <input
                   type="radio"
                   name="roleId"
                   value={opt.value}
                   checked={formData.roleId === opt.value}
                   onChange={handleSelectRoleChange}
-                  className="h-4 w-4 text-primary focus:ring-primary"
+                  className="h-4 w-4 text-primary focus:ring-primary dark:focus:ring-primary-dark"
                 />
-                <span className="text-gray-700 text-sm">{opt.label}</span>
+                <span className="text-gray-700 dark:text-gray-300 text-sm">{opt.label}</span>
               </label>
             ))}
           </div>
@@ -318,24 +322,27 @@ const AddUserPage = () => {
   );
 
   return (
-    <div>
+    <div className="dark:bg-gray-900 min-h-screen">
       <Breadcrumb
         title={`Add ${entityLabel}`}
-        items={['Dashboard', 'Accounts', `Add ${entityLabel}`]}
-        className="absolute top-0 left-0 w-full"
+        items={[
+          {link: '/dashboard', title: 'Dashboard' },
+          {link: '/dashboard/accounts', title: 'Accounts' },
+          `Add ${entityLabel}`]}
+        className="absolute top-0 left-0 w-full dark:bg-gray-900"
       />
 
-      <div className="pt-16 max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg drop-shadow-xl p-8">
+      <div className="pt-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg drop-shadow-xl p-6 sm:p-8">
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-600">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 Step {currentStep} of {totalSteps}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
-                className="bg-primary h-2 rounded-full transition-all duration-300"
+                className="bg-primary dark:bg-primary-dark h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(currentStep / totalSteps) * 100}%` }}
               />
             </div>
@@ -354,12 +361,12 @@ const AddUserPage = () => {
             </AnimatePresence>
           </motion.form>
 
-          <div className="flex justify-between pt-8 border-t border-gray-200">
+          <div className="flex justify-between pt-8 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
-              className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <FiChevronLeft className="mr-2" />
               Previous
@@ -369,7 +376,7 @@ const AddUserPage = () => {
               <button
                 type="button"
                 onClick={nextStep}
-                className="flex items-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                className="flex items-center px-6 py-2 bg-primary dark:bg-primary-dark text-white rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors"
               >
                 Next
                 <FiChevronRight className="ml-2" />
@@ -379,7 +386,7 @@ const AddUserPage = () => {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isPending}
-                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="flex items-center px-6 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors disabled:opacity-50"
               >
                 {isPending ? 'Creating...' : `Create ${entityLabel}`}
               </button>

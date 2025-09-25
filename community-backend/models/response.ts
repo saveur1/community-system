@@ -5,6 +5,7 @@ export interface ResponseAttributes {
   id: string;
   surveyId: string;
   userId?: string | null; // nullable for anonymous
+  userReportCounter?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -18,6 +19,7 @@ class Response extends Model<ResponseAttributes, ResponseCreationAttributes> imp
   declare id: string;
   declare surveyId: string;
   declare userId?: string | null;
+  declare userReportCounter?: number;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -38,6 +40,12 @@ Response.init(
       type: DataTypes.UUID,
       allowNull: true,
       defaultValue: null,
+    },
+    userReportCounter: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      comment: 'Counter for user report submissions',
     },
   },
   {

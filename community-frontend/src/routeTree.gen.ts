@@ -63,7 +63,6 @@ import { Route as DashboardSurveysTakeSurveyIndexRouteImport } from './routes/da
 import { Route as DashboardSurveysReportFormsIndexRouteImport } from './routes/dashboard/surveys/report-forms/index'
 import { Route as DashboardSurveysRapidEnquiryIndexRouteImport } from './routes/dashboard/surveys/rapid-enquiry/index'
 import { Route as DashboardSurveysViewIdIndexRouteImport } from './routes/dashboard/surveys/$view-id/index'
-import { Route as DashboardSurveysTakeSurveyAnswerRouteImport } from './routes/dashboard/surveys/take.$survey-answer'
 import { Route as DashboardSurveysTakeSurveySurveyAnswerRouteImport } from './routes/dashboard/surveys/take-survey/$survey-answer'
 import { Route as DashboardSurveysReportFormsReportIdRouteImport } from './routes/dashboard/surveys/report-forms/$report-id'
 import { Route as DashboardSurveysRapidEnquiryAddNewRouteImport } from './routes/dashboard/surveys/rapid-enquiry/add-new'
@@ -379,12 +378,6 @@ const DashboardSurveysViewIdIndexRoute =
     path: '/surveys/$view-id/',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
-const DashboardSurveysTakeSurveyAnswerRoute =
-  DashboardSurveysTakeSurveyAnswerRouteImport.update({
-    id: '/surveys/take/$survey-answer',
-    path: '/surveys/take/$survey-answer',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
 const DashboardSurveysTakeSurveySurveyAnswerRoute =
   DashboardSurveysTakeSurveySurveyAnswerRouteImport.update({
     id: '/surveys/take-survey/$survey-answer',
@@ -533,7 +526,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/surveys/rapid-enquiry/add-new': typeof DashboardSurveysRapidEnquiryAddNewRoute
   '/dashboard/surveys/report-forms/$report-id': typeof DashboardSurveysReportFormsReportIdRoute
   '/dashboard/surveys/take-survey/$survey-answer': typeof DashboardSurveysTakeSurveySurveyAnswerRoute
-  '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
   '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdIndexRoute
   '/dashboard/surveys/rapid-enquiry': typeof DashboardSurveysRapidEnquiryIndexRoute
   '/dashboard/surveys/report-forms': typeof DashboardSurveysReportFormsIndexRoute
@@ -602,7 +594,6 @@ export interface FileRoutesByTo {
   '/dashboard/surveys/rapid-enquiry/add-new': typeof DashboardSurveysRapidEnquiryAddNewRoute
   '/dashboard/surveys/report-forms/$report-id': typeof DashboardSurveysReportFormsReportIdRoute
   '/dashboard/surveys/take-survey/$survey-answer': typeof DashboardSurveysTakeSurveySurveyAnswerRoute
-  '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
   '/dashboard/surveys/$view-id': typeof DashboardSurveysViewIdIndexRoute
   '/dashboard/surveys/rapid-enquiry': typeof DashboardSurveysRapidEnquiryIndexRoute
   '/dashboard/surveys/report-forms': typeof DashboardSurveysReportFormsIndexRoute
@@ -674,7 +665,6 @@ export interface FileRoutesById {
   '/dashboard/surveys/rapid-enquiry/add-new': typeof DashboardSurveysRapidEnquiryAddNewRoute
   '/dashboard/surveys/report-forms/$report-id': typeof DashboardSurveysReportFormsReportIdRoute
   '/dashboard/surveys/take-survey/$survey-answer': typeof DashboardSurveysTakeSurveySurveyAnswerRoute
-  '/dashboard/surveys/take/$survey-answer': typeof DashboardSurveysTakeSurveyAnswerRoute
   '/dashboard/surveys/$view-id/': typeof DashboardSurveysViewIdIndexRoute
   '/dashboard/surveys/rapid-enquiry/': typeof DashboardSurveysRapidEnquiryIndexRoute
   '/dashboard/surveys/report-forms/': typeof DashboardSurveysReportFormsIndexRoute
@@ -746,7 +736,6 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/rapid-enquiry/add-new'
     | '/dashboard/surveys/report-forms/$report-id'
     | '/dashboard/surveys/take-survey/$survey-answer'
-    | '/dashboard/surveys/take/$survey-answer'
     | '/dashboard/surveys/$view-id'
     | '/dashboard/surveys/rapid-enquiry'
     | '/dashboard/surveys/report-forms'
@@ -815,7 +804,6 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/rapid-enquiry/add-new'
     | '/dashboard/surveys/report-forms/$report-id'
     | '/dashboard/surveys/take-survey/$survey-answer'
-    | '/dashboard/surveys/take/$survey-answer'
     | '/dashboard/surveys/$view-id'
     | '/dashboard/surveys/rapid-enquiry'
     | '/dashboard/surveys/report-forms'
@@ -886,7 +874,6 @@ export interface FileRouteTypes {
     | '/dashboard/surveys/rapid-enquiry/add-new'
     | '/dashboard/surveys/report-forms/$report-id'
     | '/dashboard/surveys/take-survey/$survey-answer'
-    | '/dashboard/surveys/take/$survey-answer'
     | '/dashboard/surveys/$view-id/'
     | '/dashboard/surveys/rapid-enquiry/'
     | '/dashboard/surveys/report-forms/'
@@ -1280,13 +1267,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSurveysViewIdIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/surveys/take/$survey-answer': {
-      id: '/dashboard/surveys/take/$survey-answer'
-      path: '/surveys/take/$survey-answer'
-      fullPath: '/dashboard/surveys/take/$survey-answer'
-      preLoaderRoute: typeof DashboardSurveysTakeSurveyAnswerRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
     '/dashboard/surveys/take-survey/$survey-answer': {
       id: '/dashboard/surveys/take-survey/$survey-answer'
       path: '/surveys/take-survey/$survey-answer'
@@ -1481,7 +1461,6 @@ interface DashboardRouteRouteChildren {
   DashboardSurveysRapidEnquiryAddNewRoute: typeof DashboardSurveysRapidEnquiryAddNewRoute
   DashboardSurveysReportFormsReportIdRoute: typeof DashboardSurveysReportFormsReportIdRoute
   DashboardSurveysTakeSurveySurveyAnswerRoute: typeof DashboardSurveysTakeSurveySurveyAnswerRoute
-  DashboardSurveysTakeSurveyAnswerRoute: typeof DashboardSurveysTakeSurveyAnswerRoute
   DashboardSurveysViewIdIndexRoute: typeof DashboardSurveysViewIdIndexRoute
   DashboardSurveysRapidEnquiryIndexRoute: typeof DashboardSurveysRapidEnquiryIndexRoute
   DashboardSurveysReportFormsIndexRoute: typeof DashboardSurveysReportFormsIndexRoute
@@ -1548,7 +1527,6 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
     DashboardSurveysReportFormsReportIdRoute,
   DashboardSurveysTakeSurveySurveyAnswerRoute:
     DashboardSurveysTakeSurveySurveyAnswerRoute,
-  DashboardSurveysTakeSurveyAnswerRoute: DashboardSurveysTakeSurveyAnswerRoute,
   DashboardSurveysViewIdIndexRoute: DashboardSurveysViewIdIndexRoute,
   DashboardSurveysRapidEnquiryIndexRoute:
     DashboardSurveysRapidEnquiryIndexRoute,

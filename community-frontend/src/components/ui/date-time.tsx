@@ -33,6 +33,23 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
   minDate
 }) => {
   const handleSave = () => {
+    // If user didn't select date/time, default to current values
+    const now = new Date()
+    const ensureDate = selectedDate ?? now
+    const ensureHour = selectedHour && selectedHour.length > 0 ? selectedHour : String(now.getHours()).padStart(2, '0')
+    const ensureMinute = selectedMinute && selectedMinute.length > 0 ? selectedMinute : String(now.getMinutes()).padStart(2, '0')
+
+    // Only fire updates if values differ or were missing
+    if (!selectedDate) {
+      onDateChange(ensureDate)
+    }
+    if (!selectedHour || selectedHour.length === 0) {
+      onHourChange(ensureHour)
+    }
+    if (!selectedMinute || selectedMinute.length === 0) {
+      onMinuteChange(ensureMinute)
+    }
+
     onClose()
   }
 

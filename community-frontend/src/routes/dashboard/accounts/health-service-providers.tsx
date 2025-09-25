@@ -4,6 +4,8 @@ import { AccountsList } from '@/components/accounts/accounts-list';
 import type { Account, AccountFilters } from '@/types/account';
 import { useUsersList } from '@/hooks/useUsers';
 import type { User } from '@/api/auth';
+import MainToolbar from '@/components/common/main-toolbar';
+import { FaPlus } from 'react-icons/fa';
 
 function isHealthServiceProvider(userType?: string) {
   if (!userType) return false;
@@ -22,7 +24,46 @@ function EmployeesAccountsPage() {
     pageSize: 10,
     total: 0,
   });
-  const { data, isLoading } = useUsersList({ page: pagination.page, limit: pagination.pageSize });
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const { data, isLoading } = useUsersList({ 
+    page: pagination.page, 
+    limit: pagination.pageSize,
+    search: filters.search 
+  });
+
+  // Export data formatter based on IUserAttributes
+  const excelDataExported = (users: any[]) => {
+    return users?.filter(user => isHealthServiceProvider(user.userType))?.map((user, index) => ({
+      id: index + 1,
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      address: user?.address || '',
+      status: user?.status || '',
+      userType: user?.userType || '',
+      district: user?.district || '',
+      sector: user?.sector || '',
+      cell: user?.cell || '',
+      village: user?.village || '',
+      preferredLanguage: user?.preferredLanguage || '',
+      nearByHealthCenter: user?.nearByHealthCenter || '',
+      schoolName: user?.schoolName || '',
+      schoolAddress: user?.schoolAddress || '',
+      churchName: user?.churchName || '',
+      churchAddress: user?.churchAddress || '',
+      hospitalName: user?.hospitalName || '',
+      hospitalAddress: user?.hospitalAddress || '',
+      healthCenterName: user?.healthCenterName || '',
+      healthCenterAddress: user?.healthCenterAddress || '',
+      epiDistrict: user?.epiDistrict || '',
+      salary: user?.salary || '',
+      profile: user?.profile || '',
+      emailVerified: user?.emailVerified ? 'Yes' : 'No',
+      roles: user?.roles?.map((role: any) => role.name).join(', ') || '',
+      createdAt: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
+      updatedAt: user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : ''
+    }))
+  };
 
   const mapped = useMemo(() => {
     const list: User[] = data?.result ?? [];
@@ -59,7 +100,7 @@ function EmployeesAccountsPage() {
 
   useEffect(() => {
     setAccounts(mapped);
-    const total = data?.meta?.total ?? mapped.length;
+    const total = data?.total ?? mapped.length;
     setPagination(prev => ({ ...prev, total }));
   }, [mapped, data]);
 
@@ -82,22 +123,54 @@ function EmployeesAccountsPage() {
   };
 
   return (
-    <AccountsList
-      accounts={accounts}
-      title="Health service providers"
-      addButtonLabel="add new"
-      onSearch={handleSearch}
-      onPageChange={handlePageChange}
-      onPageSizeChange={handlePageSizeChange}
-      currentPage={pagination.page}
-      totalPages={Math.ceil(pagination.total / pagination.pageSize)}
-      totalItems={pagination.total}
-      pageSize={pagination.pageSize}
-      loading={isLoading}
-      onDeleteAccount={(acc) => {
-        setAccounts(prev => prev.filter(a => a.id !== acc.id));
-        setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
-      }}
-    />
+    <div className="pt-1">
+      <MainToolbar
+        title="Health service providers"
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        search={filters.search || ''}
+        setSearch={(search) => {
+          const newFilters = { ...filters, search };
+          setFilters(newFilters);
+          setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on new search
+        }}
+        filteredCount={pagination.total}
+        showCreate={true}
+        excelData={excelDataExported(data?.result || [])}
+        excelColumnWidths={{
+          id: 6, name: 25, email: 30, phone: 15, address: 30, status: 12,
+          userType: 20, district: 15, sector: 15, cell: 15, village: 15,
+          preferredLanguage: 20, nearByHealthCenter: 25, schoolName: 25,
+          schoolAddress: 30, churchName: 25, churchAddress: 30,
+          hospitalName: 25, hospitalAddress: 30, healthCenterName: 25,
+          healthCenterAddress: 30, epiDistrict: 20, salary: 12,
+          profile: 40, emailVerified: 15, roles: 30, createdAt: 15, updatedAt: 15
+        }}
+        excelFileName='health_service_providers'
+        createButton={{
+          to: "/dashboard/accounts/add-new",
+          label: "add new",
+          icon: <FaPlus />
+        }}
+      />
+
+      <AccountsList
+        accounts={accounts}
+        title="Health service providers"
+        onSearch={handleSearch}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        currentPage={pagination.page}
+        totalPages={Math.ceil(pagination.total / pagination.pageSize)}
+        totalItems={pagination.total}
+        pageSize={pagination.pageSize}
+        loading={isLoading}
+        viewMode={viewMode}
+        onDeleteAccount={(acc) => {
+          setAccounts(prev => prev.filter(a => a.id !== acc.id));
+          setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+        }}
+      />
+    </div>
   );
 }

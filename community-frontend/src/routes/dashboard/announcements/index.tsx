@@ -10,6 +10,7 @@ import Drawer from '@/components/ui/drawer';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import type { AnnouncementEntity } from '@/api/announcements';
 import { spacer } from '@/utility/logicFunctions';
+import { FaEllipsisH } from 'react-icons/fa';
 
 // Types
 export interface Announcement {
@@ -83,8 +84,8 @@ function AnnouncementsPage() {
 
   // Use server-provided list (backend paginates)
   const announcements: AnnouncementEntity[] = announcementsResp?.result ?? [];
-  const totalItems = announcementsResp?.meta?.total ?? (announcementsResp ? announcements.length : 0);
-  const totalPages = Math.max(1, Math.ceil((announcementsResp?.meta?.total ?? 0) / pageSize));
+  const totalItems = announcementsResp?.total ?? (announcementsResp ? announcements.length : 0);
+  const totalPages = Math.max(1, Math.ceil((announcementsResp?.total ?? 0) / pageSize));
   const currentPage = Math.min(page, totalPages);
   const paginated = announcements; // server already paginates based on params
 
@@ -122,9 +123,8 @@ function AnnouncementsPage() {
                   onChange={(v) => { setStatusFilter(v as any); setPage(1); }}
                   options={[
                     { label: 'All Status', value: 'all' },
-                    { label: 'Sent', value: 'sent' },
-                    { label: 'Scheduled', value: 'scheduled' },
-                    { label: 'Draft', value: 'draft' },
+                    { label: 'Stopped', value: 'stopped' },
+                    { label: 'Active', value: 'sent' }
                   ]}
                   placeholder="Filter by status"
                   triggerClassName="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
@@ -201,10 +201,12 @@ function AnnouncementsPage() {
                        <CustomDropdown
                          trigger={
                            <button className="px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors" aria-label="Actions">
-                             •••
+                             <FaEllipsisH className="w-4 h-4" />
                            </button>
                          }
                          position="bottom-right"
+                         portal={true}
+                         dropdownClassName='w-40'
                        >
                          <div className="w-44 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black/5 dark:ring-gray-600">
                            <DropdownItem onClick={() => openDetails(a.id)}>View details</DropdownItem>

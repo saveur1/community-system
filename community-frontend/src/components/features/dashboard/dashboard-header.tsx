@@ -168,7 +168,7 @@ const ThemeSelector: React.FC = () => {
               </div>
             </div>
             {theme === option.mode && (
-              <HiCheck className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <HiCheck className="w-4 h-4 text-primary-600 dark:text-white" />
             )}
           </button>
         ))}

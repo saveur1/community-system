@@ -37,30 +37,24 @@ function RouteComponent() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportType, setExportType] = useState<'excel' | 'pdf'>('excel');
   const [exportSurvey, setExportSurvey] = useState<any | null>(null);
+
   const params = useMemo(() => {
-    const p: SurveysListParams = { page, limit: pageSize, surveyType: 'rapid-enquiry' };
+    const p: SurveysListParams = { page, limit: pageSize, surveyType: 'rapid-enquiry', search: query };
     // map status filter if applied
     if (statusFilter !== 'all') p.status = statusFilter;
     return p;
-  }, [page, pageSize, statusFilter]);
+  }, [page, pageSize, statusFilter, query]);
 
   const { data, isLoading } = useSurveysList(params);
   const deleteSurvey = useDeleteSurvey();
   const updateStatus = useUpdateSurveyStatus();
 
   const list = useMemo(() => data?.result ?? [], [data]);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter((s: any) => String(s.title ?? '').toLowerCase().includes(q));
-  }, [list, query]);
-
-  const totalPages = data?.meta?.totalPages ?? Math.max(1, Math.ceil(filtered.length / pageSize));
+  const totalItems = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
   const currentPage = Math.min(page, totalPages);
-  const paginated = filtered; // server-paginated already; we only filter client-side by query
 
-  const getStatusColor = (status: 'active' | 'paused' | 'archived') => {
+  const getStatusColor = (status: 'active' | 'paused' | 'archived' | string) => {
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
@@ -199,7 +193,7 @@ function RouteComponent() {
               <input
                 type="text"
                 value={query}
-                onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+                onChange={(e) => { setQuery(e.target.value) }}
                 placeholder="Search rapid enquiries..."
                 className="w-full pl-10 pr-4 py-2 border outline-none focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
               />
@@ -226,33 +220,60 @@ function RouteComponent() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            Rapid Enquiry History
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-600">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Rapid Enquiry History</h2>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Showing {filtered.length} item(s)</div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <RapidEnquiryTable
+            surveys={list}
+            isLoading={isLoading}
+            onActionClick={handleActionClick}
+            getStatusColor={getStatusColor}
+            getSurveyActions={getSurveyActions}
+            user={user}
+          />
         </div>
 
-        {/* Reuse the shared SurveyListTable to get identical action UI/behavior */}
-        <RapidEnquiryTable
-          paginated={paginated}
-          isLoading={isLoading}
-          getStatusColor={getStatusColor}
-          getSurveyActions={getSurveyActions}
-          user={user}
-          handleActionClick={handleActionClick}
-        />
-
-        <div className="p-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-600 text-sm">
-          <div className="text-gray-600 dark:text-gray-400">Showing {paginated.length} of {data?.meta?.total ?? filtered.length}</div>
+        <div className="p-4 border-t border-gray-200 dark:border-gray-600 flex items-center justify-between text-sm">
+          <div className="text-gray-600 dark:text-gray-400">
+            Showing {list.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} entries
+          </div>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Prev</button>
-            <span className="px-2 text-gray-900 dark:text-gray-100">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))} className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Next</button>
-            <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }} className="ml-2 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-              {[5, 10, 20].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
+            <button 
+              disabled={currentPage <= 1} 
+              onClick={() => setPage(p => Math.max(1, p - 1))} 
+              className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            >
+              Previous
+            </button>
+            <span className="px-2 text-gray-900 dark:text-gray-100">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button 
+              disabled={currentPage >= totalPages} 
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+              className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            >
+              Next
+            </button>
+            <div className="flex items-center ml-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">Show:</span>
+              <select 
+                value={pageSize} 
+                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }} 
+                className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              >
+                {[5, 10, 20, 50].map(n => 
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                )}
+              </select>
+            </div>
           </div>
         </div>
       </div>

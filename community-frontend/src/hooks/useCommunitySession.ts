@@ -21,6 +21,7 @@ export const communitySessionsKeys = {
     params?.limit ?? 10,
     params?.type,
     params?.isActive,
+    params?.search,
   ] as const,
   detail: (id: string) => [...communitySessionsKeys.all, 'detail', id] as const,
   comments: (sessionId: string, params?: CommentsListParams) => [

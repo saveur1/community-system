@@ -20,11 +20,12 @@ export class OfflineApiService {
     responderId?: string,
     page: number = 1,
     limit: number = 10,
-    surveyType?: 'report-form' | 'general' | 'rapid-enquiry'
+    surveyType?: 'report-form' | 'general' | 'rapid-enquiry',
+    search?: string
   ): Promise<any> {
     try {
       if (offlineCommon.isOnline()) {
-        const response = await surveysApi.responses(surveyId, responderId, page, limit, surveyType);
+        const response = await surveysApi.responses(surveyId, responderId, page, limit, surveyType, search);
         // Map to OfflineSurveyResponse for caching
         const toOffline = (items: any[]) => items.map((r: any) => ({
           id: r.id,
@@ -51,7 +52,6 @@ export class OfflineApiService {
     // Fallback to cached responses in Dexie
     try {
       const cached = await offlineStorage.getCachedSurveyResponses({ surveyId, responderId });
-      toast.info(JSON.stringify({message: "Responses loaded from offline cache", cached}));
       // Apply simple pagination on cached results
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;

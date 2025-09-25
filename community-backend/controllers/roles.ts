@@ -3,6 +3,7 @@ import { ServiceResponse } from '../utils/serviceResponse';
 import { Role } from '../models/role';
 import Permission from '../models/permission';
 import { asyncCatch } from '@/middlewares/errorHandler';
+import { Op } from 'sequelize';
 
 interface RoleCreateRequest {
   name: string;
@@ -31,11 +32,21 @@ export class RolesController extends Controller {
     @Query() category?: string
   ): Promise<ServiceResponse<any[]>> {
     const where: any = {};
-    if (search) {
-      where.name = search;
+
+    // Add search functionality using Sequelize operators
+    if (search && search.trim()) {
+      const searchTerm = search.trim();
+      where[Op.or] = [
+        { name: { [Op.like]: `%${searchTerm}%` } },
+        { description: { [Op.like]: `%${searchTerm}%` } },
+        { category: { [Op.like]: `%${searchTerm}%` } }
+      ];
     }
-    if (category) {
-      where.category = category;
+
+    // Filter by category if provided
+    if (category && category.trim()) {
+      const categoryTerm = category.trim();
+      where.category = { [Op.like]: `%${categoryTerm}%` };
     }
 
     const queryOptions: any = {

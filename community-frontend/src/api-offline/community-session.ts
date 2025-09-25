@@ -32,7 +32,8 @@ export class OfflineApiService {
     // Fallback to cached data
     const cachedSessions = await offlineStorage.getCachedCommunitySessions({
       type: params.type,
-      isActive: params.isActive
+      isActive: params.isActive,
+      search: params.search
     });
 
     // Apply pagination

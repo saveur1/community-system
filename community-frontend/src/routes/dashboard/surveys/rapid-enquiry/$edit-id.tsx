@@ -9,6 +9,7 @@ import type { Question, Section } from '@/components/features/surveys/types'
 import { FaPlus, FaTimes } from 'react-icons/fa'
 import { useSurvey } from '@/hooks/useSurveys'
 import { useUpdateSurvey } from '@/hooks/useSurveys'
+import { getOptions } from '@/utility/logicFunctions'
 
 const LOCAL_STORAGE_KEY = 'rapid-enquiry-edit-draft'
 
@@ -80,7 +81,7 @@ function RouteComponent() {
         switch (qi.type) {
           case 'single_choice':
           case 'multiple_choice':
-            return { ...base, options: qi.options || [] }
+            return { ...base, options: getOptions(qi.options) || [] }
           case 'text_input':
           case 'textarea':
             return { ...base, placeholder: qi.placeholder || '' }
@@ -95,10 +96,6 @@ function RouteComponent() {
         }
       })
 
-      console.log("survey.questionItems", survey.questionItems)
-      console.log("mappedQuestions", mappedQuestions)
-      console.log("survey.sections", survey.sections)
-      console.log("mappedSections", finalSections)
       setSections(finalSections)
       setQuestions(mappedQuestions)
     }
@@ -188,13 +185,13 @@ function RouteComponent() {
   }
 
   const addOption = (questionId: number): void => {
-    updateQuestion(questionId, 'options', [...((questions.find(q => q.id === questionId) as any)?.options || []), ''])
+    updateQuestion(questionId, 'options', [...getOptions((questions.find(q => q.id === questionId) as any)?.options || []), ''])
   }
 
   const updateOption = (questionId: number, optionIndex: number, value: string): void => {
     const question = questions.find(q => q.id === questionId) as any
-    if (question?.options) {
-      const newOptions = [...question.options]
+    if (getOptions(question?.options)) {
+      const newOptions = getOptions(question.options)
       newOptions[optionIndex] = value
       updateQuestion(questionId, 'options', newOptions)
     }
@@ -202,8 +199,8 @@ function RouteComponent() {
 
   const removeOption = (questionId: number, optionIndex: number): void => {
     const question = questions.find(q => q.id === questionId) as any
-    if (question?.options && question.options.length > 2) {
-      const newOptions = question.options.filter((_: any, index: number) => index !== optionIndex)
+    if (getOptions(question.options).length > 2) {
+      const newOptions = getOptions(question.options).filter((_: any, index: number) => index !== optionIndex)
       updateQuestion(questionId, 'options', newOptions)
     }
   }
@@ -259,7 +256,7 @@ function RouteComponent() {
 
     // Check for empty options in choice questions
     const hasEmptyOption = questions.some(
-      (q) => (q.type === 'single_choice' || q.type === 'multiple_choice') && q.options.some((opt) => !opt.trim()),
+      (q) => (q.type === 'single_choice' || q.type === 'multiple_choice') && getOptions(q.options).some((opt) => !opt.trim()),
     )
     if (hasEmptyOption) {
       toast.error('All options in choice questions must have a value.')
@@ -284,7 +281,7 @@ function RouteComponent() {
         case 'multiple_choice':
           return {
             ...common,
-            options: (q.options ?? []).map((o: any) => String(o)),
+            options: getOptions(q.options ?? []).map((o: any) => String(o)),
           }
         case 'text_input':
         case 'textarea':
@@ -295,7 +292,7 @@ function RouteComponent() {
         case 'file_upload':
           return {
             ...common,
-            allowedTypes: Array.isArray(q.allowedTypes) ? q.allowedTypes.map((t: any) => String(t)) : [],
+            allowedTypes: Array.isArray(getOptions(q.allowedTypes)) ? getOptions(q.allowedTypes).map((t: any) => String(t)) : [],
             maxSize: typeof q.maxSize === 'number' ? q.maxSize : 10,
           }
         case 'rating':

@@ -161,6 +161,10 @@ const models: TsoaRoute.Models = {
             "role": {"dataType":"array","array":{"dataType":"refObject","ref":"IRoleAttributes"}},
             "status": {"ref":"UserStatus"},
             "profileImage": {"dataType":"string"},
+            "district": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "sector": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "cell": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "village": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
             "userType": {"dataType":"string"},
             "roleIds": {"dataType":"array","array":{"dataType":"string"}},
             "stakeholderId": {"dataType":"string"},
@@ -179,6 +183,10 @@ const models: TsoaRoute.Models = {
             "role": {"dataType":"array","array":{"dataType":"refObject","ref":"IRoleAttributes"}},
             "status": {"ref":"UserStatus"},
             "profileImage": {"dataType":"string"},
+            "district": {"dataType":"string"},
+            "sector": {"dataType":"string"},
+            "cell": {"dataType":"string"},
+            "village": {"dataType":"string"},
             "userType": {"dataType":"string"},
             "roleIds": {"dataType":"array","array":{"dataType":"string"}},
             "stakeholderId": {"dataType":"string"},
@@ -587,6 +595,15 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChangePasswordRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "oldPassword": {"dataType":"string","required":true},
+            "newPassword": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const templateService = new ExpressTemplateService(models, {"noImplicitAdditionalProperties":"throw-on-extras","bodyCoercion":true});
 
@@ -607,6 +624,8 @@ export function RegisterRoutes(app: Router) {
         const argsUserController_getUsers: Record<string, TsoaRoute.ParameterSchema> = {
                 page: {"default":1,"in":"query","name":"page","dataType":"double"},
                 limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
+                search: {"in":"query","name":"search","dataType":"string"},
+                userType: {"in":"query","name":"userType","dataType":"string"},
         };
         app.get('/api/users',
             authenticateMiddleware([{"jwt":["user:create","user:update","user:delete"]}]),
@@ -721,6 +740,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'updateUser',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsUserController_updateUserRoles: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                userId: {"in":"path","name":"userId","required":true,"dataType":"string"},
+                roleData: {"in":"body","name":"roleData","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"roleIds":{"dataType":"array","array":{"dataType":"string"},"required":true}}},
+        };
+        app.put('/api/users/:userId/roles',
+            authenticateMiddleware([{"jwt":["user:update"]}]),
+            ...(fetchMiddlewares<RequestHandler>(UserController)),
+            ...(fetchMiddlewares<RequestHandler>(UserController.prototype.updateUserRoles)),
+
+            async function UserController_updateUserRoles(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsUserController_updateUserRoles, request, response });
+
+                const controller = new UserController();
+
+              await templateService.apiHandler({
+                methodName: 'updateUserRoles',
                 controller,
                 response,
                 next,
@@ -976,6 +1028,7 @@ export function RegisterRoutes(app: Router) {
                 surveyType: {"in":"query","name":"surveyType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["report-form"]},{"dataType":"enum","enums":["general"]},{"dataType":"enum","enums":["rapid-enquiry"]}]},
                 page: {"default":1,"in":"query","name":"page","dataType":"double"},
                 limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
+                search: {"in":"query","name":"search","dataType":"string"},
         };
         app.get('/api/surveys/responses',
             authenticateMiddleware([{"jwt":["survey:read"]}]),
@@ -1833,6 +1886,7 @@ export function RegisterRoutes(app: Router) {
                 limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
                 type: {"in":"query","name":"type","dataType":"union","subSchemas":[{"dataType":"enum","enums":["stakeholder"]},{"dataType":"enum","enums":["system_owner"]}]},
                 status: {"in":"query","name":"status","dataType":"union","subSchemas":[{"dataType":"enum","enums":["active"]},{"dataType":"enum","enums":["suspended"]},{"dataType":"enum","enums":["deleted"]}]},
+                search: {"in":"query","name":"search","dataType":"string"},
         };
         app.get('/api/organizations',
             authenticateMiddleware([{"jwt":["project:read"]}]),
@@ -2740,6 +2794,7 @@ export function RegisterRoutes(app: Router) {
                 type: {"in":"query","name":"type","dataType":"union","subSchemas":[{"dataType":"enum","enums":["video"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["document"]},{"dataType":"enum","enums":["audio"]}]},
                 isActive: {"in":"query","name":"isActive","dataType":"boolean"},
                 allowed: {"in":"query","name":"allowed","dataType":"boolean"},
+                search: {"in":"query","name":"search","dataType":"string"},
         };
         app.get('/api/community-sessions',
             authenticateMiddleware([{"jwt":["community_session:read"]}]),
@@ -3298,6 +3353,39 @@ export function RegisterRoutes(app: Router) {
                 next,
                 validatedArgs,
                 successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAuthController_changePassword: Record<string, TsoaRoute.ParameterSchema> = {
+                body: {"in":"body","name":"body","required":true,"ref":"ChangePasswordRequest"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                res: {"in":"res","name":"401","required":true,"ref":"ServiceResponse_null_"},
+        };
+        app.post('/api/auth/change-password',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.changePassword)),
+
+            async function AuthController_changePassword(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_changePassword, request, response });
+
+                const controller = new AuthController();
+
+              await templateService.apiHandler({
+                methodName: 'changePassword',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
               });
             } catch (err) {
                 return next(err);

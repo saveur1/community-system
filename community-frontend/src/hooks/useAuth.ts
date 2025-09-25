@@ -69,6 +69,18 @@ export function useAuth() {
     },
   });
 
+  // Change password mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: authApi.changePassword,
+    onSuccess: () => {
+      toast.success('Password changed successfully');
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Password change failed';
+      toast.error(errorMessage);
+    },
+  });
+
   // Google auth
   const googleAuthMutation = useMutation({
     mutationFn: authApi.getGoogleAuth,
@@ -91,9 +103,15 @@ export function useAuth() {
   });
 
   // Logout function
-  const logout = () => {
-    authApi.logout();
-    navigate({to: "/auth/login"});
+  const logout = async () => {
+    try {
+      await authApi.logout();
+      navigate({to: "/auth/login"});
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if API call fails, redirect to login
+      navigate({to: "/auth/login"});
+    }
   };
 
   // Refresh the current user data
@@ -111,12 +129,14 @@ export function useAuth() {
     signup: signupMutation.mutate,
     forgotPassword: forgotPasswordMutation.mutate,
     resetPassword: resetPasswordMutation.mutate,
+    changePassword: changePasswordMutation.mutate,
     loginWithGoogle: googleAuthMutation.mutate,
     
     // Loading states
     isLoading: loginMutation.isPending || signupMutation.isPending,
     isLoggingIn: loginMutation.isPending,
     isSigningUp: signupMutation.isPending,
+    isChangingPassword: changePasswordMutation.isPending,
     error: loginMutation.error,
     
     // Auth state

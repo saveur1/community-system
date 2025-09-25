@@ -6,6 +6,7 @@ import { IUserCreateRequest, IUserResponse, IUserUpdateRequest } from '../types/
 import { asyncCatch } from '../middlewares/errorHandler';
 import { hash } from 'bcrypt';
 import sequelize from '../config/database';
+import { Op } from 'sequelize';
 import Stakeholder from '../models/organization';
 import { createSystemLog } from '../utils/systemLog';
 
@@ -29,20 +30,89 @@ export class UserController extends Controller {
   @asyncCatch
   public async getUsers(
     @Query() page: number = 1,
-    @Query() limit: number = 10
+    @Query() limit: number = 10,
+    @Query() search?: string,
+    @Query() userType?: string
   ): Promise<ServiceResponse<IUserResponse[]>> {
-    const offset = (page - 1) * limit;
-    const { count, rows: users } = await User.findAndCountAll({
-      limit,
+    // Handle request for all users (limit = -1) set offset to 0 to get all users
+    const offset = limit > 0 ? (page - 1) * limit : 0; // Handle negative limit
+
+    // Build where clause for search
+    let whereClause: any = {};
+    let searchConditions: any = {};
+
+    // Add userType filter if provided
+    if (userType && userType.trim()) {
+      whereClause.userType = userType;
+    }
+
+    if (search && search.trim()) {
+      const searchTerm = `%${search.toLowerCase()}%`;
+
+      searchConditions = {
+        [Op.or]: [
+          // Search in user fields with proper table qualification
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('User.name')), {
+            [Op.like]: searchTerm
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('User.email')), {
+            [Op.like]: searchTerm
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('User.phone')), {
+            [Op.like]: searchTerm
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('User.district')), {
+            [Op.like]: searchTerm
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('User.sector')), {
+            [Op.like]: searchTerm
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('User.cell')), {
+            [Op.like]: searchTerm
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('User.village')), {
+            [Op.like]: searchTerm
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('User.address')), {
+            [Op.like]: searchTerm
+          })
+        ]
+      };
+    }
+
+    // Combine where conditions with search conditions (same as feedback controller)
+    const finalWhere = search && search.trim()
+      ? { [Op.and]: [whereClause, searchConditions] }
+      : whereClause;
+
+    
+    const queryOptions: any = {
       offset,
-      include: [{ model: Role, as: 'roles', attributes: ['id', 'name', 'description'], through: { attributes: [] } }],
       order: [['createdAt', 'DESC']],
+      where: finalWhere,
+      include: [{
+        model: Role,
+        as: 'roles',
+        attributes: ['id', 'name', 'description'],
+        through: { attributes: [] },
+        required: false // Use left join to include users without roles
+      }],
       distinct: true,
-    });
+    }
+
+    if (limit > 0) {
+      queryOptions.limit = limit;
+    }
+
+    const { count, rows: users } = await User.findAndCountAll(queryOptions);
 
     const userResponses = await Promise.all(users.map(user => this._buildUserResponse(user)));
 
-    return ServiceResponse.success('Users retrieved successfully', userResponses, 200, { total: count, page, totalPages: Math.ceil(count / limit) });
+    return ServiceResponse.success('Users retrieved successfully', userResponses, 200, {
+      total: count,
+      page,
+      totalPages: Math.ceil(count / limit)
+    });
   }
 
   @Security("jwt", ["user:view"])
@@ -145,6 +215,57 @@ export class UserController extends Controller {
     const userResponse = await this._buildUserResponse(user);
     await createSystemLog(req ?? null, 'updated_user', 'User', user.id, { changes: Object.keys(userData) });
     return ServiceResponse.success('User updated successfully', userResponse);
+  }
+
+  @Security("jwt", ["user:update"])
+  @Put("/{userId}/roles")
+  @Response<ServiceResponse<null>>(404, "User not found")
+  @Response<ServiceResponse<null>>(400, "Invalid role IDs provided")
+  @asyncCatch
+  public async updateUserRoles(
+    @Request() req: any,
+    @Path() userId: string,
+    @Body() roleData: { roleIds: string[] }
+  ): Promise<ServiceResponse<IUserResponse | null>> {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return ServiceResponse.failure('User not found', null, 404);
+    }
+
+    // Validate that all provided role IDs exist
+    const roles = await Role.findAll({ 
+      where: { id: roleData.roleIds },
+      attributes: ['id', 'name', 'description']
+    });
+
+    if (roles.length !== roleData.roleIds.length) {
+      const foundRoleIds = roles.map(role => role.id);
+      const invalidRoleIds = roleData.roleIds.filter(id => !foundRoleIds.includes(id));
+      return ServiceResponse.failure(
+        `Invalid role IDs provided: ${invalidRoleIds.join(', ')}`, 
+        null, 
+        400
+      );
+    }
+
+    await sequelize.transaction(async (t) => {
+      // Replace all user roles with the new ones
+      await user.setRoles(roles, { transaction: t });
+    });
+
+    const userResponse = await this._buildUserResponse(user);
+    await createSystemLog(
+      req ?? null, 
+      'updated_user_roles', 
+      'User', 
+      user.id, 
+      { 
+        roleIds: roleData.roleIds,
+        roleNames: roles.map(role => role.name)
+      }
+    );
+    
+    return ServiceResponse.success('User roles updated successfully', userResponse);
   }
 
   @Security("jwt", ["user:delete"])

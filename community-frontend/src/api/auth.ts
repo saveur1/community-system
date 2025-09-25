@@ -41,6 +41,10 @@ export const authApi = {
     const { data } = await client.post('/auth/logout');
     return data;
   },
+  changePassword: async (changePasswordData: ChangePasswordRequest): Promise<{ message: string }> => {
+    const { data } = await client.post('/auth/change-password', changePasswordData);
+    return data;
+  },
 };
 
 
@@ -69,6 +73,11 @@ export const authApi = {
   
   type ResetPasswordRequest = {
     token: string;
+    newPassword: string;
+  };
+
+  type ChangePasswordRequest = {
+    oldPassword: string;
     newPassword: string;
   };
 

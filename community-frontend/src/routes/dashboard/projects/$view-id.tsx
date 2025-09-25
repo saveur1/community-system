@@ -13,14 +13,14 @@ type ProgrammeFeedback = { id: number; respondent: string; type: 'Positive' | 'N
 
 function getStatusColor(status: string) {
   switch (status.toLowerCase()) {
-    case 'active': return 'bg-green-100 text-green-800';
-    case 'in_progress': return 'bg-blue-100 text-blue-800';
-    case 'planned': return 'bg-purple-100 text-purple-800';
-    case 'completed': return 'bg-emerald-100 text-emerald-800';
-    case 'on_hold': return 'bg-yellow-100 text-yellow-800';
-    case 'cancelled': return 'bg-red-100 text-red-800';
-    case 'draft': return 'bg-gray-100 text-gray-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    case 'in_progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+    case 'planned': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+    case 'completed': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
+    case 'on_hold': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+    case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
   }
 }
 
@@ -135,9 +135,13 @@ const ProgramDetail = () => {
   if (isLoading) {
     return (
       <div className="pb-10">
-        <Breadcrumb items={["Community", "Projects", "Loading..."]} title="Project Details" className="absolute top-0 left-0 w-full px-6" />
+        <Breadcrumb items={[
+          {title: "Dashboard", link: "/dashboard"}, 
+          {title: "Projects", link: "/dashboard/projects"}, 
+          "Loading..."
+          ]} title="Project Details" className="absolute top-0 left-0 w-full px-6" />
         <div className="pt-14 flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading project details...</div>
+          <div className="text-gray-500 dark:text-gray-400">Loading project details...</div>
         </div>
       </div>
     );
@@ -146,9 +150,13 @@ const ProgramDetail = () => {
   if (error || !project?.result) {
     return (
       <div className="pb-10">
-        <Breadcrumb items={["Community", "Projects", "Error"]} title="Project Details" className="absolute top-0 left-0 w-full px-6" />
+        <Breadcrumb items={[
+          {title: "Dashboard", link: "/dashboard"}, 
+          {title: "Projects", link: "/dashboard/projects"}, 
+          "Error"
+          ]} title="Project Details" className="absolute top-0 left-0 w-full px-6" />
         <div className="pt-14 flex items-center justify-center h-64">
-          <div className="text-red-500">Failed to load project details</div>
+          <div className="text-red-500 dark:text-red-400">Failed to load project details</div>
         </div>
       </div>
     );
@@ -158,33 +166,38 @@ const ProgramDetail = () => {
 
   return (
     <div className="pb-10">
-      <Breadcrumb items={["Community", "Projects", projectData?.name || ""]} title="Project Details" className="absolute top-0 left-0 w-full px-6" />
+      <Breadcrumb items={[
+        {title: "Dashboard", link: "/dashboard" },
+        "Projects", projectData?.name || ""
+      ]} 
+        title="Project Details" 
+        className="absolute top-0 left-0 w-full px-6" />
 
-      <div className="pt-14 space-y-6">
+      <div className="pt-20 space-y-6">
         {/* Overview Card */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 bg-title/5 w-full overflow-hidden pb-0">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 bg-title/5 dark:bg-title/10 w-full overflow-hidden pb-0">
             <div className="flex items-start gap-4">
               <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-gray-800">{projectData?.name}</h1>
-                <div className="mt-2 flex items-center gap-6 text-sm text-gray-600">
+                <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">{projectData?.name}</h1>
+                <div className="mt-2 flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(projectData?.status || ``)}`}>{formatStatus(projectData?.status || '')}</span>
-                  <span className="inline-flex items-center gap-2"><FaUsers /> Target: {projectData?.targetGroup}</span>
-                  <span className="inline-flex items-center gap-2"><FaFolderOpen /> Docs: {projectData?.documents?.length || 0}</span>
-                  <span className="inline-flex items-center gap-2"><FaBuilding /> Donors: {projectData?.donors?.length || 0}</span>
-                  {projectData?.geographicArea && <span className="inline-flex items-center gap-2"><FaMapMarkerAlt /> {projectData.geographicArea}</span>}
+                  <span className="inline-flex items-center gap-2"><FaUsers className="text-gray-400 dark:text-gray-500" /> Target: {projectData?.targetGroup}</span>
+                  <span className="inline-flex items-center gap-2"><FaFolderOpen className="text-gray-400 dark:text-gray-500" /> Docs: {projectData?.documents?.length || 0}</span>
+                  <span className="inline-flex items-center gap-2"><FaBuilding className="text-gray-400 dark:text-gray-500" /> Donors: {projectData?.donors?.length || 0}</span>
+                  {projectData?.geographicArea && <span className="inline-flex items-center gap-2"><FaMapMarkerAlt className="text-gray-400 dark:text-gray-500" /> {projectData.geographicArea}</span>}
                 </div>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="mt-10 border-b border-gray-200">
+            <div className="mt-10 border-b border-gray-200 dark:border-gray-600">
               <nav className="-mb-px flex gap-6" aria-label="Tabs">
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `details` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`details`)}>Details</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `resources` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`resources`)}>Resources ({projectData?.documents?.length || 0})</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `surveys` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`surveys`)}>Surveys (3)</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `feedbacks` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`feedbacks`)}>Feedbacks (980)</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `donors` ? `border-primary text-primary` : `border-transparent text-gray-500 hover:text-gray-700`}`} onClick={() => setActiveTab(`donors`)}>Donors ({projectData?.donors?.length || 0})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `details` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`details`)}>Details</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `resources` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`resources`)}>Resources ({projectData?.documents?.length || 0})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `surveys` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`surveys`)}>Surveys (3)</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `feedbacks` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`feedbacks`)}>Feedbacks (980)</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `donors` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`donors`)}>Donors ({projectData?.donors?.length || 0})</button>
               </nav>
             </div>
           </div>
@@ -196,16 +209,16 @@ const ProgramDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Project Info Card */}
               <div className="lg:col-span-2">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Project Information</h3>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Project Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Project Name</label>
-                        <p className="mt-1 text-gray-900 font-medium">{projectData.name}</p>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Project Name</label>
+                        <p className="mt-1 text-gray-900 dark:text-gray-100 font-medium">{projectData.name}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Status</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Status</label>
                         <div className="mt-1">
                           <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(projectData.status)}`}>
                             {formatStatus(projectData.status)}
@@ -213,33 +226,33 @@ const ProgramDetail = () => {
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Target Group</label>
-                        <p className="mt-1 text-gray-900">{projectData.targetGroup}</p>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Target Group</label>
+                        <p className="mt-1 text-gray-900 dark:text-gray-100">{projectData.targetGroup}</p>
                       </div>
                     </div>
                     <div className="space-y-4">
                       {projectData.projectDuration && (
                         <div>
-                          <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Duration</label>
-                          <p className="mt-1 text-gray-900 flex items-center gap-2">
-                            <FaClock className="text-gray-400" />
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Duration</label>
+                          <p className="mt-1 text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            <FaClock className="text-gray-400 dark:text-gray-500" />
                             {projectData.projectDuration}
                           </p>
                         </div>
                       )}
                       {projectData.geographicArea && (
                         <div>
-                          <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Geographic Area</label>
-                          <p className="mt-1 text-gray-900 flex items-center gap-2">
-                            <FaMapMarkerAlt className="text-gray-400" />
+                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Geographic Area</label>
+                          <p className="mt-1 text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            <FaMapMarkerAlt className="text-gray-400 dark:text-gray-500" />
                             {projectData.geographicArea}
                           </p>
                         </div>
                       )}
                       <div>
-                        <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Created</label>
-                        <p className="mt-1 text-gray-900 flex items-center gap-2">
-                          <FaCalendarAlt className="text-gray-400" />
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Created</label>
+                        <p className="mt-1 text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                          <FaCalendarAlt className="text-gray-400 dark:text-gray-500" />
                           {new Date(projectData?.createdAt || '').toLocaleDateString()}
                         </p>
                       </div>
@@ -250,36 +263,36 @@ const ProgramDetail = () => {
               
               {/* Statistics Card */}
               <div>
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Project Statistics</h3>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Project Statistics</h3>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <FaFolderOpen className="text-blue-600" />
-                        <span className="text-sm font-medium text-gray-700">Documents</span>
+                        <FaFolderOpen className="text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Documents</span>
                       </div>
-                      <span className="text-lg font-bold text-blue-600">{projectData.documents?.length || 0}</span>
+                      <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{projectData.documents?.length || 0}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <FaUsers className="text-green-600" />
-                        <span className="text-sm font-medium text-gray-700">Stakeholders</span>
+                        <FaUsers className="text-green-600 dark:text-green-400" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Stakeholders</span>
                       </div>
-                      <span className="text-lg font-bold text-green-600">{projectData.stakeholders?.length || 0}</span>
+                      <span className="text-lg font-bold text-green-600 dark:text-green-400">{projectData.stakeholders?.length || 0}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <FaBuilding className="text-purple-600" />
-                        <span className="text-sm font-medium text-gray-700">Donors</span>
+                        <FaBuilding className="text-purple-600 dark:text-purple-400" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Donors</span>
                       </div>
-                      <span className="text-lg font-bold text-purple-600">{projectData.donors?.length || 0}</span>
+                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">{projectData.donors?.length || 0}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <FaListOl className="text-orange-600" />
-                        <span className="text-sm font-medium text-gray-700">Surveys</span>
+                        <FaListOl className="text-orange-600 dark:text-orange-400" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Surveys</span>
                       </div>
-                      <span className="text-lg font-bold text-orange-600">3</span>
+                      <span className="text-lg font-bold text-orange-600 dark:text-orange-400">3</span>
                     </div>
                   </div>
                 </div>
@@ -290,10 +303,10 @@ const ProgramDetail = () => {
 
         {activeTab === 'resources' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-4 flex items-center gap-3 border-b border-gray-200">
-                <input value={docSearch} onChange={(e) => { setDocSearch(e.target.value); setDocPage(1); }} placeholder="Search documents..." className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-                <label className="inline-flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer text-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-4 flex items-center gap-3 border-b border-gray-200 dark:border-gray-600">
+                <input value={docSearch} onChange={(e) => { setDocSearch(e.target.value); setDocPage(1); }} placeholder="Search documents..." className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" />
+                <label className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md cursor-pointer text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
                   <FaUpload />
                   <span>Upload</span>
                   <input type="file" multiple className="hidden" onChange={(e) => {
@@ -308,35 +321,35 @@ const ProgramDetail = () => {
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="border-b border-gray-200">
+                  <thead className="border-b border-gray-200 dark:border-gray-600">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Name</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Type</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Size</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Added</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Actions</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Name</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Type</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Size</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Added</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {docPageData.map(d => (
-                      <tr key={d.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm text-gray-700">
+                      <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                           {d.name}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{d.type}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{d.size}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{d.added}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{d.type}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{d.size}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{d.added}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3 text-sm">
-                            <button className="text-title hover:underline">Download</button>
-                            <button className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700" onClick={() => {
+                            <button className="text-title dark:text-primary-200 hover:underline">Download</button>
+                            <button className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300" onClick={() => {
                               const newName = prompt('Rename document', d.name);
                               if (!newName) return;
                               setDocs(prev => prev.map(x => x.id === d.id ? { ...x, name: newName } : x));
                             }}>
                               <FaEdit /> Rename
                             </button>
-                            <button className="inline-flex items-center gap-1 text-rose-600 hover:text-rose-700" onClick={() => setDocs(prev => prev.filter(x => x.id !== d.id))}>
+                            <button className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300" onClick={() => setDocs(prev => prev.filter(x => x.id !== d.id))}>
                               <FaTrash /> Delete
                             </button>
                           </div>
@@ -346,12 +359,12 @@ const ProgramDetail = () => {
                   </tbody>
                 </table>
               </div>
-              <div className="flex items-center justify-between p-4 border-t border-gray-200 text-sm text-gray-600">
+              <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400">
                 <div>Page {docPage} of {docTotalPages} • {docsFiltered.length} documents</div>
                 <div className="flex items-center gap-2">
-                  <button className="px-3 py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50" onClick={() => setDocPage(p => Math.max(1, p - 1))} disabled={docPage === 1}><FaChevronLeft /></button>
-                  <button className="px-3 py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50" onClick={() => setDocPage(p => Math.min(docTotalPages, p + 1))} disabled={docPage === docTotalPages}><FaChevronRight /></button>
-                  <select className="ml-2 border rounded px-2 py-1 text-sm" value={docPageSize} onChange={(e) => { setDocPageSize(Number(e.target.value)); setDocPage(1); }}>
+                  <button className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300" onClick={() => setDocPage(p => Math.max(1, p - 1))} disabled={docPage === 1}><FaChevronLeft /></button>
+                  <button className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300" onClick={() => setDocPage(p => Math.min(docTotalPages, p + 1))} disabled={docPage === docTotalPages}><FaChevronRight /></button>
+                  <select className="ml-2 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" value={docPageSize} onChange={(e) => { setDocPageSize(Number(e.target.value)); setDocPage(1); }}>
                     {[5,10,20].map(n => <option key={n} value={n}>{n} / page</option>)}
                   </select>
                 </div>
@@ -362,36 +375,36 @@ const ProgramDetail = () => {
 
         {activeTab === 'surveys' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-4 flex items-center gap-3 border-b border-gray-200">
-                <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search surveys..." className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-4 flex items-center gap-3 border-b border-gray-200 dark:border-gray-600">
+                <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search surveys..." className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" />
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Rows:</label>
-                  <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }} className="border border-gray-300 rounded-md px-2 py-1 text-sm">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">Rows:</label>
+                  <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }} className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                     {[5,10,20].map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="border-b border-gray-200">
+                  <thead className="border-b border-gray-200 dark:border-gray-600">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort("name")}>Name {sortIcon("name")}</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort("status")}>Status {sortIcon("status")}</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort("email")}>Contact {sortIcon("email")}</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 cursor-pointer" onClick={() => toggleSort("responses")}>Responses {sortIcon("responses")}</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Action</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700" onClick={() => toggleSort("name")}>Name {sortIcon("name")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700" onClick={() => toggleSort("status")}>Status {sortIcon("status")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700" onClick={() => toggleSort("email")}>Contact {sortIcon("email")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700" onClick={() => toggleSort("responses")}>Responses {sortIcon("responses")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {pageData.map(s => (
-                      <tr key={s.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm text-gray-700">{s.name}</td>
-                        <td className="px-6 py-4"><span className={"inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(s.status)}"}>{s.status}</span></td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{s.email}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{s.responses}</td>
+                      <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{s.name}</td>
+                        <td className="px-6 py-4"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(s.status)}`}>{s.status}</span></td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{s.email}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{s.responses}</td>
                         <td className="px-6 py-4">
-                          <Link to="/dashboard/surveys/$view-id" params={{ "view-id": String(s.id) }} className="text-title inline-flex items-center gap-2">
+                          <Link to="/dashboard/surveys/$view-id" params={{ "view-id": String(s.id) }} className="text-title dark:text-primary-200 inline-flex items-center gap-2 hover:underline">
                             <FaEye className="w-4 h-4" /> View
                           </Link>
                         </td>
@@ -400,11 +413,11 @@ const ProgramDetail = () => {
                   </tbody>
                 </table>
               </div>
-              <div className="flex items-center justify-between p-4 border-t border-gray-200 text-sm text-gray-600">
+              <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400">
                 <div>Page {page} of {totalPages} • {surveysSorted.length} total</div>
                 <div className="flex items-center gap-2">
-                  <button className="px-3 py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><FaChevronLeft /></button>
-                  <button className="px-3 py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}><FaChevronRight /></button>
+                  <button className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><FaChevronLeft /></button>
+                  <button className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}><FaChevronRight /></button>
                 </div>
               </div>
             </div>
@@ -413,50 +426,50 @@ const ProgramDetail = () => {
 
         {activeTab === 'feedbacks' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-4 flex items-center gap-3 border-b border-gray-200">
-                <input value={search} onChange={(e) => { setSearch(e.target.value); setFbPage(1); }} placeholder="Search feedbacks..." className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-4 flex items-center gap-3 border-b border-gray-200 dark:border-gray-600">
+                <input value={search} onChange={(e) => { setSearch(e.target.value); setFbPage(1); }} placeholder="Search feedbacks..." className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" />
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Rows:</label>
-                  <select value={fbPageSize} onChange={(e) => { setFbPageSize(Number(e.target.value)); setFbPage(1); }} className="border border-gray-300 rounded-md px-2 py-1 text-sm">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">Rows:</label>
+                  <select value={fbPageSize} onChange={(e) => { setFbPageSize(Number(e.target.value)); setFbPage(1); }} className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                     {[5,10,20].map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="border-b border-gray-200">
+                  <thead className="border-b border-gray-200 dark:border-gray-600">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Respondent</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Type</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Message</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Follow-up</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Respondent</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Type</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Message</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Follow-up</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {feedbacks
                       .filter(f => [f.respondent, f.type, f.message, f.status].some(v => String(v).toLowerCase().includes(search.toLowerCase())))
                       .slice((fbPage-1)*fbPageSize, (fbPage-1)*fbPageSize + fbPageSize)
                       .map(f => (
-                      <tr key={f.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm text-gray-700">{f.respondent}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{f.type}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700 max-w-xl truncate" title={f.message}>{f.message}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{f.followUp ? "Yes" : "No"}</td>
-                        <td className="px-6 py-4"><span className={"inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(f.status)}"}>{f.status}</span></td>
+                      <tr key={f.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{f.respondent}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{f.type}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 max-w-xl truncate" title={f.message}>{f.message}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{f.followUp ? "Yes" : "No"}</td>
+                        <td className="px-6 py-4"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(f.status)}`}>{f.status}</span></td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              <div className="flex items-center justify-between p-4 border-t border-gray-200 text-sm text-gray-600">
+              <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400">
                 <div>
                   Page {fbPage} • Showing {Math.min(fbPageSize, Math.max(0, feedbacks.filter(f => [f.respondent, f.type, f.message, f.status].some(v => String(v).toLowerCase().includes(search.toLowerCase()))).length - (fbPage-1)*fbPageSize))} rows
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="px-3 py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50" onClick={() => setFbPage(p => Math.max(1, p - 1))} disabled={fbPage === 1}><FaChevronLeft /></button>
-                  <button className="px-3 py-1.5 border rounded-md hover:bg-gray-50 disabled:opacity-50" onClick={() => setFbPage(p => p + 1)} disabled={(fbPage-1)*fbPageSize >= feedbacks.filter(f => [f.respondent, f.type, f.message, f.status].some(v => String(v).toLowerCase().includes(search.toLowerCase()))).length - fbPageSize}><FaChevronRight /></button>
+                  <button className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300" onClick={() => setFbPage(p => Math.max(1, p - 1))} disabled={fbPage === 1}><FaChevronLeft /></button>
+                  <button className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300" onClick={() => setFbPage(p => p + 1)} disabled={(fbPage-1)*fbPageSize >= feedbacks.filter(f => [f.respondent, f.type, f.message, f.status].some(v => String(v).toLowerCase().includes(search.toLowerCase()))).length - fbPageSize}><FaChevronRight /></button>
                 </div>
               </div>
             </div>
@@ -465,57 +478,57 @@ const ProgramDetail = () => {
 
         {activeTab === 'donors' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800">Project Donors</h3>
-                <p className="text-sm text-gray-600 mt-1">Organizations and stakeholders supporting this project</p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-600">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Project Donors</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Organizations and stakeholders supporting this project</p>
               </div>
               {projectData?.donors && projectData.donors.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="min-w-full">
-                    <thead className="border-b border-gray-200">
+                    <thead className="border-b border-gray-200 dark:border-gray-600">
                       <tr>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Logo</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Name</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Description</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Type</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Status</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Added</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Logo</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Name</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Description</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Type</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Status</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-900 dark:text-gray-100">Added</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                       {projectData.donors.map(donor => (
-                        <tr key={donor.id} className="hover:bg-gray-50">
+                        <tr key={donor.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                           <td className="px-6 py-4">
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                               {donor.logo ? (
-                                <img 
-                                  src={donor.logo} 
+                                <img
+                                  src={donor.logo}
                                   alt={donor.name}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = 'none';
-                                    target.parentElement!.innerHTML = `<span class="text-xs font-medium text-gray-500">${donor.name.charAt(0).toUpperCase()}</span>`;
+                                    target.parentElement!.innerHTML = `<span class="text-xs font-medium text-gray-500 dark:text-gray-400">${donor.name.charAt(0).toUpperCase()}</span>`;
                                   }}
                                 />
                               ) : (
-                                <span className="text-xs font-medium text-gray-500">
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                                   {donor.name.charAt(0).toUpperCase()}
                                 </span>
                               )}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-gray-900">{donor.name}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{donor.name}</div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-700 max-w-xs truncate" title={donor.description}>
+                            <div className="text-sm text-gray-700 dark:text-gray-300 max-w-xs truncate" title={donor.description}>
                               {donor.description}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                               {donor.type}
                             </span>
                           </td>
@@ -524,7 +537,7 @@ const ProgramDetail = () => {
                               {formatStatus(donor.status)}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">
+                          <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                             {new Date(donor.createdAt).toLocaleDateString()}
                           </td>
                         </tr>
@@ -534,9 +547,9 @@ const ProgramDetail = () => {
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <FaBuilding className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No donors</h3>
-                  <p className="mt-1 text-sm text-gray-500">This project doesn't have any donors yet.</p>
+                  <FaBuilding className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">No donors</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">This project doesn't have any donors yet.</p>
                 </div>
               )}
             </div>
