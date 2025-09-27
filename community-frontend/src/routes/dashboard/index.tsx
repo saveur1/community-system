@@ -173,14 +173,14 @@ function DashboardHome() {
     ...(checkPermissions(user, "user:create")
       ? [
           { id: "accounts", label: "Accounts", icon: <HiOutlineUsers size={22} />, to: "/dashboard/accounts", color: "bg-blue-100" },
-          { id: "pending", label: "Pending Approvals", icon: <HiOutlineClock size={22} />, to: "/dashboard/pending", color: "bg-amber-100" },
+          { id: "pending", label: "Pending Approvals", icon: <HiOutlineClock size={22} />, to: "/dashboard/accounts?status=pending", color: "bg-amber-100" },
         ]
       : []),
     ...(checkPermissions(user, "survey:respond")
       ? [{ id: "surveys", label: "Surveys", icon: <FaClipboardList size={22} />, to: "/dashboard/surveys/take-survey", color: "bg-teal-100" }]
       : []),
     ...(checkPermissions(user, "report:create")
-      ? [{ id: "reports", label: "Reports", icon: <HiOutlineChartBar size={22} />, to: "/dashboard/reporting", color: "bg-sky-100" }]
+      ? [{ id: "reports", label: "Data collection", icon: <HiOutlineChartBar size={22} />, to: "/dashboard/reporting", color: "bg-sky-100" }]
       : []),
     ...(checkPermissions(user, "feedback:create")
       ? [{ id: "feedbacks", label: "Feedbacks", icon: <HiOutlineXCircle size={22} />, to: "/dashboard/feedback", color: "bg-rose-100" }]

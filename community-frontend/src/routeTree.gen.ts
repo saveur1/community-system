@@ -27,6 +27,7 @@ import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/s
 import { Route as DashboardReportingIndexRouteImport } from './routes/dashboard/reporting/index'
 import { Route as DashboardRapidEnquiryIndexRouteImport } from './routes/dashboard/rapid-enquiry/index'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
+import { Route as DashboardProfileIndexRouteImport } from './routes/dashboard/profile/index'
 import { Route as DashboardNotificationsIndexRouteImport } from './routes/dashboard/notifications/index'
 import { Route as DashboardFeedbackIndexRouteImport } from './routes/dashboard/feedback/index'
 import { Route as DashboardDocumentsIndexRouteImport } from './routes/dashboard/documents/index'
@@ -169,6 +170,11 @@ const DashboardRapidEnquiryIndexRoute =
 const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardProfileIndexRoute = DashboardProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardNotificationsIndexRoute =
@@ -507,6 +513,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
+  '/dashboard/profile': typeof DashboardProfileIndexRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
   '/dashboard/rapid-enquiry': typeof DashboardRapidEnquiryIndexRoute
   '/dashboard/reporting': typeof DashboardReportingIndexRoute
@@ -575,6 +582,7 @@ export interface FileRoutesByTo {
   '/dashboard/documents': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications': typeof DashboardNotificationsIndexRoute
+  '/dashboard/profile': typeof DashboardProfileIndexRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
   '/dashboard/rapid-enquiry': typeof DashboardRapidEnquiryIndexRoute
   '/dashboard/reporting': typeof DashboardReportingIndexRoute
@@ -646,6 +654,7 @@ export interface FileRoutesById {
   '/dashboard/documents/': typeof DashboardDocumentsIndexRoute
   '/dashboard/feedback/': typeof DashboardFeedbackIndexRoute
   '/dashboard/notifications/': typeof DashboardNotificationsIndexRoute
+  '/dashboard/profile/': typeof DashboardProfileIndexRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
   '/dashboard/rapid-enquiry/': typeof DashboardRapidEnquiryIndexRoute
   '/dashboard/reporting/': typeof DashboardReportingIndexRoute
@@ -717,6 +726,7 @@ export interface FileRouteTypes {
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
+    | '/dashboard/profile'
     | '/dashboard/projects'
     | '/dashboard/rapid-enquiry'
     | '/dashboard/reporting'
@@ -785,6 +795,7 @@ export interface FileRouteTypes {
     | '/dashboard/documents'
     | '/dashboard/feedback'
     | '/dashboard/notifications'
+    | '/dashboard/profile'
     | '/dashboard/projects'
     | '/dashboard/rapid-enquiry'
     | '/dashboard/reporting'
@@ -855,6 +866,7 @@ export interface FileRouteTypes {
     | '/dashboard/documents/'
     | '/dashboard/feedback/'
     | '/dashboard/notifications/'
+    | '/dashboard/profile/'
     | '/dashboard/projects/'
     | '/dashboard/rapid-enquiry/'
     | '/dashboard/reporting/'
@@ -1013,6 +1025,13 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/dashboard/projects'
       preLoaderRoute: typeof DashboardProjectsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/profile/': {
+      id: '/dashboard/profile/'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/notifications/': {
@@ -1443,6 +1462,7 @@ interface DashboardRouteRouteChildren {
   DashboardDocumentsIndexRoute: typeof DashboardDocumentsIndexRoute
   DashboardFeedbackIndexRoute: typeof DashboardFeedbackIndexRoute
   DashboardNotificationsIndexRoute: typeof DashboardNotificationsIndexRoute
+  DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
   DashboardProjectsIndexRoute: typeof DashboardProjectsIndexRoute
   DashboardRapidEnquiryIndexRoute: typeof DashboardRapidEnquiryIndexRoute
   DashboardReportingIndexRoute: typeof DashboardReportingIndexRoute
@@ -1503,6 +1523,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardDocumentsIndexRoute: DashboardDocumentsIndexRoute,
   DashboardFeedbackIndexRoute: DashboardFeedbackIndexRoute,
   DashboardNotificationsIndexRoute: DashboardNotificationsIndexRoute,
+  DashboardProfileIndexRoute: DashboardProfileIndexRoute,
   DashboardProjectsIndexRoute: DashboardProjectsIndexRoute,
   DashboardRapidEnquiryIndexRoute: DashboardRapidEnquiryIndexRoute,
   DashboardReportingIndexRoute: DashboardReportingIndexRoute,

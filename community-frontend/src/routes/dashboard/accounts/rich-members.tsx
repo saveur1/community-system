@@ -149,6 +149,8 @@ function RichMembersAccountsPage() {
       <AccountsList
         accounts={accounts}
         title="RICH Members"
+        filters={filters}
+        setFilters={setFilters}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}

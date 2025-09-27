@@ -56,6 +56,9 @@ const EditProjectComponent: FC = (): JSX.Element => {
     resourceFiles: [],
   });
 
+  // Track existing documents marked for removal
+  const [removedDocumentIds, setRemovedDocumentIds] = useState<string[]>([]);
+
   // Steps
   const [currentStep, setCurrentStep] = useState<number>(1);
   const totalSteps = 2;
@@ -63,17 +66,20 @@ const EditProjectComponent: FC = (): JSX.Element => {
   // Populate form with existing project data
   useEffect(() => {
     if (projectData?.result) {
+      
       const project = projectData.result;
       setProgramme({
         title: project.name || '',
         slug: project.name?.toLowerCase().replace(/\s+/g, '-') || '',
-        description: '', // Description might not be available in the API response
+        description: project?.description || '',
         targetGroup: project.targetGroup || '',
         projectDuration: project.projectDuration || '',
         geographicArea: project.geographicArea || '',
         donorIds: project.donors?.map((d: any) => d.id) || [],
         resourceFiles: [], // Files will be handled separately
       });
+      // Reset removed documents when switching projects or reloading
+      setRemovedDocumentIds([]);
     }
   }, [projectData]);
 
@@ -88,10 +94,6 @@ const EditProjectComponent: FC = (): JSX.Element => {
     setProgramme(prev => ({ ...prev, slug: slugified }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programme.title]);
-
-  // const stepTitle = useMemo(() => {
-  //   return currentStep === 1 ? 'Project Details' : 'Target Group, Donors & Resources';
-  // }, [currentStep]);
 
   // File uploads
   const onSelectFiles = (files: FileList | null) => {
@@ -152,11 +154,13 @@ const EditProjectComponent: FC = (): JSX.Element => {
         // 2) Submit project update with new fields and documents array
         await updateProject.mutateAsync({
           name: programme.title,
+          description: programme.description,
           targetGroup: programme.targetGroup || null,
           projectDuration: programme.projectDuration || null,
           geographicArea: programme.geographicArea || null,
           donorIds: programme.donorIds,
           ...(uploads.length > 0 && { documents: uploads }),
+          ...(removedDocumentIds.length > 0 && { removeDocumentIds: removedDocumentIds }),
         });
 
         navigate({ to: '/dashboard/projects' });
@@ -174,9 +178,9 @@ const EditProjectComponent: FC = (): JSX.Element => {
       <div className="pb-10">
         <Breadcrumb items={["Community", "Projects", "Edit Project"]} title="Edit Project" className="absolute top-0 left-0 w-full px-6" />
         <div className="pt-20 max-w-5xl mx-auto">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading project data...</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Loading project data...</p>
           </div>
         </div>
       </div>
@@ -188,11 +192,11 @@ const EditProjectComponent: FC = (): JSX.Element => {
       <div className="pb-10">
         <Breadcrumb items={["Community", "Projects", "Edit Project"]} title="Edit Project" className="absolute top-0 left-0 w-full px-6" />
         <div className="pt-20 max-w-5xl mx-auto">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-            <p className="text-red-600">Failed to load project data. Please try again.</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 text-center">
+            <p className="text-red-600 dark:text-red-400">Failed to load project data. Please try again.</p>
             <button 
               onClick={() => navigate({ to: '/dashboard/projects' })}
-              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600"
+              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-500"
             >
               Back to Projects
             </button>
@@ -204,7 +208,12 @@ const EditProjectComponent: FC = (): JSX.Element => {
 
   return (
     <div className="pb-10">
-      <Breadcrumb items={["Community", "Projects", "Edit Project"]} title={`Edit: ${projectData.result.name}`} className="absolute top-0 left-0 w-full px-6" />
+      <Breadcrumb items={[
+        { title: "Dashboard", link: "/dashboard" },
+        { title: "Projects", link: "/dashboard/projects" },
+        "Edit Project",
+      ]} 
+      title={`Edit: ${projectData.result.name}`} className="absolute top-0 left-0 w-full px-6" />
 
       <div className="pt-20 max-w-5xl mx-auto">
 
@@ -216,59 +225,59 @@ const EditProjectComponent: FC = (): JSX.Element => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25 }}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 mb-6"
             >
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Project Title *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project Title *</label>
                   <input
                     type="text"
                     placeholder="e.g., Immunization"
                     value={programme.title}
                     onChange={(e) => setProgramme(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                   />
                   {/* Hidden, auto-generated slug display */}
-                  <p className="text-xs text-gray-500 mt-1">Slug: {programme.slug || "—"}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Slug: {programme.slug || "—"}</p>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
                   <textarea
                     placeholder="Brief description of the project"
                     value={programme.description}
                     onChange={(e) => setProgramme(prev => ({ ...prev, description: e.target.value }))}
                     rows={4}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                   />
                 </div>
                 
                 {/* New fields */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Project Duration</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project Duration</label>
                   <input
                     type="text"
                     placeholder="e.g., 6 months, 1 year, 2 years"
                     value={programme.projectDuration}
                     onChange={(e) => setProgramme(prev => ({ ...prev, projectDuration: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Geographic Area</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Geographic Area</label>
                   <input
                     type="text"
                     placeholder="e.g., Kigali, Northern Province, Rwanda"
                     value={programme.geographicArea}
                     onChange={(e) => setProgramme(prev => ({ ...prev, geographicArea: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                   />
                 </div>
               </div>
 
               <div className="flex justify-between items-center mt-4">
-                <button onClick={handleCancel} className='px-4 py-2 rounded-md border flex items-center gap-2'>
+                <button onClick={handleCancel} className='px-4 py-2 rounded-md border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2'>
                   <FaChevronLeft className="opacity-70" /> Cancel
                 </button>
 
@@ -276,11 +285,11 @@ const EditProjectComponent: FC = (): JSX.Element => {
                 <div className="flex items-center mt-2 justify-center gap-3 px-2">
                   {[1, 2].map((s) => (
                     <div key={s} className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === s ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700'
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === s ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
                         }`}>
                         {s}
                       </div>
-                      {s < totalSteps && <div className="w-10 h-1 bg-gray-200 rounded" />}
+                      {s < totalSteps && <div className="w-10 h-1 bg-gray-200 dark:bg-gray-600 rounded" />}
                     </div>
                   ))}
                 </div>
@@ -305,23 +314,23 @@ const EditProjectComponent: FC = (): JSX.Element => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25 }}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 mb-6"
             >
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Target Group</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Target Group</label>
                   <input
                     type="text"
                     placeholder="e.g., Children under 5, Pregnant women, Adolescents"
                     value={programme.targetGroup}
                     onChange={(e) => setProgramme(prev => ({ ...prev, targetGroup: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                   />
                 </div>
 
                 {/* Donors selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Donors</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Donors</label>
                   <div className="space-y-2">
                     {/* Since SelectSearch is single-select, render multiple instances for simplicity */}
                     {(programme.donorIds || []).map((donorId, idx) => (
@@ -342,7 +351,7 @@ const EditProjectComponent: FC = (): JSX.Element => {
                         </div>
                         <button 
                           type="button"
-                          className="text-rose-600 hover:text-rose-700 text-sm"
+                          className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-sm"
                           onClick={() => setProgramme(prev => ({ ...prev, donorIds: prev.donorIds.filter((_, i) => i !== idx) }))}
                         >
                           Remove
@@ -351,7 +360,7 @@ const EditProjectComponent: FC = (): JSX.Element => {
                     ))}
                     <button 
                       type="button" 
-                      className="px-3 py-1.5 rounded-md border text-sm"
+                      className="px-3 py-1.5 rounded-md border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm hover:bg-gray-50 dark:hover:bg-gray-600"
                       onClick={() => setProgramme(prev => ({ ...prev, donorIds: [...prev.donorIds, ''] }))}
                     >
                       + Add Donor
@@ -360,8 +369,8 @@ const EditProjectComponent: FC = (): JSX.Element => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Resources (Upload new files)</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resources (Upload new files)</label>
+                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md p-4 text-center">
                     <input
                       id="resourceFiles"
                       type="file"
@@ -369,19 +378,73 @@ const EditProjectComponent: FC = (): JSX.Element => {
                       onChange={(e) => onSelectFiles(e.target.files)}
                       className="hidden"
                     />
-                    <label htmlFor="resourceFiles" className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-md cursor-pointer hover:bg-gray-200">
+                    <label htmlFor="resourceFiles" className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
                       <FaUpload /> Choose files
                     </label>
-                    <p className="text-xs text-gray-500 mt-2">PDFs, images, docs, videos are allowed.</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">PDFs, images, docs, videos are allowed.</p>
                   </div>
+
+                  {/* Existing resources */}
+                  {(projectData?.result?.documents?.length ?? 0) > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Existing resources</h4>
+                      <ul className="space-y-2">
+                        {projectData?.result?.documents?.map((doc: any) => {
+                          const marked = removedDocumentIds.includes(doc.id);
+                          return (
+                            <li
+                              key={doc.id}
+                              className={`flex items-center justify-between text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-3 py-2 ${marked ? 'opacity-60' : ''}`}
+                            >
+                              <span className={`truncate pr-3 dark:text-gray-200 ${marked ? 'line-through' : ''}`}>
+                                {doc.documentName}
+                                {doc.size ? (
+                                  <span className="text-gray-400 dark:text-gray-500"> ({Math.round((doc.size as number) / 1024)} KB)</span>
+                                ) : null}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRemovedDocumentIds(prev => (
+                                      prev.includes(doc.id)
+                                        ? prev.filter(id => id !== doc.id)
+                                        : [...prev, doc.id]
+                                    ));
+                                  }}
+                                  className={`inline-flex items-center gap-2 px-2 py-1 rounded-md border text-xs
+                                    ${marked
+                                      ? 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                      : 'border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20'
+                                    }`}
+                                >
+                                  {marked ? 'Undo' : <>Remove</>}
+                                </button>
+                                {doc.documentUrl && (
+                                  <a
+                                    href={doc.documentUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-2 py-1 rounded-md border border-gray-300 dark:border-gray-600 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                  >
+                                    View
+                                  </a>
+                                )}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
 
                   {programme.resourceFiles.length > 0 && (
                     <div className="mt-3">
-                      <h4 className="text-sm font-semibold text-gray-800 mb-2">New files to upload</h4>
+                      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">New files to upload</h4>
                       <ul className="space-y-2">
                         {programme.resourceFiles.map((f, i) => (
-                          <li key={i} className="flex items-center justify-between text-sm bg-gray-50 border border-gray-200 rounded px-3 py-2">
-                            <span className="truncate pr-3">{f.name} <span className="text-gray-400">({Math.round(f.size / 1024)} KB)</span></span>
+                          <li key={i} className="flex items-center justify-between text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-3 py-2">
+                            <span className="truncate pr-3 dark:text-gray-200">{f.name} <span className="text-gray-400 dark:text-gray-500">({Math.round(f.size / 1024)} KB)</span></span>
                             <button onClick={() => removeFile(i)} className="text-rose-600 hover:text-rose-700 inline-flex items-center gap-2">
                               <FaTrash /> Remove
                             </button>
@@ -394,7 +457,7 @@ const EditProjectComponent: FC = (): JSX.Element => {
               </div>
 
               <div className="flex justify-between mt-6">
-                <button onClick={() => setCurrentStep(1)} className="px-4 py-2 rounded-md border flex items-center gap-2">
+                <button onClick={() => setCurrentStep(1)} className="px-4 py-2 rounded-md border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2">
                   <FaChevronLeft /> Back
                 </button>
 
@@ -402,11 +465,11 @@ const EditProjectComponent: FC = (): JSX.Element => {
                 <div className="flex items-center justify-center gap-3 px-2">
                   {[1, 2].map((s) => (
                     <div key={s} className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === s ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700'
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === s ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
                         }`}>
                         {s}
                       </div>
-                      {s < totalSteps && <div className="w-10 h-1 bg-gray-200 rounded" />}
+                      {s < totalSteps && <div className="w-10 h-1 bg-gray-200 dark:bg-gray-600 rounded" />}
                     </div>
                   ))}
                 </div>

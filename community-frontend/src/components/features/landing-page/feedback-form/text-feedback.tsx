@@ -29,6 +29,7 @@ const TextFeedback: React.FC<TextFeedbackProps> = ({
         required
         aria-required="true"
         minHeight="120px"
+        disableDarkMode={true}
       />
     </motion.div>
   );

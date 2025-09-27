@@ -157,7 +157,12 @@ const FeedbacksPage = () => {
 
   return (
     <div className="pb-10">
-      <Breadcrumb items={["Community", "Feedbacks"]} title="Feedbacks" className='absolute top-0 left-0 px-6 w-full' />
+      <Breadcrumb items={[
+        {title:"Dashboard",link: "/dashboard"}, 
+        "Feedbacks"
+        ]} 
+        title="Feedbacks" 
+        className='absolute top-0 left-0 px-6 w-full' />
 
       <div className="pt-14">
         <MainToolbar

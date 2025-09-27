@@ -25,6 +25,8 @@ interface AccountsListProps {
   pageSize: number;
   loading: boolean;
   viewMode: ViewMode;
+  filters: AccountFilters;
+  setFilters: React.Dispatch<React.SetStateAction<AccountFilters>>;
   onDeleteAccount?: (account: Account) => void; // optional callback
 }
 
@@ -40,9 +42,10 @@ export function AccountsList({
   pageSize,
   loading,
   viewMode,
+  filters,
+  setFilters,
   onDeleteAccount,
 }: AccountsListProps) {
-  const [filters, setFilters] = useState<AccountFilters>({});
   const [sortConfig, setSortConfig] = useState<{ key: keyof Account; direction: 'asc' | 'desc' }>(
     { key: 'name', direction: 'asc' }
   );

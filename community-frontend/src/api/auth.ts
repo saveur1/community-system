@@ -1,4 +1,7 @@
 import { client } from './client';
+import type { FeedbackEntity } from './feedback';
+import type { SurveyEntity } from './surveys';
+import type { SystemLogEntity } from './system-logs';
 
 // Auth API functions
 export const authApi = {
@@ -119,6 +122,9 @@ export const authApi = {
     resetPasswordExpires?: string | Date | null;
     createdAt?: string | Date;
     updatedAt?: string | Date;
+    feedbacks?: FeedbackEntity[],
+    surveys?: SurveyEntity[]
+    system_logs?: SystemLogEntity[]
     roles: Array<{
       id: string;
       name: string;

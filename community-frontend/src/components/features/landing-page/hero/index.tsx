@@ -13,10 +13,8 @@ interface SlideImage {
   alt: string;
   statistics: {
     title: string;
-    items: {
-      label: string;
-      value: string;
-    }[];
+    label: string;
+    value: string;
   };
 }
 
@@ -31,9 +29,8 @@ const HeroSection: React.FC = () => {
       alt: "Community health workers in Rwanda",
       statistics: {
         title: "Training Impact",
-        items: [
-          { label: "Community health workers", value: "450+ trained" },
-        ]
+        label: "Community health workers", 
+        value: "450+ trained"
       }
     },
     {
@@ -42,9 +39,8 @@ const HeroSection: React.FC = () => {
       alt: "Gender based violence",
       statistics: {
         title: "GBV Support",
-        items: [
-          { label: "Gender based victims supported", value: "2,720+" }
-        ]
+        label: "Gender based victims supported",
+        value: "2,720+"
       }
     },
     {
@@ -53,9 +49,8 @@ const HeroSection: React.FC = () => {
       alt: "ECD Program for children",
       statistics: {
         title: "ECD Program",
-        items: [
-          { label: "Children enrolled in ECD", value: "5,854 children" },
-        ]
+        label: "Children enrolled in ECD", 
+        value: "5,854 children"
       }
     },
     {
@@ -64,9 +59,8 @@ const HeroSection: React.FC = () => {
       alt: "Community reached",
       statistics: {
         title: "Community Outreach",
-        items: [
-          { label: "Community members", value: "2M+ members" },
-        ]
+        label: "Community members", 
+        value: "2M+ members"
       }
     }
   ];
@@ -146,21 +140,17 @@ const HeroSection: React.FC = () => {
                     {slideImages[currentSlide].statistics.title}
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
-                    {slideImages[currentSlide].statistics.items.map(
-                      (item, index) => (
-                        <div
-                          key={index}
-                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/10 rounded-xl p-3"
-                        >
-                          <span className="text-sm sm:text-base text-blue-100">
-                            {item.label}
-                          </span>
-                          <span className="text-lg sm:text-xl font-bold">
-                            {item.value}
-                          </span>
-                        </div>
-                      )
-                    )}
+                      <div
+                        key={slideImages[currentSlide].statistics.title}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/10 rounded-xl p-3"
+                      >
+                        <span className="text-sm sm:text-base text-blue-100">
+                          {slideImages[currentSlide].statistics.label}
+                        </span>
+                        <span className="text-lg sm:text-xl font-bold">
+                          {slideImages[currentSlide].statistics.value}
+                        </span>
+                      </div>
                   </div>
                 </motion.div>
                 </div>

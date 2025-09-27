@@ -12,6 +12,8 @@ import { SurveyController } from './../controllers/surveys';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { StatisticsController } from './../controllers/statistics';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { SettingsController } from './../controllers/settings';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { RolesController } from './../controllers/roles';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProjectController } from './../controllers/projects';
@@ -267,6 +269,96 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["daily"]},{"dataType":"enum","enums":["weekly"]},{"dataType":"enum","enums":["monthly"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SlideshowRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "imageUrl": {"dataType":"string","required":true},
+            "altText": {"dataType":"string","required":true},
+            "statisticsTitle": {"dataType":"string","required":true},
+            "statisticsLabel": {"dataType":"string","required":true},
+            "statisticsValue": {"dataType":"string","required":true},
+            "order": {"dataType":"double"},
+            "isActive": {"dataType":"boolean"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ImpactRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "icon": {"dataType":"string","required":true},
+            "value": {"dataType":"string","required":true},
+            "label": {"dataType":"string","required":true},
+            "color": {"dataType":"string","required":true},
+            "order": {"dataType":"double"},
+            "isActive": {"dataType":"boolean"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SettingsCreateRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "websiteName": {"dataType":"string","required":true},
+            "websiteDescription": {"dataType":"string"},
+            "logoUrl": {"dataType":"string"},
+            "faviconUrl": {"dataType":"string"},
+            "primaryColor": {"dataType":"string"},
+            "secondaryColor": {"dataType":"string"},
+            "contactEmail": {"dataType":"string"},
+            "contactPhone": {"dataType":"string"},
+            "address": {"dataType":"string"},
+            "socialLinks": {"ref":"Record_string.string_"},
+            "metaTitle": {"dataType":"string"},
+            "metaDescription": {"dataType":"string"},
+            "metaKeywords": {"dataType":"string"},
+            "isActive": {"dataType":"boolean"},
+            "slideshows": {"dataType":"array","array":{"dataType":"refObject","ref":"SlideshowRequest"}},
+            "impacts": {"dataType":"array","array":{"dataType":"refObject","ref":"ImpactRequest"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SettingsUpdateRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "websiteName": {"dataType":"string"},
+            "websiteDescription": {"dataType":"string"},
+            "logoUrl": {"dataType":"string"},
+            "faviconUrl": {"dataType":"string"},
+            "primaryColor": {"dataType":"string"},
+            "secondaryColor": {"dataType":"string"},
+            "contactEmail": {"dataType":"string"},
+            "contactPhone": {"dataType":"string"},
+            "address": {"dataType":"string"},
+            "socialLinks": {"ref":"Record_string.string_"},
+            "metaTitle": {"dataType":"string"},
+            "metaDescription": {"dataType":"string"},
+            "metaKeywords": {"dataType":"string"},
+            "isActive": {"dataType":"boolean"},
+            "slideshows": {"dataType":"array","array":{"dataType":"refObject","ref":"SlideshowRequest"}},
+            "impacts": {"dataType":"array","array":{"dataType":"refObject","ref":"ImpactRequest"}},
+            "removeSlideshowIds": {"dataType":"array","array":{"dataType":"string"}},
+            "removeImpactIds": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Partial_SlideshowRequest_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"imageUrl":{"dataType":"string"},"altText":{"dataType":"string"},"statisticsTitle":{"dataType":"string"},"statisticsLabel":{"dataType":"string"},"statisticsValue":{"dataType":"string"},"order":{"dataType":"double"},"isActive":{"dataType":"boolean"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Partial_ImpactRequest_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"icon":{"dataType":"string"},"value":{"dataType":"string"},"label":{"dataType":"string"},"color":{"dataType":"string"},"order":{"dataType":"double"},"isActive":{"dataType":"boolean"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "RoleCreateRequest": {
         "dataType": "refObject",
         "properties": {
@@ -295,6 +387,7 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string","required":true},
             "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["draft"]},{"dataType":"enum","enums":["in_progress"]},{"dataType":"enum","enums":["completed"]},{"dataType":"enum","enums":["on_hold"]},{"dataType":"enum","enums":["cancelled"]}]},
             "targetGroup": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "description": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
             "projectDuration": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
             "geographicArea": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
             "stakeholderIds": {"dataType":"array","array":{"dataType":"string"}},
@@ -310,11 +403,13 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string"},
             "status": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["draft"]},{"dataType":"enum","enums":["in_progress"]},{"dataType":"enum","enums":["completed"]},{"dataType":"enum","enums":["on_hold"]},{"dataType":"enum","enums":["cancelled"]}]},
             "targetGroup": {"dataType":"string"},
+            "description": {"dataType":"string"},
             "projectDuration": {"dataType":"string"},
             "geographicArea": {"dataType":"string"},
             "stakeholderIds": {"dataType":"array","array":{"dataType":"string"}},
             "donorIds": {"dataType":"array","array":{"dataType":"string"}},
             "documents": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"deleteToken":{"dataType":"string"},"publicId":{"dataType":"string"},"userId":{"dataType":"string","required":true},"documentUrl":{"dataType":"string"},"addedAt":{"dataType":"datetime"},"type":{"dataType":"string"},"size":{"dataType":"double"},"documentName":{"dataType":"string","required":true}}}},
+            "removeDocumentIds": {"dataType":"array","array":{"dataType":"string"}},
         },
         "additionalProperties": false,
     },
@@ -1336,6 +1431,349 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSurveysHistory',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_getSettings: Record<string, TsoaRoute.ParameterSchema> = {
+        };
+        app.get('/api/settings',
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.getSettings)),
+
+            async function SettingsController_getSettings(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_getSettings, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'getSettings',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_getSettingsById: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+        };
+        app.get('/api/settings/:id',
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.getSettingsById)),
+
+            async function SettingsController_getSettingsById(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_getSettingsById, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'getSettingsById',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_createSettings: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SettingsCreateRequest"},
+        };
+        app.post('/api/settings',
+            authenticateMiddleware([{"jwt":["settings:create"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.createSettings)),
+
+            async function SettingsController_createSettings(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_createSettings, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'createSettings',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_updateSettings: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SettingsUpdateRequest"},
+        };
+        app.put('/api/settings/:id',
+            authenticateMiddleware([{"jwt":["settings:update"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.updateSettings)),
+
+            async function SettingsController_updateSettings(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_updateSettings, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'updateSettings',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_deleteSettings: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+        };
+        app.delete('/api/settings/:id',
+            authenticateMiddleware([{"jwt":["settings:delete"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.deleteSettings)),
+
+            async function SettingsController_deleteSettings(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_deleteSettings, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteSettings',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_addSlideshow: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SlideshowRequest"},
+        };
+        app.post('/api/settings/:id/slideshows',
+            authenticateMiddleware([{"jwt":["settings:update"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.addSlideshow)),
+
+            async function SettingsController_addSlideshow(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_addSlideshow, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'addSlideshow',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_addImpact: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"ImpactRequest"},
+        };
+        app.post('/api/settings/:id/impacts',
+            authenticateMiddleware([{"jwt":["settings:update"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.addImpact)),
+
+            async function SettingsController_addImpact(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_addImpact, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'addImpact',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_updateSlideshow: Record<string, TsoaRoute.ParameterSchema> = {
+                slideshowId: {"in":"path","name":"slideshowId","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"Partial_SlideshowRequest_"},
+        };
+        app.put('/api/settings/slideshows/:slideshowId',
+            authenticateMiddleware([{"jwt":["settings:update"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.updateSlideshow)),
+
+            async function SettingsController_updateSlideshow(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_updateSlideshow, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'updateSlideshow',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_updateImpact: Record<string, TsoaRoute.ParameterSchema> = {
+                impactId: {"in":"path","name":"impactId","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"Partial_ImpactRequest_"},
+        };
+        app.put('/api/settings/impacts/:impactId',
+            authenticateMiddleware([{"jwt":["settings:update"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.updateImpact)),
+
+            async function SettingsController_updateImpact(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_updateImpact, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'updateImpact',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_deleteSlideshow: Record<string, TsoaRoute.ParameterSchema> = {
+                slideshowId: {"in":"path","name":"slideshowId","required":true,"dataType":"string"},
+        };
+        app.delete('/api/settings/slideshows/:slideshowId',
+            authenticateMiddleware([{"jwt":["settings:delete"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.deleteSlideshow)),
+
+            async function SettingsController_deleteSlideshow(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_deleteSlideshow, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteSlideshow',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSettingsController_deleteImpact: Record<string, TsoaRoute.ParameterSchema> = {
+                impactId: {"in":"path","name":"impactId","required":true,"dataType":"string"},
+        };
+        app.delete('/api/settings/impacts/:impactId',
+            authenticateMiddleware([{"jwt":["settings:delete"]}]),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController)),
+            ...(fetchMiddlewares<RequestHandler>(SettingsController.prototype.deleteImpact)),
+
+            async function SettingsController_deleteImpact(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSettingsController_deleteImpact, request, response });
+
+                const controller = new SettingsController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteImpact',
                 controller,
                 response,
                 next,

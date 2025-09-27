@@ -265,10 +265,6 @@ function SignupForm({ className = "" }: SignupFormProps) {
             toast.error(t("signup.health_center_name_required"));
             return false;
           }
-          if (form.userType === "epi_managers" && !form.nearByHealthCenter?.trim()) {
-            toast.error(t("signup.nearby_health_center_required"));
-            return false;
-          }
         }
         return true;
 
@@ -346,7 +342,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
     >
       {/* Basic Information */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">{t('signup.basic_information')}</h2>
+        <h2 className="text-lg font-semibold dark:text-gray-700 mb-4">{t('signup.basic_information')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">{t('signup.full_name_label')} *</label>
@@ -357,7 +353,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="fullName"
                 value={form.fullName}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
+                className="w-full dark:text-gray-900 dark:placeholder:text-gray-500 pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
                 placeholder={t('signup.full_name_placeholder')}
               />
             </div>
@@ -371,7 +367,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
+                className="w-full dark:text-gray-900 dark:placeholder:text-gray-500 pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
                 placeholder={t('signup.phone_placeholder')}
               />
             </div>
@@ -385,7 +381,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
+                className="w-full dark:text-gray-900 dark:placeholder:text-gray-500 pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
                 placeholder={t('signup.email_placeholder')}
               />
             </div>
@@ -399,7 +395,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="password"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
+                className="w-full dark:text-gray-900 dark:placeholder:text-gray-500 pl-10 pr-4 py-3 sm:py-3.5 border border-primary/30 rounded-lg outline-primary/50 text-base sm:text-sm"
                 placeholder={t('signup.password_placeholder')}
               />
             </div>
@@ -409,7 +405,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
 
       {/* User Type Selection */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">{t('signup.who_are_you')} *</h2>
+        <h2 className="text-lg dark:text-gray-700 font-semibold mb-4">{t('signup.who_are_you')} *</h2>
 
         {/* Category Selection with Expandable Options */}
         <div className="mb-4">
@@ -466,8 +462,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                               value={option.value}
                               checked={form.userType === option.value}
                               onChange={handleRadioChange}
-                              className="h-4 w-4 text-primary focus:ring-primary"
-                            />
+                              className="h-4 w-4 appearance-none rounded-full bg-white border border-gray-300 dark:bg-white dark:border-gray-300 checked:outline checked:border-none checked:bg-primary checked:outline-offset-2 checked:outline-primary" />
                             <span className="text-gray-700 text-sm sm:text-base">{option.label}</span>
                           </label>
                         </div>
@@ -490,7 +485,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 name="otherType"
                 value={form.otherType}
                 onChange={handleChange}
-                className="w-full border outline-none border-primary/30 rounded-lg p-3 outline-primary/50"
+                className="w-full dark:text-gray-900 border outline-none border-primary/30 rounded-lg p-3 outline-primary/50"
                 placeholder={t('signup.specify_role_placeholder')}
               />
             </motion.div>
@@ -520,7 +515,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
         transition={springTransition}
         className="space-y-4"
       >
-        <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('signup.location_details')}</h2>
+        <h2 className="text-lg sm:text-xl dark:text-gray-700 font-semibold mb-4">{t('signup.location_details')}</h2>
 
         <div className="space-y-4 sm:space-y-6">
           {/* District with SelectSearch */}
@@ -545,6 +540,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
                 }));
               }}
               placeholder={t('signup.search_or_select_district')}
+              disableDarkMode={true}
             />
           </div>
 
@@ -568,6 +564,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               }}
               placeholder={t('signup.select_sector_placeholder')}
               disabled={!selectedDistrict}
+              disableDarkMode={true}
             />
           </div>
 
@@ -589,6 +586,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               }}
               placeholder={t('signup.select_cell_placeholder')}
               disabled={!selectedSector}
+              disableDarkMode={true}
             />
           </div>
 
@@ -608,6 +606,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               }}
               placeholder={t('signup.select_village_placeholder')}
               disabled={!selectedCell}
+              disableDarkMode={true}
             />
           </div>
         </div>
@@ -635,7 +634,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
             name="nearByHealthCenter"
             value={form.nearByHealthCenter || ''}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-3 sm:p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-base sm:text-sm"
+            className="w-full dark:text-gray-900 border border-gray-300 rounded-lg p-3 sm:p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-base sm:text-sm"
             placeholder={t('signup.nearby_health_center_placeholder')}
             required
           />
@@ -654,7 +653,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               name="schoolName"
               value={form.schoolName || ''}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              className="w-full dark:text-gray-900 border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
               placeholder={t('signup.school_name_placeholder')}
               required
             />
@@ -674,7 +673,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               name="churchName"
               value={form.churchName || ''}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              className="w-full dark:text-gray-900 border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
               placeholder={t('signup.church_mosque_name_placeholder')}
               required
             />
@@ -694,7 +693,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               name="hospitalName"
               value={form.hospitalName || ''}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              className="w-full dark:text-gray-900 border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
               placeholder={t('signup.hospital_name_placeholder')}
               required
             />
@@ -714,7 +713,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
               name="healthCenterName"
               value={form.healthCenterName || ''}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              className="w-full dark:text-gray-900 border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
               placeholder={t('signup.health_center_name_placeholder')}
               required
             />

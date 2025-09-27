@@ -61,7 +61,7 @@ function SettingsPage() {
         ]}
         className="absolute top-0 left-0 w-full bg-white dark:bg-gray-900"
       />
-      <div className="pt-20 max-w-8xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="pt-20 max-w-8xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen max-sm:px-2 px-4 sm:px-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-start">
@@ -78,12 +78,12 @@ function SettingsPage() {
           </div>
 
           <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex px-6">
+            <nav className="flex px-4 max-sm:px-2 sm:px-6 overflow-x-auto whitespace-nowrap">
               {tabs.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`relative py-4 px-6 text-sm font-medium transition-colors ${
+                  className={`relative py-3 sm:py-4 px-4 max-sm:px-2 sm:px-6 text-sm font-medium transition-colors flex-shrink-0 ${
                     activeTab === tab
                       ? 'text-primary dark:text-primary-200 border-b-2 border-primary dark:border-primary-200'
                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -104,7 +104,7 @@ function SettingsPage() {
           </div>
 
           <div className="flex">
-            <div className="flex-1 p-6">
+            <div className="flex-1 p-6 max-sm:p-2">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}

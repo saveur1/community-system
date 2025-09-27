@@ -8,7 +8,7 @@ import useAuth from '@/hooks/useAuth';
 import { createFileRoute, useLocation } from '@tanstack/react-router'
 import { useState } from 'react';
 import ContentFooter from '@/components/layouts/dashboard-main-content/content-footer';
-
+import { ThemeProvider } from '@/providers/theme-provider';
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardLayout,
@@ -23,31 +23,32 @@ function DashboardLayout() {
   const { user } = useAuth();
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      <Sidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-        navItems={navItems(user, path)}
-      />
-      <div className={`flex-1 transition-all duration-300 ease-in-out ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
-        {/* Header fixed at top */}
-        <div className="sticky top-0 z-40">
+    <ThemeProvider>
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+        <Sidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+          navItems={navItems(user, path)}
+        />
+        <div className={`flex-1 transition-all duration-300 ease-in-out ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
+          {/* Header fixed at top */}
+          <div className="sticky top-0 z-40">
+            <ImigongoStarter />
+            <Header setMobileMenuOpen={setMobileMenuOpen} />
+          </div>
+          {/* Scrollable content area */}
+          <div className="h-[calc(100vh-109px)] overflow-y-auto">
+            {/* Optional top decorative band inside scroll if desired */}
+            <MainContent>
+              <AuthLoader />
+              <ContentFooter />
+            </MainContent>
+          </div>
           <ImigongoStarter />
-          <Header setMobileMenuOpen={setMobileMenuOpen} />
         </div>
-        {/* Scrollable content area */}
-        <div className="h-[calc(100vh-109px)] overflow-y-auto">
-          {/* Optional top decorative band inside scroll if desired */}
-          <MainContent>
-            <AuthLoader />
-            <ContentFooter />
-          </MainContent>
-        </div>
-        <ImigongoStarter />
       </div>
-
-    </div>
+    </ThemeProvider>
   );
 }

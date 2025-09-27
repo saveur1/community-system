@@ -24,7 +24,7 @@ const CommunitySessionsPage = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const [pageSize, setPageSize] = useState(12);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [toDelete, setToDelete] = useState<CommunitySessionEntity | null>(null);
   const { user } = useAuth();

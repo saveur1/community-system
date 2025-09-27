@@ -9,7 +9,7 @@ import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator';
 
 export const Route = createRootRoute({
   component: () => (
-    <div className="scheme-light-dark">
+    <div className="dark:bg-white">
       <OfflineProvider>
         <QueryProvider>
           <NetworkStatusIndicator />

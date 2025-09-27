@@ -135,6 +135,7 @@ function CommunitySessionDetail() {
   const { sessionId } = Route.useParams();
   const nav = useNavigate();
   const { data, isLoading } = useCommunitySession(sessionId);
+  const { user } = useAuth();
   const session = data?.result;
 
   const src = session?.document?.documentUrl || undefined;
@@ -177,7 +178,7 @@ function CommunitySessionDetail() {
                 <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                   <span title={session.createdAt}>Created {timeAgo(session.createdAt)}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs ${meta?.active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}>{meta?.active ? 'Active' : 'Inactive'}</span>
-                  {meta?.roles && meta.roles.length > 0 && (
+                  {user?.id === session.createdBy && meta?.roles && meta.roles.length > 0 && (
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">Roles:</span>
                       <div className="flex flex-wrap gap-2">

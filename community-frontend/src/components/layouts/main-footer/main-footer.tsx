@@ -106,7 +106,10 @@ const FooterMain = () => {
               {t('footer.terms_of_use')}
             </div>
             
-            <div className="text-gray-700 text-sm" dangerouslySetInnerHTML={{__html:t('footer.developed')}} />
+            <div className="text-gray-700 text-sm">
+              {t('footer.developed')}
+              <a href='https://santechrwanda.com' target='_blank' rel='noopener noreferrer' className='underline'>SAN TECH</a>
+            </div>
           </div>
         </div>
       </div>

@@ -28,18 +28,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
     setForm({ ...form, [name]: value });
   };
 
-  // const validateForm = () => {
-  //   if (loginType === 'email') {
-  //     const isEmail = form.email.includes('@');
-  //     return isEmail && form.password.trim().length >= 6;
-  //   } else if (loginType === 'phone') {
-  //     const isPhone = form.phone.trim().length >= 10;
-  //     return isPhone && form.password.trim().length >= 6;
-  //   } else {
-  //     return form.username.trim().length >= 3 && form.password.trim().length >= 6;
-  //   }
-  // };
-
   const handleGoogleLogin = () => {
     window.location.href=`${appUrl}/api/auth/google`;
   };
@@ -202,7 +190,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
                           required
                           value={form.email}
                           onChange={handleChange}
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          className="block w-full dark:text-gray-700 dark:placeholder:text-gray-500 pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                           placeholder={t('login.email_placeholder')}
                         />
                       </div>
@@ -224,7 +212,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
                           required
                           value={form.phone}
                           onChange={handleChange}
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          className="block w-full dark:text-gray-700 pl-10 dark:placeholder:text-gray-500 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                           placeholder={t('login.phone_placeholder')}
                         />
                       </div>
@@ -246,7 +234,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
                           required
                           value={form.username}
                           onChange={handleChange}
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          className="block w-full dark:text-gray-700 dark:placeholder:text-gray-500 pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                           placeholder={t('login.username_placeholder', 'Enter your username')}
                         />
                       </div>
@@ -274,7 +262,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
                     name="password"
                     value={form.password}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                    className="w-full pl-10 dark:text-gray-700 dark:placeholder:text-gray-500 pr-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                     placeholder={t('login.password_placeholder')}
                     required
                   />

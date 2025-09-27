@@ -41,12 +41,6 @@ const permissions = [
   { name: 'community_session:update', description: 'Update community sessions' },
   { name: 'community_session:download', description: 'Download community sessions' },
   { name: 'community_session:delete', description: 'Delete community sessions' },
-
-  // Comments Permissions
-  { name: 'comment:create', description: 'Create comments' },
-  { name: 'comment:read', description: 'View comments' },
-  { name: 'comment:update', description: 'Update comments' },
-  { name: 'comment:delete', description: 'Delete comments' },
   
   // Reporting Permissions
   { name: 'report:create', description: 'Create reports' },
@@ -56,11 +50,7 @@ const permissions = [
 
   // dashboards Permissions
   { name: 'dashboard:analytics', description: 'View analytics dashboard' },
-  { name: 'dashboard:stakeholder', description: 'View Stakeholders dashboard' },
-  { name: 'dashboard:health', description: 'View health dashboard' },
-  { name: 'dashboard:education', description: 'View education dashboard' },
-  { name: 'dashboard:community', description: 'View community dashboard' },
-  { name: 'dashboard:religious', description: 'View religious dashboard' },
+   { name: 'dashboard:community', description: 'View community dashboard' },
 
   // Survey Permissions
   { name: 'survey:create', description: 'Create surveys' },
@@ -98,7 +88,13 @@ const permissions = [
   { name: 'system_log:create', description: 'Create system logs' },
   { name: 'system_log:read', description: 'View system logs' },
   { name: 'system_log:update', description: 'Update system logs' },
-  { name: 'system_log:delete', description: 'Delete system logs' }
+  { name: 'system_log:delete', description: 'Delete system logs' },
+
+  // Settings Permissions
+  { name: 'settings:create', description: 'Create website settings' },
+  { name: 'settings:read', description: 'View website settings' },
+  { name: 'settings:update', description: 'Update website settings' },
+  { name: 'settings:delete', description: 'Delete website settings' }
 ];
 
 // Base role templates with common permissions
@@ -899,7 +895,13 @@ const roleTemplates = {
       'stakeholder:read',
       'stakeholder:create',
       'stakeholder:update',
-      'stakeholder:delete'
+      'stakeholder:delete',
+
+      //Settings
+      'settings:create',
+      'settings:read',
+      'settings:update',
+      'settings:delete'
     ]
   }
 };
@@ -1086,6 +1088,115 @@ const setupSystem = async () => {
       throw err;
     }
 
+    // Create default website settings
+    try {
+      console.log('🔄 Creating default website settings...');
+      
+      let existingSettings = await db.Settings.findOne({ where: { isActive: true } });
+      if (!existingSettings) {
+        // Create the main settings record
+        const settings = await db.Settings.create({
+          websiteName: 'Community Listening',
+          websiteDescription: 'Amplifying community voices through faith-based collaboration. Join our interfaith network promoting health, unity, and sustainable development across Rwanda.',
+          logoUrl: 'https://sugiramwana.rw/logo192.png',
+          faviconUrl: 'https://sugiramwana.rw/favicon.ico',
+          primaryColor: '#004f64',
+          secondaryColor: '#0ea5e9',
+          contactEmail: 'info@communitylistening.rw',
+          contactPhone: '+250788123456',
+          address: 'Kigali, Rwanda',
+          socialLinks: {
+            facebook: 'https://facebook.com/communitylistening',
+            twitter: 'https://twitter.com/communitylistening',
+            linkedin: 'https://linkedin.com/company/communitylistening',
+            instagram: 'https://instagram.com/communitylistening'
+          },
+          metaTitle: 'Community Listening - Amplifying Voices Through Faith',
+          metaDescription: 'Join our interfaith network promoting health, unity, and sustainable development across Rwanda through community engagement.',
+          metaKeywords: 'community, faith, health, Rwanda, interfaith, development, listening, voices',
+          isActive: true
+        });
+
+        console.log('✅ Created default settings');
+
+        // Create slideshow images
+        const slideshowData = [
+          {
+            settingsId: settings.id,
+            imageUrl: 'https://sugiramwana.rw/images/religious_trainees.jpg',
+            altText: 'Community health workers in Rwanda',
+            statisticsTitle: 'Training Impact',
+            statisticsLabel: 'Community health workers',
+            statisticsValue: '450+ trained',
+            order: 0,
+            isActive: true
+          },
+          {
+            settingsId: settings.id,
+            imageUrl: 'https://sugiramwana.rw/images/gbc_support.jpg',
+            altText: 'Gender based violence',
+            statisticsTitle: 'GBV Support',
+            statisticsLabel: 'Gender based victims supported',
+            statisticsValue: '2,720+',
+            order: 1,
+            isActive: true
+          },
+          {
+            settingsId: settings.id,
+            imageUrl: 'https://sugiramwana.rw/images/ecd_children.jpg',
+            altText: 'ECD Program for children',
+            statisticsTitle: 'ECD Program',
+            statisticsLabel: 'Children enrolled in ECD',
+            statisticsValue: '5,854 children',
+            order: 2,
+            isActive: true
+          },
+          {
+            settingsId: settings.id,
+            imageUrl: 'https://sugiramwana.rw/images/counciljpg.jpg',
+            altText: 'Community reached',
+            statisticsTitle: 'Community Outreach',
+            statisticsLabel: 'Community members',
+            statisticsValue: '2M+ members',
+            order: 3,
+            isActive: true
+          }
+        ];
+
+        await db.Slideshow.bulkCreate(slideshowData);
+        console.log('✅ Created slideshow images');
+
+        // Create impact statistics
+        const impactData = [
+          { settingsId: settings.id, icon: 'FaUsers', value: '2M+', label: 'Community Members Reached', color: 'bg-blue-500', order: 0, isActive: true },
+          { settingsId: settings.id, icon: 'FaChild', value: '5,854+', label: 'Children Enrolled in ECD Programs', color: 'bg-pink-500', order: 1, isActive: true },
+          { settingsId: settings.id, icon: 'FaHeart', value: '2,720+', label: 'GBV Victims Supported', color: 'bg-red-500', order: 2, isActive: true },
+          { settingsId: settings.id, icon: 'MdVolunteerActivism', value: '3,784+', label: 'Religious Volunteers', color: 'bg-green-500', order: 3, isActive: true },
+          { settingsId: settings.id, icon: 'MdFamilyRestroom', value: '3,464+', label: 'Households in ECD Programs', color: 'bg-purple-500', order: 4, isActive: true },
+          { settingsId: settings.id, icon: 'FaUserMd', value: '180+', label: 'Health Workers Trained', color: 'bg-teal-500', order: 5, isActive: true },
+          { settingsId: settings.id, icon: 'MdSchool', value: '19+', label: 'Model ECD Centers', color: 'bg-orange-500', order: 6, isActive: true },
+          { settingsId: settings.id, icon: 'FaChurch', value: '128+', label: 'Religious Leaders Trained', color: 'bg-indigo-500', order: 7, isActive: true },
+          { settingsId: settings.id, icon: 'FaHospital', value: '135+', label: 'Health Centers Partnered', color: 'bg-cyan-500', order: 8, isActive: true },
+          { settingsId: settings.id, icon: 'FaGraduationCap', value: '285+', label: 'ECD Animateurs', color: 'bg-amber-500', order: 9, isActive: true },
+          { settingsId: settings.id, icon: 'FaHandsHelping', value: '60+', label: 'Family Counsellors', color: 'bg-rose-500', order: 10, isActive: true },
+          { settingsId: settings.id, icon: 'FaBrain', value: '10K+', label: 'Mental Health Messages Delivered', color: 'bg-violet-500', order: 11, isActive: true },
+          { settingsId: settings.id, icon: 'BiHealth', value: '500K+', label: 'SBC Intervention Beneficiaries', color: 'bg-emerald-500', order: 12, isActive: true },
+          { settingsId: settings.id, icon: 'FaShieldAlt', value: '6+', label: 'Isange One Stop Centers Supported', color: 'bg-lime-500', order: 13, isActive: true },
+          { settingsId: settings.id, icon: 'FaUserFriends', value: '144+', label: 'Youth Group Leaders Engaged', color: 'bg-sky-500', order: 14, isActive: true },
+          { settingsId: settings.id, icon: 'FiTrendingUp', value: '16+', label: 'Districts with ECD Centers', color: 'bg-yellow-500', order: 15, isActive: true }
+        ];
+
+        await db.Impact.bulkCreate(impactData);
+        console.log('✅ Created impact statistics');
+        console.log('🌐 Default website settings setup complete');
+      } else {
+        console.log('ℹ️ Website settings already exist');
+      }
+    } catch (err) {
+      console.error('❌ Failed to create default website settings:', err);
+      throw err;
+    }
+
     console.log('✅ System setup completed successfully!');
     return {
       roles: createdRoles.length,
@@ -1235,6 +1346,115 @@ const setupSystemPreserveData = async () => {
       console.log('🔐 Super admin setup complete (preserve)');
     } catch (err) {
       console.error('❌ Failed to ensure super admin or RICH org in preserve flow:', err);
+      throw err;
+    }
+
+    // Create default website settings (preserve mode)
+    try {
+      console.log('🔄 Creating default website settings (preserve mode)...');
+      
+      let existingSettings = await db.Settings.findOne({ where: { isActive: true } });
+      if (!existingSettings) {
+        // Create the main settings record
+        const settings = await db.Settings.create({
+          websiteName: 'Community Listening',
+          websiteDescription: 'Amplifying community voices through faith-based collaboration. Join our interfaith network promoting health, unity, and sustainable development across Rwanda.',
+          logoUrl: 'https://sugiramwana.rw/logo192.png',
+          faviconUrl: 'https://sugiramwana.rw/favicon.ico',
+          primaryColor: '#004f64',
+          secondaryColor: '#0ea5e9',
+          contactEmail: 'info@communitylistening.rw',
+          contactPhone: '+250788123456',
+          address: 'Kigali, Rwanda',
+          socialLinks: {
+            facebook: 'https://facebook.com/communitylistening',
+            twitter: 'https://twitter.com/communitylistening',
+            linkedin: 'https://linkedin.com/company/communitylistening',
+            instagram: 'https://instagram.com/communitylistening'
+          },
+          metaTitle: 'Community Listening - Amplifying Voices Through Faith',
+          metaDescription: 'Join our interfaith network promoting health, unity, and sustainable development across Rwanda through community engagement.',
+          metaKeywords: 'community, faith, health, Rwanda, interfaith, development, listening, voices',
+          isActive: true
+        });
+
+        console.log('✅ Created default settings (preserve)');
+
+        // Create slideshow images
+        const slideshowData = [
+          {
+            settingsId: settings.id,
+            imageUrl: 'https://sugiramwana.rw/images/religious_trainees.jpg',
+            altText: 'Community health workers in Rwanda',
+            statisticsTitle: 'Training Impact',
+            statisticsLabel: 'Community health workers',
+            statisticsValue: '450+ trained',
+            order: 0,
+            isActive: true
+          },
+          {
+            settingsId: settings.id,
+            imageUrl: 'https://sugiramwana.rw/images/gbc_support.jpg',
+            altText: 'Gender based violence',
+            statisticsTitle: 'GBV Support',
+            statisticsLabel: 'Gender based victims supported',
+            statisticsValue: '2,720+',
+            order: 1,
+            isActive: true
+          },
+          {
+            settingsId: settings.id,
+            imageUrl: 'https://sugiramwana.rw/images/ecd_children.jpg',
+            altText: 'ECD Program for children',
+            statisticsTitle: 'ECD Program',
+            statisticsLabel: 'Children enrolled in ECD',
+            statisticsValue: '5,854 children',
+            order: 2,
+            isActive: true
+          },
+          {
+            settingsId: settings.id,
+            imageUrl: 'https://sugiramwana.rw/images/counciljpg.jpg',
+            altText: 'Community reached',
+            statisticsTitle: 'Community Outreach',
+            statisticsLabel: 'Community members',
+            statisticsValue: '2M+ members',
+            order: 3,
+            isActive: true
+          }
+        ];
+
+        await db.Slideshow.bulkCreate(slideshowData);
+        console.log('✅ Created slideshow images (preserve)');
+
+        // Create impact statistics
+        const impactData = [
+          { settingsId: settings.id, icon: 'FaUsers', value: '2M+', label: 'Community Members Reached', color: 'bg-blue-500', order: 0, isActive: true },
+          { settingsId: settings.id, icon: 'FaChild', value: '5,854+', label: 'Children Enrolled in ECD Programs', color: 'bg-pink-500', order: 1, isActive: true },
+          { settingsId: settings.id, icon: 'FaHeart', value: '2,720+', label: 'GBV Victims Supported', color: 'bg-red-500', order: 2, isActive: true },
+          { settingsId: settings.id, icon: 'MdVolunteerActivism', value: '3,784+', label: 'Religious Volunteers', color: 'bg-green-500', order: 3, isActive: true },
+          { settingsId: settings.id, icon: 'MdFamilyRestroom', value: '3,464+', label: 'Households in ECD Programs', color: 'bg-purple-500', order: 4, isActive: true },
+          { settingsId: settings.id, icon: 'FaUserMd', value: '180+', label: 'Health Workers Trained', color: 'bg-teal-500', order: 5, isActive: true },
+          { settingsId: settings.id, icon: 'MdSchool', value: '19+', label: 'Model ECD Centers', color: 'bg-orange-500', order: 6, isActive: true },
+          { settingsId: settings.id, icon: 'FaChurch', value: '128+', label: 'Religious Leaders Trained', color: 'bg-indigo-500', order: 7, isActive: true },
+          { settingsId: settings.id, icon: 'FaHospital', value: '135+', label: 'Health Centers Partnered', color: 'bg-cyan-500', order: 8, isActive: true },
+          { settingsId: settings.id, icon: 'FaGraduationCap', value: '285+', label: 'ECD Animateurs', color: 'bg-amber-500', order: 9, isActive: true },
+          { settingsId: settings.id, icon: 'FaHandsHelping', value: '60+', label: 'Family Counsellors', color: 'bg-rose-500', order: 10, isActive: true },
+          { settingsId: settings.id, icon: 'FaBrain', value: '10K+', label: 'Mental Health Messages Delivered', color: 'bg-violet-500', order: 11, isActive: true },
+          { settingsId: settings.id, icon: 'BiHealth', value: '500K+', label: 'SBC Intervention Beneficiaries', color: 'bg-emerald-500', order: 12, isActive: true },
+          { settingsId: settings.id, icon: 'FaShieldAlt', value: '6+', label: 'Isange One Stop Centers Supported', color: 'bg-lime-500', order: 13, isActive: true },
+          { settingsId: settings.id, icon: 'FaUserFriends', value: '144+', label: 'Youth Group Leaders Engaged', color: 'bg-sky-500', order: 14, isActive: true },
+          { settingsId: settings.id, icon: 'FiTrendingUp', value: '16+', label: 'Districts with ECD Centers', color: 'bg-yellow-500', order: 15, isActive: true }
+        ];
+
+        await db.Impact.bulkCreate(impactData);
+        console.log('✅ Created impact statistics (preserve)');
+        console.log('🌐 Default website settings setup complete (preserve)');
+      } else {
+        console.log('ℹ️ Website settings already exist (preserve)');
+      }
+    } catch (err) {
+      console.error('❌ Failed to create default website settings (preserve):', err);
       throw err;
     }
 

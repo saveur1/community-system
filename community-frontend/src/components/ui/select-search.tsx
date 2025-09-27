@@ -20,6 +20,7 @@ interface SelectSearchProps {
   triggerClassName?: string;
   disabled?: boolean;
   noMatchText?: string;
+  disableDarkMode?: boolean;
 }
 
 export const SelectSearch: React.FC<SelectSearchProps> = ({
@@ -34,6 +35,7 @@ export const SelectSearch: React.FC<SelectSearchProps> = ({
   triggerClassName = "",
   disabled = false,
   noMatchText = "No matches found",
+  disableDarkMode = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -83,7 +85,7 @@ export const SelectSearch: React.FC<SelectSearchProps> = ({
   return (
     <div className={className}>
       {label && (
-        <label className={cn("block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2", labelClassName)}>
+        <label className={cn(`block text-sm font-medium text-gray-900 ${!disableDarkMode ? 'dark:text-gray-100' : ''} mb-2`, labelClassName)}>
           {label}
         </label>
       )}
@@ -98,14 +100,14 @@ export const SelectSearch: React.FC<SelectSearchProps> = ({
               placeholder={placeholder}
               disabled={disabled}
               className={cn(
-                `block w-full rounded-md bg-white dark:bg-gray-800 py-2.5 pr-8 pl-3 text-left outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 sm:text-sm placeholder-gray-500 dark:placeholder-gray-400 ${
-                  disabled ? "bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed" : "text-gray-900 dark:text-gray-100"
+                `block w-full rounded-md bg-white ${!disableDarkMode ? 'dark:bg-gray-800' : ''} py-2.5 pr-8 pl-3 text-left outline-1 -outline-offset-1 outline-gray-300 ${!disableDarkMode ? 'dark:outline-gray-600' : ''} sm:text-sm placeholder-gray-500 ${!disableDarkMode ? 'dark:placeholder-gray-400' : ''} ${
+                  disabled ? `bg-gray-50 ${!disableDarkMode ? 'dark:bg-gray-700' : ''} text-gray-400 ${!disableDarkMode ? 'dark:text-gray-500' : ''} cursor-not-allowed` : `text-gray-900 ${!disableDarkMode ? 'dark:text-gray-100' : ''}`
                 }`,
                 triggerClassName
               )}
             />
             <FiChevronDown
-              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 size-5 sm:size-4"
+              className={`pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 ${!disableDarkMode ? 'dark:text-gray-400' : ''} size-5 sm:size-4`}
               aria-hidden="true"
             />
           </div>
@@ -114,7 +116,7 @@ export const SelectSearch: React.FC<SelectSearchProps> = ({
         onToggle={setIsOpen}
         disabled={disabled}
         dropdownClassName={cn(
-          "w-full max-h-56 overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-black/5 dark:ring-gray-600 sm:text-sm",
+          `w-full max-h-56 overflow-auto rounded-md bg-white ${!disableDarkMode ? 'dark:bg-gray-800' : ''} py-1 text-base shadow-lg ring-1 ring-black/5 ${!disableDarkMode ? 'dark:ring-gray-600' : ''} sm:text-sm`,
           dropdownClassName
         )}
         position="bottom-right"
@@ -127,8 +129,8 @@ export const SelectSearch: React.FC<SelectSearchProps> = ({
               className={cn(
                 "relative cursor-default py-2 pr-9 pl-3 select-none hover:bg-primary hover:text-white group",
                 option.value === value
-                  ? "bg-indigo-50 dark:bg-indigo-900 text-[#004f64] dark:text-indigo-300 font-semibold"
-                  : "text-gray-900 dark:text-gray-100"
+                  ? `bg-indigo-50 ${!disableDarkMode ? 'dark:bg-indigo-900' : ''} text-[#004f64] ${!disableDarkMode ? 'dark:text-indigo-300' : ''} font-semibold`
+                  : `text-gray-900 ${!disableDarkMode ? 'dark:text-gray-100' : ''}`
               )}
             >
               <span className="block truncate capitalize">{option.label}</span>
@@ -140,7 +142,7 @@ export const SelectSearch: React.FC<SelectSearchProps> = ({
             </div>
           ))
         ) : (
-          <div className="py-2 px-3 text-gray-500 dark:text-gray-400 text-sm">{noMatchText}</div>
+          <div className={`py-2 px-3 text-gray-500 ${!disableDarkMode ? 'dark:text-gray-400' : ''} text-sm`}>{noMatchText}</div>
         )}
       </CustomDropdown>
     </div>

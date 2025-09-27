@@ -1236,6 +1236,268 @@
 					"monthly"
 				]
 			},
+			"Record_string.string_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "string"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"SlideshowRequest": {
+				"properties": {
+					"imageUrl": {
+						"type": "string"
+					},
+					"altText": {
+						"type": "string"
+					},
+					"statisticsTitle": {
+						"type": "string"
+					},
+					"statisticsLabel": {
+						"type": "string"
+					},
+					"statisticsValue": {
+						"type": "string"
+					},
+					"order": {
+						"type": "number",
+						"format": "double"
+					},
+					"isActive": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"imageUrl",
+					"altText",
+					"statisticsTitle",
+					"statisticsLabel",
+					"statisticsValue"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ImpactRequest": {
+				"properties": {
+					"icon": {
+						"type": "string"
+					},
+					"value": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					},
+					"color": {
+						"type": "string"
+					},
+					"order": {
+						"type": "number",
+						"format": "double"
+					},
+					"isActive": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"icon",
+					"value",
+					"label",
+					"color"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SettingsCreateRequest": {
+				"properties": {
+					"websiteName": {
+						"type": "string"
+					},
+					"websiteDescription": {
+						"type": "string"
+					},
+					"logoUrl": {
+						"type": "string"
+					},
+					"faviconUrl": {
+						"type": "string"
+					},
+					"primaryColor": {
+						"type": "string"
+					},
+					"secondaryColor": {
+						"type": "string"
+					},
+					"contactEmail": {
+						"type": "string"
+					},
+					"contactPhone": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"socialLinks": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"metaTitle": {
+						"type": "string"
+					},
+					"metaDescription": {
+						"type": "string"
+					},
+					"metaKeywords": {
+						"type": "string"
+					},
+					"isActive": {
+						"type": "boolean"
+					},
+					"slideshows": {
+						"items": {
+							"$ref": "#/components/schemas/SlideshowRequest"
+						},
+						"type": "array"
+					},
+					"impacts": {
+						"items": {
+							"$ref": "#/components/schemas/ImpactRequest"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"websiteName"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SettingsUpdateRequest": {
+				"properties": {
+					"websiteName": {
+						"type": "string"
+					},
+					"websiteDescription": {
+						"type": "string"
+					},
+					"logoUrl": {
+						"type": "string"
+					},
+					"faviconUrl": {
+						"type": "string"
+					},
+					"primaryColor": {
+						"type": "string"
+					},
+					"secondaryColor": {
+						"type": "string"
+					},
+					"contactEmail": {
+						"type": "string"
+					},
+					"contactPhone": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"socialLinks": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"metaTitle": {
+						"type": "string"
+					},
+					"metaDescription": {
+						"type": "string"
+					},
+					"metaKeywords": {
+						"type": "string"
+					},
+					"isActive": {
+						"type": "boolean"
+					},
+					"slideshows": {
+						"items": {
+							"$ref": "#/components/schemas/SlideshowRequest"
+						},
+						"type": "array"
+					},
+					"impacts": {
+						"items": {
+							"$ref": "#/components/schemas/ImpactRequest"
+						},
+						"type": "array"
+					},
+					"removeSlideshowIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"removeImpactIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Partial_SlideshowRequest_": {
+				"properties": {
+					"imageUrl": {
+						"type": "string"
+					},
+					"altText": {
+						"type": "string"
+					},
+					"statisticsTitle": {
+						"type": "string"
+					},
+					"statisticsLabel": {
+						"type": "string"
+					},
+					"statisticsValue": {
+						"type": "string"
+					},
+					"order": {
+						"type": "number",
+						"format": "double"
+					},
+					"isActive": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_ImpactRequest_": {
+				"properties": {
+					"icon": {
+						"type": "string"
+					},
+					"value": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					},
+					"color": {
+						"type": "string"
+					},
+					"order": {
+						"type": "number",
+						"format": "double"
+					},
+					"isActive": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
 			"RoleCreateRequest": {
 				"properties": {
 					"name": {
@@ -1301,6 +1563,10 @@
 						]
 					},
 					"targetGroup": {
+						"type": "string",
+						"nullable": true
+					},
+					"description": {
 						"type": "string",
 						"nullable": true
 					},
@@ -1392,6 +1658,9 @@
 					"targetGroup": {
 						"type": "string"
 					},
+					"description": {
+						"type": "string"
+					},
 					"projectDuration": {
 						"type": "string"
 					},
@@ -1445,6 +1714,12 @@
 								"documentName"
 							],
 							"type": "object"
+						},
+						"type": "array"
+					},
+					"removeDocumentIds": {
+						"items": {
+							"type": "string"
 						},
 						"type": "array"
 					}
@@ -3549,6 +3824,433 @@
 						"in": "query",
 						"name": "surveyId",
 						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/settings": {
+			"get": {
+				"operationId": "GetSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:create"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SettingsCreateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/settings/{id}": {
+			"get": {
+				"operationId": "GetSettingsById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SettingsUpdateRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/settings/{id}/slideshows": {
+			"post": {
+				"operationId": "AddSlideshow",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SlideshowRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/settings/{id}/impacts": {
+			"post": {
+				"operationId": "AddImpact",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ImpactRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/settings/slideshows/{slideshowId}": {
+			"put": {
+				"operationId": "UpdateSlideshow",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "slideshowId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Partial_SlideshowRequest_"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteSlideshow",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "slideshowId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/settings/impacts/{impactId}": {
+			"put": {
+				"operationId": "UpdateImpact",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:update"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "impactId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Partial_ImpactRequest_"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteImpact",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServiceResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Settings"
+				],
+				"security": [
+					{
+						"jwt": [
+							"settings:delete"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "impactId",
+						"required": true,
 						"schema": {
 							"type": "string"
 						}

@@ -62,22 +62,22 @@ export const RolesTab: React.FC<RolesTabProps> = () => {
   return (
     <>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200">Role Management</h3>
-          <div className="flex items-center gap-4">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+            <div className="relative w-full sm:w-64">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search roles..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary"
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary"
               />
             </div>
             <Link
               to="/dashboard/settings/add-role"
-              className="px-4 py-2 bg-primary dark:bg-primary/80 text-white rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-primary dark:bg-primary/80 text-white rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors flex items-center justify-center gap-2"
             >
               <FiPlus className="w-4 h-4" />
               Add Role
@@ -97,8 +97,8 @@ export const RolesTab: React.FC<RolesTabProps> = () => {
               <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
                   <th className="text-left py-3 px-6 text-sm font-medium text-gray-500 dark:text-gray-300">Role Name</th>
-                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500 dark:text-gray-300">Description</th>
-                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500 dark:text-gray-300">Permissions</th>
+                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500 dark:text-gray-300 hidden md:table-cell">Description</th>
+                  <th className="text-left py-3 px-6 text-sm font-medium text-gray-500 dark:text-gray-300 hidden md:table-cell">Permissions</th>
                   <th className="text-left py-3 px-6 text-sm font-medium text-gray-500 dark:text-gray-300">Actions</th>
                 </tr>
               </thead>
@@ -119,8 +119,8 @@ export const RolesTab: React.FC<RolesTabProps> = () => {
                   roles.map((role) => (
                     <tr key={role.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="py-4 px-6 font-medium text-gray-900 dark:text-gray-200 capitalize">{spacer(role.name)}</td>
-                      <td className="py-4 px-6 text-gray-500 dark:text-gray-400">{role.description || 'No description'}</td>
-                      <td className="py-4 px-6 text-gray-500 dark:text-gray-400">
+                      <td className="py-4 px-6 text-gray-500 dark:text-gray-400 hidden md:table-cell">{role.description || 'No description'}</td>
+                      <td className="py-4 px-6 text-gray-500 dark:text-gray-400 hidden md:table-cell">
                         {role.permissions?.length || 0} permissions
                       </td>
                       <td className="py-4 px-6">
@@ -151,11 +151,11 @@ export const RolesTab: React.FC<RolesTabProps> = () => {
           </div>
           
           {totalPages > 1 && (
-            <div className="flex justify-between items-center px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalRoles)} of {totalRoles} roles
               </span>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 overflow-x-auto">
                 <button 
                   className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}

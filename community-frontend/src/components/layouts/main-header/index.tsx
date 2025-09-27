@@ -96,6 +96,7 @@ const MainHeader = () => {
                 triggerClassName="py-1.5"
                 value={language}
                 onChange={handleLanguageChange}
+                disableDarkMode={true}
             />
             <Link
                 to="/auth/login"
@@ -145,7 +146,7 @@ const MainHeader = () => {
 
                         {/* Mobile hamburger */}
                         <button
-                            className="lg:hidden rounded focus:outline-none"
+                            className="lg:hidden rounded focus:outline-none dark:text-black"
                             onClick={() => setMobileOpen(true)}
                             aria-label="Open menu"
                         >

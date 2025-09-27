@@ -18,6 +18,7 @@ export type ProjectStatus = 'draft' | 'in_progress' | 'completed' | 'on_hold' | 
 export type ProjectEntity = {
   id: string;
   name: string;
+  description?: string;
   status: ProjectStatus;
   targetGroup: string | null;
   projectDuration: string | null;
@@ -26,6 +27,7 @@ export type ProjectEntity = {
   updatedAt?: string;
   documents?: any[];
   stakeholders?: any[];
+  surveys?: any[];
   donors?: any[];
 };
 
@@ -40,6 +42,7 @@ export type ProjectResponse = ServiceResponse<ProjectEntity>;
 export type ProjectCreateRequest = {
   name: string;
   status?: ProjectStatus;
+  description?: string;
   targetGroup?: string | null;
   projectDuration?: string | null;
   geographicArea?: string | null;

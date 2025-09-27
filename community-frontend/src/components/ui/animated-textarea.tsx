@@ -6,6 +6,7 @@ interface AnimatedTextareaProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   minHeight?: string;
+  disableDarkMode?: boolean;
   [key: string]: any; // Allow additional props for the textarea
 }
 
@@ -14,6 +15,7 @@ const AnimatedTextarea: React.FC<AnimatedTextareaProps> = ({
   value, 
   onChange, 
   minHeight = '120px',
+  disableDarkMode = false,
   ...props 
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -25,7 +27,7 @@ const AnimatedTextarea: React.FC<AnimatedTextareaProps> = ({
 
   // Get background color based on theme
   const getBackgroundColor = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !disableDarkMode) {
       const isDark = document.documentElement.classList.contains('dark');
       return isFloating ? (isDark ? '#1f2937' : '#ffffff') : 'transparent';
     }
@@ -39,12 +41,12 @@ const AnimatedTextarea: React.FC<AnimatedTextareaProps> = ({
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-2 focus:border-primary bg-white dark:bg-gray-800 text-black dark:text-white resize-none peer"
+        className={`w-full px-4 py-3 border border-gray-300 ${!disableDarkMode ? 'dark:border-gray-600' : ''} rounded-lg focus:outline-none focus:border-2 focus:border-primary bg-white ${!disableDarkMode ? 'dark:bg-gray-800' : ''} text-black ${!disableDarkMode ? 'dark:text-white' : ''} resize-none peer`}
         style={{ minHeight }}
         {...props}
       />
       <motion.label
-        className="absolute left-4 text-gray-500 dark:text-gray-400 pointer-events-none origin-top-left"
+        className={`absolute left-4 text-gray-500 ${!disableDarkMode ? 'dark:text-gray-400' : ''} pointer-events-none origin-top-left`}
         initial={false}
         animate={{
           top: isFloating ? '-8px' : '12px',

@@ -145,6 +145,8 @@ function StakeholdersAccountsPage() {
       <AccountsList
         accounts={accounts}
         title="Stakeholders"
+        filters={filters}
+        setFilters={setFilters}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}

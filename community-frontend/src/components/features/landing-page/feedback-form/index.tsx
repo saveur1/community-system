@@ -192,6 +192,7 @@ function FeedbackForm() {
                   label={t('feedback.feedback_name')}
                   value={form.name}
                   onChange={(e) => handleFormChange({ name: e.target.value })}
+                  disableDarkMode={true}
                 />
               </div>
 

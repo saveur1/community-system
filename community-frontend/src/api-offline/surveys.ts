@@ -3,7 +3,6 @@ import { offlineStorage } from '../services/offline-storage';
 import { surveysApi, type SurveyEntity, type SurveysListParams, type SubmitAnswersRequest } from '@/api/surveys';
 import type { ServiceResponse } from '@/api/surveys';
 import { offlineCommon } from './common';
-import { toast } from 'react-toastify';
 
 export class OfflineApiService {
   private static instance: OfflineApiService;

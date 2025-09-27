@@ -10,7 +10,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import reportWebVitals from './reportWebVitals.ts'
 import i18n from './i18n';
-import { ThemeProvider } from './providers/theme-provider.tsx';
 
 const lang = i18n.language || 'rw';
 
@@ -40,9 +39,7 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <ThemeProvider>
-        <RouterProvider router={router} />
-      </ThemeProvider>
+      <RouterProvider router={router} />
     </StrictMode>,
   )
 }

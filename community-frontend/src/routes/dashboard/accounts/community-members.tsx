@@ -149,6 +149,8 @@ function CommunityAccountsPage() {
       <AccountsList
         accounts={accounts}
         title="Community Members"
+        filters={filters}
+        setFilters={setFilters}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}

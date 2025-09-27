@@ -5,11 +5,11 @@ import React, { useMemo, useState } from 'react';
 import { FaChevronLeft, FaChevronRight, FaFolderOpen, FaListOl, FaUsers, FaSort, FaSortUp, FaSortDown, FaEye, FaUpload, FaTrash, FaEdit, FaCalendarAlt, FaMapMarkerAlt, FaClock, FaBuilding } from 'react-icons/fa';
 import { useProject } from '@/hooks/useProjects';
 
-type DocItem = { id: number; name: string; type: string; size: string; added: string };
+type DocItem = { id: string; name: string; type: string; size: string; added: string; url?: string };
 
-type ProgrammeSurvey = { id: number; name: string; status: 'Active' | 'Draft' | 'Completed' | 'Pending'; email: string; responses: number };
+type ProgrammeSurvey = { id: string; name: string; status: 'Active' | 'Draft' | 'Completed' | 'Pending' | string; email: string; responses: number };
 
-type ProgrammeFeedback = { id: number; respondent: string; type: 'Positive' | 'Negative' | 'Suggestion' | 'Concern'; message: string; followUp: boolean; status: 'Open' | 'Closed' | 'Pending' };
+type ProgrammeFeedback = { id: string; respondent: string; type: 'Positive' | 'Negative' | 'Suggestion' | 'Concern' | string; message: string; followUp: boolean; status: 'Open' | 'Closed' | 'Pending' | string };
 
 function getStatusColor(status: string) {
   switch (status.toLowerCase()) {
@@ -29,35 +29,10 @@ function formatStatus(status: string) {
 }
 
 
-async function fetchDocs(_: number): Promise<DocItem[]> {
-  await new Promise(r => setTimeout(r, 120));
-  return [
-    { id: 1, name: 'Project Outline.pdf', type: 'PDF', size: '1.2 MB', added: '2025-08-01' },
-    { id: 2, name: 'Budget.xlsx', type: 'XLSX', size: '380 KB', added: '2025-08-02' },
-    { id: 3, name: 'Campaign Banner.png', type: 'PNG', size: '820 KB', added: '2025-08-05' },
-    { id: 4, name: 'Field Report.docx', type: 'DOCX', size: '220 KB', added: '2025-08-06' },
-    { id: 5, name: 'Schedule.csv', type: 'CSV', size: '12 KB', added: '2025-08-08' },
-  ];
-}
+// Helper to format file sizes to KB
+const kb = (n?: number | null) => typeof n === 'number' ? `${Math.round(n / 1024)} KB` : '-';
 
-async function fetchProgrammeSurveys(_: number): Promise<ProgrammeSurvey[]> {
-  await new Promise(r => setTimeout(r, 120));
-  return [
-    { id: 11, name: 'Parent Satisfaction', status: 'Active', email: 'immunization@community.org', responses: 210 },
-    { id: 12, name: 'Clinic Experience', status: 'Draft', email: 'immunization@community.org', responses: 145 },
-    { id: 13, name: 'Outreach Outcomes', status: 'Completed', email: 'immunization@community.org', responses: 320 },
-  ];
-}
 
-async function fetchProgrammeFeedbacks(_: number): Promise<ProgrammeFeedback[]> {
-  await new Promise(r => setTimeout(r, 120));
-  return [
-    { id: 9001, respondent: 'Jane Smith', type: 'Positive', message: 'Staff were kind and the service was quick.', followUp: false, status: 'Closed' },
-    { id: 9002, respondent: 'John Doe', type: 'Suggestion', message: 'Extend clinic hours for working parents.', followUp: true, status: 'Open' },
-    { id: 9003, respondent: 'Alex Lee', type: 'Negative', message: 'Wait times were long.', followUp: true, status: 'Pending' },
-    { id: 9004, respondent: 'Sam W.', type: 'Positive', message: 'Great outreach event!', followUp: false, status: 'Closed' },
-  ];
-}
 
 const ProgramDetail = () => {
   const { 'view-id': viewId } = useParams({ strict: false }) as { 'view-id': string };
@@ -70,18 +45,43 @@ const ProgramDetail = () => {
   const [surveys, setSurveys] = useState<ProgrammeSurvey[]>([]);
   const [feedbacks, setFeedbacks] = useState<ProgrammeFeedback[]>([]);
 
-  // Initialize dummy data for resources, surveys, and feedbacks
+  // Populate with real backend data when loaded
   React.useEffect(() => {
-    Promise.all([
-      fetchDocs(Number(viewId) || 0),
-      fetchProgrammeSurveys(Number(viewId) || 0),
-      fetchProgrammeFeedbacks(Number(viewId) || 0),
-    ]).then(([d, s, f]) => {
-      setDocs(d);
-      setSurveys(s);
-      setFeedbacks(f);
-    });
-  }, [viewId]);
+    if (!project?.result) return;
+    const pd = project.result as any;
+
+    // Documents -> DocItem
+    const mappedDocs: DocItem[] = (pd.documents || []).map((d: any) => ({
+      id: d.id,
+      name: d.documentName,
+      type: (d.type || '').toString().toUpperCase(),
+      size: kb(d.size),
+      added: new Date(d.addedAt || d.createdAt).toLocaleDateString(),
+      url: d.documentUrl || undefined,
+    }));
+    setDocs(mappedDocs);
+
+    // Surveys -> map to ProgrammeSurvey shape expected by table
+    const mappedSurveys: ProgrammeSurvey[] = (pd.surveys || []).map((s: any) => ({
+      id: s.id,
+      name: s.title,
+      status: (s.status || 'active').charAt(0).toUpperCase() + (s.status || 'active').slice(1),
+      email: '-',
+      responses: 0,
+    }));
+    setSurveys(mappedSurveys);
+
+    // Feedbacks -> ProgrammeFeedback shape
+    const mappedFeedbacks: ProgrammeFeedback[] = (pd.feedbacks || []).map((f: any) => ({
+      id: f.id,
+      respondent: f.responderName || 'Anonymous',
+      type: (f.feedbackType || '').toString().charAt(0).toUpperCase() + (f.feedbackType || '').toString().slice(1),
+      message: f.mainMessage || f.otherFeedbackOn || '',
+      followUp: !!f.followUpNeeded,
+      status: f.status || 'Open',
+    }));
+    setFeedbacks(mappedFeedbacks);
+  }, [project]);
 
   // Shared table controls
   const [search, setSearch] = useState('');
@@ -168,7 +168,8 @@ const ProgramDetail = () => {
     <div className="pb-10">
       <Breadcrumb items={[
         {title: "Dashboard", link: "/dashboard" },
-        "Projects", projectData?.name || ""
+        {title: "Projects", link: "/dashboard/projects" }, 
+        projectData?.name || ""
       ]} 
         title="Project Details" 
         className="absolute top-0 left-0 w-full px-6" />
@@ -194,9 +195,9 @@ const ProgramDetail = () => {
             <div className="mt-10 border-b border-gray-200 dark:border-gray-600">
               <nav className="-mb-px flex gap-6" aria-label="Tabs">
                 <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `details` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`details`)}>Details</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `resources` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`resources`)}>Resources ({projectData?.documents?.length || 0})</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `surveys` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`surveys`)}>Surveys (3)</button>
-                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `feedbacks` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`feedbacks`)}>Feedbacks (980)</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `resources` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`resources`)}>Resources ({docs.length})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `surveys` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`surveys`)}>Surveys ({surveys.length})</button>
+                <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `feedbacks` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`feedbacks`)}>Feedbacks ({feedbacks.length})</button>
                 <button className={`pb-2 border-b-4 text-sm font-medium transition-colors ${activeTab === `donors` ? `border-primary text-primary dark:border-primary-200 dark:text-primary-200` : `border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`}`} onClick={() => setActiveTab(`donors`)}>Donors ({projectData?.donors?.length || 0})</button>
               </nav>
             </div>
@@ -271,28 +272,28 @@ const ProgramDetail = () => {
                         <FaFolderOpen className="text-blue-600 dark:text-blue-400" />
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Documents</span>
                       </div>
-                      <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{projectData.documents?.length || 0}</span>
+                      <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{projectData?.documents?.length || 0}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
                         <FaUsers className="text-green-600 dark:text-green-400" />
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Stakeholders</span>
                       </div>
-                      <span className="text-lg font-bold text-green-600 dark:text-green-400">{projectData.stakeholders?.length || 0}</span>
+                      <span className="text-lg font-bold text-green-600 dark:text-green-400">{projectData?.stakeholders?.length || 0}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
                         <FaBuilding className="text-purple-600 dark:text-purple-400" />
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Donors</span>
                       </div>
-                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">{projectData.donors?.length || 0}</span>
+                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">{projectData?.donors?.length || 0}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
                         <FaListOl className="text-orange-600 dark:text-orange-400" />
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Surveys</span>
                       </div>
-                      <span className="text-lg font-bold text-orange-600 dark:text-orange-400">3</span>
+                      <span className="text-lg font-bold text-orange-600 dark:text-orange-400">{projectData?.surveys?.length || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -313,7 +314,7 @@ const ProgramDetail = () => {
                     const files = Array.from(e.target.files || []);
                     if (!files.length) return;
                     const now = new Date().toISOString().slice(0,10);
-                    const newDocs: DocItem[] = files.map((f, i) => ({ id: Date.now()+i, name: f.name, type: f.name.split('.').pop()?.toUpperCase() || 'FILE', size: '${Math.ceil(f.size/1024)} KB', added: now }));
+                    const newDocs: DocItem[] = files.map((f, i) => ({ id: String(Date.now()+i), name: f.name, type: f.name.split('.').pop()?.toUpperCase() || 'FILE', size: '${Math.ceil(f.size/1024)} KB', added: now }));
                     setDocs(prev => [...newDocs, ...prev]);
                     e.currentTarget.value = '';
                   }} />

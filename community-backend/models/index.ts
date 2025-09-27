@@ -18,6 +18,9 @@ import SystemLog from './systemLog';
 import Announcement from './announcement';
 import Response from './response';
 import Notification from './notification';
+import Settings from './settings';
+import Slideshow from './slideshow';
+import Impact from './impact';
 
 // Centralized associations to avoid circular imports
 User.belongsToMany(Role, {
@@ -227,7 +230,7 @@ Document.belongsToMany(Feedback, {
 
 //USER FEEDBACK ASSOCIATIONS
 User.hasMany(Feedback, {
-  as: 'feedback',
+  as: 'feedbacks',
   foreignKey: 'userId',
 });
 Feedback.belongsTo(User, {
@@ -237,7 +240,7 @@ Feedback.belongsTo(User, {
 
 //PROJECT FEEDBACK ASSOCIATIONS
 Project.hasMany(Feedback, {
-  as: 'feedback',
+  as: 'feedbacks',
   foreignKey: 'projectId',
 });
 Feedback.belongsTo(Project, {
@@ -424,6 +427,29 @@ Organization.hasMany(Notification, {
   foreignKey: 'organizationId',
 });
 
-const db = { sequelize, User, Role, UserRole, Permission, Project, Document, Organization, Survey, Question, Answer, Section, Feedback, FeedbackReply, CommunitySession, Comment, SystemLog, Announcement, Response, Notification };
+// SETTINGS ASSOCIATIONS
+Settings.hasMany(Slideshow, {
+  as: 'slideshows',
+  foreignKey: 'settingsId',
+  onDelete: 'CASCADE',
+  hooks: true,
+});
+Slideshow.belongsTo(Settings, {
+  as: 'settings',
+  foreignKey: 'settingsId',
+});
+
+Settings.hasMany(Impact, {
+  as: 'impacts',
+  foreignKey: 'settingsId',
+  onDelete: 'CASCADE',
+  hooks: true,
+});
+Impact.belongsTo(Settings, {
+  as: 'settings',
+  foreignKey: 'settingsId',
+});
+
+const db = { sequelize, User, Role, UserRole, Permission, Project, Document, Organization, Survey, Question, Answer, Section, Feedback, FeedbackReply, CommunitySession, Comment, SystemLog, Announcement, Response, Notification, Settings, Slideshow, Impact };
 
 export default db;

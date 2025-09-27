@@ -157,6 +157,8 @@ function EmployeesAccountsPage() {
       <AccountsList
         accounts={accounts}
         title="Health service providers"
+        filters={filters}
+        setFilters={setFilters}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}

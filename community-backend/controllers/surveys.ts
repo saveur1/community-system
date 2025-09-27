@@ -637,6 +637,30 @@ export class SurveyController extends Controller {
         await db.Question.bulkCreate(questionsToCreate as any, { transaction: t });
       }
 
+      // If the new survey is a rapid enquiry, pause all existing active rapid enquiries (except drafts)
+      if (data.surveyType === 'rapid-enquiry') {
+        const pausedCount = await db.Survey.update(
+          { status: 'paused' },
+          {
+            where: {
+              surveyType: 'rapid-enquiry',
+              status: {
+                [Op.ne]: 'draft' // Don't pause draft surveys
+              }
+            },
+            transaction: t
+          }
+        );
+
+        // Log the action for audit purposes
+        if (pausedCount[0] > 0) {
+          await createSystemLog(request ?? null, 'paused_existing_rapid_enquiries', 'Survey', s.id, {
+            pausedCount: pausedCount[0],
+            reason: 'New rapid enquiry created'
+          });
+        }
+      }
+
       if (data.allowedRoles && data.allowedRoles.length > 0) {
         const roles = await db.Role.findAll({ where: { id: data.allowedRoles }, transaction: t });
         if (roles.length) {
@@ -682,6 +706,33 @@ export class SurveyController extends Controller {
         const end = data.endAt ? new Date(data.endAt) : survey.endAt;
         if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
           throw new Error('Invalid startAt/endAt values');
+        }
+      }
+
+      // If the survey type is being changed to rapid-enquiry, pause all existing active rapid enquiries (except drafts)
+      if (data.surveyType === 'rapid-enquiry' && survey.surveyType !== 'rapid-enquiry') {
+        const pausedCount = await db.Survey.update(
+          { status: 'paused' },
+          {
+            where: {
+              surveyType: 'rapid-enquiry',
+              status: {
+                [Op.ne]: 'draft' // Don't pause draft surveys
+              },
+              id: {
+                [Op.ne]: survey.id // Don't pause the survey being updated
+              }
+            },
+            transaction: t
+          }
+        );
+
+        // Log the action for audit purposes
+        if (pausedCount[0] > 0) {
+          await createSystemLog(request ?? null, 'paused_existing_rapid_enquiries', 'Survey', survey.id, {
+            pausedCount: pausedCount[0],
+            reason: 'Survey type changed to rapid-enquiry'
+          });
         }
       }
 

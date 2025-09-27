@@ -20,6 +20,7 @@ export type ProjectStatus = 'draft' | 'in_progress' | 'completed' | 'on_hold' | 
 export interface ProjectAttributes {
   id: string;
   name: string;
+  description?: string | null;
   status: ProjectStatus;
   targetGroup: string | null;
   projectDuration: string | null; // e.g., "6 months", "1 year", etc.
@@ -33,6 +34,7 @@ export type ProjectCreationAttributes = Optional<ProjectAttributes, 'id' | 'stat
 class Project extends Model<ProjectAttributes, ProjectCreationAttributes> implements ProjectAttributes {
   declare id: string;
   declare name: string;
+  declare description: string | null;
   declare status: ProjectStatus;
   declare targetGroup: string | null;
   declare projectDuration: string | null;
@@ -78,6 +80,11 @@ Project.init({
   targetGroup: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: "Project description"
   },
   projectDuration: {
     type: DataTypes.STRING,

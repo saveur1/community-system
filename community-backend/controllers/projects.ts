@@ -8,6 +8,7 @@ interface ProjectCreateRequest {
   name: string;
   status?: 'draft' | 'in_progress' | 'completed' | 'on_hold' | 'cancelled';
   targetGroup?: string | null;
+  description?: string | null;
   projectDuration?: string | null; // New field
   geographicArea?: string | null; // New field
   stakeholderIds?: string[]; // optional to attach stakeholders
@@ -25,7 +26,10 @@ interface ProjectCreateRequest {
   }>;
 }
 
-interface ProjectUpdateRequest extends Partial<ProjectCreateRequest> {}
+interface ProjectUpdateRequest extends Partial<ProjectCreateRequest> {
+  // For updates, allow removing specific existing documents by ID
+  removeDocumentIds?: string[];
+}
 
 @Route('api/projects')
 @Tags('Projects')
@@ -65,6 +69,7 @@ export class ProjectController extends Controller {
         { model: db.Organization, as: 'stakeholders', through: { attributes: [] } },
         { model: db.Organization, as: 'donors', through: { attributes: [] } },
         { model: db.Survey, as: 'surveys' },
+        { model: db.Feedback, as: "feedbacks"}
       ],
     });
     if (!project) return ServiceResponse.failure('Project not found', null, 404);
@@ -80,6 +85,7 @@ export class ProjectController extends Controller {
       const project = await db.Project.create({
         name: data.name,
         status: data.status ?? 'in_progress',
+        description: data.description ?? null,
         targetGroup: data.targetGroup ?? null,
         projectDuration: data.projectDuration ?? null,
         geographicArea: data.geographicArea ?? null,
@@ -141,6 +147,7 @@ export class ProjectController extends Controller {
 
     await project.update({
       name: data.name ?? project.name,
+      description: data.description ?? project.description,
       status: (data.status as any) ?? project.status,
       targetGroup: data.targetGroup ?? project.targetGroup,
       projectDuration: data.projectDuration ?? project.projectDuration,
@@ -153,6 +160,32 @@ export class ProjectController extends Controller {
 
     if (data.donorIds) {
       await (project as any).setDonors(data.donorIds);
+    }
+
+    // Remove selected existing documents
+    if (data.removeDocumentIds && data.removeDocumentIds.length) {
+      await db.Document.destroy({
+        where: {
+          id: data.removeDocumentIds,
+          projectId: project.id,
+        }
+      });
+    }
+
+    // Add new documents (resources)
+    if (data.documents && data.documents.length) {
+      for (const res of data.documents) {
+        await (project as any).createDocument({
+          documentName: res.documentName,
+          size: res.size ?? null,
+          type: res.type ?? null,
+          addedAt: res.addedAt ?? new Date(),
+          documentUrl: res.documentUrl ?? null,
+          userId: res.userId,
+          publicId: res.publicId ?? null,
+          deleteToken: res.deleteToken ?? null,
+        });
+      }
     }
 
     const result = await db.Project.findByPk(project.id, {

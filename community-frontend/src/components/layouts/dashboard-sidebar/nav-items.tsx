@@ -13,7 +13,11 @@ const NavItem: React.FC<NavItemProps> = ({ item, collapsed }) => {
   const location = useLocation();
   const hasChildren = Array.isArray(item.children) && item.children.length > 0;
   const path = location.pathname;
-  const isActive = path === item.link || (hasChildren && path.startsWith(item.link));
+  // Active logic:
+  // - Exact match only for '/dashboard'
+  // - For all other links, highlight when path starts with the item's link
+  const isDashboard = item.link === '/dashboard';
+  const isActive = isDashboard ? (path === '/dashboard') : path.startsWith(item.link);
   const [open, setOpen] = React.useState(() => isActive);
   const Icon = item.icon;
 
@@ -81,7 +85,7 @@ const NavItem: React.FC<NavItemProps> = ({ item, collapsed }) => {
           <span className="pointer-events-none absolute left-6 top-0 bottom-0 w-px bg-white/20" aria-hidden="true" />
 
           {item.children!.map((child, _) => {
-            const childActive = path === child.link;
+            const childActive = path.startsWith(child.link);
             return (
               <Link
                 key={child.name}

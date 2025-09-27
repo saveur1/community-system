@@ -31,12 +31,22 @@ function AccountsPage() {
     total: 0,
   });
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const searchParams = Route.useSearch();
 
   const { data, isLoading } = useUsersList({ 
     page: pagination.page, 
     limit: pagination.pageSize,
     search: filters.search 
   });
+
+  useEffect(()=>{
+    if((searchParams as any).status == "pending"){
+      setFilters({
+        ...filters,
+        status: "pending"
+      })
+    }
+  },[])
 
   const { data: exportData } = useUsersList({ limit:-1});
 
@@ -154,6 +164,8 @@ function AccountsPage() {
       <AccountsList
         accounts={accounts}
         title="All Accounts"
+        filters={filters}
+        setFilters={setFilters}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}

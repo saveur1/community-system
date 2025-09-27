@@ -125,6 +125,7 @@ const AddProjectComponent: FC = (): JSX.Element => {
         // 2) Submit project with new fields and documents array
         await createProject.mutateAsync({
           name: programme.title,
+          description: programme?.description,
           targetGroup: programme.targetGroup || null,
           projectDuration: programme.projectDuration || null,
           geographicArea: programme.geographicArea || null,
