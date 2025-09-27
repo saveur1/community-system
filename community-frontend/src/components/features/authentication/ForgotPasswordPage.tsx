@@ -46,7 +46,7 @@ function ForgotPasswordPage() {
     setTouched(true);
 
     if (error) {
-      showErrorToast("forgot_password.email_required");
+      showErrorToast(t("forgot_password.email_required"));
       return;
     }
 

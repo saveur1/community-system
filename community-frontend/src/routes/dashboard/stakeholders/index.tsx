@@ -10,6 +10,8 @@ import { CgUnblock } from 'react-icons/cg';
 import Drawer from '@/components/ui/drawer';
 import { type OrganizationEntity } from '@/api/organizations';
 import MainToolbar from '@/components/common/main-toolbar';
+import OfflineIndicator from '@/components/common/OfflineIndicator';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 // Excel export data formatter for stakeholders
 const excelDataExported = (stakeholders: OrganizationEntity[]) => {
@@ -45,6 +47,7 @@ const StakeholdersComponent = () => {
   // fetch organizations (get a reasonably large pageSize or rely on server pagination) and filter to type === 'stakeholder'
   const { data, isLoading, isError, refetch, isFetching } = useOrganizationsList({ page, limit: pageSize, type: "stakeholder", search });
   const deleteOrganization = useDeleteOrganization();
+  const { isOnline } = useNetworkStatus();
 
   // search & pagination
   
@@ -254,7 +257,8 @@ const StakeholdersComponent = () => {
                     </button>
                   }
                   position="bottom-right"
-                  dropdownClassName="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-48"
+                  dropdownClassName="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 w-40"
+                  portal={true}
                 >
                   <ActionItems
                     stakeholder={stakeholder}
@@ -342,7 +346,8 @@ const StakeholdersComponent = () => {
               <CustomDropdown
                 trigger={<button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"><FaEllipsisV className="w-4 h-4" /></button>}
                 position="bottom-right"
-                dropdownClassName="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-48"
+                dropdownClassName="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 w-40"
+                portal={true}
               >
                 <ActionItems stakeholder={stakeholder} onDelete={(id, name) => { setToDelete({ id, name }); setDeleteModalOpen(true); }} />
               </CustomDropdown>
@@ -353,6 +358,28 @@ const StakeholdersComponent = () => {
     </div>
   );
 
+  // Show offline indicator when not online
+  if (!isOnline) {
+    return (
+      <div className="pb-10">
+        <Breadcrumb
+          items={[
+            {title: 'Dashboard', link: "/dashboard"}, 
+            'Stakeholders'
+          ]}
+          title="Stakeholders"
+          className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
+        />
+        <div className="pt-20">
+          <OfflineIndicator 
+            title="Stakeholders Not Available Offline"
+            message="The stakeholders page requires an internet connection to load and manage stakeholder data. Please check your connection and try again."
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-10">
       <Breadcrumb
@@ -361,7 +388,7 @@ const StakeholdersComponent = () => {
           'Stakeholders'
         ]}
         title="Stakeholders"
-        className='absolute top-0 left-0 w-full px-6'
+        className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
       />
 
       <div className="pt-14">

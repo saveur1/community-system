@@ -209,7 +209,7 @@ function FeedbackForm() {
                       <div className="flex flex-col items-center">
                         <span className="text-2xl mr-2 p-1 bg-primary/10 rounded-full">{method.icon}</span>
                         <div className="mt-1">
-                          <div className="font-medium text-sm text-center">{method.label}</div>
+                          <div className="font-medium dark:text-gray-500 text-sm text-center">{method.label}</div>
                           <div className="text-xs sm:text-xs mt-1 text-gray-500 text-center">{method.description}</div>
                         </div>
                       </div>

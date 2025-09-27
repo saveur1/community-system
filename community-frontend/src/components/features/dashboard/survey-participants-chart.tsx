@@ -26,6 +26,7 @@ export function SurveyParticipants() {
   const { data: surveysResp, isLoading: surveysLoading } = useSurveysList({
     page: 1,
     limit: 1000,
+    owner: 'any'
   });
   const surveysList =
     surveysResp?.result?.map((s) => ({

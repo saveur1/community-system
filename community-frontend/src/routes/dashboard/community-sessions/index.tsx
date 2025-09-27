@@ -9,6 +9,8 @@ import type { CommunitySessionEntity } from '@/api/community-sessions';
 import FilePreview from '@/components/common/file-preview';
 import { checkPermissions } from '@/utility/logicFunctions';
 import useAuth from '@/hooks/useAuth';
+import OfflineIndicator from '@/components/common/OfflineIndicator';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 const SessionTypeIcon = ({ type }: { type: CommunitySessionEntity['type'] }) => {
   switch (type) {
@@ -28,6 +30,7 @@ const CommunitySessionsPage = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [toDelete, setToDelete] = useState<CommunitySessionEntity | null>(null);
   const { user } = useAuth();
+  const { isOnline } = useNetworkStatus();
 
   const { data, isLoading } = useCommunitySessionsList({ page, limit: pageSize, allowed: true, search: search.trim() || undefined });
   const sessions = data?.result ?? [];
@@ -178,6 +181,28 @@ const CommunitySessionsPage = () => {
     );
   };
 
+  // Show offline indicator when not online
+  if (!isOnline) {
+    return (
+      <div className="pb-6 lg:pb-10 px-2 lg:px-0">
+        <Breadcrumb
+          title="Community Sessions"
+          items={[
+            { link: '/dashboard', title: 'Dashboard' },
+            'Community Sessions'
+          ]}
+          className='absolute top-0 left-0 w-full px-4 lg:px-6 bg-white dark:bg-gray-900'
+        />
+        <div className="pt-20">
+          <OfflineIndicator 
+            title="Community Sessions Not Available Offline"
+            message="The community sessions page requires an internet connection to load and manage session data. Please check your connection and try again."
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-6 lg:pb-10 px-2 lg:px-0">
       <Breadcrumb
@@ -186,7 +211,7 @@ const CommunitySessionsPage = () => {
           { link: '/dashboard', title: 'Dashboard' },
           'Community Sessions'
         ]}
-        className='absolute top-0 left-0 w-full px-4 lg:px-6'
+        className='absolute top-0 left-0 w-full px-4 lg:px-6 bg-white dark:bg-gray-900'
       />
       <div className="pt-20">
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-3 lg:p-4 mb-4 lg:mb-6">

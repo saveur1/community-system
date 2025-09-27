@@ -17,6 +17,9 @@ import SurveyGridCard from '@/components/features/surveys/SurveyGridCard';
 import SurveyShareModal from '@/components/features/surveys/SurveyShareModal';
 import ExportSurveyModal from '@/components/features/surveys/details/export-survey-modal';
 import { format, parseISO } from 'date-fns';
+import CenteredNotFound from '@/components/common/CenteredNotFound';
+import OfflineIndicator from '@/components/common/OfflineIndicator';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 const SurveyComponent = () => {
     const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -34,6 +37,7 @@ const SurveyComponent = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const { user } = useAuth();
+    const { isOnline } = useNetworkStatus();
 
     const params = useMemo(() => {
         const param: SurveysListParams = { page, limit: pageSize, surveyType: "general", owner: "me", search: search || undefined };
@@ -154,10 +158,7 @@ const SurveyComponent = () => {
     }, [surveys, search]);
 
     const totalPages = data?.totalPages ?? Math.max(1, Math.ceil(filtered.length / pageSize));
-    console.log(data);
-    console.log("totoal pages", totalPages)
     const currentPage = Math.min(page, totalPages);
-    console.log("current page", currentPage)
     const paginated = filtered; // server-paginated; filter client-side only
 
     const handleConfirmDelete = () => {
@@ -202,8 +203,8 @@ const SurveyComponent = () => {
 
     const handleActionClick = (actionKey: string, survey: any) => {
       if (actionKey === 'pause') updateStatus.mutate({ surveyId: String(survey.id), status: 'paused' });
-      else if (actionKey === 'activate') updateStatus.mutate({ surveyId: String(survey.id), status: 'active' });
-      else if (actionKey === 'archive') updateStatus.mutate({ surveyId: String(survey.id), status: 'archived' });
+      else if (actionKey === 'activate' ) updateStatus.mutate({ surveyId: String(survey.id), status: 'active' });
+      else if (actionKey === 'archive' ) updateStatus.mutate({ surveyId: String(survey.id), status: 'archived' });
       else if (actionKey === 'share') openShareModal(survey);
       else if (actionKey === 'delete') { setToDelete({ id: survey.id, name: survey.title }); setDeleteModalOpen(true); }
       else if (actionKey === 'export-excel') handleExportClick('excel', survey.id);
@@ -222,6 +223,8 @@ const SurveyComponent = () => {
       setExportModalOpen(false);
       setExportSurvey(null);
     };
+
+
 
     const getSurveyActions = (survey: any, user: User | null) => {
         const baseActions = [
@@ -308,6 +311,47 @@ const SurveyComponent = () => {
 
     // Share modal (placed near bottom)
     const shareLink = shareSurvey ? buildShareLink(shareSurvey) : '';
+
+    // Show offline indicator when not online
+    if (!isOnline) {
+        return (
+            <div className="pb-10">
+                <Breadcrumb
+                    items={[
+                        {title:"Dashboard", link:"/dashboard"}, 
+                        "Surveys"
+                    ]}
+                    title="Surveys"
+                    className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
+                />
+                <div className="pt-20">
+                    <OfflineIndicator 
+                        title="Surveys Not Available Offline"
+                        message="The surveys page requires an internet connection to load and manage survey data. Please check your connection and try again."
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    if(!checkPermissions(user, 'survey:create')) {
+        return (
+            <div className="pb-10">
+                <Breadcrumb
+                    items={[
+                        {title:"Dashboard", link:"/dashboard"}, 
+                        "Surveys"
+                    ]}
+                    title="Surveys"
+                    className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
+                />
+                {/* centered not-found component when user lacks permission */}
+                <div className="pt-20">
+                  <CenteredNotFound />
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="pb-10">

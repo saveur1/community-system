@@ -29,23 +29,86 @@ const returnErrorToUser: ErrorRequestHandler = (errors, _req, res, next) => {
 
   if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
     console.log("Getting this error", error);
+    
+    // Handle Sequelize Unique Constraint Errors
     if(error.name === "SequelizeUniqueConstraintError"){
-        const message = `Duplicate field value: '${error?.errors[0].value}'. Please use another value!`;
-        error = new ErrorHandler(message, 400);
+      const field = error?.errors[0]?.path;
+      const value = error?.errors[0]?.value;
+      
+      let message = "This information is already in use.";
+      if (field === 'email') {
+        message = "An account with this email address already exists. Please use a different email or try logging in.";
+      } else if (field === 'phone') {
+        message = "An account with this phone number already exists. Please use a different phone number or try logging in.";
+      } else if (field) {
+        message = `This ${field} is already taken. Please choose a different one.`;
+      }
+      
+      error = new ErrorHandler(message, 400);
     }
+    
+    // Handle Sequelize Validation Errors
+    if (error.name === "SequelizeValidationError") {
+      const validationErrors = error.errors || [];
+      let message = "Please check your input and try again.";
+      
+      if (validationErrors.length > 0) {
+        const firstError = validationErrors[0];
+        const field = firstError.path;
+        const validatorKey = firstError.validatorKey;
+        
+        // Custom messages for specific validation errors
+        if (field === 'phone' && validatorKey === 'isNumeric') {
+          message = "Phone number must contain only numbers. Please remove any letters, spaces, or special characters.";
+        } else if (field === 'email' && validatorKey === 'isEmailOrNull') {
+          message = "Please enter a valid email address (e.g., example@email.com).";
+        } else if (field === 'name' && validatorKey === 'notEmpty') {
+          message = "Name is required and cannot be empty.";
+        } else if (field === 'salary' && validatorKey === 'min') {
+          message = "Salary must be a positive number.";
+        } else if (field === 'profile' && validatorKey === 'isCustomUrl') {
+          message = "Profile picture must be a valid URL.";
+        } else {
+          // Generic validation error message
+          message = firstError.message || `Invalid ${field}. Please check your input.`;
+        }
+      }
+      
+      error = new ErrorHandler(message, 400);
+    }
+    
+    // Handle Sequelize Database Errors
+    if (error.name === "SequelizeDatabaseError") {
+      let message = "There was a problem saving your information. Please try again.";
+      
+      // Handle specific database errors
+      if (error.original?.code === 'ER_DATA_TOO_LONG') {
+        message = "One of your entries is too long. Please shorten your input and try again.";
+      } else if (error.original?.code === 'ER_BAD_NULL_ERROR') {
+        message = "Please fill in all required fields.";
+      }
+      
+      error = new ErrorHandler(message, 400);
+    }
+    
+    // Handle Sequelize Connection Errors
+    if (error.name === "SequelizeConnectionError") {
+      error = new ErrorHandler("Unable to connect to the database. Please try again later.", 500);
+    }
+    
     if (error.name === "CastError") {
       const message = `Resource Not Found. Invalid ${error.path}`;
       error = new ErrorHandler(message, 400);
     }
 
     if (error.name === "JsonWebTokenError") {
-      const message = "JSON web token is invalid. Try Again!!!";
-      error = new ErrorHandler(message, 400);
+      const message = "Your session is invalid. Please log in again.";
+      error = new ErrorHandler(message, 401);
     }
 
-    if (error.name === "TokenExipiredError") {
-      const message = "JSON web token is Expired. Try Again!!!";
-      error = new ErrorHandler(message, 400);
+    if (error.name === "TokenExpiredError") {
+      const message = "Your session has expired. Please log in again.";
+      error = new ErrorHandler(message, 401);
     }
 
     return res.status(error.statusCode).json({

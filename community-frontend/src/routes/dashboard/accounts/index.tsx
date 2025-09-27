@@ -7,6 +7,9 @@ import { FaPlus } from 'react-icons/fa';
 import type { Account, AccountFilters } from '@/types/account';
 import type { User } from '@/api/auth';
 import { spacer } from '@/utility/logicFunctions';
+import OfflineIndicator from '@/components/common/OfflineIndicator';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import Breadcrumb from '@/components/ui/breadcrum';
 
 // Helper: determine account type by membership in signup user type groups
 function mapUserTypeToAccountType(userType?: string): Account['type'] {
@@ -32,6 +35,7 @@ function AccountsPage() {
   });
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const searchParams = Route.useSearch();
+  const { isOnline } = useNetworkStatus();
 
   const { data, isLoading } = useUsersList({ 
     page: pagination.page, 
@@ -130,6 +134,28 @@ function AccountsPage() {
       total: prev.total,
     }));
   };
+
+  // Show offline indicator when not online
+  if (!isOnline) {
+    return (
+      <div className="pb-10">
+        <Breadcrumb
+          items={[
+            { title: 'Dashboard', link: '/dashboard' },
+            'Accounts'
+          ]}
+          title="Accounts"
+          className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
+        />
+        <div className="pt-20">
+          <OfflineIndicator 
+            title="Accounts Not Available Offline"
+            message="The accounts page requires an internet connection to load and manage user account data. Please check your connection and try again."
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-1">

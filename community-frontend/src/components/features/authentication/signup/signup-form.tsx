@@ -789,7 +789,7 @@ function SignupForm({ className = "" }: SignupFormProps) {
           <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <FiUserPlus className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold mb-2">{t('signup.create_title')}</h1>
+          <h1 className="text-xl sm:text-2xl dark:text-title font-bold mb-2">{t('signup.create_title')}</h1>
           {actualTotalSteps > 1 && (
             <div className="flex justify-center mb-4">
               {Array.from({ length: actualTotalSteps }, (_, i) => i + 1).map((step) => (

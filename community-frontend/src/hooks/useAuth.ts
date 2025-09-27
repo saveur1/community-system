@@ -1,7 +1,8 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi,type AuthResponse } from '../api/auth';
 import { toast } from 'react-toastify';
 import { useNavigate } from '@tanstack/react-router';
+import { tokenManager } from '@/lib/auth';
 
 // Query keys for react-query
 export const authKeys = {
@@ -10,12 +11,25 @@ export const authKeys = {
 
 export function useAuth() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: () => {
-      navigate({to: "/dashboard"});
+    onSuccess: (data: AuthResponse) => {
+      // Cache the user data immediately after successful login
+      if (data?.result?.user) {
+        // Cache the full auth response to match the expected format
+        queryClient.setQueryData(authKeys.currentUser, data);
+        
+        // Mark that we have a successful login for faster checks
+        tokenManager.setToken('authenticated', true);
+      }
+      
+      // Check for redirect parameter in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get('redirect') || '/dashboard';
+      navigate({ to: redirectTo });
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || 'Login failed';
@@ -32,6 +46,15 @@ export function useAuth() {
   const signupMutation = useMutation({
     mutationFn: authApi.signup,
     onSuccess: (data: AuthResponse) => {
+      // Cache the user data immediately after successful signup
+      if (data?.result?.user) {
+        // Cache the full auth response to match the expected format
+        queryClient.setQueryData(authKeys.currentUser, data);
+        
+        // Mark that we have a successful signup for faster checks
+        tokenManager.setToken('authenticated', true);
+      }
+      
       if(data?.result?.user?.roles[0]?.name === "general_population"){
         navigate({to: "/dashboard"});
       }
@@ -98,18 +121,30 @@ export function useAuth() {
   const currentUserQuery = useQuery<AuthResponse>({
     queryKey: authKeys.currentUser,
     queryFn: authApi.getCurrentUser,
-    enabled: true,
-    retry: true
+    enabled: tokenManager.hasToken(), // Only fetch if we have a token
+    retry: (failureCount, error) => {
+      // Don't retry on 401 errors
+      if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+        tokenManager.removeToken(); // Clear invalid token
+        return false;
+      }
+      return failureCount < 2;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Logout function
   const logout = async () => {
     try {
       await authApi.logout();
+      tokenManager.removeToken(); // Clear stored token
+      queryClient.removeQueries({ queryKey: authKeys.currentUser }); // Clear cached user data
       navigate({to: "/auth/login"});
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if API call fails, redirect to login
+      // Even if API call fails, clear token and cached data, then redirect to login
+      tokenManager.removeToken();
+      queryClient.removeQueries({ queryKey: authKeys.currentUser });
       navigate({to: "/auth/login"});
     }
   };

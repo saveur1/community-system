@@ -15,6 +15,8 @@ import SurveyShareModal from '@/components/features/surveys/SurveyShareModal';
 import ExportSurveyModal from '@/components/features/surveys/details/export-survey-modal';
 import RapidEnquiryTable from '@/components/features/surveys/rapid-enquiry/RapidEnquiryTable';
 import { SelectDropdown } from '@/components/ui/select';
+import OfflineIndicator from '@/components/common/OfflineIndicator';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 export const Route = createFileRoute('/dashboard/surveys/rapid-enquiry/')({
   component: RouteComponent,
@@ -37,6 +39,7 @@ function RouteComponent() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportType, setExportType] = useState<'excel' | 'pdf'>('excel');
   const [exportSurvey, setExportSurvey] = useState<any | null>(null);
+  const { isOnline } = useNetworkStatus();
 
   const params = useMemo(() => {
     const p: SurveysListParams = { page, limit: pageSize, surveyType: 'rapid-enquiry', search: query };
@@ -181,6 +184,21 @@ function RouteComponent() {
     setDeleteId(null);
     setConfirmOpen(false);
   };
+
+  // Show offline indicator when not online
+  if (!isOnline) {
+    return (
+      <div className="space-y-6 pb-10">
+        <Breadcrumb items={['Dashboard', 'Rapid Enquiry']} title="Rapid Enquiry" className="absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900" />
+        <div className="pt-20">
+          <OfflineIndicator 
+            title="Rapid Enquiry Not Available Offline"
+            message="The rapid enquiry page requires an internet connection to load and manage enquiry data. Please check your connection and try again."
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-10">

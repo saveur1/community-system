@@ -9,8 +9,13 @@ import { createFileRoute, useLocation } from '@tanstack/react-router'
 import { useState } from 'react';
 import ContentFooter from '@/components/layouts/dashboard-main-content/content-footer';
 import { ThemeProvider } from '@/providers/theme-provider';
+import { authUtils } from '@/lib/auth';
 
 export const Route = createFileRoute('/dashboard')({
+  // Protect dashboard routes - require authentication
+  beforeLoad: async ({ context }) => {
+    return await authUtils.requireAuth(context.queryClient);
+  },
   component: DashboardLayout,
 })
 

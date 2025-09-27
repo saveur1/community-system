@@ -162,6 +162,9 @@ export class SurveyController extends Controller {
       }
       where.createdBy = { [Op.ne]: userId };
     }
+    // else {
+    //     return ServiceResponse.failure('Invalid owner filter value', [], 400);
+    // }
 
     // RESPONDED FILTERING (requires authenticated user)
     if (responded) {

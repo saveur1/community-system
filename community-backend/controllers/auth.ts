@@ -20,6 +20,7 @@ import { asyncCatch } from '@/middlewares/errorHandler';
 import db from '@/models';
 import { IUserAttributes } from '../types/user-types';
 import { verifyInviteToken } from '../utils/tokenService';
+import { validateSignupData, sanitizeString } from '../utils/validationHelpers';
 import type { User } from '@/models/users';
 
 // Extend the Express Request type to include the user property
@@ -116,7 +117,7 @@ export class AuthController extends Controller {
 
   @Post('/signup')
   @SuccessResponse(201, 'User created')
-  @Response(400, 'User with this email already exists')
+  @Response(400, 'Validation error')
   @asyncCatch
   public async signup(
     @Body() signupData: SignupRequest,
@@ -149,20 +150,29 @@ export class AuthController extends Controller {
       epiDistrict,
     } = signupData as any;
 
-    // Require phone; email is optional
-    if (!phone || !String(phone).trim()) {
-      res(400, ServiceResponse.failure('Phone is required', { user: null }));
+    // Comprehensive input validation using validation helpers
+    const validation = validateSignupData(signupData);
+    if (!validation.isValid) {
+      res(400, ServiceResponse.failure(validation.message!, { user: null }));
       return;
     }
 
-    // Uniqueness checks
-    if (await db.User.findOne({ where: { phone } })) {
-      res(400, ServiceResponse.failure('User with this phone already exists', { user: null }));
+    // Clean phone number for database operations
+    const phoneStr = String(phone).trim();
+
+    // Uniqueness checks with user-friendly messages
+    const existingPhoneUser = await db.User.findOne({ where: { phone: phoneStr } });
+    if (existingPhoneUser) {
+      res(400, ServiceResponse.failure('An account with this phone number already exists. Please use a different phone number or try logging in.', { user: null }));
       return;
     }
-    if (email && (await db.User.findOne({ where: { email } }))) {
-      res(400, ServiceResponse.failure('User with this email already exists', { user: null }));
-      return;
+
+    if (email && String(email).trim()) {
+      const existingEmailUser = await db.User.findOne({ where: { email: String(email).trim().toLowerCase() } });
+      if (existingEmailUser) {
+        res(400, ServiceResponse.failure('An account with this email address already exists. Please use a different email or try logging in.', { user: null }));
+        return;
+      }
     }
 
     const hashedPassword = await hash(password, 10);
@@ -170,39 +180,43 @@ export class AuthController extends Controller {
     const newUser = await sequelize.transaction(async (t) => {
       // Create user with status based on role
       const isGeneralPopulation = roleType === 'general_population';
-      const user = await db.User.create({
-        name,
-        email,
+      
+      // Clean and prepare data for database insertion using sanitization helpers
+      const userData = {
+        name: sanitizeString(name)!,
+        email: email ? sanitizeString(email)!.toLowerCase() : null,
         password: hashedPassword,
-        address,
-        phone,
-        status: isGeneralPopulation ? 'active' : 'pending',
-        userType,
-        // extended optional fields
-        district,
-        sector,
-        cell,
-        village,
-        preferredLanguage,
-        nearByHealthCenter,
-        // role-specific optional fields
-        schoolName,
-        schoolAddress,
-        churchName,
-        churchAddress,
-        hospitalName,
-        hospitalAddress,
-        healthCenterName,
-        healthCenterAddress,
-        epiDistrict,
-      }, { transaction: t });
+        address: sanitizeString(address),
+        phone: phoneStr,
+        status: (isGeneralPopulation ? 'active' : 'pending') as 'active' | 'pending',
+        userType: sanitizeString(userType),
+        // extended optional fields - clean and validate
+        district: sanitizeString(district),
+        sector: sanitizeString(sector),
+        cell: sanitizeString(cell),
+        village: sanitizeString(village),
+        preferredLanguage: sanitizeString(preferredLanguage),
+        nearByHealthCenter: sanitizeString(nearByHealthCenter),
+        // role-specific optional fields - clean and validate
+        schoolName: sanitizeString(schoolName),
+        schoolAddress: sanitizeString(schoolAddress),
+        churchName: sanitizeString(churchName),
+        churchAddress: sanitizeString(churchAddress),
+        hospitalName: sanitizeString(hospitalName),
+        hospitalAddress: sanitizeString(hospitalAddress),
+        healthCenterName: sanitizeString(healthCenterName),
+        healthCenterAddress: sanitizeString(healthCenterAddress),
+        epiDistrict: sanitizeString(epiDistrict),
+      };
+
+      const user = await db.User.create(userData, { transaction: t });
 
       // Find or create role
       let role = await db.Role.findOne({ where: { name: roleType }, transaction: t });
 
       // If role doesn't exist, return error
       if (!role) {
-        res(400, ServiceResponse.failure('Can\'t create user, with that role.', { user: null }));
+        res(400, ServiceResponse.failure('The selected role is not valid. Please choose a valid role and try again.', { user: null }));
         await t.rollback();
         return;
       }
@@ -228,7 +242,7 @@ export class AuthController extends Controller {
     });
 
     if (!newUser) {
-      res(400, ServiceResponse.failure('Can\'t create user, with that role.', { user: null }));
+      res(400, ServiceResponse.failure('Unable to create your account. Please check your information and try again.', { user: null }));
       return;
     }
 

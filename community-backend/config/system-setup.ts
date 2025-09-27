@@ -842,6 +842,15 @@ const roleTemplates = {
       'rapid_enquiry:update',
       'rapid_enquiry:delete',
 
+      //Users
+        'user:view',
+        'user:create',
+        'user:update',
+        'user:delete',
+
+        //Roles
+        'role:read',
+
        //Projects
       'project:read',
 

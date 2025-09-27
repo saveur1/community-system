@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --port 3000",
     "start": "vite --port 3000",
-    "build": "vite build && tsc",
+    "build": "vite build && tsc && npx workbox injectManifest workbox-config.cjs",
     "serve": "vite preview --port 3000",
     "test": "vitest run",
     "lint": "eslint",
@@ -62,6 +62,7 @@
     "typescript": "^5.7.2",
     "vite": "^6.3.5",
     "vitest": "^3.0.5",
-    "web-vitals": "^4.2.4"
+    "web-vitals": "^4.2.4",
+    "workbox-cli": "^7.3.0"
   }
 }

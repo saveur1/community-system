@@ -15,6 +15,8 @@ import { format, parseISO } from 'date-fns';
 import ExportSurveyModal from '@/components/features/surveys/details/export-survey-modal';
 import SurveyShareModal from '@/components/features/surveys/SurveyShareModal';
 import { toast } from 'react-toastify';
+import OfflineIndicator from '@/components/common/OfflineIndicator';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 const SurveyReportForms = () => {
     const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -36,6 +38,7 @@ const SurveyReportForms = () => {
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [shareSurvey, setShareSurvey] = useState<any | null>(null);
     const [isCopying, setIsCopying] = useState(false);
+    const { isOnline } = useNetworkStatus();
 
     const surveys = useMemo(() => data?.result ?? [], [data]);
 
@@ -481,12 +484,31 @@ const SurveyReportForms = () => {
         </div>
     );
 
+    // Show offline indicator when not online
+    if (!isOnline) {
+        return (
+            <div className="pb-10">
+                <Breadcrumb
+                    items={["Dashboard", "Report forms"]}
+                    title="Report Forms"
+                    className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
+                />
+                <div className="pt-20">
+                    <OfflineIndicator 
+                        title="Report Forms Not Available Offline"
+                        message="The report forms page requires an internet connection to load and manage form data. Please check your connection and try again."
+                    />
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="pb-10">
             <Breadcrumb
                 items={["Dashboard", "Report forms"]}
                 title="Report Forms"
-                className='absolute top-0 left-0 w-full px-6'
+                className='absolute top-0 left-0 w-full px-6 bg-white dark:bg-gray-900'
             />
 
             {/* Header with view controls */}

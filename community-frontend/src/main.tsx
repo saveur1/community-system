@@ -1,9 +1,11 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { QueryClient } from '@tanstack/react-query'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
+import { tokenManager } from './lib/auth'
 
 import './styles.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,13 +14,33 @@ import reportWebVitals from './reportWebVitals.ts'
 import i18n from './i18n';
 
 const lang = i18n.language || 'rw';
+// Create QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: (failureCount, error) => {
+        // Don't retry auth errors
+        if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+    },
+  },
+});
 
-// Create a new router i  nstance
+// Create a new router instance
 const router = createRouter({
   routeTree,
   context: {
-    head: '',
-    lang: lang,
+    queryClient,
+    lang:lang,
+    auth: {
+      isAuthenticated: tokenManager.hasToken(),
+      user: null,
+      isLoading: true
+    },
   },
   defaultPreload: 'intent',
   scrollRestoration: true,

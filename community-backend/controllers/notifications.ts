@@ -3,7 +3,6 @@ import { ServiceResponse } from '../utils/serviceResponse';
 import { asyncCatch } from '../middlewares/errorHandler';
 import { Op } from 'sequelize';
 import db from '@/models';
-import { createSystemLog } from '../utils/systemLog';
 
 interface NotificationCreateRequest {
   type: 'survey' | 'feedback' | 'community_session' | 'system';
@@ -150,12 +149,6 @@ export class NotificationController extends Controller {
 
     this.setStatus(201);
 
-    // Log creation
-    await createSystemLog(request ?? null, 'created_notification', 'Notification', notifications[0].id, {
-      title: data.title,
-      recipientCount: data.userIds.length,
-    });
-
     return ServiceResponse.success('Notifications created successfully', notifications, 201);
   }
 
@@ -188,10 +181,6 @@ export class NotificationController extends Controller {
       ],
     });
 
-    await createSystemLog(request ?? null, 'updated_notification', 'Notification', notificationId, {
-      changes: Object.keys(data),
-    });
-
     return ServiceResponse.success('Notification updated successfully', result);
   }
 
@@ -208,10 +197,6 @@ export class NotificationController extends Controller {
       { isRead: true },
       { where: { userId, isRead: false } }
     );
-
-    await createSystemLog(request ?? null, 'marked_all_notifications_read', 'Notification', null, {
-      updatedCount,
-    });
 
     return ServiceResponse.success('All notifications marked as read', { updated: updatedCount });
   }
@@ -236,7 +221,7 @@ export class NotificationController extends Controller {
     if (!notification) return ServiceResponse.failure('Notification not found', null, 404);
 
     await notification.destroy();
-    await createSystemLog(request ?? null, 'deleted_notification', 'Notification', notificationId, {});
+    
     this.setStatus(204);
     return ServiceResponse.success('Notification deleted successfully', null, 204);
   }
@@ -253,10 +238,6 @@ export class NotificationController extends Controller {
 
     const deletedCount = await db.Notification.destroy({
       where: { userId, isRead: true },
-    });
-
-    await createSystemLog(request ?? null, 'cleared_read_notifications', 'Notification', null, {
-      deletedCount,
     });
 
     return ServiceResponse.success('Read notifications cleared successfully', { deleted: deletedCount });

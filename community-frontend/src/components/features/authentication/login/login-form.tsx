@@ -108,7 +108,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = "" }) => {
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <FiUser className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-title mb-2">
+          <h1 className="text-2xl font-bold text-title dark:text-title mb-2">
             {t('login.title')}
           </h1>
         </div>

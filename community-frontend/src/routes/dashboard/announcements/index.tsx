@@ -11,6 +11,8 @@ import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import type { AnnouncementEntity } from '@/api/announcements';
 import { spacer } from '@/utility/logicFunctions';
 import { FaEllipsisH } from 'react-icons/fa';
+import OfflineIndicator from '@/components/common/OfflineIndicator';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 // Types
 export interface Announcement {
@@ -50,6 +52,7 @@ function AnnouncementsPage() {
   const { data: announcementsResp, isLoading: announcementsLoading, isError: announcementsError } = useAnnouncementsList(params);
   const updateAnnouncement = useUpdateAnnouncement();
   const deleteAnnouncement = useDeleteAnnouncement();
+  const { isOnline } = useNetworkStatus();
 
   const openDetails = (id: string) => {
     setActiveAnnouncementId(id);
@@ -89,6 +92,28 @@ function AnnouncementsPage() {
   const currentPage = Math.min(page, totalPages);
   const paginated = announcements; // server already paginates based on params
 
+  // Show offline indicator when not online
+  if (!isOnline) {
+    return (
+      <div className="space-y-6 pb-10">
+        <Breadcrumb
+          items={[
+            { title: 'Dashboard', link: '/dashboard' },
+            'Announcements'
+          ]}
+          title="Announcements"
+          className="absolute top-0 left-0 w-full px-4 lg:px-6 bg-white dark:bg-gray-900"
+        />
+        <div className="pt-20">
+          <OfflineIndicator 
+            title="Announcements Not Available Offline"
+            message="The announcements page requires an internet connection to load and manage announcement data. Please check your connection and try again."
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 pb-10">
       <Breadcrumb
@@ -97,7 +122,7 @@ function AnnouncementsPage() {
           'Announcements'
         ]}
         title="Announcements"
-        className="absolute top-0 left-0 w-full px-4 lg:px-6"
+        className="absolute top-0 left-0 w-full px-4 lg:px-6 bg-white dark:bg-gray-900"
       />
 
       {/* Toolbar */}
