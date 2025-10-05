@@ -130,7 +130,7 @@ function EditSurveyComponent(): JSX.Element {
   const [rolesModalOpen, setRolesModalOpen] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const isReportForm = data?.result?.surveyType === 'report-form';
-  const backHomeLink = isReportForm ? '/dashboard/surveys/report-forms' : '/dashboard/surveys';
+  const backHomeLink = isReportForm ? '/dashboard/reporting/report-forms' : '/dashboard/surveys';
 
   const roleGroups = useMemo(() => {
     const list = rolesData?.result ?? [];

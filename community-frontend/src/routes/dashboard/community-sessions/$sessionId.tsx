@@ -2,15 +2,18 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import Breadcrumb from '@/components/ui/breadcrum';
 import FilePreview from '@/components/common/file-preview';
-import { FaDownload, FaEllipsisV, FaShare, FaUserCircle, FaArrowLeft } from 'react-icons/fa';
+import { FaDownload, FaEllipsisV, FaShare, FaUserCircle, FaArrowLeft, FaTrash } from 'react-icons/fa';
 import { BsExclamationOctagon } from 'react-icons/bs';
 import {
   useAddComment,
   useCommunitySession,
   useCommunitySessionComments,
+  useDeleteComment,
 } from '@/hooks/useCommunitySession';
 import { spacer } from '@/utility/logicFunctions';
 import useAuth from '@/hooks/useAuth';
+import { saveAs } from 'file-saver';
+import { toast } from 'react-toastify';
 
 const MediaBox = ({ src, filename, type }: { src?: string; filename?: string; type: any }) => {
   return (
@@ -46,22 +49,52 @@ function timeAgo(dateStr: string) {
 
 const Comments = ({ sessionId }: { sessionId: string }) => {
   const [content, setContent] = useState('');
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   console.log("Sesssion id:", sessionId);
-  
+
   const { data: listResp, isLoading } = useCommunitySessionComments(sessionId, { page: 1, limit: 50 });
   const addComment = useAddComment(sessionId);
+  const deleteComment = useDeleteComment(sessionId);
   const comments = listResp?.result ?? [];
   const { user } = useAuth();
 
   const handleAdd = async () => {
     const text = content.trim();
     if (!text) return;
-    await addComment.mutateAsync({ 
-      data: { content: text }, 
+    await addComment.mutateAsync({
+      data: { content: text },
       userId: user?.id || '' // TODO: Get from auth context
     });
     setContent('');
   };
+
+  const handleDelete = async (commentId: string) => {
+    if (!window.confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+    
+    try {
+      setDeletingCommentId(commentId);
+      await deleteComment.mutateAsync(commentId);
+    } finally {
+      setDeletingCommentId(null);
+    }
+  };
+
+  // Group consecutive comments from the same user
+  const groupedComments = comments.reduce((groups: any[], comment, index) => {
+    if (index === 0 || comments[index - 1].user?.id !== comment.user?.id) {
+      // Start a new group
+      groups.push({
+        user: comment.user,
+        comments: [comment],
+      });
+    } else {
+      // Add to the last group
+      groups[groups.length - 1].comments.push(comment);
+    }
+    return groups;
+  }, []);
 
   return (
     <div className="mt-6">
@@ -108,18 +141,44 @@ const Comments = ({ sessionId }: { sessionId: string }) => {
               <p className="text-sm text-gray-500 dark:text-gray-400">Be the first to share your thoughts!</p>
             </div>
           ) : (
-            <ul className="space-y-4">
-              {comments.map((c) => (
-                <li key={c.id} className="flex gap-3">
-                  <div className="mt-1">
+            <ul className="space-y-6">
+              {groupedComments.map((group, groupIndex) => (
+                <li key={`group-${groupIndex}`} className="flex gap-3">
+                  <div className="mt-1 flex-shrink-0">
                     <FaUserCircle className="text-gray-400 dark:text-gray-500" size={36} />
                   </div>
-                  <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{c.user?.name ?? 'User'}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(c.createdAt)}</div>
+                  <div className="flex-1 space-y-2">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      {group.user?.name ?? 'User'}
                     </div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap">{c.content}</p>
+                    {group.comments.map((comment: any) => (
+                      <div 
+                        key={comment.id} 
+                        className="bg-gray-50 flex justify-between items-center dark:bg-gray-700 rounded-lg p-3 relative group"
+                      >
+                        <div>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap pr-8">
+                            {comment.content}
+                          </p>
+                          <div className="flex items-center justify-between mt-1">
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {timeAgo(comment.createdAt)}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Show delete button only for user's own comments */}
+                        {user?.id === comment.userId && (
+                            <button
+                              onClick={() => handleDelete(comment.id)}
+                              disabled={deletingCommentId === comment.id}
+                              className="opacity-0 cursor-pointer group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 disabled:opacity-50"
+                              title="Delete comment"
+                            >
+                              <FaTrash size={12} />
+                            </button>
+                          )}
+                      </div>
+                    ))}
                   </div>
                 </li>
               ))}
@@ -150,15 +209,38 @@ function CommunitySessionDetail() {
     };
   }, [session]);
 
+  // Handle file download using file-saver
+  const handleDownload = async () => {
+    if (!src) return;
+
+    // Show loading toast
+    const loadingToastId = toast.loading('Preparing download...');
+
+    try {
+      const response = await fetch(src);
+      const blob = await response.blob();
+      saveAs(blob, filename || 'downloaded-file');
+
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToastId);
+      toast.success('File downloaded successfully');
+    } catch (error) {
+      // Dismiss loading toast and show error
+      toast.dismiss(loadingToastId);
+      console.error('Error downloading file:', error);
+      toast.error('Error downloading file');
+    }
+  };
+
   return (
     <div>
-      <Breadcrumb 
-        title="Session Details" 
+      <Breadcrumb
+        title="Session Details"
         items={[
-          {title: "Dashboard", link:"/dashboard"}, 
-          {title: "Community Sessions", link:"/dashboard/community-sessions"}, 
+          {title: "Dashboard", link:"/dashboard"},
+          {title: "Community Sessions", link:"/dashboard/community-sessions"},
           session?.title || 'Details'
-        ]} 
+        ]}
         className="absolute top-0 left-0 w-full" />
       <div className="pt-16 max-w-6xl mx-auto">
         <button onClick={() => nav({ to: '/dashboard/community-sessions' })} className="mb-4 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
@@ -182,7 +264,7 @@ function CommunitySessionDetail() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">Roles:</span>
                       <div className="flex flex-wrap gap-2">
-                        {meta.roles.map((role) => (
+                        {meta.roles.map((role: any) => (
                           <span key={role.id} className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs uppercase border border-gray-200 dark:border-gray-600">
                             {spacer(role.name)}
                           </span>
@@ -200,14 +282,12 @@ function CommunitySessionDetail() {
                     >
                       <FaShare /> Share
                     </button>
-                    <a
+                    <button
                       className="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark flex items-center gap-2 transition-colors"
-                      href={src}
-                      target="_blank"
-                      rel="noreferrer"
+                      onClick={handleDownload}
                     >
                       <FaDownload /> Download
-                    </a>
+                    </button>
                     <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"><FaEllipsisV /></button>
                   </div>
                 </div>

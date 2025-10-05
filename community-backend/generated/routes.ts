@@ -983,7 +983,7 @@ export function RegisterRoutes(app: Router) {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
         };
         app.delete('/api/system-logs/:id',
-            authenticateMiddleware([{"jwt":["system_log:delete"]}]),
+            authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(SystemLogController)),
             ...(fetchMiddlewares<RequestHandler>(SystemLogController.prototype.deleteLog)),
 
@@ -3493,7 +3493,7 @@ export function RegisterRoutes(app: Router) {
                 commentId: {"in":"path","name":"commentId","required":true,"dataType":"string"},
         };
         app.delete('/api/community-sessions/comments/:commentId',
-            authenticateMiddleware([{"jwt":["comment:delete"]}]),
+            authenticateMiddleware([{"jwt":["community_session:read"]}]),
             ...(fetchMiddlewares<RequestHandler>(CommunitySessionController)),
             ...(fetchMiddlewares<RequestHandler>(CommunitySessionController.prototype.deleteComment)),
 

@@ -9,6 +9,7 @@ import sequelize from '../config/database';
 import { Op } from 'sequelize';
 import Stakeholder from '../models/organization';
 import { createSystemLog } from '../utils/systemLog';
+import db from '@/models';
 
 @Route("api/users")
 @Tags("Users")
@@ -122,14 +123,70 @@ export class UserController extends Controller {
   public async getUserById(
     @Path() userId: string
   ): Promise<ServiceResponse<IUserResponse | null>> {
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Role,
+          as: 'roles',
+          attributes: ['id', 'name', 'description'],
+          through: { attributes: [] },
+          required: false
+        }
+      ]
+    });
 
     if (!user) {
       return ServiceResponse.failure('User not found', null, 404);
     }
 
-    const userResponse = await this._buildUserResponse(user);
-    return ServiceResponse.success('User retrieved successfully', userResponse);
+    // Fetch user's feedbacks
+    const feedbacks = await db.Feedback.findAll({
+      where: { userId: userId },
+      include: [
+        {
+          model: db.Project,
+          as: 'project',
+          attributes: ['id', 'name', 'description']
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 50 // Limit to recent 50 feedbacks
+    });
+
+    // Fetch user's survey responses
+    const surveyResponses = await db.Response.findAll({
+      where: { userId: userId },
+      include: [
+        {
+          model: db.Survey,
+          as: 'survey',
+          attributes: ['id', 'title', 'description', 'surveyType'],
+          where: { surveyType: 'general' },
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 50 // Limit to recent 50 responses
+    });
+
+    // Fetch user's system logs
+    const systemLogs = await db.SystemLog.findAll({
+      where: { userId: userId },
+      order: [['createdAt', 'DESC']],
+      limit: 100 // Limit to recent 100 logs
+    });
+
+    // Build user response with roles
+    const { password, resetPasswordCode, resetPasswordExpires, ...userData } = user.toJSON();
+    
+    const userResponse = {
+      ...userData,
+      roles: user.roles || [],
+      feedbacks: feedbacks.map(f => f.toJSON()),
+      surveyResponses: surveyResponses.map(r => r.toJSON()),
+      systemLogs: systemLogs.map(l => l.toJSON())
+    };
+
+    return ServiceResponse.success('User retrieved successfully', userResponse as any);
   }
 
   @Security("jwt", ["user:create"])

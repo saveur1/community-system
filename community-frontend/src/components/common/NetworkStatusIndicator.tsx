@@ -10,7 +10,7 @@ export function NetworkStatusIndicator() {
   }
 
   return (
-    <div className={`fixed top-4 right-4 z-50 p-3 rounded-lg shadow-lg max-w-sm ${
+    <div className={`fixed top-4 left-[50%] translate-x-[-50%] z-50 p-3 rounded-lg shadow-lg max-w-sm ${
       isOnline ? 'bg-yellow-100 border-yellow-400' : 'bg-red-100 border-red-400'
     } border`}>
       <div className="flex items-center space-x-2">

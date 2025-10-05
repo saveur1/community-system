@@ -5,7 +5,7 @@
   "scripts": {
     "build": "npx tsoa routes && npx tsoa spec && tsc && tsup",
     "seed": "tsx ./scripts/seedMockData.ts",
-    "start": "node dist/index.js",
+    "start": "node dist/index.mjs",
     "dev": "npx tsoa routes && npx tsoa spec && tsx watch index.ts",
     "setup:system": "tsx ./config/system-setup.ts"
   },

@@ -3126,9 +3126,7 @@
 				],
 				"security": [
 					{
-						"jwt": [
-							"system_log:delete"
-						]
+						"jwt": []
 					}
 				],
 				"parameters": [
@@ -6775,7 +6773,7 @@
 				"security": [
 					{
 						"jwt": [
-							"comment:delete"
+							"community_session:read"
 						]
 					}
 				],

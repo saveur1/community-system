@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { FaSort, FaSortUp, FaSortDown, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaChevronLeft, FaChevronRight, FaEye, FaTrash, FaEllipsisV, FaUserCog } from 'react-icons/fa';
 import type { Account, AccountFilters } from '@/types/account';
 import { SelectDropdown } from '@/components/ui/select';
-import Drawer from '@/components/ui/drawer';
 import Modal, { ModalBody, ModalFooter, ModalButton } from '@/components/ui/modal';
 import { CustomDropdown, DropdownItem } from '@/components/ui/dropdown';
 import { spacer } from '@/utility/logicFunctions';
@@ -46,14 +46,14 @@ export function AccountsList({
   setFilters,
   onDeleteAccount,
 }: AccountsListProps) {
+  const navigate = useNavigate();
   const [sortConfig, setSortConfig] = useState<{ key: keyof Account; direction: 'asc' | 'desc' }>(
     { key: 'name', direction: 'asc' }
   );
   const { data: rolesData } = useRolesList({ category: title === 'All Accounts' ? undefined : title });
   const roles = rolesData?.result ?? [];
 
-  // Drawer state
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // Delete Modal state
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   // Delete Modal state
@@ -86,8 +86,7 @@ export function AccountsList({
   };
 
   const openView = (account: Account) => {
-    setSelectedAccount(account);
-    setIsDrawerOpen(true);
+    navigate({ to: '/dashboard/accounts/$account-id', params: { 'account-id': String(account.id) } });
   };
 
   const openDelete = (account: Account) => {
@@ -583,45 +582,6 @@ export function AccountsList({
         </div>
         )
       )}
-
-      {/* View Drawer */}
-      <Drawer
-        open={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        title={selectedAccount ? `Account: ${selectedAccount.name}` : 'Account'}
-        placement="right"
-        width={440}
-      >
-        {selectedAccount && (
-          <div className="p-4 space-y-4 text-sm text-gray-700 dark:text-gray-300">
-            <div className="flex items-center gap-3">
-              <div className="h-14 w-14 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                {selectedAccount.profile ? (
-                  <img src={selectedAccount.profile} alt={selectedAccount.name} className="h-14 w-14 rounded-full" />
-                ) : (
-                  <FaUser className="h-7 w-7 text-gray-400 dark:text-gray-300" />
-                )}
-              </div>
-              <div>
-                <div className="text-base font-semibold text-gray-900 dark:text-gray-100">{selectedAccount.name}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">{selectedAccount.type}</div>
-              </div>
-            </div>
-            <div>
-              <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">Details</div>
-              <ul className="space-y-1">
-                <li><span className="text-gray-500 dark:text-gray-400">Email:</span> {selectedAccount.email || 'N/A'}</li>
-                <li><span className="text-gray-500 dark:text-gray-400">Phone:</span> {selectedAccount.phone}</li>
-                <li><span className="text-gray-500 dark:text-gray-400">Role:</span> {selectedAccount.role}</li>
-                <li><span className="text-gray-500 dark:text-gray-400">Status:</span> {selectedAccount.status}</li>
-                <li><span className="text-gray-500 dark:text-gray-400">Address:</span> {selectedAccount.address || '—'}</li>
-                <li><span className="text-gray-500 dark:text-gray-400">Created:</span> {new Date(selectedAccount.createdAt).toLocaleString()}</li>
-                <li><span className="text-gray-500 dark:text-gray-400">Updated:</span> {new Date(selectedAccount.updatedAt).toLocaleString()}</li>
-              </ul>
-            </div>
-          </div>
-        )}
-      </Drawer>
 
       {/* Delete Confirmation Modal */}
       <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete user" size="md">

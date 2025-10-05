@@ -308,7 +308,7 @@ export class FeedbackController extends Controller {
       // Get user email if available
       const feedbackWithUser = await Feedback.findByPk(feedbackId, { include: [{ model: User, as: 'user', attributes: ['id', 'email'] }] });
       const recipientEmail = (feedbackWithUser as any)?.user?.email;
-      const link = `${config.frontendUrl}/dashboard/feedback/${feedbackId}`;
+      const link = `${config.frontendUrl}/dashboard/feedback?feedbackId=${feedbackId}`;
       if (recipientEmail) {
         await sendFeedbackReplyEmail(recipientEmail, {
           subject: data.subject ?? null,

@@ -131,7 +131,7 @@ const CreateSurveyComponent: FC = () => {
   const { t } = useTranslation()
 
   const LOCAL_STORAGE_KEY = "in-progress-survey"
-  const backLink = isReport ? "/dashboard/surveys/report-forms" : "/dashboard/surveys"
+  const backLink = isReport ? "/dashboard/reporting/report-forms" : "/dashboard/surveys"
 
   // availability window (start/end) state + modal visibility
   const now = new Date()

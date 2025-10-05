@@ -74,7 +74,6 @@ function NotificationsPage() {
   const { mutate: deleteNotification } = useDeleteNotification();
 
   // Extract notifications from paginated data
-  console.log(notificationsData);
   const allNotifications: NotificationItem[] = notificationsData?.pages?.flatMap(page => page.result || []) || [];
   const hasMore = notificationsData?.pages?.[notificationsData.pages.length - 1]?.hasMore || false;
   const currentPage = notificationsData?.pageParams?.length || 0;

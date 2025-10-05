@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useUsersList } from '@/hooks/useUsers';
+import { useDeleteUser, useUsersList } from '@/hooks/useUsers';
 import { AccountsList } from '@/components/accounts/accounts-list';
 import { createFileRoute } from '@tanstack/react-router';
 import MainToolbar from '@/components/common/main-toolbar';
@@ -36,6 +36,7 @@ function AccountsPage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const searchParams = Route.useSearch();
   const { isOnline } = useNetworkStatus();
+  const { mutateAsync: deleteAccount } = useDeleteUser();
 
   const { data, isLoading } = useUsersList({ 
     page: pagination.page, 
@@ -193,6 +194,10 @@ function AccountsPage() {
         filters={filters}
         setFilters={setFilters}
         onSearch={handleSearch}
+        onDeleteAccount={async (acc) => {
+          await deleteAccount(acc.id);
+          setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+        }}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
         currentPage={pagination.page}

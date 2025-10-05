@@ -1,29 +1,18 @@
 import nodemailer from 'nodemailer';
 import config from '../config/config';
 
-// Create a test account using ethereal.email for development
-const createTestAccount = async () => {
-  // Only create test account in development
-  if (config.nodeEnv !== 'production') {
-    const testAccount = await nodemailer.createTestAccount();
-    return testAccount;
-
-  }
-  return null;
-};
-
-// Create a reusable transporter object using the default SMTP transport
+// Create a reusable transporter object using the default SMTP transport, for production and development
 const createTransporter = async () => {
-  if (config.nodeEnv === 'development') {
-    console.log("development");
-
-    console.log("Credentials", {
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
+  console.log('Creating transporter...', {
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || '587', 10),
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+    auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASSWORD,
-    })
-    // In production, use real SMTP credentials from environment variables
+    },
+  });
+
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587', 10),
@@ -32,26 +21,9 @@ const createTransporter = async () => {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD,
       },
-      tls: {
-        rejectUnauthorized: false, // <--- allow self-signed certs if needed
-      },
+      logger: true,    // enables console logging
+      debug: true,     // show SMTP traffic
     });
-  }
-
-  // In development, use ethereal.email
-  const testAccount = await createTestAccount();
-  return nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    secure: false,
-    auth: {
-      user: testAccount?.user,
-      pass: testAccount?.pass,
-    },
-    tls: {
-    rejectUnauthorized: false, // <--- allow self-signed certs if needed
-  },
-  });
 };
 
 /**
@@ -66,7 +38,7 @@ export const sendPasswordResetEmail = async (to: string, resetCode: string): Pro
 
     // Send mail with defined transport object
     const info = await transporter.sendMail({
-      from: '"Community Tool" <no-reply@communitytool.com>',
+      from: '"Community Tool" <support@sugiramwana.rw>',
       to,
       subject: 'Password Reset Request',
       text: `Please click the following link to reset your password: ${resetLink}\n\nIf the link doesn't work, please copy and paste it into your browser.\n\nThis link will expire in 1 hour.`,
@@ -110,7 +82,7 @@ export const sendWelcomeEmail = async (to: string, name: string): Promise<void> 
 
     // Send mail with defined transport object
     const info = await transporter.sendMail({
-      from: '"Community Tool" <welcome@communitytool.com>',
+      from: '"Community Tool" <support@sugiramwana.rw>',
       to,
       subject: 'Welcome to Community Tool!',
       text: `Welcome ${name}!\n\nThank you for joining our community.`,
@@ -149,7 +121,7 @@ export const sendOrganizationInviteEmail = async (
     const verificationLink = `${config.frontendUrl}/verify-organization?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
 
     await transporter.sendMail({
-      from: '"Community Tool" <no-reply@communitytool.com>',
+      from: '"Community Tool" <support@sugiramwana.rw>',
       to,
       subject: `Invitation to join ${organizationName}`,
       html: `
@@ -218,7 +190,7 @@ export const sendOrganizationInvite = async (
     const transporter = await createTransporter();
 
     await transporter.sendMail({
-      from: '"Community Tool" <no-reply@communitytool.com>',
+      from: '"Community Tool" <support@sugiramwana.rw>',
       to: email,
       subject: template.subject,
       html: template.html,
@@ -246,21 +218,20 @@ export const sendFeedbackReplyEmail = async (
       : 'Your feedback has a new reply';
 
     const info = await transporter.sendMail({
-      from: '"Community Tool" <no-reply@communitytool.com>',
+      from: '"Community Tool" <support@sugiramwana.rw>',
       to,
       subject: emailSubject,
       text: `Hello,
+      You have received a new reply to your feedback.
 
-You have received a new reply to your feedback.
+      Subject: ${data.subject ?? '—'}
+      Message:
+      ${data.message}
 
-Subject: ${data.subject ?? '—'}
-Message:
-${data.message}
+      View reply: ${data.link}
 
-View reply: ${data.link}
-
-Regards,
-Community Tool`,
+      Regards,
+      Community Tool`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5;">
           <h2 style="margin: 0 0 12px 0;">Your feedback has a new reply</h2>

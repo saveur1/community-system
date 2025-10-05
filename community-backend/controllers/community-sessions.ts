@@ -367,7 +367,7 @@ export class CommunitySessionController extends Controller {
     return ServiceResponse.success('Comment updated successfully', result);
   }
 
-  @Security('jwt', ['comment:delete'])
+  @Security('jwt', ['community_session:read'])
   @Delete('/comments/{commentId}')
   @SuccessResponse(204, 'No Content')
   @asyncCatch

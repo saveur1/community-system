@@ -154,7 +154,7 @@ const SurveyReportForms = () => {
         const q = search.trim().toLowerCase();
         if (!q) return surveys;
         return surveys.filter((survey: any) =>
-            [survey.title, survey.project, survey.description].some((v: any) =>
+            [survey.title, survey.project?.name, survey.description].some((v: any) =>
                 String(v ?? '').toLowerCase().includes(q)
             )
         );
@@ -310,7 +310,7 @@ const SurveyReportForms = () => {
                                             <FaEdit className="w-4 h-4" />
                                         </Link>
                                         <Link
-                                            to="/dashboard/surveys/report-forms/$report-id"
+                                            to="/dashboard/reporting/report-forms/$report-id"
                                             params={{ 'report-id': String(survey.id) }}
                                             className="text-title dark:text-gray-300 cursor-pointer hover:text-shadow-title dark:hover:text-gray-100"
                                             title="View Survey"
@@ -411,7 +411,7 @@ const SurveyReportForms = () => {
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-600">
-                        <span className="text-sm text-gray-500 dark:text-gray-400">{survey.project}</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">{survey?.project?.name}</span>
                         <div className="flex items-center space-x-2">
                             <Link
                                 to="/dashboard/surveys/edit/$edit-id"
@@ -590,6 +590,6 @@ const SurveyReportForms = () => {
     );
 };
 
-export const Route = createFileRoute('/dashboard/surveys/report-forms/')({
+export const Route = createFileRoute('/dashboard/reporting/report-forms/')({
     component: SurveyReportForms,
 })

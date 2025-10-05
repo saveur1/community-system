@@ -412,6 +412,57 @@ export class OfflineStorageService {
     await db.surveyResponses.clear();
   }
 
+  // Clear specific tables (for user-specific data on logout/login)
+  async clearTableData(table: string): Promise<void> {
+    switch (table) {
+      case 'surveys':
+        await db.surveys.clear();
+        break;
+      case 'communitySessions':
+        await db.communitySessions.clear();
+        break;
+      case 'feedback':
+        await db.feedback.clear();
+        break;
+      case 'projects':
+        await db.projects.clear();
+        break;
+      case 'organizations':
+        await db.organizations.clear();
+        break;
+      case 'statisticsOverview':
+        await db.statisticsOverview.clear();
+        break;
+      case 'surveysHistory':
+        await db.surveysHistory.clear();
+        break;
+      case 'comments':
+        await db.comments.clear();
+        break;
+      case 'surveyResponses':
+        await db.surveyResponses.clear();
+        break;
+    }
+  }
+
+  // Clear user-specific data (called on logout)
+  async clearUserData(): Promise<void> {
+    console.log('🗑️ Clearing all user-specific cached data...');
+    await Promise.all([
+      db.surveys.clear(),
+      db.communitySessions.clear(),
+      db.feedback.clear(),
+      db.projects.clear(),
+      db.organizations.clear(),
+      db.statisticsOverview.clear(),
+      db.surveysHistory.clear(),
+      db.comments.clear(),
+      db.surveyResponses.clear(),
+      // Keep sync queue as it contains pending user actions
+    ]);
+    console.log('✅ User-specific data cleared');
+  }
+
   async getStorageStats(): Promise<{
     surveys: number;
     communitySessions: number;

@@ -19,6 +19,8 @@ export class OfflineApiService {
     try {
       if (offlineCommon.isOnline()) {
         const response = await projectsApi.list(params);
+        // Clear existing projects data before caching new user-specific data
+        await offlineStorage.clearTableData('projects');
         await offlineStorage.cacheProjects(response.result as any);
         return response;
       }

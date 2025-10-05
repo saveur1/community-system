@@ -16,7 +16,7 @@ const sequelize = new Sequelize(config.database.databaseName, config.database.us
 export const initializeDatabase = async (): Promise<{ success: boolean; error?: any }> => {
   try {
     await sequelize.authenticate();
-    // await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: true });
     console.info("Connection to the database has been established successfully.");
     return { success: true };
   } catch (error) {

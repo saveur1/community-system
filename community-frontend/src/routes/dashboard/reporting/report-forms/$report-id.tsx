@@ -205,7 +205,7 @@ const ReportFormDetail = () => {
         onSuccess: () => {
           setDeleteModalOpen(false);
           setToDelete(null);
-          router.navigate({ to: '/dashboard/surveys/report-forms' });
+          router.navigate({ to: '/dashboard/reporting/report-forms' });
         }
       });
     }
@@ -358,7 +358,7 @@ const ReportFormDetail = () => {
       <Breadcrumb
         items={[
           { title: "Dashboard", link: "/dashboard" },
-          { title: "Report Forms", link: "/dashboard/surveys/report-forms" },
+          { title: "Report Forms", link: "/dashboard/reporting/report-forms" },
           { title: survey?.title || "—" }
         ]}
         title="Report Form Details"
@@ -675,6 +675,6 @@ const ReportFormDetail = () => {
   );
 };
 
-export const Route = createFileRoute('/dashboard/surveys/report-forms/$report-id')({
+export const Route = createFileRoute('/dashboard/reporting/report-forms/$report-id')({
   component: ReportFormDetail,
 })

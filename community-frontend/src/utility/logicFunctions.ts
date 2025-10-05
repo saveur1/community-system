@@ -139,10 +139,12 @@ export const timeAgo = (iso?: string | null) => {
 
 export const getResourceLink = (activity: string, resourceId: string) => {
   switch (activity) {
-    case "created_survey":
-    case "updated_survey":
     case "responded_survey":
       return `/dashboard/surveys/take-survey/response/${resourceId}`;
+    
+    case "created_survey":
+    case "updated_survey":
+      return `/dashboard/surveys/${resourceId}`;
 
     case "created_announcement":
     case "updated_announcement":
@@ -154,8 +156,9 @@ export const getResourceLink = (activity: string, resourceId: string) => {
 
 
     case "created_feedback":
+      case "replied_feedback":
     case "updated_feedback":
-      return `/dashboard/feedback`;
+      return `/dashboard/feedback?feedbackId=${resourceId}`;
 
     case "created_stakeholder":
     case "updated_stakeholder":
@@ -164,7 +167,6 @@ export const getResourceLink = (activity: string, resourceId: string) => {
     case "updated_user":
     case "created_user":
       return `/dashboard/accounts`;
-      return `#`;
 
     default:
       return `#`;

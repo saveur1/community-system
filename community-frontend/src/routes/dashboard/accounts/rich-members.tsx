@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { AccountsList } from '@/components/accounts/accounts-list';
 import type { Account, AccountFilters } from '@/types/account';
-import { useUsersList } from '@/hooks/useUsers';
+import { useDeleteUser, useUsersList } from '@/hooks/useUsers';
 import type { User } from '@/api/auth';
 import MainToolbar from '@/components/common/main-toolbar';
 import { FaPlus } from 'react-icons/fa';
@@ -19,6 +19,7 @@ export const Route = createFileRoute('/dashboard/accounts/rich-members')({
 function RichMembersAccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [filters, setFilters] = useState<Omit<AccountFilters, 'type'>>({});
+  const { mutateAsync: deleteAccount } = useDeleteUser();
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
@@ -160,8 +161,8 @@ function RichMembersAccountsPage() {
         pageSize={pagination.pageSize}
         loading={isLoading}
         viewMode={viewMode}
-        onDeleteAccount={(acc) => {
-          setAccounts(prev => prev.filter(a => a.id !== acc.id));
+        onDeleteAccount={async (acc) => {
+          await deleteAccount(acc.id);
           setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
         }}
       />

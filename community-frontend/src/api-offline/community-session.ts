@@ -19,6 +19,8 @@ export class OfflineApiService {
     try {
       if (offlineCommon.isOnline()) {
         const response = await communitySessionsApi.list(params);
+        // Clear existing community sessions before caching new user-specific data
+        await offlineStorage.clearTableData('communitySessions');
         // Cache the results
         for (const session of response.result) {
           await offlineStorage.cacheCommunitySession(session as any);

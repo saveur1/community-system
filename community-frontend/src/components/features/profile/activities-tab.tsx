@@ -1,51 +1,14 @@
 import React from 'react';
 import { FiActivity, FiClock, FiMonitor, FiMapPin, FiLogIn, FiEdit, FiFileText, FiMessageSquare } from 'react-icons/fi';
+import type { User } from '@/api/auth';
 
-// Sample data for system logs/activities
-const sampleActivities = [
-  {
-    id: '1',
-    action: 'Login',
-    description: 'User logged into the system',
-    timestamp: '2024-01-22 09:30:00',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-  },
-  {
-    id: '2',
-    action: 'Profile Update',
-    description: 'Updated profile information',
-    timestamp: '2024-01-21 14:15:00',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-  },
-  {
-    id: '3',
-    action: 'Survey Submission',
-    description: 'Completed Community Health Assessment survey',
-    timestamp: '2024-01-20 16:45:00',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-  },
-  {
-    id: '4',
-    action: 'Feedback Submission',
-    description: 'Submitted feedback for Training Program',
-    timestamp: '2024-01-20 11:20:00',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-  },
-  {
-    id: '5',
-    action: 'Password Change',
-    description: 'User changed their password',
-    timestamp: '2024-01-19 08:45:00',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-  }
-];
+interface ActivitiesTabProps {
+  user?: User | null;
+}
 
-export const ActivitiesTab: React.FC = () => {
+export const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ user }) => {
+  // Use real system logs from user data or empty array
+  const systemLogs = user?.systemLogs || [];
   const getActionIcon = (action: string) => {
     switch (action.toLowerCase()) {
       case 'login':
@@ -80,7 +43,7 @@ export const ActivitiesTab: React.FC = () => {
     }
   };
 
-  const formatTimestamp = (timestamp: string) => {
+  const formatTimestamp = (timestamp: string | Date) => {
     const date = new Date(timestamp);
     return {
       date: date.toLocaleDateString(),
@@ -88,7 +51,8 @@ export const ActivitiesTab: React.FC = () => {
     };
   };
 
-  const getBrowserInfo = (userAgent: string) => {
+  const getBrowserInfo = (userAgent?: string | null) => {
+    if (!userAgent) return 'Unknown';
     if (userAgent.includes('Chrome')) return 'Chrome';
     if (userAgent.includes('Firefox')) return 'Firefox';
     if (userAgent.includes('Safari')) return 'Safari';
@@ -101,27 +65,27 @@ export const ActivitiesTab: React.FC = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">User Activities</h2>
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          {sampleActivities.length} activities logged
+          {systemLogs.length} activities logged
         </span>
       </div>
 
       <div className="space-y-4">
-        {sampleActivities.map((activity) => {
-          const { date, time } = formatTimestamp(activity.timestamp);
+        {systemLogs.map((log) => {
+          const { date, time } = formatTimestamp(log.createdAt || new Date());
           return (
-            <div key={activity.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+            <div key={log.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
-                  {getActionIcon(activity.action)}
+                  {getActionIcon(log.action)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        {activity.action}
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 capitalize">
+                        {log.action.replace(/_/g, ' ')}
                       </h3>
-                      <span className={`px-2 py-1 text-xs rounded-full ${getActionColor(activity.action)}`}>
-                        {activity.action}
+                      <span className={`px-2 py-1 text-xs rounded-full capitalize ${getActionColor(log.action)}`}>
+                        {log.action.replace(/_/g, ' ')}
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
@@ -130,18 +94,22 @@ export const ActivitiesTab: React.FC = () => {
                     </div>
                   </div>
                   
-                  <p className="text-gray-600 dark:text-gray-400 mb-3">
-                    {activity.description}
-                  </p>
+                  {log.resourceType && (
+                    <p className="text-gray-600 dark:text-gray-400 mb-3">
+                      {log.resourceType} {log.resourceId ? `(ID: ${log.resourceId})` : ''}
+                    </p>
+                  )}
                   
                   <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
-                    <div className="flex items-center space-x-1">
-                      <FiMapPin className="w-4 h-4" />
-                      <span>IP: {activity.ipAddress}</span>
-                    </div>
+                    {log.ip && (
+                      <div className="flex items-center space-x-1">
+                        <FiMapPin className="w-4 h-4" />
+                        <span>IP: {log.ip}</span>
+                      </div>
+                    )}
                     <div className="flex items-center space-x-1">
                       <FiMonitor className="w-4 h-4" />
-                      <span>{getBrowserInfo(activity.userAgent)}</span>
+                      <span>{getBrowserInfo(log.userAgent)}</span>
                     </div>
                   </div>
                 </div>
@@ -151,7 +119,7 @@ export const ActivitiesTab: React.FC = () => {
         })}
       </div>
 
-      {sampleActivities.length === 0 && (
+      {systemLogs.length === 0 && (
         <div className="text-center py-12">
           <FiActivity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No activities found</h3>

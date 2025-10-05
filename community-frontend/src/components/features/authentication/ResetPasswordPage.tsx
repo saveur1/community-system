@@ -86,10 +86,6 @@ function ResetPasswordPage() {
         );
       });
       setIsSuccess(true);
-      toast.success("Password reset successfully!", {
-        position: "top-center",
-        autoClose: 3000,
-      });
     } catch (_) {
       // error handled in hook
     } finally {

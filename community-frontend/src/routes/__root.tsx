@@ -4,10 +4,9 @@ import { TanstackDevtools } from '@tanstack/react-devtools'
 import QueryProvider from '@/providers/query-provider'
 import { ToastContainer } from 'react-toastify'
 import { OfflineProvider } from '@/providers/OfflineContext';
-import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator';
+import { NetworkStatusIndicator } from '@/components/common/NetworkStatusIndicator';
 import { QueryClient } from '@tanstack/react-query';
 import type { AuthContext } from '@/lib/auth';
-// import { OfflineStatusBar } from '@/components/OfflineStatusBar';
 
 // Define the router context interface
 interface RouterContext {

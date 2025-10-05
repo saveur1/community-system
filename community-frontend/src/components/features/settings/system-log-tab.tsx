@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { spacer } from '@/utility/logicFunctions';
 import { useSystemLogsList, useDeleteSystemLog } from '@/hooks/useSystemLogs';
+import useAuth from '@/hooks/useAuth';
 
 interface SystemLogsTabProps {}
 
@@ -9,11 +10,13 @@ export const SystemLogsTab: React.FC<SystemLogsTabProps> = () => {
   const [logsSearch, setLogsSearch] = useState('');
   const [logsPage, setLogsPage] = useState(1);
   const [logsPageSize] = useState(10);
+  const { user } = useAuth();
 
   const { data: logsResponse, isLoading: logsLoading } = useSystemLogsList({
     page: logsPage,
     limit: logsPageSize,
     action: logsSearch || undefined,
+    userId: user?.id,
   });
 
   const deleteLog = useDeleteSystemLog();

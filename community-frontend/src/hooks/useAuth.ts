@@ -3,6 +3,7 @@ import { authApi,type AuthResponse } from '../api/auth';
 import { toast } from 'react-toastify';
 import { useNavigate } from '@tanstack/react-router';
 import { tokenManager } from '@/lib/auth';
+import { offlineStorage } from '@/services/offline-storage';
 
 // Query keys for react-query
 export const authKeys = {
@@ -139,12 +140,14 @@ export function useAuth() {
       await authApi.logout();
       tokenManager.removeToken(); // Clear stored token
       queryClient.removeQueries({ queryKey: authKeys.currentUser }); // Clear cached user data
+      await offlineStorage.clearUserData(); // Clear all offline cached data
       navigate({to: "/auth/login"});
     } catch (error) {
       console.error('Logout error:', error);
       // Even if API call fails, clear token and cached data, then redirect to login
       tokenManager.removeToken();
       queryClient.removeQueries({ queryKey: authKeys.currentUser });
+      await offlineStorage.clearUserData(); // Clear all offline cached data
       navigate({to: "/auth/login"});
     }
   };

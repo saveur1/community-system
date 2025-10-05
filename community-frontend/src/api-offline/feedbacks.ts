@@ -18,6 +18,8 @@ export class OfflineApiService {
     try {
       if (offlineCommon.isOnline()) {
         const response = await feedbackApi.list(params);
+        // Clear existing feedback data before caching new user-specific data
+        await offlineStorage.clearTableData('feedback');
         // Cache the results
         const feedbackWithOfflineFields = response.result.map(item => ({
           ...item,

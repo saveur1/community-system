@@ -25,6 +25,8 @@ export class OfflineApiService {
     try {
       if (offlineCommon.isOnline()) {
         const response = await surveysApi.responses(surveyId, responderId, page, limit, surveyType, search);
+        // Clear existing survey responses before caching new user-specific data
+        await offlineStorage.clearTableData('surveyResponses');
         // Map to OfflineSurveyResponse for caching
         const toOffline = (items: any[]) => items.map((r: any) => ({
           id: r.id,
@@ -228,6 +230,8 @@ export class OfflineApiService {
       if (offlineCommon.isOnline()) {
         // Try to fetch from API first
         const response = await surveysApi.list(params);
+        // Clear existing surveys data before caching new user-specific data
+        await offlineStorage.clearTableData('surveys');
         // Cache the results
         await offlineStorage.cacheSurveys(response.result);
         return response;

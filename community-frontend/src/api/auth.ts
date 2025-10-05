@@ -122,9 +122,16 @@ export const authApi = {
     resetPasswordExpires?: string | Date | null;
     createdAt?: string | Date;
     updatedAt?: string | Date;
-    feedbacks?: FeedbackEntity[],
-    surveys?: SurveyEntity[]
-    system_logs?: SystemLogEntity[]
+    feedbacks?: FeedbackEntity[];
+    surveyResponses?: Array<{
+      id: string;
+      surveyId: string;
+      userId?: string;
+      createdAt: string | Date;
+      updatedAt: string | Date;
+      survey?: SurveyEntity;
+    }>;
+    systemLogs?: SystemLogEntity[];
     roles: Array<{
       id: string;
       name: string;

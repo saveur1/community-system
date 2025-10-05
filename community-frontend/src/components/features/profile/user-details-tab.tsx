@@ -3,6 +3,7 @@ import { FiMail, FiPhone, FiMapPin, FiUser } from 'react-icons/fi';
 import { MdVerified, MdPending } from 'react-icons/md';
 import { FaIdCard } from 'react-icons/fa';
 import type { User } from '@/api/auth';
+import { spacer } from '@/utility/logicFunctions';
 
 interface UserDetailsTabProps {
   user?: User | null;
@@ -120,7 +121,7 @@ export const UserDetailsTab: React.FC<UserDetailsTabProps> = ({ user }) => {
           {user.roles?.map((role) => (
             <div key={role.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{role.name}</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{spacer(role.name)}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{role.description}</p>
               </div>
             </div>

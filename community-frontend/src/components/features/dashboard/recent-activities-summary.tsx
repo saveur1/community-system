@@ -13,13 +13,6 @@ function RecentUserActivities() {
 
   const recentActivities = data?.result ?? [];
 
-  // format date helper
-  // const fmt = (iso?: string) => {
-  //   if (!iso) return '-';
-  //   const d = new Date(iso);
-  //   return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  // };
-
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">

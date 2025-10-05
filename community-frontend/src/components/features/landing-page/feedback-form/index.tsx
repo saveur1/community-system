@@ -90,8 +90,7 @@ function FeedbackForm() {
       showErrorToast('Please record a video message.');
       return;
     }
-
-    try {
+    
       // Upload media files to Cloudinary if present
       const documentsToUpload = [voiceFeedback, videoFeedback].filter(Boolean) as (VoiceFeedbackType | VideoFeedbackType)[];
       const uploadedDocuments: DocumentInput[] = [];
@@ -146,14 +145,8 @@ function FeedbackForm() {
       cleanupBlobUrls();
       setVoiceFeedback(null);
       setVideoFeedback(null);
-
-      toast.success(t('feedback.success_message'));
       setTimeout(() => setSubmitted(false), 3000);
 
-    } catch (err) {
-      const msg = (err as any)?.response?.data?.message || 'Failed to submit feedback';
-      toast.error(msg);
-    }
   };
 
   const feedbackMethods: { value: FeedbackMethod; label: string; icon: string; description: string }[] = [

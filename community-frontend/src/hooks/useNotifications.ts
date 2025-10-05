@@ -110,7 +110,7 @@ export const useMarkAllAsRead = () => {
       // Invalidate and refetch notifications and unread count
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
-      const count = response?.data?.data?.updated || 0;
+      const count = response?.data?.result?.updated || 0;
       if (count > 0) {
         toast.success(`${count} notifications marked as read`);
       } else {

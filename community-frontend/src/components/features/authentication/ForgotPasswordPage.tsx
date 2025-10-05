@@ -61,10 +61,6 @@ function ForgotPasswordPage() {
         );
       });
       setIsSubmitted(true);
-      toast.success(t("forgot_password.reset_success"), {
-        position: "top-center",
-        autoClose: 3000,
-      });
     } catch (_) {
       // Error toast handled in hook
     }

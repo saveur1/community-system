@@ -52,7 +52,7 @@ const SurveyGridCard: React.FC<Props> = ({ paginated, isLoading, getInitials, ge
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-600">
-              <span className="text-sm text-gray-500 dark:text-gray-400">{survey.project}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{survey?.project?.name}</span>
               <div className="flex items-center space-x-2">
                 <Link
                   to="/dashboard/surveys/edit/$edit-id"

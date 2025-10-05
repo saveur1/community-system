@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler, RequestHandler } from "express";
+import { ForeignKeyConstraintError } from "sequelize";
 
 //ADD 404 TO NOT FOUND ERROR
 const unexpectedRequest: RequestHandler = (_req, res, next) => {
@@ -94,6 +95,35 @@ const returnErrorToUser: ErrorRequestHandler = (errors, _req, res, next) => {
     // Handle Sequelize Connection Errors
     if (error.name === "SequelizeConnectionError") {
       error = new ErrorHandler("Unable to connect to the database. Please try again later.", 500);
+    }
+    
+    // Handle Sequelize Foreign Key Constraint Errors
+    if(error.name === "SequelizeForeignKeyConstraintError") {
+      let message = "This item cannot be deleted because it has related data that must be removed first.";
+
+      // Analyze the constraint error to provide specific guidance
+      if (error.original?.sqlMessage) {
+        const sqlMessage = error.original.sqlMessage.toLowerCase();
+
+        if (sqlMessage.includes('comments') && sqlMessage.includes('user_id')) {
+          message = "This user cannot be deleted because they have comments associated with them. Please delete all comments created by this user first.";
+        } else if (sqlMessage.includes('survey_responses') || sqlMessage.includes('surveys')) {
+          message = "This survey cannot be deleted because it has responses associated with it. Please delete all survey responses first.";
+        } else if (sqlMessage.includes('projects') && sqlMessage.includes('user_id')) {
+          message = "This user cannot be deleted because they are associated with projects. Please remove them from all projects first.";
+        } else if (sqlMessage.includes('feedback') || sqlMessage.includes('feedbacks')) {
+          message = "This item cannot be deleted because it has feedback associated with it. Please delete all related feedback first.";
+        } else if (sqlMessage.includes('notifications') && sqlMessage.includes('user_id')) {
+          message = "This user cannot be deleted because they have notifications. Please clear all notifications first.";
+        } else if (sqlMessage.includes('sessions') || sqlMessage.includes('community_sessions')) {
+          message = "This item cannot be deleted because it has sessions associated with it. Please delete all related sessions first.";
+        } else {
+          // Generic message for other constraint errors
+          message = "This item cannot be deleted because it has related data. Please contact your administrator for assistance.";
+        }
+      }
+
+      error = new ErrorHandler(message, 409); // 409 Conflict is appropriate for constraint violations
     }
     
     if (error.name === "CastError") {

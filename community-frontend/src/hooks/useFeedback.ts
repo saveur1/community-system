@@ -17,8 +17,8 @@ export const useGetFeedback = (params: FeedbackListParams) => {
   return useQuery({
     queryKey: [...feedbackKeys.lists(), params],
     queryFn: () => offlineFeedbackApi.getFeedback(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 30 * 1000, // 30 seconds - reasonable balance between freshness and performance
+    gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache for offline access
   });
 };
 

@@ -29,10 +29,6 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
       ]
     }
 
-    if(checkPermissions(user, 'survey:forms')) {
-      surveyItem.children.push({ name: "Report Forms", active: false, link: `/${path}/surveys/report-forms`, icon: HiClipboardList });
-    }
-
     if(checkPermissions(user, 'rapid_enquiry:create')) {
       surveyItem.children.push({ name: "Rapid Enquiry", active: false, link: `/${path}/surveys/rapid-enquiry`, icon: FaQuestionCircle });
     }
@@ -46,10 +42,6 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
   if (checkPermissions(user, 'project:create')) {
     navigationItems.push({ name: "Projects", icon: GrProjects, active: false, link: `/${path}/projects` })
   }
-
-  // if(checkPermissions(user, 'document:read')) {
-  //   navigationItems.push({ name: "Documents", icon: HiDocumentText, active: false, link: `/${path}/documents` })
-  // }
 
   if (checkPermissions(user, 'user:read')) {
     navigationItems.push({
@@ -67,15 +59,21 @@ const navItems = (user: User | null, path: string): NavItemType[] => {
     })
   }
 
-  // if(checkPermissions(user, 'role:read')) {
-  //   navigationItems.push({ name: "Roles", icon: PiSubtitlesFill, active: false, link: `/${path}/roles` })
-  // }
-
-  if (checkPermissions(user, 'permission:read')) {
-    navigationItems.push({ name: "Permissions", icon: FaUserFriends, active: false, link: `/${path}/permissions` })
+  if (checkPermissions(user, 'survey:forms')) {
+    const dataCollections = {
+      name: "Data Collection ",
+      icon: FaUserFriends,
+      active: false,
+      link: `/${path}/reporting`,
+      children: [
+        { name: "Manage Forms", active: false, link: `/${path}/reporting/report-forms`, icon: HiClipboardList },
+        { name: "Collect data", active: false, link: `/${path}/reporting`, icon: HiClipboardList },
+      ]
+    }
+    
+    navigationItems.push(dataCollections)
   }
-
-  if (checkPermissions(user, 'report:create')) {
+  else if (checkPermissions(user, 'report:create')) {
     navigationItems.push({ name: "Data Collection", icon: FaUserFriends, active: false, link: `/${path}/reporting` })
   }
 

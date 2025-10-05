@@ -17,6 +17,8 @@ export const offlineStatisticsApi = {
     if (offlineCommon.isOnline()) {
       try {
         const response = await statisticsApi.overview(params);
+        // Clear existing statistics before caching new user-specific data
+        await offlineStorage.clearTableData('statisticsOverview');
         // Cache result using the same pattern as feedback
         try {
           const cacheData: OfflineStatisticsOverview = {
@@ -78,6 +80,8 @@ export const offlineStatisticsApi = {
     if (offlineCommon.isOnline()) {
       try {
         const response = await statisticsApi.surveysHistory(params);
+        // Clear existing surveys history before caching new user-specific data
+        await offlineStorage.clearTableData('surveysHistory');
         // Cache the result using simple static key
         try {
           const cacheData: OfflineSurveysHistory = {

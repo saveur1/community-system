@@ -67,20 +67,20 @@ const SurveyComponent = () => {
     const excelDataExported = (list: SurveyEntity[]) => {
       return (list || []).map((s, idx) => ({
         id: idx + 1,
-        title: s.title,
-        project: s.project,
-        surveyType: spacer(s.surveyType ?? ''),
-        estimatedTime: s.estimatedTime ?? '',
-        status: s.status,
-        organization: s.organization?.name ?? '',
-        creator: s.creator?.name ?? '',
-        startAt: s.startAt ? format(parseISO(s.startAt), 'MMM dd, yyyy h:mm a') : '',
-        endAt: s.endAt ? format(parseISO(s.endAt), 'MMM dd, yyyy h:mm a') : '',
-        questionsCount: s.questionItems?.length ?? s.questions?.length ?? 0,
-        responsesCount: s.responses?.length ?? 0,
-        allowedRoles: (s.allowedRoles || []).map(r => spacer(r.name ?? '')).join(', '),
-        createdAt: s.createdAt ? format(parseISO(s.createdAt), 'MMM dd, yyyy h:mm a') : '',
-        updatedAt: s.updatedAt ? format(parseISO(s.updatedAt), 'MMM dd, yyyy h:mm a') : '',
+        title: s?.title,
+        project: s?.project?.name,
+        surveyType: spacer(s?.surveyType ?? ''),
+        estimatedTime: s?.estimatedTime ?? '',
+        status: s?.status,
+        organization: s?.organization?.name ?? '',
+        creator: s?.creator?.name ?? '',
+        startAt: s?.startAt ? format(parseISO(s.startAt), 'MMM dd, yyyy h:mm a') : '',
+        endAt: s?.endAt ? format(parseISO(s.endAt), 'MMM dd, yyyy h:mm a') : '',
+        questionsCount: s?.questionItems?.length ?? s?.questions?.length ?? 0,
+        responsesCount: s?.responses?.length ?? 0,
+        allowedRoles: (s?.allowedRoles || []).map(r => spacer(r.name ?? '')).join(', '),
+        createdAt: s?.createdAt ? format(parseISO(s.createdAt), 'MMM dd, yyyy h:mm a') : '',
+        updatedAt: s?.updatedAt ? format(parseISO(s.updatedAt), 'MMM dd, yyyy h:mm a') : '',
       }));
     };
 
@@ -151,7 +151,7 @@ const SurveyComponent = () => {
         const q = search.trim().toLowerCase();
         if (!q) return surveys;
         return surveys.filter((survey: any) =>
-            [survey.title, survey.project, survey.description].some((v: any) =>
+            [survey.title, survey?.project?.name, survey.description].some((v: any) =>
                 String(v ?? '').toLowerCase().includes(q)
             )
         );

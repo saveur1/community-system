@@ -67,7 +67,7 @@ export class SystemLogController extends Controller {
   /**
    * Delete a system log (hard delete)
    */
-  @Security('jwt', ['system_log:delete'])
+  @Security('jwt')
   @Delete('/{id}')
   @SuccessResponse(204, 'No Content')
   @asyncCatch

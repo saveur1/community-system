@@ -916,7 +916,7 @@ export class SurveyController extends Controller {
       }
     });
 
-    await createSystemLog(request ?? null, 'responded_survey', survey?.dataValues?.title, surveyId, { answersCount: (body.answers || []).length });
+    await createSystemLog(request ?? null, 'responded_survey', survey?.dataValues?.title, createdResponse.id, { answersCount: (body.answers || []).length });
 
     const result = await db.Survey.findByPk(survey.id, {
       include: [
